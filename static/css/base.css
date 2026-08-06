@@ -1,0 +1,76 @@
+:root {
+    --paper: #FBF8F2;
+    --ink: #2F5D50;
+    --ink-dark: #234840;
+    --brown: #6B4226;
+    --brown-dark: #54331d;
+    --divider: #DDD6C9;
+    --text: #2A2420;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: system-ui, -apple-system, sans-serif;
+    background: var(--paper);
+    color: var(--text);
+}
+
+a { color: inherit; }
+
+.navbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 32px;
+    background: #ffffff;
+    border-bottom: 1px solid var(--divider);
+    gap: 24px;
+    flex-wrap: nowrap;
+}
+
+.brand { display: flex; align-items: center; flex-shrink: 0; text-decoration: none; }
+.logo { height: 32px; width: auto; display: block; }
+
+.nav-links { display: flex; gap: 18px; flex-wrap: nowrap; white-space: nowrap; }
+.nav-links a { font-size: 0.92rem; text-decoration: none; color: var(--text); }
+.nav-links a:hover { color: var(--brown); }
+
+.auth-links { display: flex; align-items: center; gap: 12px; white-space: nowrap; flex-shrink: 0; }
+.auth-links a { text-decoration: none; color: var(--ink-dark); font-size: 0.9rem; }
+.link-button { background: none; border: none; color: var(--ink-dark); font-size: 0.9rem; cursor: pointer; }
+
+.btn-cta {
+    background: var(--brown);
+    color: #ffffff !important;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+}
+.btn-cta:hover { background: var(--brown-dark); }
+.btn-disabled { background: #d8d3c8; color: #6b6862 !important; cursor: not-allowed; }
+
+.content { max-width: 1000px; margin: 32px auto; padding: 0 16px; }
+
+.messages { list-style: none; margin-bottom: 16px; }
+.messages li { padding: 10px 14px; border-radius: 6px; margin-bottom: 8px; }
+.messages .success { background: #e3f5e9; color: #1e6b3d; }
+.messages .error { background: #fbe4e2; color: #99341d; }
+.messages .info { background: #e6eef0; color: #234840; }
+
+.footer { text-align: center; padding: 24px; color: #8a8880; font-size: 0.85rem; }
+
+.section-title { font-size: 1.5rem; color: var(--brown); margin-bottom: 20px; }
+.hint-text { color: #8a8880; font-size: 0.88rem; }
+
+.btn-primary {
+    padding: 12px 26px; border: none; border-radius: 8px; background: var(--brown);
+    color: #fff; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: background .15s ease;
+}
+.btn-primary:hover { background: var(--brown-dark); }
+
+.btn-secondary { padding: 10px 18px; border: 1.5px solid var(--divider); border-radius: 8px; background: #fff; color: var(--text); font-weight: 600; font-size: 0.85rem; cursor: pointer; }
+.btn-primary-outline { padding: 10px 18px; border: 1.5px solid var(--brown); border-radius: 8px; background: transparent; color: var(--brown); font-weight: 600; font-size: 0.85rem; text-decoration: none; }

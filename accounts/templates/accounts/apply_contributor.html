@@ -1,0 +1,50 @@
+{% extends 'app_base.html' %}
+{% load static %}
+{% block title %}Jadi Kontributor{% endblock %}
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/forms.css' %}">
+    <link rel="stylesheet" href="{% static 'css/contributor.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="contributor-wrap">
+    <div class="info-panel">
+        <span class="eyebrow">Bergabung sebagai Penulis</span>
+        <h1>Bagikan tulisanmu ke ribuan pembaca</h1>
+        <p class="lead">Jadi kontributor Pena Digital dan mulai publikasikan artikel, ulasan, atau cerita kamu.</p>
+
+        <div class="benefit">
+            <div class="benefit-icon">✓</div>
+            <div class="benefit-text">
+                <strong>Jangkauan luas</strong>
+                Artikel kamu tampil di kategori Hot News, Fiksi, dan lainnya
+            </div>
+        </div>
+        <div class="benefit">
+            <div class="benefit-icon">✓</div>
+            <div class="benefit-text">
+                <strong>Proses simpel</strong>
+                Cukup isi bio dan link portofolio, kami tinjau cepat
+            </div>
+        </div>
+        <div class="benefit">
+            <div class="benefit-icon">✓</div>
+            <div class="benefit-text">
+                <strong>Statistik pribadi</strong>
+                Pantau rating dan komentar dari tiap artikelmu
+            </div>
+        </div>
+    </div>
+
+    <div class="form-panel">
+        <h2>Daftar Sebagai Kontributor</h2>
+        <p class="auth-subtitle">Isi data di bawah, tim kami akan meninjau pengajuanmu</p>
+
+        <form method="post" class="auth-form">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Kirim Pengajuan</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

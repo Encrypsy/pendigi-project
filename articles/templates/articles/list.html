@@ -1,0 +1,30 @@
+{% extends 'app_base.html' %}
+{% load static %}
+{% block title %}Artikel Terbaru{% endblock %}
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/articles.css' %}">
+{% endblock %}
+{% block content %}
+<h1 class="section-title">
+    {% if active_category %}Kategori: {{ active_category|title }}{% else %}Artikel Terbaru{% endif %}
+</h1>
+
+<div class="article-grid">
+    {% for article in articles %}
+        <a href="{% url 'articles:article_detail' article.pk %}" class="article-card">
+            {% if article.thumbnail %}
+                <img src="{{ article.thumbnail.url }}" class="article-thumb" alt="{{ article.title }}">
+            {% else %}
+                <div class="article-thumb article-thumb-placeholder">📄</div>
+            {% endif %}
+            <div class="article-card-body">
+                <span class="category-tag">{{ article.category.name }}</span>
+                <h3>{{ article.title }}</h3>
+                <p class="author">oleh {{ article.contributor.username }}</p>
+            </div>
+        </a>
+    {% empty %}
+        <p>Belum ada artikel yang tayang.</p>
+    {% endfor %}
+</div>
+{% endblock %}

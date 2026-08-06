@@ -1,0 +1,18 @@
+{% extends 'app_base.html' %}
+{% block title %}Catatan Pribadi{% endblock %}
+{% load static %}
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/forms.css' %}">
+{% endblock %}
+{% block content %}
+<div class="upload-card">
+    <h2>Catat Insight dari "{{ article.title }}"</h2>
+    <p class="auth-subtitle">Apa yang kamu pelajari atau rasakan dari artikel ini?</p>
+
+    <form method="post" class="auth-form">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Simpan Catatan</button>
+    </form>
+</div>
+{% endblock %}

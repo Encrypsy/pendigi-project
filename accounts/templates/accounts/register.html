@@ -1,0 +1,25 @@
+{% extends 'auth_base.html' %}
+{% load static %}
+{% block title %}Daftar - Pena Digital{% endblock %}
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/forms.css' %}">
+    <link rel="stylesheet" href="{% static 'css/auth.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="auth-card">
+    <img src="{% static 'images/pendigi-logo-tulisan.svg' %}" alt="Pena Digital" class="logo">
+    <h2>Buat Akun Baru</h2>
+    <p class="auth-subtitle">Gabung dan mulai baca di Pena Digital</p>
+
+    <form method="post" class="auth-form">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Daftar</button>
+    </form>
+
+    <div class="auth-form-footer">
+        Sudah punya akun? <a href="{% url 'login' %}">Login di sini</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,90 @@
+{% extends 'app_base.html' %}
+{% load static %}
+{% block title %}Profil Saya{% endblock %}
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/forms.css' %}">
+    <link rel="stylesheet" href="{% static 'css/profile.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="profile-card">
+    <div class="profile-top">
+        <div class="profile-avatar-wrap">
+            {% if user.profile_picture %}
+                <img src="{{ user.profile_picture.url }}" class="profile-avatar" alt="{{ user.username }}">
+            {% else %}
+                <div class="profile-avatar profile-avatar-placeholder">{{ user.username|first|upper }}</div>
+            {% endif %}
+            <label for="photo-upload" class="avatar-edit-btn" title="Ganti foto">✎</label>
+        </div>
+
+        <div class="profile-identity">
+            <h1>{{ user.username }}</h1>
+            <p class="profile-role">
+                {% if user.status_kontributor == 'approved' %}Kontributor{% else %}Pembaca{% endif %}
+            </p>
+        </div>
+
+        <div class="profile-stats">
+            <div class="stat-item"><strong>{{ favorites|length }}</strong><span>Favorit</span></div>
+            <div class="stat-item"><strong>{{ notes|length }}</strong><span>Catatan</span></div>
+            {% if published_count is not None %}
+                <div class="stat-item"><strong>{{ published_count }}</strong><span>Artikel</span></div>
+            {% endif %}
+        </div>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" id="photoForm" style="display:none;">
+        {% csrf_token %}
+        <input type="file" name="profile_picture" id="photo-upload" accept="image/*" onchange="document.getElementById('photoForm').submit()">
+    </form>
+</div>
+
+<div class="card">
+    <h3>Bio Singkat</h3>
+    <form method="post" class="bio-form">
+        {% csrf_token %}
+        {{ form.bio }}
+        <button type="submit" class="btn-small">Simpan</button>
+    </form>
+</div>
+
+<div class="card">
+    <h3>Top 4 Artikel Favorit</h3>
+    <div class="favorite-grid">
+        {% for fav in favorites %}
+            <a href="{% url 'articles:article_detail' fav.article.pk %}" class="favorite-item">
+                <span class="rank-badge">#{{ fav.rank_order }}</span>
+                {{ fav.article.title }}
+            </a>
+        {% empty %}
+            <p class="hint-text">Belum ada artikel favorit.</p>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="card">
+    <h3>Aktivitas Terbaru</h3>
+    <ul class="activity-list">
+        {% for activity in activities %}
+            <li>{{ activity.get_action_type_display }} — <strong>{{ activity.article.title }}</strong>
+                <span class="activity-date">{{ activity.created_at|timesince }} lalu</span>
+            </li>
+        {% empty %}
+            <li class="hint-text">Belum ada aktivitas.</li>
+        {% endfor %}
+    </ul>
+</div>
+
+<div class="card">
+    <h3>Catatan Pribadi</h3>
+    {% for note in notes %}
+        <div class="comment-item">
+            <strong>{{ note.article.title }}</strong>
+            <p>{{ note.note_content }}</p>
+        </div>
+    {% empty %}
+        <p class="hint-text">Belum ada catatan.</p>
+    {% endfor %}
+</div>
+{% endblock %}

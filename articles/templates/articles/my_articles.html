@@ -1,0 +1,34 @@
+{% extends 'app_base.html' %}
+{% load static %}
+{% block title %}Artikel Saya{% endblock %}
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/table.css' %}">
+{% endblock %}
+{% block content %}
+<h1 class="section-title">Artikel Saya</h1>
+<table class="data-table">
+    <thead>
+        <tr><th>Thumbnail</th><th>Judul</th><th>Kategori</th><th>Status</th><th>Tanggal</th><th>Aksi</th></tr>
+    </thead>
+    <tbody>
+        {% for article in articles %}
+        <tr>
+            <td>
+                {% if article.thumbnail %}
+                    <img src="{{ article.thumbnail.url }}" class="table-thumb" alt="{{ article.title }}">
+                {% else %}
+                    <div class="table-thumb table-thumb-placeholder">📄</div>
+                {% endif %}
+            </td>
+            <td><a href="{% url 'articles:article_detail' article.pk %}">{{ article.title }}</a></td>
+            <td>{{ article.category.name }}</td>
+            <td><span class="status-badge status-{{ article.status }}">{{ article.get_status_display }}</span></td>
+            <td>{{ article.created_at|date:"d M Y" }}</td>
+            <td><a href="{% url 'articles:edit_article' article.pk %}" class="edit-link">Edit</a></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6">Kamu belum menulis artikel.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
