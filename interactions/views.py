@@ -3,9 +3,10 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.views.decorators.http import require_POST
 from articles.models import Articles
-from .models import Comments, Ratings, Bookmarks
+from .models import Comments, Ratings, Bookmarks, StatusComment
 from .forms import CommentForm, RatingForm
 from reading_journal.models import ReadingActivity, ActionType
+from accounts.decorators import admin_required
 
 
 @login_required
@@ -95,3 +96,28 @@ def submit_comment(request, pk):
         messages.error(request, 'Komentar gagal dikirim, pastikan tidak kosong.')
 
     return redirect('articles:article_detail', pk=pk)
+
+@admin_required
+def admin_pending_comments(request):
+    comments = Comments.objects.filter(status=StatusComment.PENDING).select_related('user', 'article')
+    return render(request, 'interactions/admin_pending.html', {'comments': comments})
+
+
+@admin_required
+@require_POST
+def admin_approve_comment(request, pk):
+    comment = get_object_or_404(Comments, pk=pk)
+    comment.status = StatusComment.APPROVED
+    comment.save()
+    messages.success(request, 'Komentar disetujui.')
+    return redirect('interactions:admin_pending_comments')
+
+
+@admin_required
+@require_POST
+def admin_reject_comment(request, pk):
+    comment = get_object_or_404(Comments, pk=pk)
+    comment.status = StatusComment.REJECTED
+    comment.save()
+    messages.success(request, 'Komentar ditolak.')
+    return redirect('interactions:admin_pending_comments')

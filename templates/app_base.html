@@ -16,7 +16,9 @@
 
         <div class="auth-links">
             {% if user.is_authenticated %}
-                {% if user.status_kontributor == 'approved' %}
+                {% if user.role == 'admin' or user.is_superuser %}
+                    <a href="{% url 'dashboard' %}" class="btn-cta">Dashboard</a>
+                {% elif user.status_kontributor == 'approved' %}
                     <a href="{% url 'articles:upload_article' %}" class="btn-cta">Tulis Artikel</a>
                 {% elif user.status_kontributor == 'pending' %}
                     <span class="btn-cta btn-disabled">Menunggu Verifikasi</span>

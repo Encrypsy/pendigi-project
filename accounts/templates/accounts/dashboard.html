@@ -1,0 +1,88 @@
+{% extends 'app_base.html' %}
+{% load static %}
+{% block title %}Dashboard Admin{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+<h1 class="section-title">Dashboard Admin</h1>
+
+<div class="stat-grid">
+    <div class="stat-card">
+        <span class="stat-number">{{ stats.total_users }}</span>
+        <span class="stat-label">Total Pembaca</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-number">{{ stats.total_kontributor }}</span>
+        <span class="stat-label">Kontributor Aktif</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-number">{{ stats.total_articles }}</span>
+        <span class="stat-label">Total Artikel</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-number">{{ stats.new_users_week }}</span>
+        <span class="stat-label">User Baru (7 Hari)</span>
+    </div>
+</div>
+
+<div class="section-title-row">
+    <h2>Perlu Ditinjau</h2>
+</div>
+
+<div class="pending-grid">
+    <a href="{% url 'articles:admin_pending_articles' %}" class="pending-card pending-warning">
+        <span class="pending-number">{{ stats.pending_articles }}</span>
+        <span class="pending-label">Artikel Menunggu Approval</span>
+    </a>
+    <a href="{% url 'interactions:admin_pending_comments' %}" class="pending-card pending-warning">
+        <span class="pending-number">{{ stats.pending_comments }}</span>
+        <span class="pending-label">Komentar Menunggu Approval</span>
+    </a>
+    <a href="{% url 'admin_pending_contributors' %}" class="pending-card pending-warning">
+        <span class="pending-number">{{ stats.pending_contributors }}</span>
+        <span class="pending-label">Pengajuan Kontributor</span>
+    </a>
+</div>
+
+<div class="dashboard-columns">
+    <div class="card">
+        <h3>Artikel Terpopuler</h3>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Judul</th>
+                    <th>Rating</th>
+                    <th>Komentar</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for article in popular_articles %}
+                <tr>
+                    <td>{{ article.title }}</td>
+                    <td>{{ article.rating_count }}</td>
+                    <td>{{ article.comment_count }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3">Belum ada data.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="card">
+        <h3>Artikel per Kategori</h3>
+        <ul class="category-stat-list">
+            {% for cat in articles_per_category %}
+            <li>
+                <span>{{ cat.name }}</span>
+                <span class="category-count">{{ cat.article_count }}</span>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}

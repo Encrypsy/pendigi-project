@@ -1,0 +1,41 @@
+{% extends 'app_base.html' %}
+{% load static %}
+{% block title %}Kelola Komentar{% endblock %}
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/table.css' %}">
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+<h1 class="section-title">Komentar Menunggu Approval ({{ comments.count }})</h1>
+
+<table class="data-table">
+    <thead>
+        <tr><th>User</th><th>Artikel</th><th>Isi Komentar</th><th>Tanggal</th><th>Aksi</th></tr>
+    </thead>
+    <tbody>
+        {% for comment in comments %}
+        <tr>
+            <td>{{ comment.user.username }}</td>
+            <td><a href="{% url 'articles:article_detail' comment.article.pk %}" target="_blank">{{ comment.article.title }}</a></td>
+            <td class="comment-preview">{{ comment.content }}</td>
+            <td>{{ comment.created_at|date:"d M Y H:i" }}</td>
+            <td>
+                <div class="table-actions">
+                    <form action="{% url 'interactions:admin_approve_comment' comment.pk %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-approve">Approve</button>
+                    </form>
+                    <form action="{% url 'interactions:admin_reject_comment' comment.pk %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-reject">Reject</button>
+                    </form>
+                </div>
+            </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5">Tidak ada komentar yang menunggu approval.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

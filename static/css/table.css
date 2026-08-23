@@ -23,3 +23,56 @@
     font-size: 1.3rem;
     border: 1px solid var(--divider);
 }
+
+.table-actions { display: flex; gap: 6px; }
+
+.btn-approve, .btn-reject {
+    padding: 6px 14px;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+.btn-approve { background: #E3F5E9; color: #1e6b3d; }
+.btn-approve:hover { background: #c8ecd6; }
+.btn-reject { background: #FBEAE5; color: #9C3B24; }
+.btn-reject:hover { background: #f5d2ca; }
+
+.comment-preview {
+    max-width: 280px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.applicant-list { display: flex; flex-direction: column; gap: 16px; }
+
+.applicant-card {
+    background: #fff;
+    border: 1px solid var(--divider);
+    border-radius: 12px;
+    padding: 20px 24px;
+}
+
+.applicant-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+.applicant-header strong { display: block; font-size: 0.95rem; color: var(--text); }
+.applicant-date { font-size: 0.78rem; color: #a09c92; }
+
+.applicant-body { margin-bottom: 16px; }
+.applicant-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--brown);
+    margin-bottom: 4px;
+    margin-top: 12px;
+}
+.applicant-bio { font-size: 0.9rem; color: var(--text); line-height: 1.5; }
+.applicant-link { font-size: 0.88rem; color: var(--ink-dark); word-break: break-all; }

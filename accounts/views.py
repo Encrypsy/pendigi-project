@@ -4,7 +4,16 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.shortcuts import render, redirect
 from .forms import RegisterForm, ContributorApplicationForm, ProfileUpdateForm
-from .models import StatusKontributor
+from .models import StatusKontributor, ContributorApplication, Users
+from .decorators import admin_required
+from django.db.models import Count
+from django.utils import timezone
+from articles.models import Articles, StatusArticle, Categories
+from interactions.models import Comments, StatusComment, Ratings
+from articles.models import Articles, StatusArticle, Categories
+from datetime import timedelta
+from django.views.decorators.http import require_POST
+
 
 
 class CustomLoginView(LoginView):
@@ -76,3 +85,68 @@ def profile_view(request):
         'form': form,
         'published_count': published_count,
     })
+
+@admin_required
+def dashboard_view(request):
+    seven_days_ago = timezone.now() - timedelta(days=7)
+
+    stats = {
+        'total_users': Users.objects.filter(role='pembaca').count(),
+        'total_kontributor': Users.objects.filter(status_kontributor=StatusKontributor.APPROVED).count(),
+        'total_articles': Articles.objects.count(),
+        'pending_articles': Articles.objects.filter(status=StatusArticle.PENDING).count(),
+        'pending_comments': Comments.objects.filter(status=StatusComment.PENDING).count(),
+        'pending_contributors': ContributorApplication.objects.filter(status=StatusKontributor.PENDING).count(),
+        'total_categories': Categories.objects.count(),
+        'new_users_week': Users.objects.filter(date_joined__gte=seven_days_ago).count(),
+    }
+
+    popular_articles = Articles.objects.filter(status=StatusArticle.APPROVED).annotate(
+        rating_count=Count('ratings'),
+        comment_count=Count('comments'),
+    ).order_by('-rating_count')[:5]
+
+    articles_per_category = Categories.objects.annotate(
+        article_count=Count('articles')
+    ).order_by('-article_count')
+
+    return render(request, 'accounts/dashboard.html', {
+        'stats': stats,
+        'popular_articles': popular_articles,
+        'articles_per_category': articles_per_category,
+    })
+
+@admin_required
+def admin_pending_contributors(request):
+    applications = ContributorApplication.objects.filter(
+        status=StatusKontributor.PENDING
+    ).select_related('user')
+    return render(request, 'accounts/admin_pending_contributors.html', {'applications': applications})
+
+
+@admin_required
+@require_POST
+def admin_approve_contributor(request, pk):
+    application = get_object_or_404(ContributorApplication, pk=pk)
+    application.status = StatusKontributor.APPROVED
+    application.save()
+
+    application.user.status_kontributor = StatusKontributor.APPROVED
+    application.user.save()
+
+    messages.success(request, f'{application.user.username} disetujui sebagai kontributor.')
+    return redirect('admin_pending_contributors')
+
+
+@admin_required
+@require_POST
+def admin_reject_contributor(request, pk):
+    application = get_object_or_404(ContributorApplication, pk=pk)
+    application.status = StatusKontributor.REJECTED
+    application.save()
+
+    application.user.status_kontributor = StatusKontributor.REJECTED
+    application.user.save()
+
+    messages.success(request, f'Pengajuan {application.user.username} ditolak.')
+    return redirect('admin_pending_contributors')

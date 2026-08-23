@@ -9,6 +9,8 @@ from accounts.models import StatusKontributor
 from interactions.models import Comments, Ratings, Bookmarks, StatusComment
 from interactions.forms import CommentForm, RatingForm
 from reading_journal.models import ReadingActivity, ActionType
+from django.utils import timezone
+from accounts.decorators import admin_required
 
 
 def article_list(request):
@@ -132,3 +134,29 @@ def delete_article(request, pk):
     article.delete()
     messages.success(request, 'Artikel berhasil dihapus.')
     return redirect('articles:my_articles')
+
+@admin_required
+def admin_pending_articles(request):
+    articles = Articles.objects.filter(status=StatusArticle.PENDING).select_related('category', 'contributor')
+    return render(request, 'articles/admin_pending.html', {'articles': articles})
+
+
+@admin_required
+@require_POST
+def admin_approve_article(request, pk):
+    article = get_object_or_404(Articles, pk=pk)
+    article.status = StatusArticle.APPROVED
+    article.published_at = timezone.now()
+    article.save()
+    messages.success(request, f'Artikel "{article.title}" disetujui.')
+    return redirect('articles:admin_pending_articles')
+
+
+@admin_required
+@require_POST
+def admin_reject_article(request, pk):
+    article = get_object_or_404(Articles, pk=pk)
+    article.status = StatusArticle.REJECTED
+    article.save()
+    messages.success(request, f'Artikel "{article.title}" ditolak.')
+    return redirect('articles:admin_pending_articles')
