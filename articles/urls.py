@@ -14,4 +14,8 @@ urlpatterns = [
     path('kelola/pending/', views.admin_pending_articles, name='admin_pending_articles'),
     path('kelola/<int:pk>/approve/', views.admin_approve_article, name='admin_approve_article'),
     path('kelola/<int:pk>/reject/', views.admin_reject_article, name='admin_reject_article'),
+    path('kelola/kategori/', views.category_list, name='category_list'),
+    path('kelola/kategori/tambah/', views.category_create, name='category_create'),
+    path('kelola/kategori/<int:pk>/edit/', views.category_edit, name='category_edit'),
+    path('kelola/kategori/<int:pk>/hapus/', views.category_delete, name='category_delete'),
 ]

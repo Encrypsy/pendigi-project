@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.contrib import messages
-from django.db.models import Avg
+from django.db.models import Avg, Count
 from .models import Articles, Categories, StatusArticle
 from .forms import ArticleUploadForm
 from accounts.models import StatusKontributor
@@ -11,6 +11,58 @@ from interactions.forms import CommentForm, RatingForm
 from reading_journal.models import ReadingActivity, ActionType
 from django.utils import timezone
 from accounts.decorators import admin_required
+from accounts.decorators import admin_required
+from .forms import CategoryForm
+
+
+@admin_required
+def category_list(request):
+    categories = Categories.objects.annotate(article_count=Count('articles')).order_by('name')
+    return render(request, 'articles/category_list.html', {'categories': categories})
+
+
+@admin_required
+def category_create(request):
+    if request.method == 'POST':
+        form = CategoryForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Kategori berhasil ditambahkan.')
+            return redirect('articles:category_list')
+    else:
+        form = CategoryForm()
+
+    return render(request, 'articles/category_form.html', {'form': form, 'is_edit': False})
+
+
+@admin_required
+def category_edit(request, pk):
+    category = get_object_or_404(Categories, pk=pk)
+
+    if request.method == 'POST':
+        form = CategoryForm(request.POST, instance=category)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Kategori berhasil diperbarui.')
+            return redirect('articles:category_list')
+    else:
+        form = CategoryForm(instance=category)
+
+    return render(request, 'articles/category_form.html', {'form': form, 'is_edit': True, 'category': category})
+
+
+@admin_required
+@require_POST
+def category_delete(request, pk):
+    category = get_object_or_404(Categories, pk=pk)
+
+    if category.articles.exists():
+        messages.error(request, f'Kategori "{category.name}" tidak bisa dihapus karena masih dipakai {category.articles.count()} artikel.')
+        return redirect('articles:category_list')
+
+    category.delete()
+    messages.success(request, 'Kategori berhasil dihapus.')
+    return redirect('articles:category_list')
 
 
 def article_list(request):

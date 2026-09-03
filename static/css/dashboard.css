@@ -60,3 +60,10 @@
     border-radius: 10px;
     font-size: 0.8rem;
 }
+
+.pending-card:not(.pending-warning) {
+    background: #E8F0EE;
+    border: 1px solid #C5DAD3;
+}
+.pending-card:not(.pending-warning) .pending-number { color: var(--ink-dark); }
+.pending-card:not(.pending-warning) .pending-label { color: #3d5c53; }

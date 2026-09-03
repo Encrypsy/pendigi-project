@@ -1,56 +1,54 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block body %}
-    <header class="navbar">
-        <a href="{% url 'articles:article_list' %}" class="brand">
-            <img src="{% static 'images/pendigi-logo-tulisan.svg' %}" alt="Pena Digital" class="logo">
-        </a>
+<header class="navbar">
+    <a href="{% url 'articles:article_list' %}" class="brand">
+        <img src="{% static 'images/pendigi-logo-tulisan.svg' %}" alt="Pena Digital" class="logo">
+    </a>
 
-        <nav class="nav-links">
-            <a href="{% url 'articles:article_list' %}?kategori=hot news">Hot News</a>
-            <a href="{% url 'articles:article_list' %}?kategori=tips & trik">Tips & Trik</a>
-            <a href="{% url 'articles:article_list' %}?kategori=fiksi">Fiksi</a>
-            <a href="{% url 'articles:article_list' %}?kategori=non-fiksi">Non-Fiksi</a>
-            <a href="{% url 'articles:article_list' %}?kategori=event">Event</a>
-        </nav>
+    <nav class="nav-links">
+        {% for cat in navbar_categories %}
+        <a href="{% url 'articles:article_list' %}?kategori={{ cat.name|urlencode }}">{{ cat.name }}</a>
+        {% endfor %}
+    </nav>
 
-        <div class="auth-links">
-            {% if user.is_authenticated %}
-                {% if user.role == 'admin' or user.is_superuser %}
-                    <a href="{% url 'dashboard' %}" class="btn-cta">Dashboard</a>
-                {% elif user.status_kontributor == 'approved' %}
-                    <a href="{% url 'articles:upload_article' %}" class="btn-cta">Tulis Artikel</a>
-                {% elif user.status_kontributor == 'pending' %}
-                    <span class="btn-cta btn-disabled">Menunggu Verifikasi</span>
-                {% else %}
-                    <a href="{% url 'apply_contributor' %}" class="btn-cta">Jadi Kontributor</a>
-                {% endif %}
-
-                <a href="{% url 'profile' %}">{{ user.username }}</a>
-                <form action="{% url 'logout' %}" method="post" style="display:inline;">
-                    {% csrf_token %}
-                    <button type="submit" class="link-button">Logout</button>
-                </form>
-            {% else %}
-                <a href="{% url 'login' %}">Login</a>
-                <a href="{% url 'register' %}">Daftar</a>
-            {% endif %}
-        </div>
-    </header>
-
-    <main class="content">
-        {% if messages %}
-            <ul class="messages">
-                {% for message in messages %}
-                    <li class="{{ message.tags }}">{{ message }}</li>
-                {% endfor %}
-            </ul>
+    <div class="auth-links">
+        {% if user.is_authenticated %}
+        {% if user.role == 'admin' or user.is_superuser %}
+        <a href="{% url 'dashboard' %}" class="btn-cta">Dashboard</a>
+        {% elif user.status_kontributor == 'approved' %}
+        <a href="{% url 'articles:upload_article' %}" class="btn-cta">Tulis Artikel</a>
+        {% elif user.status_kontributor == 'pending' %}
+        <span class="btn-cta btn-disabled">Menunggu Verifikasi</span>
+        {% else %}
+        <a href="{% url 'apply_contributor' %}" class="btn-cta">Jadi Kontributor</a>
         {% endif %}
 
-        {% block content %}{% endblock %}
-    </main>
+        <a href="{% url 'profile' %}">{{ user.username }}</a>
+        <form action="{% url 'logout' %}" method="post" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" class="link-button">Logout</button>
+        </form>
+        {% else %}
+        <a href="{% url 'login' %}">Login</a>
+        <a href="{% url 'register' %}">Daftar</a>
+        {% endif %}
+    </div>
+</header>
 
-    <footer class="footer">
-        <p>&copy; {% now "Y" %} Pena Digital</p>
-    </footer>
+<main class="content">
+    {% if messages %}
+    <ul class="messages">
+        {% for message in messages %}
+        <li class="{{ message.tags }}">{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+    {% block content %}{% endblock %}
+</main>
+
+<footer class="footer">
+    <p>&copy; {% now "Y" %} Pena Digital</p>
+</footer>
 {% endblock %}

@@ -1,0 +1,18 @@
+{% extends 'app_base.html' %}
+{% load static %}
+{% block title %}{% if is_edit %}Edit Kategori{% else %}Tambah Kategori{% endif %}{% endblock %}
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/forms.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="upload-card">
+    <h2>{% if is_edit %}Edit Kategori{% else %}Tambah Kategori Baru{% endif %}</h2>
+
+    <form method="post" class="auth-form">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">{% if is_edit %}Simpan Perubahan{% else %}Tambah{% endif %}</button>
+    </form>
+</div>
+{% endblock %}

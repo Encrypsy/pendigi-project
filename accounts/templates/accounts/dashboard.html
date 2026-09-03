@@ -47,6 +47,16 @@
     </a>
 </div>
 
+<div class="section-title-row">
+    <h2>Kelola Konten</h2>
+</div>
+<div class="pending-grid">
+    <a href="{% url 'articles:category_list' %}" class="pending-card">
+        <span class="pending-number">{{ stats.total_categories }}</span>
+        <span class="pending-label">Kategori Terdaftar</span>
+    </a>
+</div>
+
 <div class="dashboard-columns">
     <div class="card">
         <h3>Artikel Terpopuler</h3>
