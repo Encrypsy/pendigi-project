@@ -23,6 +23,15 @@ class Comments(models.Model):
     class Meta:
         ordering = ['created_at']
 
+    def get_all_replies(self):
+        """Ambil semua balasan secara flat, termasuk balasan dari balasan (rekursif)."""
+        replies = []
+        direct_replies = self.replies.filter(status=StatusComment.APPROVED).select_related('user', 'parent__user').order_by('created_at')
+        for reply in direct_replies:
+            replies.append(reply)
+            replies.extend(reply.get_all_replies())
+        return replies
+
     def __str__(self):
         return f'{self.user.username} ({self.article.title}) -- "{self.content[:30]}"'
 

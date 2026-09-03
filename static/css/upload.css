@@ -85,3 +85,54 @@
 .btn-danger:hover { background: #FBEAE5; }
 
 .submit-row { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
+
+.register-dropzone {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    padding: 0;
+    margin: 0 auto 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: #E8E5DF;
+    border: none;
+}
+
+.register-dropzone:hover {
+    background: #DDD9D0;
+}
+
+.register-dropzone .preview {
+    width: 96px;
+    height: 96px;
+    max-height: none;
+    border-radius: 50%;
+    object-fit: cover;
+    margin: 0;
+}
+
+.register-dropzone #dz-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.register-dropzone #dz-placeholder .icon {
+    font-size: 1.8rem;
+    margin: 0;
+    filter: grayscale(1) brightness(1.4);
+    line-height: 1;
+}
+.register-dropzone .icon { font-size: 1.4rem; margin-bottom: 2px; }
+.register-dropzone .main-text { font-size: 0.65rem; line-height: 1.2; }
+.register-dropzone .sub-text { display: none; }
+
+.icon-camera {
+    width: 30px;
+    height: 30px;
+    display: block;
+}

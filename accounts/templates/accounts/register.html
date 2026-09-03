@@ -2,8 +2,9 @@
 {% load static %}
 {% block title %}Daftar - Pena Digital{% endblock %}
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/forms.css' %}">
-    <link rel="stylesheet" href="{% static 'css/auth.css' %}">
+<link rel="stylesheet" href="{% static 'css/forms.css' %}">
+<link rel="stylesheet" href="{% static 'css/auth.css' %}">
+<link rel="stylesheet" href="{% static 'css/upload.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -12,9 +13,34 @@
     <h2>Buat Akun Baru</h2>
     <p class="auth-subtitle">Gabung dan mulai baca di Pena Digital</p>
 
-    <form method="post" class="auth-form">
+    <form method="post" enctype="multipart/form-data" class="auth-form">
         {% csrf_token %}
-        {{ form.as_p }}
+
+        <label class="dropzone register-dropzone" id="dropzone">
+            <img class="preview" id="preview">
+            <div id="dz-placeholder">
+                <svg class="icon-camera" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                        d="M4 8C4 6.89543 4.89543 6 6 6H7.5L8.5 4H15.5L16.5 6H18C19.1046 6 20 6.89543 20 8V17C20 18.1046 19.1046 19 18 19H6C4.89543 19 4 18.1046 4 17V8Z"
+                        stroke="#9B968C" stroke-width="1.6" stroke-linejoin="round" />
+                    <circle cx="12" cy="12.5" r="3.3" stroke="#9B968C" stroke-width="1.6" />
+                </svg>
+            </div>
+            {{ form.profile_picture }}
+        </label>
+
+        {{ form.username.label_tag }} {{ form.username }}
+        {% if form.username.errors %}<p class="field-error-text">{{ form.username.errors.0 }}</p>{% endif %}
+
+        {{ form.email.label_tag }} {{ form.email }}
+        {% if form.email.errors %}<p class="field-error-text">{{ form.email.errors.0 }}</p>{% endif %}
+
+        {{ form.password1.label_tag }} {{ form.password1 }}
+        {% if form.password1.errors %}<p class="field-error-text">{{ form.password1.errors.0 }}</p>{% endif %}
+
+        {{ form.password2.label_tag }} {{ form.password2 }}
+        {% if form.password2.errors %}<p class="field-error-text">{{ form.password2.errors.0 }}</p>{% endif %}
+
         <button type="submit">Daftar</button>
     </form>
 
@@ -22,4 +48,23 @@
         Sudah punya akun? <a href="{% url 'login' %}">Login di sini</a>
     </div>
 </div>
+
+<script>
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = dropzone.querySelector('input[type=file]');
+    const preview = document.getElementById('preview');
+    const placeholder = document.getElementById('dz-placeholder');
+
+    fileInput.addEventListener('change', () => {
+        if (fileInput.files && fileInput.files[0]) {
+            const reader = new FileReader();
+            reader.onload = e => {
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+                placeholder.style.display = 'none';
+            };
+            reader.readAsDataURL(fileInput.files[0]);
+        }
+    });
+</script>
 {% endblock %}

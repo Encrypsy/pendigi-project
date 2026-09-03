@@ -35,7 +35,7 @@ def article_detail(request, pk):
 
     comments = article.comments.filter(
         status=StatusComment.APPROVED, parent__isnull=True
-    ).select_related('user').prefetch_related('replies__user')
+    ).select_related('user')
 
     avg_rating = article.ratings.aggregate(avg=Avg('rating_value'))['avg']
 

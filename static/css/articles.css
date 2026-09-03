@@ -21,7 +21,7 @@
 
 .comments-section { max-width: 720px; margin: 0 auto; }
 .comment-list { margin-top: 16px; }
-.comment-item { border-bottom: 1px solid var(--divider); padding: 12px 0; }
+.comment-item { padding: 12px 0; }
 .comment-date { font-size: 0.75rem; color: #a09c92; margin-left: 8px; }
 
 /* Star Rating */
@@ -102,12 +102,11 @@
 }
 .comment-input-wrap button:hover { background: var(--brown-dark); }
 
-.comment-item {
-    display: flex;
-    gap: 12px;
-    padding: 16px 0;
-    border-bottom: 1px solid var(--divider);
+.reply-item {
+    padding: 12px 0;
+    border-bottom: none !important;
 }
+
 .comment-body { flex: 1; }
 .comment-meta { display: flex; align-items: baseline; gap: 8px; margin-bottom: 4px; }
 .comment-meta strong { font-size: 0.9rem; color: var(--text); }
@@ -181,12 +180,7 @@
 
 .comment-list { margin-top: 8px; }
 
-.comment-item {
-    display: flex;
-    gap: 12px;
-    padding: 16px 0;
-    border-bottom: 1px solid var(--divider);
-}
+
 .comment-body { flex: 1; }
 .comment-meta { display: flex; align-items: baseline; gap: 8px; margin-bottom: 4px; }
 .comment-meta strong { font-size: 0.9rem; color: var(--text); }
@@ -286,15 +280,6 @@
     position: relative;
 }
 
-.comment-item:not(:last-child)::after {
-    content: "";
-    position: absolute;
-    left: 19px;
-    top: 58px;
-    bottom: -18px;
-    width: 1.5px;
-    background: var(--divider);
-}
 
 .comment-body { flex: 1; padding-top: 2px; }
 .comment-meta { display: flex; align-items: baseline; gap: 8px; margin-bottom: 6px; }
@@ -486,25 +471,6 @@
 }
 
 
-/* garis */
-
-.comment-item:not(:last-child)::before{
-
-    content:"";
-
-    position:absolute;
-
-    left:21px;
-
-    top:48px;
-
-    bottom:-22px;
-
-    width:2px;
-
-    background:#ede7de;
-}
-
 
 /* ==========================
    BODY
@@ -617,9 +583,79 @@
 .reply-list {
     margin-top: 14px;
     padding-left: 20px;
-    border-left: 2px solid var(--divider);
+
+    /* Garis vertikal cokelat dengan opacity 0.7 */
+    border-left: 2px solid rgba(107, 66, 38, 0.7);
 }
 
-.reply-item { padding: 12px 0; }
+.reply-item {
+    padding: 12px 0;
+    border-bottom: none !important;
+}
 
 .comment-avatar-sm { width: 30px; height: 30px; font-size: 0.75rem; }
+
+/* ==============================
+   FIX REPLY THREAD
+   ============================== */
+
+.reply-list,
+.reply-list *,
+.reply-list .comment-item,
+.reply-list .reply-item {
+    border-bottom: none !important;
+    border-top: none !important;
+}
+
+.reply-list .comment-item::before,
+.reply-list .comment-item::after,
+.reply-list .reply-item::before,
+.reply-list .reply-item::after {
+    content: none !important;
+    display: none !important;
+}
+
+.reply-list {
+    border-left: 2px solid color-mix(
+        in srgb,
+        var(--brown) 70%,
+        transparent
+    ) !important;
+
+    border-right: none !important;
+}
+
+.reply-list {
+    margin-top: 14px;
+    position: relative;
+}
+
+.reply-item {
+    padding: 12px 0;
+    padding-left: 20px;
+    position: relative;
+}
+
+.reply-item:not(:last-child)::before {
+    content: "";
+    position: absolute;
+    left: 15px;
+    top: 42px;
+    bottom: -12px;
+    width: 2px;
+    background: var(--brown);
+}
+
+.comment-list .reply-item {
+    position: relative !important;
+}
+
+.comment-list .reply-item:not(:last-child)::before {
+    content: "" !important;
+    position: absolute !important;
+    left: 15px !important;
+    top: 42px !important;
+    bottom: -12px !important;
+    width: 2px !important;
+    background: var(--brown) !important;
+}

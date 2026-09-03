@@ -8,12 +8,13 @@ class RegisterForm(UserCreationForm):
 
     class Meta(UserCreationForm.Meta):
         model = Users
-        fields = UserCreationForm.Meta.fields + ('email',)
+        fields = UserCreationForm.Meta.fields + ('email', 'profile_picture')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for field in self.fields.values():
             field.help_text = ''
+        self.fields['profile_picture'].required = False
 
 
 class ContributorApplicationForm(forms.ModelForm):
@@ -36,4 +37,12 @@ class ProfileUpdateForm(forms.ModelForm):
         fields = ['profile_picture', 'bio']
         widgets = {
             'bio': forms.TextInput(attrs={'placeholder': 'Ceritakan dirimu dalam satu kalimat...'}),
+        }
+
+class CategoryForm(forms.ModelForm):
+    class Meta:
+        model = Categories
+        fields = ['name']
+        widgets = {
+            'name': forms.TextInput(attrs={'placeholder': 'Nama kategori, misal: Hot News'})
         }
