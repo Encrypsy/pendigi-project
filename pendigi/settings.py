@@ -41,7 +41,8 @@ INSTALLED_APPS = [
     'accounts',
     'articles',
     'interactions',
-    'reading_journal'
+    'reading_journal',
+    'fiction'
 ]
 
 MIDDLEWARE = [

@@ -119,3 +119,19 @@
     align-items: center;
     margin-bottom: 20px;
 }
+
+.edit-link {
+    display: inline-block;
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-decoration: none;
+    background: #E8F0EE;
+    color: var(--ink-dark);
+    transition: background .15s ease;
+}
+.edit-link:hover {
+    background: #d4e5e0;
+    text-decoration: none;
+}

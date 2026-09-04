@@ -71,23 +71,22 @@
 
     {% if user.is_authenticated %}
     <form action="{% url 'interactions:submit_comment' article.pk %}" method="post" class="comment-form">
-
         {% csrf_token %}
-
         {% if user.profile_picture %}
         <img src="{{ user.profile_picture.url }}" class="comment-avatar-img">
         {% else %}
-        <div class="comment-avatar">
-            {{ user.username|first|upper }}
-        </div>
+        <div class="comment-avatar">{{ user.username|first|upper }}</div>
         {% endif %}
-
         <div class="comment-input-wrap">
             {{ comment_form.content }}
             <button type="submit">Kirim</button>
         </div>
-
     </form>
+    {% else %}
+    <div class="login-prompt">
+        Kamu harus <a href="{% url 'login' %}" class="login-prompt-link">login</a> terlebih dahulu untuk memberi
+        komentar.
+    </div>
     {% endif %}
 
     <div class="comment-list">

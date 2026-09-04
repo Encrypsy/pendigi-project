@@ -12,7 +12,6 @@ from accounts.decorators import admin_required
 @login_required
 @require_POST
 def submit_comment(request, pk):
-    """Use case: Beri rating & komentar artikel (bagian komentar)"""
     article = get_object_or_404(Articles, pk=pk)
     form = CommentForm(request.POST)
 
@@ -20,10 +19,25 @@ def submit_comment(request, pk):
         comment = form.save(commit=False)
         comment.user = request.user
         comment.article = article
+
+        parent_id = request.POST.get('parent_id')
+        if parent_id:
+            parent_comment = get_object_or_404(Comments, pk=parent_id, article=article)
+            comment.parent = parent_comment
+
+        # Admin nggak perlu approval buat komentar sendiri
+        if request.user.role == 'admin' or request.user.is_superuser:
+            comment.status = StatusComment.APPROVED
+        
+
         comment.save()
 
         ReadingActivity.objects.create(user=request.user, article=article, action_type=ActionType.COMMENTED)
-        messages.success(request, 'Komentar terkirim, menunggu approval admin.')
+        
+        if comment.status == StatusComment.APPROVED:
+            messages.success(request, 'Komentar berhasil dikirim.')
+        else:
+            messages.success(request, 'Komentar terkirim, menunggu approval admin.')
     else:
         messages.error(request, 'Komentar gagal dikirim, pastikan tidak kosong.')
 
