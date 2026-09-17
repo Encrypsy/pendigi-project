@@ -1,0 +1,30 @@
+{% extends 'app_base.html' %}
+{% load static %}
+{% block title %}Tag: {{ tag }}{% endblock %}
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/profile.css' %}">
+{% endblock %}
+
+{% block content %}
+<h1 class="section-title">Cerita dengan tag "{{ tag }}"</h1>
+
+<div class="story-mini-grid">
+    {% for story in stories %}
+    <a href="{% url 'fiction:story_detail' story.pk %}" class="story-mini-card">
+        <div class="story-cover-wrap">
+            {% if story.cover %}
+                <img src="{{ story.cover.url }}" class="story-mini-cover" alt="{{ story.title }}">
+            {% else %}
+                <div class="story-mini-cover story-mini-placeholder">📖</div>
+            {% endif %}
+        </div>
+        <div class="story-mini-info">
+            <strong>{{ story.title }}</strong>
+            <span class="story-mini-chapters">{{ story.total_chapters }} bab</span>
+        </div>
+    </a>
+    {% empty %}
+        <p class="hint-text">Belum ada cerita dengan tag ini.</p>
+    {% endfor %}
+</div>
+{% endblock %}

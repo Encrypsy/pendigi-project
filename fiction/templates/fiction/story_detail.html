@@ -2,46 +2,149 @@
 {% load static %}
 {% block title %}{{ story.title }}{% endblock %}
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/table.css' %}">
+<link rel="stylesheet" href="{% static 'css/table.css' %}">
+<link rel="stylesheet" href="{% static 'css/story-detail.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="review-header">
-    <div class="review-cover">
+<div class="story-hero">
+    <div class="story-hero-cover">
         {% if story.cover %}
-            <img src="{{ story.cover.url }}" alt="{{ story.title }}">
+        <img src="{{ story.cover.url }}" alt="{{ story.title }}">
         {% else %}
-            <div class="table-thumb-placeholder review-cover-placeholder">📖</div>
+        <div class="table-thumb-placeholder story-hero-placeholder">📖</div>
         {% endif %}
     </div>
-    <div class="review-meta">
+
+    <div class="story-hero-info">
         <h1>{{ story.title }}</h1>
-        <p class="author">oleh {{ story.author.username }} &middot; {{ story.get_genre_display }} &middot; {{ story.get_target_pembaca_display }}</p>
-        <p class="review-description">{{ story.description }}</p>
-        {% if story.tags %}
-            <div class="review-tags">
-                {% for tag in story.tags.split %}
-                    <span class="tag-chip-static">{{ tag }}</span>
-                {% endfor %}
-            </div>
-        {% endif %}
+        <p class="story-hero-author">{{ story.author.username }}</p>
+
+        <div class="story-hero-stats">
+            <span>👁 {{ story.views_count }}</span>
+            <span>☆ {{ story.total_favorites }}</span>
+            <span>☰ {{ story.total_chapters }} bab</span>
+        </div>
+
+        <div class="story-hero-actions">
+            {% if chapters.first %}
+            <a href="{% url 'fiction:read_chapter' story.pk chapters.first.chapter_number %}"
+                class="btn-primary story-read-btn">Mulai Membaca</a>
+            {% else %}
+            <span class="btn-primary story-read-btn story-read-disabled">Belum Ada Bab</span>
+            {% endif %}
+
+            {% if user.is_authenticated %}
+            <form action="{% url 'fiction:toggle_favorite_story' story.pk %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="favorite-icon-btn {% if is_favorited %}is-active{% endif %}">
+                    {% if is_favorited %}★{% else %}+{% endif %}
+                </button>
+            </form>
+            {% endif %}
+        </div>
     </div>
 </div>
 
-<hr class="review-divider">
+<div class="story-tabs">
+    <button class="story-tab-btn active" data-tab="ringkasan">Ringkasan</button>
+    <button class="story-tab-btn" data-tab="bab">Bab</button>
+</div>
 
-<h2 class="section-title">Daftar Bab</h2>
-<table class="data-table">
-    <thead><tr><th>Bab</th><th>Judul</th></tr></thead>
-    <tbody>
-        {% for chapter in chapters %}
-        <tr>
-            <td>Bab {{ chapter.chapter_number }}</td>
-            <td><a href="{% url 'fiction:read_chapter' story.pk chapter.chapter_number %}">{{ chapter.title }}</a></td>
-        </tr>
-        {% empty %}
-        <tr><td colspan="2">Belum ada bab yang tayang.</td></tr>
+<div class="story-tab-content active" id="tab-ringkasan">
+    <div class="story-info-line">
+        {% if story.target_pembaca == 'dewasa' %}<span>📖 Dewasa</span> &middot;{% endif %}
+        <span>{% if story.is_completed %}Lengkap{% else %}Sedang Berlangsung{% endif %}</span> &middot;
+        <span>{{ story.published_at|date:"D, d M Y" }}</span>
+    </div>
+    <div class="story-info-line story-info-genre">
+        ⓘ {{ story.get_genre_display }}
+    </div>
+
+    {% if story.tag_list %}
+    <div class="story-tags">
+        {% for tag in story.tag_list %}
+        <a href="{% url 'fiction:tag_stories' tag %}" class="tag-chip-link">{{ tag }}</a>
         {% endfor %}
-    </tbody>
-</table>
+    </div>
+    {% endif %}
+
+    <div class="story-description" id="storyDescription">
+        <p id="descText" class="desc-collapsed">{{ story.description|linebreaksbr }}</p>
+        <button type="button" id="descToggleBtn" class="desc-toggle-btn">Baca selengkapnya</button>
+    </div>
+
+    {% if similar_stories %}
+    <div class="similar-stories-section">
+        <h3 class="similar-title">Anda Mungkin Juga Menyukai</h3>
+        <div class="similar-grid">
+            {% for similar in similar_stories %}
+            <a href="{% url 'fiction:story_detail' similar.pk %}" class="similar-card">
+                <div class="similar-cover">
+                    {% if similar.cover %}
+                    <img src="{{ similar.cover.url }}" alt="{{ similar.title }}">
+                    {% else %}
+                    <div class="similar-cover-placeholder">📖</div>
+                    {% endif %}
+                </div>
+                <div class="similar-info">
+                    <strong>{{ similar.title }}</strong>
+                    <p>{{ similar.description|truncatewords:12 }}</p>
+                    <span class="similar-meta">☰ {{ similar.total_chapters }} bab &middot; 
+                        {% if similar.is_completed%}Lengkap{% else %}Berlangsung{% endif %}</span>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<div class="story-tab-content" id="tab-bab">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Bab</th>
+                <th>Judul</th>
+                <th>Tanggal</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for chapter in chapters %}
+            <tr>
+                <td>{{ chapter.chapter_number }}</td>
+                <td><a href="{% url 'fiction:read_chapter' story.pk chapter.chapter_number %}">{{ chapter.title }}</a>
+                </td>
+                <td>{{ chapter.created_at|date:"D, d M Y" }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="3">Belum ada bab yang tayang.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+    document.querySelectorAll('.story-tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.story-tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.story-tab-content').forEach(c => c.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+        });
+    });
+
+    const descText = document.getElementById('descText');
+    const descToggleBtn = document.getElementById('descToggleBtn');
+    if (descText.scrollHeight <= descText.clientHeight + 4) {
+        descToggleBtn.style.display = 'none';
+    } else {
+        descToggleBtn.addEventListener('click', () => {
+            descText.classList.toggle('desc-collapsed');
+            descToggleBtn.textContent = descText.classList.contains('desc-collapsed') ? 'Baca selengkapnya' : 'Tutup';
+        });
+    }
+</script>
 {% endblock %}

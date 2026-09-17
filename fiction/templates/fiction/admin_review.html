@@ -19,7 +19,7 @@
         <span class="status-badge status-{{ story.status }}">{{ story.get_status_display }}</span>
         <h1>{{ story.title }}</h1>
         <p class="author">oleh {{ story.author.username }} &middot; {{ story.get_genre_display }} &middot; {{ story.get_target_pembaca_display }}</p>
-        <p class="review-description">{{ story.description }}</p>
+        <p class="review-description">{{ story.description|linebreaksbr }}</p>
         {% if story.tags %}
             <div class="review-tags">
                 {% for tag in story.tags.split %}

@@ -1,0 +1,269 @@
+.reader-header {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: #fff;
+    border-bottom: 1px solid var(--divider);
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.reader-header-story {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    color: var(--text);
+    min-width: 0;
+}
+
+.reader-header-cover {
+    width: 36px;
+    height: 48px;
+    object-fit: cover;
+    border-radius: 4px;
+    flex-shrink: 0;
+}
+.reader-cover-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--paper);
+    font-size: 1rem;
+}
+
+.reader-header-titles { display: flex; flex-direction: column; overflow: hidden; }
+.reader-header-titles strong {
+    font-size: 0.9rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.reader-header-titles span { font-size: 0.75rem; color: #8a8880; }
+
+.reader-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+    position: relative;
+}
+
+.reader-icon-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 1.5px solid var(--divider);
+    background: #fff;
+    color: var(--brown);
+    font-size: 1.05rem;
+    cursor: pointer;
+}
+.reader-icon-btn.is-active { background: var(--brown); color: #fff; border-color: var(--brown); }
+
+.reader-toc-toggle {
+    background: var(--paper);
+    border: 1.5px solid var(--divider);
+    border-radius: 20px;
+    padding: 8px 16px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--brown);
+    cursor: pointer;
+}
+.reader-toc-toggle:hover { background: #F5EBE0; }
+
+.reader-toc-dropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 8px;
+    width: 280px;
+    max-height: 360px;
+    overflow-y: auto;
+    background: #fff;
+    border: 1px solid var(--divider);
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+}
+.reader-toc-dropdown.is-open { display: block; }
+
+.reader-toc-header {
+    text-align: center;
+    padding: 14px;
+    border-bottom: 1px solid var(--divider);
+}
+.reader-toc-header strong { display: block; font-size: 0.9rem; }
+.reader-toc-header span { font-size: 0.75rem; color: #8a8880; }
+
+.reader-toc-item {
+    display: block;
+    padding: 10px 16px;
+    font-size: 0.85rem;
+    color: var(--text);
+    text-decoration: none;
+    border-bottom: 1px solid var(--divider);
+}
+.reader-toc-item:last-child { border-bottom: none; }
+.reader-toc-item:hover { background: var(--paper); }
+.reader-toc-item.is-current { background: #F5EBE0; color: var(--brown); font-weight: 700; }
+
+.reader-body {
+    display: flex;
+    gap: 32px;
+    max-width: 800px;
+    margin: 32px auto;
+    padding: 0 16px;
+}
+
+.reader-author-sidebar {
+    width: 100px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    text-align: center;
+}
+.reader-author-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+.reader-avatar-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--brown);
+    color: #fff;
+    font-weight: 700;
+}
+.reader-author-name { font-size: 0.78rem; color: #8a8880; }
+
+.reader-main { flex: 1; min-width: 0; }
+
+.reader-chapter-info { text-align: center; margin-bottom: 32px; }
+.reader-chapter-info h1 { font-size: 2rem; color: var(--brown); margin-bottom: 8px; }
+.reader-chapter-stats { display: flex; justify-content: center; gap: 16px; font-size: 0.85rem; color: #8a8880; }
+
+.reader-content {
+    line-height: 1.9;
+    font-size: 1.02rem;
+    color: var(--text);
+}
+.reader-content p { margin-bottom: 1.2em; }
+
+.reader-next-nav { margin-top: 40px; }
+.reader-next-btn {
+    display: block;
+    text-align: center;
+    background: var(--brown);
+    color: #fff;
+    padding: 16px;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 700;
+}
+.reader-next-btn:hover { background: var(--brown-dark); }
+.reader-last-chapter {
+    text-align: center;
+    padding: 16px;
+    color: #8a8880;
+    font-style: italic;
+}
+
+.reader-prev-link {
+    display: inline-block;
+    margin-top: 16px;
+    font-size: 0.85rem;
+    color: var(--brown);
+    font-weight: 600;
+}
+
+@media (max-width: 700px) {
+    .reader-body { flex-direction: column; }
+    .reader-author-sidebar { flex-direction: row; width: 100%; justify-content: center; }
+}
+
+.reader-author-sidebar {
+    width: 120px;
+    flex-shrink: 0;
+}
+
+.reader-author-sticky {
+    position: sticky;
+    top: 88px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    text-align: center;
+}
+
+.reader-author-avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+.reader-avatar-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--brown);
+    color: #fff;
+    font-weight: 700;
+    font-size: 1.2rem;
+}
+.reader-author-name { font-size: 0.8rem; color: #8a8880; }
+
+.reader-follow-btn {
+    background: var(--brown);
+    color: #fff;
+    border: none;
+    border-radius: 20px;
+    padding: 8px 18px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    width: 100%;
+}
+.reader-follow-btn:hover { background: var(--brown-dark); }
+
+.reader-share-block {
+    margin-top: 8px;
+    padding-top: 12px;
+    border-top: 1px solid var(--divider);
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+.reader-share-label { font-size: 0.75rem; color: #a09c92; text-transform: uppercase; letter-spacing: 0.04em; }
+
+.reader-share-icons { display: flex; gap: 8px; }
+.share-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--paper);
+    border: 1px solid var(--divider);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--brown);
+    transition: all .15s ease;
+}
+.share-icon:hover { background: var(--brown); color: #fff; }
+
+@media (max-width: 700px) {
+    .reader-body { flex-direction: column; }
+    .reader-author-sidebar { width: 100%; }
+    .reader-author-sticky { position: static; flex-direction: row; justify-content: center; flex-wrap: wrap; }
+}

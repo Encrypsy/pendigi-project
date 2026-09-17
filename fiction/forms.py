@@ -5,7 +5,7 @@ from .models import Stories, Chapters
 class StoryForm(forms.ModelForm):
     class Meta:
         model = Stories
-        fields = ['title', 'cover', 'description', 'genre', 'tags', 'target_pembaca']
+        fields = ['title', 'cover', 'description', 'genre', 'tags', 'target_pembaca', 'is_completed']
         widgets = {
             'description': forms.Textarea(attrs={'rows': 5, 'placeholder': 'Ceritakan sinopsis singkat ceritamu...'}),
             'genre': forms.RadioSelect(),

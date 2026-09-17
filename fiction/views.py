@@ -2,12 +2,13 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from accounts.models import StatusKontributor
-from .models import Stories, Chapters, StatusStory
+from .models import Stories, Chapters, StatusStory, FavoriteStories
 from .forms import StoryForm, ChapterForm
 from django.http import JsonResponse
 from accounts.decorators import admin_required
 from django.views.decorators.http import require_POST
 from django.utils import timezone
+from django.db.models import F
 
 def tag_suggestions(request):
     query = request.GET.get('q', '').strip().lower()
@@ -166,20 +167,64 @@ def story_list(request):
 
 def story_detail(request, pk):
     story = get_object_or_404(Stories, pk=pk, status=StatusStory.APPROVED)
+
+    Stories.objects.filter(pk=pk).update(views_count=F('views_count') + 1)
+    story.refresh_from_db(fields=['views_count'])
+
     chapters = story.chapters.all()
-    return render(request, 'fiction/story_detail.html', {'story': story, 'chapters': chapters})
+    similar_stories = story.get_similar_stories()
+
+    is_favorited = False
+    if request.user.is_authenticated:
+        is_favorited = FavoriteStories.objects.filter(user=request.user, story=story).exists()
+
+    return render(request, 'fiction/story_detail.html', {
+        'story': story,
+        'chapters': chapters,
+        'is_favorited': is_favorited,
+        'similar_stories': similar_stories,
+    })
 
 
 def read_chapter(request, pk, chapter_number):
     story = get_object_or_404(Stories, pk=pk, status=StatusStory.APPROVED)
     chapter = get_object_or_404(Chapters, story=story, chapter_number=chapter_number)
 
+    Chapters.objects.filter(pk=chapter.pk).update(views_count=F('views_count') + 1)
+    chapter.refresh_from_db(fields=['views_count'])
+
+    all_chapters = story.chapters.all()
     prev_chapter = story.chapters.filter(chapter_number__lt=chapter_number).order_by('-chapter_number').first()
     next_chapter = story.chapters.filter(chapter_number__gt=chapter_number).order_by('chapter_number').first()
+
+    is_favorited = False
+    if request.user.is_authenticated:
+        is_favorited = FavoriteStories.objects.filter(user=request.user, story=story).exists()
 
     return render(request, 'fiction/read_chapter.html', {
         'story': story,
         'chapter': chapter,
+        'all_chapters': all_chapters,
         'prev_chapter': prev_chapter,
         'next_chapter': next_chapter,
+        'is_favorited': is_favorited,
     })
+
+@login_required
+@require_POST
+def toggle_favorite_story(request, pk):
+    story = get_object_or_404(Stories, pk=pk, status=StatusStory.APPROVED)
+    favorite, created = FavoriteStories.objects.get_or_create(user=request.user, story=story)
+
+    if not created:
+        favorite.delete()
+        messages.info(request, 'Dihapus dari favorit.')
+    else:
+        messages.success(request, 'Ditambahkan ke favorit.')
+
+    return redirect('fiction:story_detail', pk=pk)
+
+def tag_stories(request, tag):
+    stories = Stories.objects.filter(status=StatusStory.APPROVED, tags__icontains=tag)
+    stories = [s for s in stories if tag.lower() in [t.lower() for t in s.tag_list()]]
+    return render(request, 'fiction/tag_stories.html', {'stories': stories, 'tag': tag})
