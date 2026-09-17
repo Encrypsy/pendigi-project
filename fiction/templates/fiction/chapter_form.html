@@ -1,0 +1,96 @@
+{% extends 'app_base.html' %}
+{% load static %}
+{% block title %}{% if is_edit %}Edit Bab {{ chapter_number }}{% else %}Tulis Bab {{ chapter_number }}{% endif %}
+{%endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/forms.css' %}">
+<link rel="stylesheet" href="{% static 'css/upload.css' %}">
+<link rel="stylesheet" href="{% static 'css/chapter-editor.css' %}">
+<link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="upload-card chapter-editor-card">
+    <h2>{{ story.title }} — Bab {{ chapter_number }}</h2>
+    <p class="auth-subtitle">Tulis judul dan isi bab di bawah ini</p>
+
+    <br><br>
+
+    <form method="post" class="auth-form" id="chapterForm">
+        {% csrf_token %}
+
+        <div class="field">
+
+            <label for="{{ form.title.id_for_label }}">Judul Bab</label>
+            {{ form.title }}
+            {% if form.title.errors %}<p class="field-error-text">{{ form.title.errors.0 }}</p>{% endif %}
+        </div>
+
+        <div class="field">
+            <label>Isi Bab</label>
+            <div id="quillToolbar">
+                <span class="ql-formats">
+                    <select class="ql-header">
+                        <option value="">Body</option>
+                        <option value="1">Heading 1</option>
+                        <option value="2">Heading 2</option>
+                    </select>
+                </span>
+                <span class="ql-formats">
+                    <button class="ql-bold"></button>
+                    <button class="ql-italic"></button>
+                    <button class="ql-underline"></button>
+                </span>
+                <span class="ql-formats">
+                    <button class="ql-align" value=""></button>
+                    <button class="ql-align" value="center"></button>
+                    <button class="ql-align" value="right"></button>
+                    <button class="ql-align" value="justify"></button>
+                </span>
+                <span class="ql-formats">
+                    <button class="ql-list" value="ordered"></button>
+                    <button class="ql-list" value="bullet"></button>
+                </span>
+                <span class="ql-formats">
+                    <button class="ql-blockquote"></button>
+                    <button class="ql-code-block"></button>
+                </span>
+            </div>
+            <div id="quillEditor"></div>
+            {{ form.content }}
+            {% if form.content.errors %}<p class="field-error-text">{{ form.content.errors.0 }}</p>{% endif %}
+        </div>
+        <script>
+            document.getElementById('chapterForm').addEventListener('submit', function (e) {
+                rawTextarea.value = quill.root.innerHTML;
+
+                const plainText = quill.getText().trim();
+                if (plainText.length === 0) {
+                    e.preventDefault();
+                    alert('Isi bab tidak boleh kosong.');
+                }
+            });
+        </script>
+        <button type="submit">Simpan Bab</button>
+    </form>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
+<script>
+    const quill = new Quill('#quillEditor', {
+        theme: 'snow',
+        modules: { toolbar: '#quillToolbar' },
+        placeholder: 'Tulis isi bab di sini...',
+    });
+
+    const rawTextarea = document.getElementById('id_content_raw');
+
+    if (rawTextarea.value.trim()) {
+        quill.root.innerHTML = rawTextarea.value;
+    }
+
+    document.getElementById('chapterForm').addEventListener('submit', function () {
+        rawTextarea.value = quill.root.innerHTML;
+    });
+</script>
+{% endblock %}

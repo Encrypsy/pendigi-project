@@ -1,0 +1,57 @@
+{% extends 'app_base.html' %}
+{% load static %}
+{% block title %}Review: {{ story.title }}{% endblock %}
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/table.css' %}">
+    <link rel="stylesheet" href="{% static 'css/articles.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="review-header">
+    <div class="review-cover">
+        {% if story.cover %}
+            <img src="{{ story.cover.url }}" alt="{{ story.title }}">
+        {% else %}
+            <div class="table-thumb-placeholder review-cover-placeholder">📖</div>
+        {% endif %}
+    </div>
+    <div class="review-meta">
+        <span class="status-badge status-{{ story.status }}">{{ story.get_status_display }}</span>
+        <h1>{{ story.title }}</h1>
+        <p class="author">oleh {{ story.author.username }} &middot; {{ story.get_genre_display }} &middot; {{ story.get_target_pembaca_display }}</p>
+        <p class="review-description">{{ story.description }}</p>
+        {% if story.tags %}
+            <div class="review-tags">
+                {% for tag in story.tags.split %}
+                    <span class="tag-chip-static">{{ tag }}</span>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="review-actions">
+    <form action="{% url 'fiction:admin_approve_story' story.pk %}" method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn-approve">Approve Cerita</button>
+    </form>
+    <form action="{% url 'fiction:admin_reject_story' story.pk %}" method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn-reject">Reject Cerita</button>
+    </form>
+    <a href="{% url 'fiction:admin_pending_stories' %}" class="btn-secondary">Kembali</a>
+</div>
+
+<hr class="review-divider">
+
+<h2 class="section-title">Isi Cerita ({{ chapters.count }} Bab)</h2>
+
+{% for chapter in chapters %}
+<div class="chapter-review-block">
+    <h3>Bab {{ chapter.chapter_number }}: {{ chapter.title }}</h3>
+    <div class="chapter-content">{{ chapter.content|safe }}</div>
+</div>
+{% empty %}
+<p class="hint-text">Cerita ini belum punya bab sama sekali.</p>
+{% endfor %}
+{% endblock %}

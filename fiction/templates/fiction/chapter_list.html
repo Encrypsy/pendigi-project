@@ -1,0 +1,39 @@
+{% extends 'app_base.html' %}
+{% load static %}
+{% block title %}{{ story.title }} - Daftar Bab{% endblock %}
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/table.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="page">
+    <div class="page-header-row">
+        <h1 class="section-title">{{ story.title }} — Daftar Bab</h1>
+        <a href="{% url 'fiction:add_chapter' story.pk %}" class="btn-primary">+ Bab Baru</a>
+    </div>
+
+    <table class="data-table">
+        <thead><tr><th>Bab</th><th>Judul</th><th>Jumlah Kata</th><th>Aksi</th></tr></thead>
+        <tbody>
+            {% for chapter in chapters %}
+            <tr>
+                <td>Bab {{ chapter.chapter_number }}</td>
+                <td>{{ chapter.title }}</td>
+                <td>{{ chapter.word_count }} kata</td>
+                <td>
+                    <div class="table-actions">
+                        <a href="{% url 'fiction:edit_chapter' story.pk chapter.pk %}" class="edit-link">Edit</a>
+                        <form action="{% url 'fiction:delete_chapter' story.pk chapter.pk %}" method="post" onsubmit="return confirm('Hapus bab ini?');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-reject">Hapus</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4">Belum ada bab. Klik "+ Bab Baru" untuk mulai menulis.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

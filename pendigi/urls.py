@@ -9,6 +9,7 @@ urlpatterns = [
     path('articles/', include('articles.urls')),
     path('interactions/', include('interactions.urls')),
     path('reading-journal/', include('reading_journal.urls')),
+    path('fiksi/', include('fiction.urls')),
 ]
 
 if settings.DEBUG:

@@ -1,0 +1,27 @@
+{% extends 'app_base.html' %}
+{% load static %}
+{% block title %}{{ story.title }} - Bab {{ chapter.chapter_number }}{% endblock %}
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/articles.css' %}">
+    <link rel="stylesheet" href="{% static 'css/table.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="chapter-review-block" style="max-width: 720px; margin: 0 auto;">
+    <p class="author"><a href="{% url 'fiction:story_detail' story.pk %}">{{ story.title }}</a></p>
+    <h3>Bab {{ chapter.chapter_number }}: {{ chapter.title }}</h3>
+    <div class="chapter-content">{{ chapter.content|safe }}</div>
+</div>
+
+<div class="chapter-nav" style="max-width: 720px; margin: 20px auto;">
+    {% if prev_chapter %}
+        <a href="{% url 'fiction:read_chapter' story.pk prev_chapter.chapter_number %}" class="btn-secondary">&larr; Bab Sebelumnya</a>
+    {% else %}
+        <span></span>
+    {% endif %}
+
+    {% if next_chapter %}
+        <a href="{% url 'fiction:read_chapter' story.pk next_chapter.chapter_number %}" class="btn-primary">Bab Selanjutnya &rarr;</a>
+    {% endif %}
+</div>
+{% endblock %}

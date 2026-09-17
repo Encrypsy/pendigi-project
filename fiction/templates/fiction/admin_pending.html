@@ -1,0 +1,51 @@
+{% extends 'app_base.html' %}
+{% load static %}
+{% block title %}Kelola Cerita Fiksi{% endblock %}
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/table.css' %}">
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+<h1 class="section-title">Cerita Menunggu Approval ({{ stories.count }})</h1>
+
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>Sampul</th><th>Judul</th><th>Genre</th><th>Penulis</th><th>Bab</th><th>Tanggal</th><th>Aksi</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for story in stories %}
+        <tr>
+            <td>
+                {% if story.cover %}
+                    <img src="{{ story.cover.url }}" class="table-thumb" alt="{{ story.title }}">
+                {% else %}
+                    <div class="table-thumb table-thumb-placeholder">📖</div>
+                {% endif %}
+            </td>
+            <td><a href="{% url 'fiction:admin_review_story' story.pk %}">{{ story.title }}</a></td>
+            <td>{{ story.get_genre_display }}</td>
+            <td>{{ story.author.username }}</td>
+            <td>{{ story.total_chapters }} bab</td>
+            <td>{{ story.created_at|date:"d M Y" }}</td>
+            <td>
+                <div class="table-actions">
+                    <form action="{% url 'fiction:admin_approve_story' story.pk %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-approve">Approve</button>
+                    </form>
+                    <form action="{% url 'fiction:admin_reject_story' story.pk %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-reject">Reject</button>
+                    </form>
+                </div>
+            </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7">Tidak ada cerita yang menunggu approval.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

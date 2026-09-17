@@ -11,8 +11,10 @@ from django.utils import timezone
 from articles.models import Articles, StatusArticle, Categories
 from interactions.models import Comments, StatusComment, Ratings
 from articles.models import Articles, StatusArticle, Categories
+from fiction.models import Stories, StatusStory
 from datetime import timedelta
 from django.views.decorators.http import require_POST
+
 
 
 
@@ -62,10 +64,12 @@ def apply_contributor(request):
     return render(request, 'accounts/apply_contributor.html', {'form': form})
 
 @login_required
+@login_required
 def profile_view(request):
     favorites = request.user.favorite_articles.select_related('article').all()
     notes = request.user.personal_notes.select_related('article').all()[:10]
     activities = request.user.activities.select_related('article').all()[:15]
+    stories = request.user.stories.all()[:5]
 
     if request.method == 'POST':
         form = ProfileUpdateForm(request.POST, request.FILES, instance=request.user)
@@ -82,6 +86,7 @@ def profile_view(request):
         'favorites': favorites,
         'notes': notes,
         'activities': activities,
+        'stories': stories,
         'form': form,
         'published_count': published_count,
     })
@@ -97,6 +102,7 @@ def dashboard_view(request):
         'pending_articles': Articles.objects.filter(status=StatusArticle.PENDING).count(),
         'pending_comments': Comments.objects.filter(status=StatusComment.PENDING).count(),
         'pending_contributors': ContributorApplication.objects.filter(status=StatusKontributor.PENDING).count(),
+        'pending_stories': Stories.objects.filter(status=StatusStory.PENDING).count(),
         'total_categories': Categories.objects.count(),
         'new_users_week': Users.objects.filter(date_joined__gte=seven_days_ago).count(),
     }

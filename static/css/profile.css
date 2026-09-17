@@ -199,3 +199,95 @@
 .comment-item:last-child { border-bottom: none; }
 
 .hint-text { color: #8a8880; font-size: 0.88rem; }
+
+.card-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+.card-header-row h3 { margin-bottom: 0; }
+
+.see-all-link {
+    font-size: 0.82rem;
+    color: var(--brown);
+    font-weight: 600;
+    text-decoration: none;
+}
+.see-all-link:hover { text-decoration: underline; }
+
+.story-mini-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 14px;
+}
+
+.story-mini-card {
+    text-decoration: none;
+    color: var(--text);
+    display: block;
+}
+
+.story-mini-cover {
+    width: 100%;
+    aspect-ratio: 3/4;
+    object-fit: cover;
+    border-radius: 8px;
+    display: block;
+    margin-bottom: 8px;
+}
+.story-mini-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--paper);
+    border: 1px solid var(--divider);
+    font-size: 1.8rem;
+}
+
+.story-mini-info { display: flex; flex-direction: column; gap: 4px; }
+.story-mini-info strong { font-size: 0.85rem; line-height: 1.3; }
+.story-mini-chapters { font-size: 0.72rem; color: #a09c92; }
+
+.story-cover-wrap {
+    position: relative;
+    margin-bottom: 8px;
+}
+
+.story-mini-cover {
+    width: 100%;
+    aspect-ratio: 3/4;
+    object-fit: cover;
+    border-radius: 8px;
+    display: block;
+    margin-bottom: 0;
+    box-shadow: 0 6px 16px rgba(107, 66, 38, 0.18), 0 2px 4px rgba(0,0,0,0.08);
+    transition: transform .18s ease, box-shadow .18s ease;
+}
+
+.story-mini-card:hover .story-mini-cover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 22px rgba(107, 66, 38, 0.25), 0 3px 6px rgba(0,0,0,0.1);
+}
+
+.story-mini-placeholder {
+    box-shadow: 0 6px 16px rgba(107, 66, 38, 0.12);
+}
+
+.age-badge {
+    position: absolute;
+    top: -8px;
+    left: -8px;
+    background: #D32F2F;
+    color: #fff;
+    font-size: 0.68rem;
+    font-weight: 800;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+}

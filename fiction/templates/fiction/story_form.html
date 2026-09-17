@@ -1,0 +1,183 @@
+{% extends 'app_base.html' %}
+{% load static %}
+{% block title %}{% if is_edit %}Edit Cerita{% else %}Tulis Cerita Baru{% endif %}{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/upload.css' %}">
+<link rel="stylesheet" href="{% static 'css/story-form.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>{% if is_edit %}Edit Cerita{% else %}Tambahkan Informasi Cerita{% endif %}</h1>
+    <p>{% if is_edit %}Mengedit cerita akan mengembalikan status ke menunggu approval{% else %}Isi detail dasar cerita
+        fiksimu{% endif %}</p>
+</div>
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <div class="story-form-layout">
+        <div class="story-cover-col">
+            <label class="dropzone story-cover-dropzone" id="dropzone">
+                <img class="preview" id="preview" {% if is_edit and story.cover %}src="{{ story.cover.url }}" style="display:block;" {% endif %}>
+                <div id="dz-placeholder" {% if is_edit and story.cover %}style="display:none;" {% endif %}>
+                    <div class="icon">📖</div>
+                    <div class="main-text">Tambahkan Sampul</div>
+                    <div class="sub-text">PNG/JPG, rasio potret disarankan</div>
+                </div>
+                {{ form.cover }}
+            </label>
+        </div>
+
+        <div class="story-detail-col">
+            <div class="card">
+                <h3>Detail Cerita</h3>
+
+                <div class="field">
+                    <label for="{{ form.title.id_for_label }}">Judul</label>
+                    {{ form.title }}
+                    {% if form.title.errors %}<p class="field-error-text">{{ form.title.errors.0 }}</p>{% endif %}
+                </div>
+
+                <div class="field">
+                    <label for="{{ form.description.id_for_label }}">Deskripsi</label>
+                    {{ form.description }}
+                    {% if form.description.errors %}<p class="field-error-text">{{ form.description.errors.0 }}</p>{%endif %}
+                </div>
+
+                <div class="field">
+                    <label>Genre</label>
+                    <div class="category-pills">
+                        {% for radio in form.genre %}
+                        {{ radio.tag }}
+                        <label for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+                        {% endfor %}
+                    </div>
+                    {% if form.genre.errors %}<p class="field-error-text">{{ form.genre.errors.0 }}</p>{% endif %}
+                </div>
+
+                <div class="field">
+                    <label>Tag</label>
+                    <div class="tag-input-wrap" id="tagInputWrap">
+                        <div class="tag-chips" id="tagChips"></div>
+                        <input type="text" id="tagTextInput" placeholder="Ketik tag, tekan spasi/enter...">
+                        <div class="tag-suggestions" id="tagSuggestions"></div>
+                    </div>
+                    <input type="hidden" name="{{ form.tags.name }}" id="tagHiddenInput"
+                        value="{{ form.tags.value|default:'' }}">
+                </div>
+
+                <div class="field">
+                    <label>Target Pembaca</label>
+                    <div class="category-pills">
+                        {% for radio in form.target_pembaca %}
+                        {{ radio.tag }}
+                        <label for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="submit-row">
+                <button type="submit" class="btn-primary">{% if is_edit %}Simpan Perubahan{% else %}Simpan & Lanjutkan </button>
+            </div>
+        </div>
+    </div>
+</form>
+
+<script>
+const dropzone = document.getElementById('dropzone');
+const fileInput = dropzone.querySelector('input[type=file]');
+const preview = document.getElementById('preview');
+const placeholder = document.getElementById('dz-placeholder');
+
+fileInput.addEventListener('change', () => {
+    if (fileInput.files && fileInput.files[0]) {
+        const reader = new FileReader();
+        reader.onload = e => {
+            preview.src = e.target.result;
+            preview.style.display = 'block';
+            placeholder.style.display = 'none';
+        };
+        reader.readAsDataURL(fileInput.files[0]);
+    }
+});
+</script>
+
+<script>
+        const wrap = document.getElementById('tagInputWrap');
+        const chipsContainer = document.getElementById('tagChips');
+        const textInput = document.getElementById('tagTextInput');
+        const hiddenInput = document.getElementById('tagHiddenInput');
+        const suggestionsBox = document.getElementById('tagSuggestions');
+
+        let tags = hiddenInput.value ? hiddenInput.value.split(' ').filter(Boolean) : [];
+
+        function renderChips() {
+            chipsContainer.innerHTML = '';
+            tags.forEach((tag, index) => {
+                const chip = document.createElement('span');
+                chip.className = 'tag-chip';
+                chip.innerHTML = `${tag} <button type="button" data-index="${index}">&times;</button>`;
+                chipsContainer.appendChild(chip);
+            });
+            hiddenInput.value = tags.join(' ');
+        }
+
+        function addTag(value) {
+            const clean = value.trim().toLowerCase();
+            if (clean && !tags.includes(clean)) {
+                tags.push(clean);
+                renderChips();
+            }
+            textInput.value = '';
+            suggestionsBox.innerHTML = '';
+        }
+
+        chipsContainer.addEventListener('click', (e) => {
+            if (e.target.tagName === 'BUTTON') {
+                const idx = parseInt(e.target.dataset.index);
+                tags.splice(idx, 1);
+                renderChips();
+            }
+        });
+
+        textInput.addEventListener('keydown', (e) => {
+            if (e.key === ' ' || e.key === 'Enter') {
+                e.preventDefault();
+                if (textInput.value.trim()) addTag(textInput.value);
+            }
+            if (e.key === 'Backspace' && textInput.value === '' && tags.length > 0) {
+                tags.pop();
+                renderChips();
+            }
+        });
+
+        let debounceTimer;
+        textInput.addEventListener('input', () => {
+            clearTimeout(debounceTimer);
+            const query = textInput.value.trim();
+            debounceTimer = setTimeout(() => {
+                fetch(`{% url 'fiction:tag_suggestions' %}?q=${encodeURIComponent(query)}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        suggestionsBox.innerHTML = '';
+                        data.tags.filter(t => !tags.includes(t)).forEach(tag => {
+                            const item = document.createElement('div');
+                            item.className = 'tag-suggestion-item';
+                            item.textContent = tag;
+                            item.addEventListener('click', () => addTag(tag));
+                            suggestionsBox.appendChild(item);
+                        });
+                    });
+            }, 200);
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!wrap.contains(e.target)) suggestionsBox.innerHTML = '';
+        });
+
+        renderChips();
+</script>
+{%endif%}
+{% endblock %}

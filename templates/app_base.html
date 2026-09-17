@@ -7,10 +7,14 @@
     </a>
 
     <nav class="nav-links">
-        {% for cat in navbar_categories %}
-        <a href="{% url 'articles:article_list' %}?kategori={{ cat.name|urlencode }}">{{ cat.name }}</a>
-        {% endfor %}
-    </nav>
+    {% for cat in navbar_categories %}
+        {% if cat.name|lower == "fiksi" %}
+            <a href="{% url 'fiction:story_list' %}">{{ cat.name }}</a>
+        {% else %}
+            <a href="{% url 'articles:article_list' %}?kategori={{ cat.name|urlencode }}">{{ cat.name }}</a>
+        {% endif %}
+    {% endfor %}
+</nav>
 
     <div class="auth-links">
         {% if user.is_authenticated %}
@@ -18,6 +22,7 @@
         <a href="{% url 'dashboard' %}" class="btn-cta">Dashboard</a>
         {% elif user.status_kontributor == 'approved' %}
         <a href="{% url 'articles:upload_article' %}" class="btn-cta">Tulis Artikel</a>
+        <a href="{% url 'fiction:create_story' %}" class="btn-cta">Tulis Cerita</a>
         {% elif user.status_kontributor == 'pending' %}
         <span class="btn-cta btn-disabled">Menunggu Verifikasi</span>
         {% else %}

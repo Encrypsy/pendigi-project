@@ -1,0 +1,33 @@
+{% extends 'app_base.html' %}
+{% load static %}
+{% block title %}Fiksi{% endblock %}
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/profile.css' %}">
+{% endblock %}
+
+{% block content %}
+<h1 class="section-title">Fiksi</h1>
+
+<div class="story-mini-grid story-browse-grid">
+    {% for story in stories %}
+    <a href="{% url 'fiction:story_detail' story.pk %}" class="story-mini-card">
+        <div class="story-cover-wrap">
+            {% if story.cover %}
+                <img src="{{ story.cover.url }}" class="story-mini-cover" alt="{{ story.title }}">
+            {% else %}
+                <div class="story-mini-cover story-mini-placeholder">📖</div>
+            {% endif %}
+            {% if story.target_pembaca == 'dewasa' %}
+                <span class="age-badge">18+</span>
+            {% endif %}
+        </div>
+        <div class="story-mini-info">
+            <strong>{{ story.title }}</strong>
+            <span class="story-mini-chapters">{{ story.get_genre_display }} &middot; {{ story.total_chapters }} bab</span>
+        </div>
+    </a>
+    {% empty %}
+        <p class="hint-text">Belum ada cerita yang tayang.</p>
+    {% endfor %}
+</div>
+{% endblock %}

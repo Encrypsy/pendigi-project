@@ -45,6 +45,10 @@
         <span class="pending-number">{{ stats.pending_contributors }}</span>
         <span class="pending-label">Pengajuan Kontributor</span>
     </a>
+    <a href="{% url 'fiction:admin_pending_stories' %}" class="pending-card pending-warning">
+        <span class="pending-number">{{ stats.pending_stories }}</span>
+        <span class="pending-label">Cerita Menunggu Approval</span>
+    </a>
 </div>
 
 <div class="section-title-row">

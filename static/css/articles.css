@@ -680,3 +680,9 @@
     background: var(--brown);
     color: #fff;
 }
+
+.chapter-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}

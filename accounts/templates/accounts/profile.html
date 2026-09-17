@@ -2,8 +2,8 @@
 {% load static %}
 {% block title %}Profil Saya{% endblock %}
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/forms.css' %}">
-    <link rel="stylesheet" href="{% static 'css/profile.css' %}">
+<link rel="stylesheet" href="{% static 'css/forms.css' %}">
+<link rel="stylesheet" href="{% static 'css/profile.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -11,9 +11,9 @@
     <div class="profile-top">
         <div class="profile-avatar-wrap">
             {% if user.profile_picture %}
-                <img src="{{ user.profile_picture.url }}" class="profile-avatar" alt="{{ user.username }}">
+            <img src="{{ user.profile_picture.url }}" class="profile-avatar" alt="{{ user.username }}">
             {% else %}
-                <div class="profile-avatar profile-avatar-placeholder">{{ user.username|first|upper }}</div>
+            <div class="profile-avatar profile-avatar-placeholder">{{ user.username|first|upper }}</div>
             {% endif %}
             <label for="photo-upload" class="avatar-edit-btn" title="Ganti foto">✎</label>
         </div>
@@ -29,14 +29,15 @@
             <div class="stat-item"><strong>{{ favorites|length }}</strong><span>Favorit</span></div>
             <div class="stat-item"><strong>{{ notes|length }}</strong><span>Catatan</span></div>
             {% if published_count is not None %}
-                <div class="stat-item"><strong>{{ published_count }}</strong><span>Artikel</span></div>
+            <div class="stat-item"><strong>{{ published_count }}</strong><span>Artikel</span></div>
             {% endif %}
         </div>
     </div>
 
     <form method="post" enctype="multipart/form-data" id="photoForm" style="display:none;">
         {% csrf_token %}
-        <input type="file" name="profile_picture" id="photo-upload" accept="image/*" onchange="document.getElementById('photoForm').submit()">
+        <input type="file" name="profile_picture" id="photo-upload" accept="image/*"
+            onchange="document.getElementById('photoForm').submit()">
     </form>
 </div>
 
@@ -49,16 +50,47 @@
     </form>
 </div>
 
+{% if stories %}
+<div class="card">
+    <div class="card-header-row">
+        <h3>Cerita Saya</h3>
+        <a href="{% url 'fiction:my_stories' %}" class="see-all-link">Lihat Semua</a>
+    </div>
+    <div class="story-mini-grid">
+        {% for story in stories %}
+        <a href="{% url 'fiction:chapter_list' story.pk %}" class="story-mini-card">
+            <div class="story-cover-wrap">
+                {% if story.cover %}
+                <img src="{{ story.cover.url }}" class="story-mini-cover" alt="{{ story.title }}">
+                {% else %}
+                <div class="story-mini-cover story-mini-placeholder">📖</div>
+                {% endif %}
+
+                {% if story.status == 'approved' and story.target_pembaca == 'dewasa' %}
+                <span class="age-badge">18+</span>
+                {% endif %}
+            </div>
+            <div class="story-mini-info">
+                <strong>{{ story.title }}</strong>
+                <span class="status-badge status-{{ story.status }}">{{ story.get_status_display }}</span>
+                <span class="story-mini-chapters">{{ story.total_chapters }} bab</span>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
 <div class="card">
     <h3>Top 4 Artikel Favorit</h3>
     <div class="favorite-grid">
         {% for fav in favorites %}
-            <a href="{% url 'articles:article_detail' fav.article.pk %}" class="favorite-item">
-                <span class="rank-badge">#{{ fav.rank_order }}</span>
-                {{ fav.article.title }}
-            </a>
+        <a href="{% url 'articles:article_detail' fav.article.pk %}" class="favorite-item">
+            <span class="rank-badge">#{{ fav.rank_order }}</span>
+            {{ fav.article.title }}
+        </a>
         {% empty %}
-            <p class="hint-text">Belum ada artikel favorit.</p>
+        <p class="hint-text">Belum ada artikel favorit.</p>
         {% endfor %}
     </div>
 </div>
@@ -67,11 +99,11 @@
     <h3>Aktivitas Terbaru</h3>
     <ul class="activity-list">
         {% for activity in activities %}
-            <li>{{ activity.get_action_type_display }} — <strong>{{ activity.article.title }}</strong>
-                <span class="activity-date">{{ activity.created_at|timesince }} lalu</span>
-            </li>
+        <li>{{ activity.get_action_type_display }} — <strong>{{ activity.article.title }}</strong>
+            <span class="activity-date">{{ activity.created_at|timesince }} lalu</span>
+        </li>
         {% empty %}
-            <li class="hint-text">Belum ada aktivitas.</li>
+        <li class="hint-text">Belum ada aktivitas.</li>
         {% endfor %}
     </ul>
 </div>
@@ -79,12 +111,12 @@
 <div class="card">
     <h3>Catatan Pribadi</h3>
     {% for note in notes %}
-        <div class="comment-item">
-            <strong>{{ note.article.title }}</strong>
-            <p>{{ note.note_content }}</p>
-        </div>
+    <div class="comment-item">
+        <strong>{{ note.article.title }}</strong>
+        <p>{{ note.note_content }}</p>
+    </div>
     {% empty %}
-        <p class="hint-text">Belum ada catatan.</p>
+    <p class="hint-text">Belum ada catatan.</p>
     {% endfor %}
 </div>
 {% endblock %}

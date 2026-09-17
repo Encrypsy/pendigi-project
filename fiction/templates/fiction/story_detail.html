@@ -1,0 +1,47 @@
+{% extends 'app_base.html' %}
+{% load static %}
+{% block title %}{{ story.title }}{% endblock %}
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/table.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="review-header">
+    <div class="review-cover">
+        {% if story.cover %}
+            <img src="{{ story.cover.url }}" alt="{{ story.title }}">
+        {% else %}
+            <div class="table-thumb-placeholder review-cover-placeholder">📖</div>
+        {% endif %}
+    </div>
+    <div class="review-meta">
+        <h1>{{ story.title }}</h1>
+        <p class="author">oleh {{ story.author.username }} &middot; {{ story.get_genre_display }} &middot; {{ story.get_target_pembaca_display }}</p>
+        <p class="review-description">{{ story.description }}</p>
+        {% if story.tags %}
+            <div class="review-tags">
+                {% for tag in story.tags.split %}
+                    <span class="tag-chip-static">{{ tag }}</span>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<hr class="review-divider">
+
+<h2 class="section-title">Daftar Bab</h2>
+<table class="data-table">
+    <thead><tr><th>Bab</th><th>Judul</th></tr></thead>
+    <tbody>
+        {% for chapter in chapters %}
+        <tr>
+            <td>Bab {{ chapter.chapter_number }}</td>
+            <td><a href="{% url 'fiction:read_chapter' story.pk chapter.chapter_number %}">{{ chapter.title }}</a></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="2">Belum ada bab yang tayang.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

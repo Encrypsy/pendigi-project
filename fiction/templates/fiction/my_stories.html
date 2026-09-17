@@ -1,0 +1,59 @@
+{% extends 'app_base.html' %}
+{% load static %}
+{% block title %}Cerita Saya{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/table.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="page-header-row">
+    <h1 class="section-title">Cerita Saya</h1>
+    <a href="{% url 'fiction:create_story' %}" class="btn-primary">+ Tulis Cerita Baru</a>
+</div>
+
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>Sampul</th>
+            <th>Judul</th>
+            <th>Genre</th>
+            <th>Bab</th>
+            <th>Status</th>
+            <th>Aksi</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for story in stories %}
+        <tr>
+            <td>
+                <div class="story-cover-wrap story-cover-wrap-sm">
+                    {% if story.cover %}
+                    <img src="{{ story.cover.url }}" class="table-thumb" alt="{{ story.title }}">
+                    {% else %}
+                    <div class="table-thumb table-thumb-placeholder">📖</div>
+                    {% endif %}
+
+                    {% if story.status == 'approved' and story.target_pembaca == 'dewasa' %}
+                    <span class="age-badge age-badge-sm">18+</span>
+                    {% endif %}
+                </div>
+            </td>
+            <td>{{ story.title }}</td>
+            <td>{{ story.get_genre_display }}</td>
+            <td>{{ story.total_chapters }} bab</td>
+            <td><span class="status-badge status-{{ story.status }}">{{ story.get_status_display }}</span></td>
+            <td>
+                <div class="table-actions">
+                    <a href="{% url 'fiction:chapter_list' story.pk %}" class="edit-link">Kelola Bab</a>
+                    <a href="{% url 'fiction:edit_story' story.pk %}" class="edit-link">Edit Info</a>
+                </div>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="6">Kamu belum menulis cerita.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
