@@ -1,0 +1,13 @@
+{
+  "builds": [{
+    "src": "pendigi/wsgi.py",
+    "use": "@vercel/python",
+    "config": { "maxLambdaSize": "15mb", "runtime": "python3.14.7" }
+  }],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "pendigi/wsgi.py"
+    }
+  ]
+}
