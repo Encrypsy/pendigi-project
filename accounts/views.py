@@ -2,7 +2,7 @@ from django.contrib.auth import login
 from django.contrib.auth.views import LoginView
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.shortcuts import render, redirect
+from django.shortcuts import get_object_or_404, render, redirect
 from .forms import RegisterForm, ContributorApplicationForm, ProfileUpdateForm
 from .models import StatusKontributor, ContributorApplication, Users
 from .decorators import admin_required
@@ -14,8 +14,26 @@ from articles.models import Articles, StatusArticle, Categories
 from fiction.models import Stories, StatusStory
 from datetime import timedelta
 from django.views.decorators.http import require_POST
+from .models import Follow
 
+@login_required
+@require_POST
+def toggle_follow(request, username):
+    target_user = get_object_or_404(Users, username=username)
 
+    if target_user == request.user:
+        messages.error(request, 'Tidak bisa follow diri sendiri.')
+        return redirect(request.META.get('HTTP_REFERER', 'articles:article_list'))
+
+    follow, created = Follow.objects.get_or_create(follower=request.user, following=target_user)
+
+    if not created:
+        follow.delete()
+        messages.info(request, f'Berhenti mengikuti {target_user.username}.')
+    else:
+        messages.success(request, f'Mengikuti {target_user.username}.')
+
+    return redirect(request.META.get('HTTP_REFERER', 'articles:article_list'))
 
 
 class CustomLoginView(LoginView):

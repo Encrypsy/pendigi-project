@@ -1,0 +1,177 @@
+<section class="comments-section">
+    <div class="comments-header">
+        <h3>Comments <span class="comment-count">{{ total_count }}</span></h3>
+        <form method="get" class="sort-form">
+            <select name="sort" onchange="this.form.submit()" class="sort-select">
+                <option value="recent" {% if current_sort == 'recent' %}selected{% endif %}>Most Recent</option>
+                <option value="oldest" {% if current_sort == 'oldest' %}selected{% endif %}>Oldest</option>
+                <option value="liked" {% if current_sort == 'liked' %}selected{% endif %}>Most Liked</option>
+            </select>
+        </form>
+    </div>
+
+    {% if user.is_authenticated %}
+    <form action="{{ post_url }}" method="post" class="comment-form">
+        {% csrf_token %}
+        {% if user.profile_picture %}
+            <img src="{{ user.profile_picture.url }}" class="comment-avatar-img">
+        {% else %}
+            <div class="comment-avatar">{{ user.username|first|upper }}</div>
+        {% endif %}
+        <div class="comment-input-wrap">
+            <textarea name="content" rows="1" placeholder="Tulis komentar..."></textarea>
+            <button type="submit">➤</button>
+        </div>
+    </form>
+    {% else %}
+        <div class="login-prompt">Kamu harus <a href="{% url 'login' %}" class="login-prompt-link">login</a> terlebih dahulu untuk memberi komentar.</div>
+    {% endif %}
+
+    <div class="comment-list">
+        {% for comment in comments %}
+        <div class="comment-row" id="comment-{{ comment.pk }}">
+            {% if comment.user.profile_picture %}
+                <img src="{{ comment.user.profile_picture.url }}" class="comment-avatar-img">
+            {% else %}
+                <div class="comment-avatar">{{ comment.user.username|first|upper }}</div>
+            {% endif %}
+
+            <div class="comment-content-col">
+                <div class="comment-top">
+                    <div class="comment-user-time">
+                        <strong>{{ comment.user.username }}</strong>
+                        <span class="comment-date">{{ comment.created_at|timesince }} ago</span>
+                    </div>
+                    <div class="comment-options-wrap">
+                        <button class="comment-options-btn" onclick="toggleOptions({{ comment.pk }})">&#8942;</button>
+                        <div class="comment-options-menu" id="options-{{ comment.pk }}">
+                            {% if comment.is_owner %}
+                                <button onclick="startEdit({{ comment.pk }})">Edit</button>
+                                <form action="{{ comment.delete_url }}" method="post" onsubmit="return confirm('Hapus komentar ini?');">
+                                    {% csrf_token %}
+                                    <button type="submit">Hapus</button>
+                                </form>
+                            {% else %}
+                                <button onclick="alert('Laporan terkirim. Terima kasih.')">Laporkan</button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <p class="comment-text" id="text-{{ comment.pk }}">{{ comment.content }}</p>
+
+                {% if comment.is_owner %}
+                <form action="{{ comment.edit_url }}" method="post" class="edit-form" id="edit-form-{{ comment.pk }}" style="display:none;">
+                    {% csrf_token %}
+                    <div class="comment-input-wrap">
+                        <textarea name="content" rows="1">{{ comment.content }}</textarea>
+                        <button type="submit">Simpan</button>
+                    </div>
+                </form>
+                {% endif %}
+
+                <div class="comment-actions-row">
+                    <form action="{{ comment.like_url }}" method="post" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="like-btn like-btn-inline {% if comment.is_liked %}is-liked{% endif %}">
+                            <svg viewBox="0 0 24 24" fill="{% if comment.is_liked %}currentColor{% else %}none{% endif %}" stroke="currentColor" stroke-width="2"><path d="M20.8 4.6c-1.7-1.7-4.5-1.7-6.2 0L12 7.2 9.4 4.6c-1.7-1.7-4.5-1.7-6.2 0-1.7 1.7-1.7 4.5 0 6.2l8.8 8.8 8.8-8.8c1.7-1.7 1.7-4.5 0-6.2z"/></svg>
+                            <span class="like-count">{{ comment.total_likes }}</span>
+                        </button>
+                    </form>
+                    <form action="{{ comment.dislike_url }}" method="post" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="dislike-btn {% if comment.is_disliked %}is-disliked{% endif %}">
+                            <svg viewBox="0 0 24 24" fill="{% if comment.is_disliked %}currentColor{% else %}none{% endif %}" stroke="currentColor" stroke-width="2" style="transform:rotate(180deg);"><path d="M20.8 4.6c-1.7-1.7-4.5-1.7-6.2 0L12 7.2 9.4 4.6c-1.7-1.7-4.5-1.7-6.2 0-1.7 1.7-1.7 4.5 0 6.2l8.8 8.8 8.8-8.8c1.7-1.7 1.7-4.5 0-6.2z"/></svg>
+                            <span class="like-count">{{ comment.total_dislikes }}</span>
+                        </button>
+                    </form>
+                    {% if user.is_authenticated %}
+                    <button class="reply-toggle" onclick="toggleReplyForm({{ comment.pk }})">Reply</button>
+                    {% endif %}
+                </div>
+
+                {% if user.is_authenticated %}
+                <form action="{{ post_url }}" method="post" class="reply-form" id="reply-form-{{ comment.pk }}" style="display:none;">
+                    {% csrf_token %}
+                    <input type="hidden" name="parent_id" value="{{ comment.pk }}">
+                    <div class="comment-input-wrap">
+                        <textarea name="content" rows="1" placeholder="Membalas @{{ comment.user.username }}..."></textarea>
+                        <button type="submit">➤</button>
+                    </div>
+                </form>
+                {% endif %}
+
+                {% if comment.reply_list %}
+                <button class="show-replies-toggle" onclick="toggleReplies({{ comment.pk }})" id="toggle-label-{{ comment.pk }}">
+                    Lihat {{ comment.reply_list|length }} balasan
+                </button>
+                <div class="reply-list" id="replies-{{ comment.pk }}" style="display:none;">
+                    {% for reply in comment.reply_list %}
+                    <div class="comment-row">
+                        {% if reply.user.profile_picture %}
+                            <img src="{{ reply.user.profile_picture.url }}" class="comment-avatar-img comment-avatar-sm">
+                        {% else %}
+                            <div class="comment-avatar comment-avatar-sm">{{ reply.user.username|first|upper }}</div>
+                        {% endif %}
+                        <div class="comment-content-col">
+                            <div class="comment-top">
+                                <div class="comment-user-time">
+                                    <strong>{{ reply.user.username }}</strong>
+                                    {% if reply.parent_id != comment.pk %}<span class="reply-to-tag">membalas @{{ reply.parent_username }}</span>{% endif %}
+                                    <span class="comment-date">{{ reply.created_at|timesince }} ago</span>
+                                </div>
+                                {% if reply.is_owner %}
+                                <button class="comment-options-btn" onclick="alert('Fitur edit/hapus balasan sama seperti komentar utama')">&#8942;</button>
+                                {% endif %}
+                            </div>
+                            <p class="comment-text">{{ reply.content }}</p>
+                            <div class="comment-actions-row">
+                                <form action="{{ reply.like_url }}" method="post" style="display:inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="like-btn like-btn-inline {% if reply.is_liked %}is-liked{% endif %}">
+                                        <svg viewBox="0 0 24 24" fill="{% if reply.is_liked %}currentColor{% else %}none{% endif %}" stroke="currentColor" stroke-width="2"><path d="M20.8 4.6c-1.7-1.7-4.5-1.7-6.2 0L12 7.2 9.4 4.6c-1.7-1.7-4.5-1.7-6.2 0-1.7 1.7-1.7 4.5 0 6.2l8.8 8.8 8.8-8.8c1.7-1.7 1.7-4.5 0-6.2z"/></svg>
+                                        <span class="like-count">{{ reply.total_likes }}</span>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+            <p class="hint-text">Belum ada komentar. Jadi yang pertama!</p>
+        {% endfor %}
+    </div>
+</section>
+
+<script>
+function toggleReplyForm(id) {
+    const f = document.getElementById('reply-form-' + id);
+    f.style.display = f.style.display === 'none' ? 'flex' : 'none';
+}
+function toggleReplies(id) {
+    const list = document.getElementById('replies-' + id);
+    const label = document.getElementById('toggle-label-' + id);
+    const hidden = list.style.display === 'none';
+    if (hidden && !label.dataset.original) label.dataset.original = label.textContent;
+    list.style.display = hidden ? 'block' : 'none';
+    label.textContent = hidden ? 'Sembunyikan balasan' : label.dataset.original;
+}
+function toggleOptions(id) {
+    document.querySelectorAll('.comment-options-menu.is-open').forEach(m => { if (m.id !== 'options-' + id) m.classList.remove('is-open'); });
+    document.getElementById('options-' + id).classList.toggle('is-open');
+}
+function startEdit(id) {
+    document.getElementById('text-' + id).style.display = 'none';
+    document.getElementById('edit-form-' + id).style.display = 'block';
+    document.getElementById('options-' + id).classList.remove('is-open');
+}
+document.addEventListener('click', (e) => {
+    if (!e.target.closest('.comment-options-wrap')) {
+        document.querySelectorAll('.comment-options-menu.is-open').forEach(m => m.classList.remove('is-open'));
+    }
+});
+</script>

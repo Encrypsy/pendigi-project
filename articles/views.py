@@ -1,8 +1,11 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.urls import reverse
 from django.views.decorators.http import require_POST
 from django.contrib import messages
-from django.db.models import Avg, Count
+from django.db.models import F, Avg, Count
+
+from interactions.views import _attach_comment_meta, _sort_comments
 from .models import Articles, Categories, StatusArticle
 from .forms import ArticleUploadForm
 from accounts.models import StatusKontributor
@@ -13,6 +16,7 @@ from django.utils import timezone
 from accounts.decorators import admin_required
 from accounts.decorators import admin_required
 from .forms import CategoryForm
+from fiction.models import Stories, StatusStory as FictionStatusStory
 
 
 @admin_required
@@ -66,8 +70,11 @@ def category_delete(request, pk):
 
 
 def article_list(request):
-    """Use case: Baca & tandai artikel selesai (halaman index)"""
     articles = Articles.objects.filter(status=StatusArticle.APPROVED).select_related('category', 'contributor')
+
+    query = request.GET.get('q', '').strip()
+    if query:
+        articles = articles.filter(title__icontains=query)
 
     category_slug = request.GET.get('kategori')
     if category_slug:
@@ -75,19 +82,44 @@ def article_list(request):
 
     categories = Categories.objects.all()
 
+    banner_articles = Articles.objects.filter(
+        status=StatusArticle.APPROVED
+    ).exclude(thumbnail='').select_related('category').order_by('-published_at')[:5]
+
+    trending_articles = Articles.objects.filter(
+        status=StatusArticle.APPROVED
+    ).select_related('category').order_by('-views_count')[:4]
+
+    featured_stories = Stories.objects.filter(
+        status=FictionStatusStory.APPROVED
+    ).exclude(cover='').select_related('author').order_by('-views_count')[:12]
+
     return render(request, 'articles/list.html', {
         'articles': articles,
         'categories': categories,
         'active_category': category_slug,
+        'banner_articles': banner_articles,
+        'trending_articles': trending_articles,
+        'featured_stories': featured_stories,
+        'search_query': query,
     })
 
 
 def article_detail(request, pk):
     article = get_object_or_404(Articles, pk=pk, status=StatusArticle.APPROVED)
 
-    comments = article.comments.filter(
-        status=StatusComment.APPROVED, parent__isnull=True
-    ).select_related('user')
+    Articles.objects.filter(pk=pk).update(views_count=F('views_count') + 1)
+    article.refresh_from_db(fields=['views_count'])
+
+    sort = request.GET.get('sort', 'recent')
+    comments_qs = article.comments.filter(status=StatusComment.APPROVED, parent__isnull=True).select_related('user')
+    comments_qs = _sort_comments(comments_qs, sort)
+    comments = _attach_comment_meta(
+        comments_qs, request,
+        'interactions:toggle_comment_like', 'interactions:toggle_comment_dislike',
+        'interactions:edit_comment_placeholder', 'interactions:delete_comment',
+        url_kwargs={}
+    )
 
     avg_rating = article.ratings.aggregate(avg=Avg('rating_value'))['avg']
 
@@ -110,6 +142,9 @@ def article_detail(request, pk):
         'user_rating': user_rating,
         'comment_form': CommentForm(),
         'rating_form': RatingForm(),
+        'total_count': article.comments.filter(status=StatusComment.APPROVED).count(),
+        'current_sort': sort,
+        'post_url': reverse('interactions:submit_comment', kwargs={'pk': pk}),
     })
 
 

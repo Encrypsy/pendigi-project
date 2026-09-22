@@ -35,6 +35,12 @@ class Comments(models.Model):
     def __str__(self):
         return f'{self.user.username} ({self.article.title}) -- "{self.content[:30]}"'
 
+    def total_likes(self):
+        return self.likes.count()
+
+    def total_dislikes(self):
+        return self.dislikes.count()
+
 
 class Ratings(models.Model):
     user = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='ratings')
@@ -63,3 +69,20 @@ class Bookmarks(models.Model):
 
     def __str__(self):
         return f'{self.user.username} bookmarked {self.article.title}'
+
+class CommentLikes(models.Model):
+    user = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='comment_likes')
+    comment = models.ForeignKey(Comments, on_delete=models.CASCADE, related_name='likes')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=['user', 'comment'], name='unique_user_comment_like')]
+
+
+class CommentDislikes(models.Model):
+    user = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='comment_dislikes')
+    comment = models.ForeignKey(Comments, on_delete=models.CASCADE, related_name='dislikes')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=['user', 'comment'], name='unique_user_comment_dislike')]

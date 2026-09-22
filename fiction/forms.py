@@ -1,5 +1,5 @@
 from django import forms
-from .models import Stories, Chapters
+from .models import Stories, Chapters, ChapterComments
 
 
 class StoryForm(forms.ModelForm):
@@ -26,3 +26,11 @@ class ChapterForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['content'].required = False
+
+class ChapterCommentForm(forms.ModelForm):
+    class Meta:
+        model = ChapterComments
+        fields = ['content']
+        widgets = {
+            'content': forms.Textarea(attrs={'rows': 2, 'placeholder': 'Tulis komentar...'})
+        }

@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils import timezone
-from .models import Stories, Chapters, StatusStory
+from .models import Stories, Chapters, StatusStory, ChapterComments
 
 
 @admin.action(description="Approve cerita terpilih")
@@ -20,4 +20,7 @@ class StoriesAdmin(admin.ModelAdmin):
     actions = [approve_stories, reject_stories]
 
 
-admin.site.register(Chapters)
+admin.site.register([
+    Chapters,
+    ChapterComments
+])

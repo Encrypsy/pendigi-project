@@ -1,5 +1,6 @@
 from django.db import models
 from accounts.models import Users, StatusKontributor
+from interactions.models import StatusComment
 
 class GenreFiksi(models.TextChoices):
     ROMANCE = 'romance', 'Romance'
@@ -109,3 +110,49 @@ class Chapters(models.Model):
     def word_count(self):
         return len(self.content.split())
 
+class ChapterComments(models.Model):
+    chapter = models.ForeignKey(Chapters, on_delete=models.CASCADE, related_name='comments')
+    user = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='chapter_comments')
+    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='replies')
+    content = models.TextField()
+    status = models.CharField(max_length=20, choices=StatusComment.choices, default=StatusComment.PENDING)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['created_at']
+
+    def __str__(self):
+        return f'{self.user.username} - {self.chapter}'
+
+    def total_likes(self):
+        return self.likes.count()
+    
+    def total_dislikes(self):
+        return self.dislikes.count()
+
+    def get_all_replies(self):
+        replies = []
+        direct = self.replies.filter(status=StatusComment.APPROVED).select_related('user', 'parent__user').order_by('created_at')
+        for reply in direct:
+            replies.append(reply)
+            replies.extend(reply.get_all_replies())
+        return replies
+
+
+class ChapterCommentLikes(models.Model):
+    user = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='chapter_comment_likes')
+    comment = models.ForeignKey(ChapterComments, on_delete=models.CASCADE, related_name='likes')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['user', 'comment'], name='unique_chapter_comment_like')
+        ]
+
+class ChapterCommentDislikes(models.Model):
+    user = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='chapter_comment_dislikes')
+    comment = models.ForeignKey(ChapterComments, on_delete=models.CASCADE, related_name='dislikes')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=['user', 'comment'], name='unique_chapter_comment_dislike')]

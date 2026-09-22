@@ -21,4 +21,6 @@ urlpatterns = [
     path('', views.story_list, name='story_list'),
     path('<int:pk>/', views.story_detail, name='story_detail'),
     path('<int:pk>/baca/<int:chapter_number>/', views.read_chapter, name='read_chapter'),
+    path('<int:pk>/baca/<int:chapter_number>/komentar/', views.submit_chapter_comment, name='submit_chapter_comment'),
+    path('komentar/<int:comment_id>/like/', views.toggle_chapter_comment_like, name='toggle_chapter_comment_like'),
 ]

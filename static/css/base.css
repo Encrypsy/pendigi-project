@@ -30,7 +30,7 @@ a { color: inherit; }
 }
 
 .brand { display: flex; align-items: center; flex-shrink: 0; text-decoration: none; }
-.logo { height: 32px; width: auto; display: block; }
+.logo { height: 100px; width: auto;}
 
 .nav-links { display: flex; gap: 18px; flex-wrap: nowrap; white-space: nowrap; }
 .nav-links a { font-size: 0.92rem; text-decoration: none; color: var(--text); }

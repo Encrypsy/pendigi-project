@@ -1,9 +1,10 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from accounts.models import StatusKontributor
-from .models import Stories, Chapters, StatusStory, FavoriteStories
-from .forms import StoryForm, ChapterForm
+from accounts.models import StatusKontributor, Follow
+from interactions.models import StatusComment
+from .models import Stories, Chapters, StatusStory, FavoriteStories, ChapterComments, ChapterCommentLikes
+from .forms import StoryForm, ChapterForm, ChapterCommentForm
 from django.http import JsonResponse
 from accounts.decorators import admin_required
 from django.views.decorators.http import require_POST
@@ -197,9 +198,17 @@ def read_chapter(request, pk, chapter_number):
     prev_chapter = story.chapters.filter(chapter_number__lt=chapter_number).order_by('-chapter_number').first()
     next_chapter = story.chapters.filter(chapter_number__gt=chapter_number).order_by('chapter_number').first()
 
+    comments = chapter.comments.filter(status=StatusComment.APPROVED, parent__isnull=True).select_related('user')
+
     is_favorited = False
+    is_following_author = False
+    liked_comment_ids = []
     if request.user.is_authenticated:
         is_favorited = FavoriteStories.objects.filter(user=request.user, story=story).exists()
+        is_following_author = Follow.objects.filter(follower=request.user, following=story.author).exists()
+        liked_comment_ids = list(
+            ChapterCommentLikes.objects.filter(user=request.user, comment__chapter=chapter).values_list('comment_id', flat=True)
+        )
 
     return render(request, 'fiction/read_chapter.html', {
         'story': story,
@@ -208,6 +217,10 @@ def read_chapter(request, pk, chapter_number):
         'prev_chapter': prev_chapter,
         'next_chapter': next_chapter,
         'is_favorited': is_favorited,
+        'is_following_author': is_following_author,
+        'comments': comments,
+        'comment_form': ChapterCommentForm(),
+        'liked_comment_ids': liked_comment_ids,
     })
 
 @login_required
@@ -228,3 +241,46 @@ def tag_stories(request, tag):
     stories = Stories.objects.filter(status=StatusStory.APPROVED, tags__icontains=tag)
     stories = [s for s in stories if tag.lower() in [t.lower() for t in s.tag_list()]]
     return render(request, 'fiction/tag_stories.html', {'stories': stories, 'tag': tag})
+
+@login_required
+@require_POST
+def submit_chapter_comment(request, pk, chapter_number):
+    story = get_object_or_404(Stories, pk=pk, status=StatusStory.APPROVED)
+    chapter = get_object_or_404(Chapters, story=story, chapter_number=chapter_number)
+    form = ChapterCommentForm(request.POST)
+
+    if form.is_valid():
+        comment = form.save(commit=False)
+        comment.user = request.user
+        comment.chapter = chapter
+
+        parent_id = request.POST.get('parent_id')
+        if parent_id:
+            parent_comment = get_object_or_404(ChapterComments, pk=parent_id, chapter=chapter)
+            comment.parent = parent_comment
+
+        if request.user.role == 'admin' or request.user.is_superuser:
+            comment.status = StatusComment.APPROVED
+
+        comment.save()
+
+        if comment.status == StatusComment.APPROVED:
+            messages.success(request, 'Komentar terkirim.')
+        else:
+            messages.success(request, 'Komentar terkirim, menunggu approval admin.')
+    else:
+        messages.error(request, 'Komentar tidak boleh kosong.')
+
+    return redirect('fiction:read_chapter', pk=pk, chapter_number=chapter_number)
+
+
+@login_required
+@require_POST
+def toggle_chapter_comment_like(request, comment_id):
+    comment = get_object_or_404(ChapterComments, pk=comment_id)
+    like, created = ChapterCommentLikes.objects.get_or_create(user=request.user, comment=comment)
+
+    if not created:
+        like.delete()
+
+    return redirect('fiction:read_chapter', pk=comment.chapter.story.pk, chapter_number=comment.chapter.chapter_number)

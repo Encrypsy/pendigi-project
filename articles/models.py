@@ -24,14 +24,12 @@ class Articles(models.Model):
     content = models.TextField()
     category = models.ForeignKey(Categories, on_delete=models.CASCADE, related_name='articles')
     contributor = models.ForeignKey(
-        Users,
-        on_delete=models.CASCADE,
-        limit_choices_to={
-            'status_kontributor': StatusKontributor.APPROVED
-        },
+        Users, on_delete=models.CASCADE,
+        limit_choices_to={'status_kontributor': StatusKontributor.APPROVED},
         related_name='articles'
     )
     status = models.CharField(max_length=20, choices=StatusArticle.choices, default=StatusArticle.PENDING)
+    views_count = models.PositiveIntegerField(default=0)
     published_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 

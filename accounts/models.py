@@ -54,3 +54,16 @@ class ContributorApplication(models.Model):
 
     def __str__(self):
         return f'{self.user.username} - {self.status}'
+
+class Follow(models.Model):
+    follower = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='following')
+    following = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='followers')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['follower', 'following'], name='unique_follow_pair')
+        ]
+
+    def __str__(self):
+        return f'{self.follower.username} follows {self.following.username}'

@@ -11,4 +11,7 @@ urlpatterns = [
     path('kelola/pending/', views.admin_pending_comments, name='admin_pending_comments'),
     path('kelola/<int:pk>/approve/', views.admin_approve_comment, name='admin_approve_comment'),
     path('kelola/<int:pk>/reject/', views.admin_reject_comment, name='admin_reject_comment'),
+    path('komentar/<int:comment_id>/hapus/', views.delete_comment, name='delete_comment'),
+    path('komentar/<int:comment_id>/like/', views.toggle_comment_like, name='toggle_comment_like'),
+    path('komentar/<int:comment_id>/dislike/', views.toggle_comment_dislike, name='toggle_comment_dislike'),
 ]
