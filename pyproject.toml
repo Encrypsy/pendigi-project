@@ -2,6 +2,16 @@
 name = "pendigi"
 version = "0.1.0"
 requires-python = ">=3.12"
+dependencies = [
+    "asgiref==3.12.1",
+    "dj-database-url==3.1.2",
+    "Django==6.1",
+    "pillow==12.3.0",
+    "psycopg==3.3.6",
+    "psycopg-binary==3.3.6",
+    "sqlparse==0.6.0",
+    "tzdata==2026.3",
+]
 
 [tool.vercel.scripts]
 build = "python manage.py migrate --noinput"
