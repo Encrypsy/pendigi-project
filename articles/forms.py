@@ -2,11 +2,6 @@ from django import forms
 from .models import Articles
 from articles.models import Categories
 
-class CategoryChoices(forms.ChoiceField):
-    data_category = Categories.objects.all()
-    for category in data_category:
-        category.name
-
 class CategoryForm(forms.ModelForm):
     class Meta:
         model = Categories
