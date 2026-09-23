@@ -3,7 +3,6 @@ import cloudinary
 import cloudinary.uploader
 from pathlib import Path
 
-# Cloudinary membaca CLOUDINARY_URL dari environment variable
 cloudinary.config(secure=True)
 
 MEDIA_ROOT = Path("media")
@@ -21,9 +20,11 @@ print(f"Ditemukan {len(files)} file.")
 
 for file in files:
     relative_path = file.relative_to(MEDIA_ROOT)
-    public_id = str(relative_path.with_suffix("")).replace("\\", "/")
+
+    public_id = f"media/{str(relative_path.with_suffix('')).replace(chr(92), '/')}"
 
     print(f"Uploading: {file}")
+    print(f"Public ID: {public_id}")
 
     try:
         result = cloudinary.uploader.upload(
