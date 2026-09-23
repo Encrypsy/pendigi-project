@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.urls import reverse
 from accounts.models import StatusKontributor, Follow
 from interactions.models import StatusComment
 from .models import Stories, Chapters, StatusStory, FavoriteStories, ChapterComments, ChapterCommentLikes
@@ -10,6 +11,7 @@ from accounts.decorators import admin_required
 from django.views.decorators.http import require_POST
 from django.utils import timezone
 from django.db.models import F
+from django.http import JsonResponse
 
 def tag_suggestions(request):
     query = request.GET.get('q', '').strip().lower()
@@ -198,17 +200,21 @@ def read_chapter(request, pk, chapter_number):
     prev_chapter = story.chapters.filter(chapter_number__lt=chapter_number).order_by('-chapter_number').first()
     next_chapter = story.chapters.filter(chapter_number__gt=chapter_number).order_by('chapter_number').first()
 
-    comments = chapter.comments.filter(status=StatusComment.APPROVED, parent__isnull=True).select_related('user')
+    from interactions.views import _attach_comment_meta
+
+    comments_qs = chapter.comments.filter(status=StatusComment.APPROVED, parent__isnull=True).select_related('user').order_by('-created_at')
+    post_url = reverse('fiction:submit_chapter_comment', kwargs={'pk': pk, 'chapter_number': chapter_number})
+    comments = _attach_comment_meta(
+        comments_qs, request,
+        'fiction:toggle_chapter_comment_like', 'fiction:toggle_chapter_comment_like',
+        url_kwargs={}, post_url=post_url
+    )
 
     is_favorited = False
     is_following_author = False
-    liked_comment_ids = []
     if request.user.is_authenticated:
         is_favorited = FavoriteStories.objects.filter(user=request.user, story=story).exists()
         is_following_author = Follow.objects.filter(follower=request.user, following=story.author).exists()
-        liked_comment_ids = list(
-            ChapterCommentLikes.objects.filter(user=request.user, comment__chapter=chapter).values_list('comment_id', flat=True)
-        )
 
     return render(request, 'fiction/read_chapter.html', {
         'story': story,
@@ -219,8 +225,10 @@ def read_chapter(request, pk, chapter_number):
         'is_favorited': is_favorited,
         'is_following_author': is_following_author,
         'comments': comments,
-        'comment_form': ChapterCommentForm(),
-        'liked_comment_ids': liked_comment_ids,
+        'total_count': chapter.comments.filter(status=StatusComment.APPROVED).count(),
+        'current_sort': 'recent',
+        'post_url': post_url,
+        'refresh_url': reverse('fiction:chapter_comments_partial', kwargs={'pk': pk, 'chapter_number': chapter_number}),
     })
 
 @login_required
@@ -247,8 +255,19 @@ def tag_stories(request, tag):
 def submit_chapter_comment(request, pk, chapter_number):
     story = get_object_or_404(Stories, pk=pk, status=StatusStory.APPROVED)
     chapter = get_object_or_404(Chapters, story=story, chapter_number=chapter_number)
-    form = ChapterCommentForm(request.POST)
 
+    is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+
+    edit_id = request.POST.get('edit_id')
+    if edit_id:
+        comment = get_object_or_404(ChapterComments, pk=edit_id, user=request.user)
+        comment.content = request.POST.get('content', comment.content)
+        comment.save()
+        if is_ajax:
+            return JsonResponse({'ok': True})
+        return redirect('fiction:read_chapter', pk=pk, chapter_number=chapter_number)
+
+    form = ChapterCommentForm(request.POST)
     if form.is_valid():
         comment = form.save(commit=False)
         comment.user = request.user
@@ -264,11 +283,12 @@ def submit_chapter_comment(request, pk, chapter_number):
 
         comment.save()
 
-        if comment.status == StatusComment.APPROVED:
-            messages.success(request, 'Komentar terkirim.')
-        else:
-            messages.success(request, 'Komentar terkirim, menunggu approval admin.')
+        if is_ajax:
+            return JsonResponse({'ok': True})
+        messages.success(request, 'Komentar terkirim.')
     else:
+        if is_ajax:
+            return JsonResponse({'error': 'Komentar tidak boleh kosong.'})
         messages.error(request, 'Komentar tidak boleh kosong.')
 
     return redirect('fiction:read_chapter', pk=pk, chapter_number=chapter_number)
@@ -283,4 +303,37 @@ def toggle_chapter_comment_like(request, comment_id):
     if not created:
         like.delete()
 
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({'ok': True})
     return redirect('fiction:read_chapter', pk=comment.chapter.story.pk, chapter_number=comment.chapter.chapter_number)
+
+def chapter_comments_partial(request, pk, chapter_number):
+    story = get_object_or_404(Stories, pk=pk, status=StatusStory.APPROVED)
+    chapter = get_object_or_404(Chapters, story=story, chapter_number=chapter_number)
+
+    sort = request.GET.get('sort', 'recent')
+    comments_qs = chapter.comments.filter(status=StatusComment.APPROVED, parent__isnull=True).select_related('user')
+
+    if sort == 'oldest':
+        comments_qs = comments_qs.order_by('created_at')
+    elif sort == 'liked':
+        comments_qs = sorted(comments_qs, key=lambda c: c.likes.count(), reverse=True)
+    else:
+        comments_qs = comments_qs.order_by('-created_at')
+
+    from interactions.views import _attach_comment_meta
+
+    post_url = reverse('fiction:submit_chapter_comment', kwargs={'pk': pk, 'chapter_number': chapter_number})
+    comments = _attach_comment_meta(
+        comments_qs, request,
+        'fiction:toggle_chapter_comment_like', 'fiction:toggle_chapter_comment_like',
+        url_kwargs={}, post_url=post_url
+    )
+
+    return render(request, 'partials/comment_section.html', {
+        'comments': comments,
+        'total_count': chapter.comments.filter(status=StatusComment.APPROVED).count(),
+        'current_sort': sort,
+        'post_url': post_url,
+        'refresh_url': reverse('fiction:chapter_comments_partial', kwargs={'pk': pk, 'chapter_number': chapter_number}),
+    })

@@ -1,3 +1,4 @@
+from django.http import JsonResponse
 from django.shortcuts import redirect, get_object_or_404, render
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -97,7 +98,8 @@ def submit_comment(request, pk):
         comment = get_object_or_404(Comments, pk=edit_id, user=request.user)
         comment.content = request.POST.get('content', comment.content)
         comment.save()
-        messages.success(request, 'Komentar diperbarui.')
+        if _is_ajax(request):
+            return JsonResponse({'ok': True})
         return redirect('articles:article_detail', pk=pk)
 
     form = CommentForm(request.POST)
@@ -105,20 +107,20 @@ def submit_comment(request, pk):
         comment = form.save(commit=False)
         comment.user = request.user
         comment.article = article
-
         parent_id = request.POST.get('parent_id')
         if parent_id:
             comment.parent = get_object_or_404(Comments, pk=parent_id, article=article)
-
         if request.user.role == 'admin' or request.user.is_superuser:
             comment.status = StatusComment.APPROVED
-
         comment.save()
-        messages.success(request, 'Komentar terkirim.' if comment.status == StatusComment.APPROVED else 'Komentar terkirim, menunggu approval admin.')
+        if _is_ajax(request):
+            return JsonResponse({'ok': True})
+        return redirect('articles:article_detail', pk=pk)
     else:
+        if _is_ajax(request):
+            return JsonResponse({'error': 'Komentar tidak boleh kosong.'})
         messages.error(request, 'Komentar tidak boleh kosong.')
-
-    return redirect('articles:article_detail', pk=pk)
+        return redirect('articles:article_detail', pk=pk)
 
 
 @login_required
@@ -127,7 +129,8 @@ def delete_comment(request, comment_id):
     comment = get_object_or_404(Comments, pk=comment_id, user=request.user)
     article_pk = comment.article.pk
     comment.delete()
-    messages.success(request, 'Komentar dihapus.')
+    if _is_ajax(request):
+        return JsonResponse({'ok': True})
     return redirect('articles:article_detail', pk=article_pk)
 
 
@@ -139,6 +142,8 @@ def toggle_comment_like(request, comment_id):
     like, created = CommentLikes.objects.get_or_create(user=request.user, comment=comment)
     if not created:
         like.delete()
+    if _is_ajax(request):
+        return JsonResponse({'ok': True})
     return redirect('articles:article_detail', pk=comment.article.pk)
 
 
@@ -150,6 +155,8 @@ def toggle_comment_dislike(request, comment_id):
     dislike, created = CommentDislikes.objects.get_or_create(user=request.user, comment=comment)
     if not created:
         dislike.delete()
+    if _is_ajax(request):
+        return JsonResponse({'ok': True})
     return redirect('articles:article_detail', pk=comment.article.pk)
 
 @admin_required
@@ -177,7 +184,7 @@ def admin_reject_comment(request, pk):
     messages.success(request, 'Komentar ditolak.')
     return redirect('interactions:admin_pending_comments')
 
-def _attach_comment_meta(comments, request, like_url_name, dislike_url_name, edit_url_name, delete_url_name, url_kwargs):
+def _attach_comment_meta(comments, request, like_url_name, dislike_url_name, url_kwargs, post_url=None):
     result = []
     for c in comments:
         c.is_owner = request.user.is_authenticated and c.user_id == request.user.id
@@ -185,14 +192,13 @@ def _attach_comment_meta(comments, request, like_url_name, dislike_url_name, edi
         c.is_disliked = request.user.is_authenticated and c.dislikes.filter(user=request.user).exists()
         c.like_url = reverse(like_url_name, kwargs={**url_kwargs, 'comment_id': c.pk})
         c.dislike_url = reverse(dislike_url_name, kwargs={**url_kwargs, 'comment_id': c.pk})
-        c.edit_url = reverse(edit_url_name, kwargs={'comment_id': c.pk}) if c.is_owner else None
-        c.delete_url = reverse(delete_url_name, kwargs={'comment_id': c.pk}) if c.is_owner else None
+        c.edit_url = post_url
+        c.delete_url = reverse('interactions:delete_comment', kwargs={'comment_id': c.pk}) if c.is_owner else None
 
         replies = list(c.get_all_replies())
         for r in replies:
             r.is_owner = request.user.is_authenticated and r.user_id == request.user.id
             r.is_liked = request.user.is_authenticated and r.likes.filter(user=request.user).exists()
-            r.parent_id = r.parent_id
             r.parent_username = r.parent.user.username
             r.like_url = reverse(like_url_name, kwargs={**url_kwargs, 'comment_id': r.pk})
         c.reply_list = replies
@@ -206,3 +212,6 @@ def _sort_comments(queryset, sort):
     if sort == 'liked':
         return sorted(queryset, key=lambda c: c.likes.count(), reverse=True)
     return queryset.order_by('-created_at')
+
+def _is_ajax(request):
+    return request.headers.get('X-Requested-With') == 'XMLHttpRequest'

@@ -114,11 +114,11 @@ def article_detail(request, pk):
     sort = request.GET.get('sort', 'recent')
     comments_qs = article.comments.filter(status=StatusComment.APPROVED, parent__isnull=True).select_related('user')
     comments_qs = _sort_comments(comments_qs, sort)
+    post_url = reverse('interactions:submit_comment', kwargs={'pk': pk})
     comments = _attach_comment_meta(
         comments_qs, request,
         'interactions:toggle_comment_like', 'interactions:toggle_comment_dislike',
-        'interactions:edit_comment_placeholder', 'interactions:delete_comment',
-        url_kwargs={}
+        url_kwargs={}, post_url=post_url
     )
 
     avg_rating = article.ratings.aggregate(avg=Avg('rating_value'))['avg']
@@ -145,6 +145,7 @@ def article_detail(request, pk):
         'total_count': article.comments.filter(status=StatusComment.APPROVED).count(),
         'current_sort': sort,
         'post_url': reverse('interactions:submit_comment', kwargs={'pk': pk}),
+        'refresh_url': reverse('articles:article_comments_partial', kwargs={'pk': pk}),
     })
 
 
@@ -247,3 +248,23 @@ def admin_reject_article(request, pk):
     article.save()
     messages.success(request, f'Artikel "{article.title}" ditolak.')
     return redirect('articles:admin_pending_articles')
+
+def article_comments_partial(request, pk):
+    article = get_object_or_404(Articles, pk=pk, status=StatusArticle.APPROVED)
+    sort = request.GET.get('sort', 'recent')
+    comments_qs = article.comments.filter(status=StatusComment.APPROVED, parent__isnull=True).select_related('user')
+    comments_qs = _sort_comments(comments_qs, sort)
+    post_url = reverse('interactions:submit_comment', kwargs={'pk': pk})
+    comments = _attach_comment_meta(
+        comments_qs, request,
+        'interactions:toggle_comment_like', 'interactions:toggle_comment_dislike',
+        url_kwargs={}, post_url=post_url
+    )
+
+    return render(request, 'partials/comment_section.html', {
+        'comments': comments,
+        'total_count': article.comments.filter(status=StatusComment.APPROVED).count(),
+        'current_sort': sort,
+        'post_url': reverse('interactions:submit_comment', kwargs={'pk': pk}),
+        'refresh_url': reverse('articles:article_comments_partial', kwargs={'pk': pk}),
+    })

@@ -1,4 +1,6 @@
-<section class="comments-section">
+<section class="comments-section" id="commentsRoot"
+         data-refresh-url="{{ refresh_url }}"
+         data-current-sort="{{ current_sort }}">
     <div class="comments-header">
         <h3>Comments <span class="comment-count">{{ total_count }}</span></h3>
         <form method="get" class="sort-form">
@@ -10,7 +12,7 @@
         </form>
     </div>
 
-    {% if user.is_authenticated %}
+        {% if user.is_authenticated %}
     <form action="{{ post_url }}" method="post" class="comment-form">
         {% csrf_token %}
         {% if user.profile_picture %}
@@ -146,32 +148,3 @@
         {% endfor %}
     </div>
 </section>
-
-<script>
-function toggleReplyForm(id) {
-    const f = document.getElementById('reply-form-' + id);
-    f.style.display = f.style.display === 'none' ? 'flex' : 'none';
-}
-function toggleReplies(id) {
-    const list = document.getElementById('replies-' + id);
-    const label = document.getElementById('toggle-label-' + id);
-    const hidden = list.style.display === 'none';
-    if (hidden && !label.dataset.original) label.dataset.original = label.textContent;
-    list.style.display = hidden ? 'block' : 'none';
-    label.textContent = hidden ? 'Sembunyikan balasan' : label.dataset.original;
-}
-function toggleOptions(id) {
-    document.querySelectorAll('.comment-options-menu.is-open').forEach(m => { if (m.id !== 'options-' + id) m.classList.remove('is-open'); });
-    document.getElementById('options-' + id).classList.toggle('is-open');
-}
-function startEdit(id) {
-    document.getElementById('text-' + id).style.display = 'none';
-    document.getElementById('edit-form-' + id).style.display = 'block';
-    document.getElementById('options-' + id).classList.remove('is-open');
-}
-document.addEventListener('click', (e) => {
-    if (!e.target.closest('.comment-options-wrap')) {
-        document.querySelectorAll('.comment-options-menu.is-open').forEach(m => m.classList.remove('is-open'));
-    }
-});
-</script>

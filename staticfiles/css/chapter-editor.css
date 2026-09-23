@@ -1,0 +1,128 @@
+.chapter-editor-card {
+    max-width: 800px;
+}
+
+#quillToolbar {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    border: 1.5px solid var(--divider) !important;
+    border-bottom: none !important;
+    border-radius: 10px 10px 0 0;
+    background: var(--paper);
+    padding: 8px 10px !important;
+}
+
+#quillToolbar .ql-formats {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding-right: 8px;
+    margin-right: 6px !important;
+    border-right: 1px solid var(--divider);
+}
+#quillToolbar .ql-formats:last-child {
+    border-right: none;
+    padding-right: 0;
+    margin-right: 0 !important;
+}
+
+#quillToolbar button {
+    width: 38px;
+    height: 38px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .12s ease;
+}
+
+#quillToolbar svg {
+    width: 20px;
+    height: 20px;
+}
+
+#quillToolbar button:hover {
+    background: #E8D9C8;
+}
+
+#quillToolbar button.ql-active {
+    background: var(--brown);
+}
+#quillToolbar button.ql-active .ql-stroke {
+    stroke: #fff !important;
+}
+#quillToolbar button.ql-active .ql-fill {
+    fill: #fff !important;
+}
+
+#quillToolbar .ql-stroke { stroke: var(--brown) !important; }
+#quillToolbar .ql-fill { fill: var(--brown) !important; }
+
+#quillToolbar .ql-picker {
+    border-radius: 6px;
+    transition: background .12s ease;
+}
+#quillToolbar .ql-picker:hover {
+    background: #E8D9C8;
+}
+#quillToolbar .ql-picker-label {
+    border: none !important;
+    color: var(--brown) !important;
+    font-weight: 600;
+    padding: 6px 10px !important;
+    font-size: 0.95rem;
+    height: 38px;
+    display: flex;
+    align-items: center;
+}
+#quillToolbar .ql-picker-options {
+    border: 1px solid var(--divider) !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    padding: 4px !important;
+}
+#quillToolbar .ql-picker-item {
+    border-radius: 4px;
+    padding: 6px 10px !important;
+}
+#quillToolbar .ql-picker-item:hover {
+    background: var(--paper);
+    color: var(--brown) !important;
+}
+
+#quillEditor {
+    min-height: 320px;
+    background: #fff;
+    border: 1.5px solid var(--divider) !important;
+    border-radius: 0 0 10px 10px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    transition: border-color .15s ease;
+}
+
+#quillEditor:focus-within {
+    border-color: var(--brown) !important;
+}
+
+#quillEditor .ql-editor {
+    min-height: 320px;
+    line-height: 1.7;
+}
+
+#quillEditor .ql-editor.ql-blank::before {
+    color: #a09c92;
+    font-style: normal;
+}
+
+.hidden-raw-content { display: none !important; }
+
+#id_content_raw {
+    display: none !important;
+}
+
+#quillToolbar .ql-picker.ql-align .ql-picker-label svg,
+#quillToolbar .ql-picker-item svg {
+    width: 20px;
+    height: 20px;
+}

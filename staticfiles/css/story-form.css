@@ -1,0 +1,116 @@
+.story-form-layout {
+    max-width: 900px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 24px;
+    align-items: start;
+}
+
+.story-cover-col {
+    position: sticky;
+    top: 20px;
+}
+
+.story-cover-dropzone {
+    width: 100%;
+    aspect-ratio: 3/4;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+}
+
+.story-cover-dropzone .preview {
+    width: 100%;
+    height: 100%;
+    max-height: none;
+    object-fit: cover;
+    border-radius: 12px;
+    margin: 0;
+}
+
+.story-detail-col .card {
+    margin-bottom: 20px;
+}
+
+@media (max-width: 700px) {
+    .story-form-layout {
+        grid-template-columns: 1fr;
+    }
+    .story-cover-col {
+        position: static;
+        max-width: 240px;
+        margin: 0 auto;
+    }
+}
+
+.tag-input-wrap {
+    position: relative;
+    border: 1.5px solid var(--divider);
+    border-radius: 8px;
+    background: var(--paper);
+    padding: 8px 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+}
+.tag-input-wrap:focus-within { border-color: var(--brown); }
+
+.tag-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.tag-chip {
+    background: var(--brown);
+    color: #fff;
+    font-size: 0.8rem;
+    padding: 4px 8px 4px 10px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.tag-chip button {
+    background: none;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    font-size: 0.95rem;
+    line-height: 1;
+    padding: 0;
+    opacity: 0.8;
+}
+.tag-chip button:hover { opacity: 1; }
+
+#tagTextInput {
+    border: none !important;
+    background: transparent !important;
+    flex: 1;
+    min-width: 120px;
+    padding: 4px !important;
+    outline: none;
+}
+
+.tag-suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #fff;
+    border: 1px solid var(--divider);
+    border-radius: 8px;
+    margin-top: 4px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    z-index: 10;
+    max-height: 160px;
+    overflow-y: auto;
+}
+.tag-suggestions:empty { display: none; }
+
+.tag-suggestion-item {
+    padding: 8px 14px;
+    font-size: 0.88rem;
+    cursor: pointer;
+}
+.tag-suggestion-item:hover { background: var(--paper); }

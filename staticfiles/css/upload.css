@@ -1,0 +1,138 @@
+.page { max-width: 720px; margin: 40px auto; }
+.page-header { margin-bottom: 24px; }
+.page-header h1 { font-size: 1.6rem; font-weight: 700; color: var(--brown); margin-bottom: 4px; }
+.page-header p { font-size: 0.9rem; color: #8a8880; }
+
+.card {
+    background: #fff;
+    border: 1px solid var(--divider);
+    border-radius: 14px;
+    padding: 32px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 24px rgba(107, 66, 38, 0.06);
+}
+.card h3 {
+    font-size: 0.95rem; font-weight: 700; color: var(--brown);
+    margin-bottom: 16px; display: flex; align-items: center; gap: 8px;
+}
+.card h3 .num {
+    width: 24px; height: 24px; border-radius: 50%;
+    background: var(--brown); color: #fff; font-size: 0.75rem;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+
+.dropzone {
+    display: block;
+    border: 2px dashed var(--divider);
+    border-radius: 10px;
+    padding: 32px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color .15s ease, background .15s ease;
+    position: relative;
+    overflow: hidden;
+    background: var(--paper);
+}
+.dropzone:hover { border-color: var(--brown); background: #fbf3ea; }
+.dropzone .icon { font-size: 1.8rem; margin-bottom: 8px; }
+.dropzone .main-text { font-size: 0.9rem; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+.dropzone .sub-text { font-size: 0.78rem; color: #a09c92; }
+.dropzone .preview { max-width: 100%; max-height: 220px; border-radius: 8px; display: none; margin: 0 auto; }
+.dropzone input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+
+.category-pills { display: flex; flex-wrap: wrap; gap: 8px; }
+.category-pills input { display: none; }
+.category-pills label {
+    padding: 8px 16px; border: 1.5px solid var(--divider); border-radius: 20px;
+    font-size: 0.85rem; font-weight: 500; color: var(--text); cursor: pointer;
+    transition: all .15s ease;
+}
+.category-pills input:checked + label { background: var(--brown); border-color: var(--brown); color: #fff; }
+
+.field-error-text { color: #9C3B24; font-size: 0.78rem; margin-top: 4px; }
+.submit-row { display: flex; justify-content: flex-end; margin-top: 8px; }
+
+.field { margin-bottom: 20px; }
+.field:last-child { margin-bottom: 0; }
+.field label { display: block; font-size: 0.82rem; font-weight: 600; color: var(--brown); margin-bottom: 6px; }
+
+.field input[type=text], .field textarea {
+    width: 100%;
+    border: 1.5px solid var(--divider);
+    border-radius: 8px;
+    background: var(--paper);
+    padding: 11px 14px;
+    font-size: 0.95rem;
+    color: var(--text);
+    outline: none;
+    font-family: inherit;
+    transition: border-color .15s ease;
+}
+.field input:focus, .field textarea:focus { border-color: var(--brown); }
+.field textarea { resize: vertical; min-height: 220px; line-height: 1.6; }
+
+.btn-danger {
+    padding: 12px 22px;
+    border: 1.5px solid #C0392B;
+    border-radius: 8px;
+    background: #fff;
+    color: #C0392B;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    margin-right: auto;
+}
+.btn-danger:hover { background: #FBEAE5; }
+
+.submit-row { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
+
+.register-dropzone {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    padding: 0;
+    margin: 0 auto 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: #E8E5DF;
+    border: none;
+}
+
+.register-dropzone:hover {
+    background: #DDD9D0;
+}
+
+.register-dropzone .preview {
+    width: 96px;
+    height: 96px;
+    max-height: none;
+    border-radius: 50%;
+    object-fit: cover;
+    margin: 0;
+}
+
+.register-dropzone #dz-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.register-dropzone #dz-placeholder .icon {
+    font-size: 1.8rem;
+    margin: 0;
+    filter: grayscale(1) brightness(1.4);
+    line-height: 1;
+}
+.register-dropzone .icon { font-size: 1.4rem; margin-bottom: 2px; }
+.register-dropzone .main-text { font-size: 0.65rem; line-height: 1.2; }
+.register-dropzone .sub-text { display: none; }
+
+.icon-camera {
+    width: 30px;
+    height: 30px;
+    display: block;
+}

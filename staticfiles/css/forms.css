@@ -1,0 +1,73 @@
+.auth-form p { margin-bottom: 18px; }
+.auth-form label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--brown);
+    margin-bottom: 6px;
+}
+.auth-form input, .auth-form textarea, .auth-form select {
+    width: 100%;
+    border: 1.5px solid var(--divider);
+    border-radius: 8px;
+    background: var(--paper);
+    padding: 11px 14px;
+    font-size: 0.95rem;
+    color: var(--text);
+    outline: none;
+    font-family: inherit;
+    transition: border-color .15s ease;
+}
+.auth-form input:focus, .auth-form textarea:focus, .auth-form select:focus { border-color: var(--brown); }
+.auth-form textarea { resize: vertical; }
+.auth-form button {
+    width: 100%;
+    padding: 13px;
+    margin-top: 8px;
+    background: var(--brown);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: background .15s ease;
+}
+.auth-form button:hover { background: var(--brown-dark); }
+
+.auth-form-footer { text-align: center; margin-top: 22px; font-size: 0.88rem; }
+.auth-form-footer a { color: var(--brown); font-weight: 600; text-decoration: none; }
+.auth-form-footer a:hover { text-decoration: underline; }
+
+.auth-form ul.errorlist { list-style: none; margin: 6px 0 4px; padding: 0; }
+.auth-form ul.errorlist li {
+    background: #FBEAE5; border: 1px solid #E8B4A6; color: #9C3B24;
+    font-size: 0.82rem; padding: 8px 12px; border-radius: 6px; margin-bottom: 6px;
+}
+
+.auth-form small,
+.auth-form .helptext,
+.auth-form ul.helptext,
+.auth-form span.helptext {
+    display: block !important;
+    list-style: none;
+    margin: 8px 0 18px !important;
+    padding: 12px 14px;
+    background: var(--paper);
+    border: 1px solid var(--divider);
+    border-radius: 8px;
+    font-size: 0.8rem;
+    color: #6b6862;
+    line-height: 1.5;
+}
+
+.upload-card {
+    max-width: 640px;
+    margin: 40px auto;
+    background: #ffffff;
+    border: 1px solid var(--divider);
+    border-radius: 14px;
+    padding: 36px 40px;
+    box-shadow: 0 4px 24px rgba(107, 66, 38, 0.08);
+}
+.upload-card h2 { color: var(--brown); font-size: 1.4rem; margin-bottom: 4px; }
