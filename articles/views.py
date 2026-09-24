@@ -70,7 +70,12 @@ def category_delete(request, pk):
 
 
 def article_list(request):
-    articles = Articles.objects.filter(status=StatusArticle.APPROVED).select_related('category', 'contributor')
+    articles = Articles.objects.filter(
+        status=StatusArticle.APPROVED
+        ).select_related(
+            'category', 
+            'contributor'
+        ).order_by('created_at')[:4]
 
     query = request.GET.get('q', '').strip()
     if query:
