@@ -8,13 +8,17 @@ from .models import StatusKontributor, ContributorApplication, Users
 from .decorators import admin_required
 from django.db.models import Count
 from django.utils import timezone
+from datetime import timedelta
 from articles.models import Articles, StatusArticle, Categories
 from interactions.models import Comments, StatusComment, Ratings
 from articles.models import Articles, StatusArticle, Categories
-from fiction.models import Stories, StatusStory
+from fiction.models import Stories, StatusStory as FictionStatusStory
+from reading_journal.models import ReadingActivity
 from datetime import timedelta
 from django.views.decorators.http import require_POST
 from .models import Follow
+import json
+from django.db.models.functions import TruncDate
 
 @login_required
 @require_POST
@@ -111,33 +115,67 @@ def profile_view(request):
 
 @admin_required
 def dashboard_view(request):
-    seven_days_ago = timezone.now() - timedelta(days=7)
+    now = timezone.now()
+    thirty_days_ago = now - timedelta(days=30)
+    seven_days_ago = now - timedelta(days=7)
 
     stats = {
         'total_users': Users.objects.filter(role='pembaca').count(),
+        'new_users_week': Users.objects.filter(date_joined__gte=seven_days_ago).count(),
         'total_kontributor': Users.objects.filter(status_kontributor=StatusKontributor.APPROVED).count(),
         'total_articles': Articles.objects.count(),
+        'new_articles_week': Articles.objects.filter(created_at__gte=seven_days_ago).count(),
+        'total_stories': Stories.objects.count(),
         'pending_articles': Articles.objects.filter(status=StatusArticle.PENDING).count(),
         'pending_comments': Comments.objects.filter(status=StatusComment.PENDING).count(),
         'pending_contributors': ContributorApplication.objects.filter(status=StatusKontributor.PENDING).count(),
-        'pending_stories': Stories.objects.filter(status=StatusStory.PENDING).count(),
+        'pending_stories': Stories.objects.filter(status=FictionStatusStory.PENDING).count(),
         'total_categories': Categories.objects.count(),
-        'new_users_week': Users.objects.filter(date_joined__gte=seven_days_ago).count(),
     }
 
-    popular_articles = Articles.objects.filter(status=StatusArticle.APPROVED).annotate(
-        rating_count=Count('ratings'),
-        comment_count=Count('comments'),
-    ).order_by('-rating_count')[:5]
+    # --- Data grafik: user baru & interaksi per hari (30 hari terakhir) ---
+    users_per_day = (
+        Users.objects.filter(date_joined__gte=thirty_days_ago)
+        .annotate(day=TruncDate('date_joined'))
+        .values('day').annotate(count=Count('id')).order_by('day')
+    )
+    activity_per_day = (
+        ReadingActivity.objects.filter(created_at__gte=thirty_days_ago)
+        .annotate(day=TruncDate('created_at'))
+        .values('day').annotate(count=Count('id')).order_by('day')
+    )
 
-    articles_per_category = Categories.objects.annotate(
-        article_count=Count('articles')
-    ).order_by('-article_count')
+    date_labels = [(thirty_days_ago + timedelta(days=i)).date() for i in range(31)]
+    users_map = {row['day']: row['count'] for row in users_per_day}
+    activity_map = {row['day']: row['count'] for row in activity_per_day}
+
+    chart_labels = [d.strftime('%d %b') for d in date_labels]
+    chart_new_users = [users_map.get(d, 0) for d in date_labels]
+    chart_interactions = [activity_map.get(d, 0) for d in date_labels]
+
+    # --- Distribusi status konten (artikel + fiksi digabung) ---
+    status_counts = {'approved': 0, 'pending': 0, 'rejected': 0}
+    for status, count in Articles.objects.values_list('status').annotate(c=Count('id')).values_list('status', 'c'):
+        status_counts[status] = status_counts.get(status, 0) + count
+    for status, count in Stories.objects.values_list('status').annotate(c=Count('id')).values_list('status', 'c'):
+        status_counts[status] = status_counts.get(status, 0) + count
+
+    # --- Artikel per kategori ---
+    articles_per_category = Categories.objects.annotate(article_count=Count('articles')).order_by('-article_count')
+
+    popular_articles = Articles.objects.filter(status=StatusArticle.APPROVED).order_by('-views_count')[:5]
 
     return render(request, 'accounts/dashboard.html', {
         'stats': stats,
         'popular_articles': popular_articles,
         'articles_per_category': articles_per_category,
+        'chart_labels': json.dumps(chart_labels),
+        'chart_new_users': json.dumps(chart_new_users),
+        'chart_interactions': json.dumps(chart_interactions),
+        'status_labels': json.dumps(['Approved', 'Pending', 'Rejected']),
+        'status_data': json.dumps([status_counts['approved'], status_counts['pending'], status_counts['rejected']]),
+        'category_labels': json.dumps([c.name for c in articles_per_category]),
+        'category_data': json.dumps([c.article_count for c in articles_per_category]),
     })
 
 @admin_required
