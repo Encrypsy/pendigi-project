@@ -1,101 +1,98 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block body %}
-<div class="admin-layout">
+  <div class="admin-layout">
     <aside class="admin-sidebar">
-        <div class="admin-sidebar-header">
-            <img src="{% static 'images/pendigi-logo-tulisan.svg' %}" alt="Pena Digital" class="admin-logo">
+      <div class="admin-sidebar-header">
+        <img src="{% static 'images/pendigi-logo-tulisan.svg' %}" alt="Pena Digital" class="admin-logo" />
+      </div>
+
+      <nav class="admin-nav">
+        <span class="admin-nav-group-label">Main</span>
+
+        <a href="{% url 'dashboard' %}" class="admin-nav-link {% if active_menu == 'dashboard' %}is-active{% endif %}"><span class="admin-nav-icon">▦</span> Dashboard</a>
+
+        <div class="admin-nav-dropdown {% if active_menu == 'master' %}is-open{% endif %}">
+          <button type="button" class="admin-nav-link admin-nav-dropdown-toggle">
+            <span class="admin-nav-icon">🗂</span> Kelola Data
+            <span class="admin-nav-caret">▾</span>
+          </button>
+          <div class="admin-nav-submenu">
+            <a href="{% url 'articles:category_list' %}">Kategori</a>
+            <a href="#">Artikel</a>
+            <a href="#">User</a>
+            <a href="{% url 'articles:banner_list' %}">Banner</a>
+          </div>
         </div>
 
-        <nav class="admin-nav">
-            <span class="admin-nav-group-label">Main</span>
+        <div class="admin-nav-dropdown {% if active_menu == 'approval' %}is-open{% endif %}">
+          <button type="button" class="admin-nav-link admin-nav-dropdown-toggle">
+            <span class="admin-nav-icon">✔</span> Approval Center
+            <span class="admin-nav-caret">▾</span>
+          </button>
+          <div class="admin-nav-submenu">
+            <a href="{% url 'articles:admin_pending_articles' %}">Artikel Pending</a>
+            <a href="{% url 'interactions:admin_pending_comments' %}">Komentar Pending</a>
+            <a href="{% url 'fiction:admin_pending_stories' %}">Fiksi Pending</a>
+            <a href="{% url 'admin_pending_contributors' %}">Kontributor Pending</a>
+          </div>
+        </div>
 
-            <a href="{% url 'dashboard' %}" class="admin-nav-link {% if active_menu == 'dashboard' %}is-active{% endif %}">
-                <span class="admin-nav-icon">▦</span> Dashboard
-            </a>
-
-            <div class="admin-nav-dropdown {% if active_menu == 'master' %}is-open{% endif %}">
-                <button type="button" class="admin-nav-link admin-nav-dropdown-toggle">
-                    <span class="admin-nav-icon">🗂</span> Master Data
-                    <span class="admin-nav-caret">▾</span>
-                </button>
-                <div class="admin-nav-submenu">
-                    <a href="{% url 'articles:category_list' %}">Kategori</a>
-                    <a href="#">Artikel</a>
-                    <a href="#">User</a>
-                    <a href="#">Banner</a>
-                </div>
-            </div>
-
-            <div class="admin-nav-dropdown {% if active_menu == 'approval' %}is-open{% endif %}">
-                <button type="button" class="admin-nav-link admin-nav-dropdown-toggle">
-                    <span class="admin-nav-icon">✔</span> Approval Center
-                    <span class="admin-nav-caret">▾</span>
-                </button>
-                <div class="admin-nav-submenu">
-                    <a href="{% url 'articles:admin_pending_articles' %}">Artikel Pending</a>
-                    <a href="{% url 'interactions:admin_pending_comments' %}">Komentar Pending</a>
-                    <a href="{% url 'fiction:admin_pending_stories' %}">Fiksi Pending</a>
-                    <a href="{% url 'admin_pending_contributors' %}">Kontributor Pending</a>
-                </div>
-            </div>
-
-            <span class="admin-nav-group-label">Settings</span>
-            <a href="#" class="admin-nav-link">
-                <span class="admin-nav-icon">⚙</span> Pengaturan
-            </a>
-            <a href="{% url 'articles:article_list' %}" class="admin-nav-link">
-                <span class="admin-nav-icon">↩</span> Kembali ke Situs
-            </a>
-        </nav>
+        <span class="admin-nav-group-label">Settings</span>
+        <a href="#" class="admin-nav-link"><span class="admin-nav-icon">⚙</span> Pengaturan</a>
+        <a href="{% url 'articles:article_list' %}" class="admin-nav-link"><span class="admin-nav-icon">↩</span> Kembali ke Situs</a>
+      </nav>
     </aside>
 
     <div class="admin-main">
-        <header class="admin-topbar">
-            <div class="admin-breadcrumb">Home / {{ breadcrumb|default:"Dashboard" }}</div>
+      <header class="admin-topbar">
+        <div class="admin-breadcrumb">Home / {{ breadcrumb|default:'Dashboard' }}</div>
 
-            <div class="admin-topbar-right">
-                <div class="admin-search">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
-                        <circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                    </svg>
-                    <input type="text" placeholder="Search...">
-                </div>
+        <div class="admin-topbar-right">
+          <div class="admin-search">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+              <circle cx="11" cy="11" r="7" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            <input type="text" placeholder="Search..." />
+          </div>
 
-                <button class="admin-notif-btn" title="Notifikasi">
-                    🔔
-                    {% if stats.pending_articles or stats.pending_comments or stats.pending_stories or stats.pending_contributors %}
-                        <span class="admin-notif-badge"></span>
-                    {% endif %}
-                </button>
-
-                <div class="admin-profile">
-                    {% if user.profile_picture %}
-                        <img src="{{ user.profile_picture.url }}" class="admin-profile-avatar">
-                    {% else %}
-                        <div class="admin-profile-avatar admin-avatar-placeholder">{{ user.username|first|upper }}</div>
-                    {% endif %}
-                    <span>{{ user.username }}</span>
-                </div>
-            </div>
-        </header>
-
-        <main class="admin-content">
-            {% if messages %}
-                <ul class="messages">
-                    {% for message in messages %}<li class="{{ message.tags }}">{{ message }}</li>{% endfor %}
-                </ul>
+          <button class="admin-notif-btn" title="Notifikasi">
+            🔔{% if stats.pending_articles or stats.pending_comments or stats.pending_stories or stats.pending_contributors %}
+              <span class="admin-notif-badge"></span>
             {% endif %}
-            {% block admin_content %}{% endblock %}
-        </main>
-    </div>
-</div>
+          </button>
 
-<script>
-document.querySelectorAll('.admin-nav-dropdown-toggle').forEach(btn => {
-    btn.addEventListener('click', () => {
-        btn.closest('.admin-nav-dropdown').classList.toggle('is-open');
-    });
-});
-</script>
+          <div class="admin-profile">
+            {% if user.profile_picture %}
+              <img src="{{ user.profile_picture.url }}" class="admin-profile-avatar" />
+            {% else %}
+              <div class="admin-profile-avatar admin-avatar-placeholder">{{ user.username|first|upper }}</div>
+            {% endif %}
+            <span>{{ user.username }}</span>
+          </div>
+        </div>
+      </header>
+
+      <main class="admin-content">
+        {% if messages %}
+          <ul class="messages">
+            {% for message in messages %}
+              <li class="{{ message.tags }}">{{ message }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+        {% block admin_content %}
+        {% endblock %}
+      </main>
+    </div>
+  </div>
+
+  <script>
+    document.querySelectorAll('.admin-nav-dropdown-toggle').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        btn.closest('.admin-nav-dropdown').classList.toggle('is-open')
+      })
+    })
+  </script>
 {% endblock %}

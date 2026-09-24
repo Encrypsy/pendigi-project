@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils import timezone
-from .models import Categories, Articles, StatusArticle
+from .models import Categories, Articles, StatusArticle, Banner
 
 
 @admin.action(description="Approve artikel terpilih")
@@ -20,4 +20,7 @@ class ArticlesAdmin(admin.ModelAdmin):
     actions = [approve_articles, reject_articles]
 
 
-admin.site.register(Categories)
+admin.site.register([
+    Categories,
+    Banner
+])

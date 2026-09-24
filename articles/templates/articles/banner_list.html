@@ -1,0 +1,48 @@
+{% extends 'admin_base.html' %}
+{% load static %}
+{% block title %}Kelola Banner{% endblock %}
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/admin.css' %}">
+    <link rel="stylesheet" href="{% static 'css/table.css' %}">
+{% endblock %}
+
+{% block admin_content %}
+<div class="page-header-row">
+    <h1 class="admin-page-title">Kelola Banner</h1>
+    <div style="display:flex; gap:10px;">
+        <a href="{% url 'articles:banner_preview' %}" target="_blank" class="btn-secondary">Preview</a>
+        <a href="{% url 'articles:banner_create' %}" class="btn-primary">+ Tambah Banner</a>
+    </div>
+</div>
+
+<table class="data-table">
+    <thead>
+        <tr><th>Gambar</th><th>Judul</th><th>Urutan</th><th>Status</th><th>Aksi</th></tr>
+    </thead>
+    <tbody>
+        {% for banner in banners %}
+        <tr>
+            <td><img src="{{ banner.image.url }}" class="table-thumb" alt=""></td>
+            <td>{{ banner.title|default:"-" }}</td>
+            <td>{{ banner.order }}</td>
+            <td>
+                <form action="{% url 'articles:banner_toggle_active' banner.pk %}" method="post" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="status-badge {% if banner.is_active %}status-approved{% else %}status-rejected{% endif %}" style="border:none; cursor:pointer;">
+                        {% if banner.is_active %}Aktif{% else %}Nonaktif{% endif %}
+                    </button>
+                </form>
+            </td>
+            <td>
+                <form action="{% url 'articles:banner_delete' banner.pk %}" method="post" onsubmit="return confirm('Hapus banner ini?');" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-reject">Hapus</button>
+                </form>
+            </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5">Belum ada banner.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

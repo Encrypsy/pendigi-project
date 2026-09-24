@@ -38,3 +38,17 @@ class Articles(models.Model):
 
     def __str__(self):
         return self.title
+
+class Banner(models.Model):
+    title = models.CharField(max_length=100, blank=True, help_text="Opsional, judul yang muncul di overlay banner")
+    image = models.ImageField(upload_to='banners/')
+    link_url = models.CharField(max_length=255, blank=True, help_text="Opsional, arahkan ke URL tertentu saat banner diklik")
+    order = models.PositiveIntegerField(default=0, help_text="Angka kecil tampil lebih dulu")
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['order', '-created_at']
+
+    def __str__(self):
+        return self.title or f'Banner #{self.pk}'

@@ -6,8 +6,8 @@ from django.contrib import messages
 from django.db.models import F, Avg, Count
 
 from interactions.views import _attach_comment_meta, _sort_comments
-from .models import Articles, Categories, StatusArticle
-from .forms import ArticleUploadForm
+from .models import Articles, Banner, Categories, StatusArticle
+from .forms import ArticleUploadForm, BannerForm
 from accounts.models import StatusKontributor
 from interactions.models import Comments, Ratings, Bookmarks, StatusComment
 from interactions.forms import CommentForm, RatingForm
@@ -82,9 +82,7 @@ def article_list(request):
 
     categories = Categories.objects.all()
 
-    banner_articles = Articles.objects.filter(
-        status=StatusArticle.APPROVED
-    ).exclude(thumbnail='').select_related('category').order_by('-published_at')[:5]
+    banner_items = Banner.objects.filter(is_active=True)
 
     trending_articles = Articles.objects.filter(
         status=StatusArticle.APPROVED
@@ -268,3 +266,44 @@ def article_comments_partial(request, pk):
         'post_url': reverse('interactions:submit_comment', kwargs={'pk': pk}),
         'refresh_url': reverse('articles:article_comments_partial', kwargs={'pk': pk}),
     })
+
+@admin_required
+def banner_list(request):
+    banners = Banner.objects.all()
+    return render(request, 'articles/banner_list.html', {'banners': banners})
+
+
+@admin_required
+def banner_create(request):
+    if request.method == 'POST':
+        form = BannerForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Banner berhasil ditambahkan.')
+            return redirect('articles:banner_list')
+    else:
+        form = BannerForm()
+    return render(request, 'articles/banner_form.html', {'form': form})
+
+
+@admin_required
+@require_POST
+def banner_delete(request, pk):
+    banner = get_object_or_404(Banner, pk=pk)
+    banner.delete()
+    messages.success(request, 'Banner dihapus.')
+    return redirect('articles:banner_list')
+
+
+@admin_required
+@require_POST
+def banner_toggle_active(request, pk):
+    banner = get_object_or_404(Banner, pk=pk)
+    banner.is_active = not banner.is_active
+    banner.save()
+    return redirect('articles:banner_list')
+
+
+def banner_preview(request):
+    banners = Banner.objects.filter(is_active=True)
+    return render(request, 'articles/banner_preview.html', {'banners': banners})

@@ -19,28 +19,25 @@ Beranda
   </button>
 </form>
 
-{% if banner_articles and not search_query and not active_category %}
+{% if banner_items and not search_query and not active_category %}
 <div class="hero-banner" id="heroBanner">
-  <div class="hero-slides" id="heroSlides">
-    {% for banner in banner_articles %}
-    <a href="{% url 'articles:article_detail' banner.pk %}" class="hero-slide {% if forloop.first %}active{% endif %}">
-      <img src="{{ banner.thumbnail.url }}" alt="{{ banner.title }}" />
-      <div class="hero-slide-overlay">
-        <span class="category-tag">{{ banner.category.name }}</span>
-        <h2>{{ banner.title }}</h2>
-      </div>
-    </a>
-    {% endfor %}
-  </div>
-
-  <button class="hero-arrow hero-arrow-prev" id="heroPrev">&#10094;</button>
-  <button class="hero-arrow hero-arrow-next" id="heroNext">&#10095;</button>
-
-  <div class="hero-dots" id="heroDots">
-    {% for banner in banner_articles %}
-    <button class="hero-dot {% if forloop.first %}active{% endif %}" data-index="{{ forloop.counter0 }}"></button>
-    {% endfor %}
-  </div>
+    <div class="hero-slides" id="heroSlides">
+        {% for banner in banner_items %}
+        <a href="{{ banner.link_url|default:'#' }}" class="hero-slide {% if forloop.first %}active{% endif %}">
+            <img src="{{ banner.image.url }}" alt="{{ banner.title }}">
+            {% if banner.title %}
+            <div class="hero-slide-overlay"><h2>{{ banner.title }}</h2></div>
+            {% endif %}
+        </a>
+        {% endfor %}
+    </div>
+    <button class="hero-arrow hero-arrow-prev" id="heroPrev">&#10094;</button>
+    <button class="hero-arrow hero-arrow-next" id="heroNext">&#10095;</button>
+    <div class="hero-dots" id="heroDots">
+        {% for banner in banner_items %}
+            <button class="hero-dot {% if forloop.first %}active{% endif %}" data-index="{{ forloop.counter0 }}"></button>
+        {% endfor %}
+    </div>
 </div>
 {% endif %}
 

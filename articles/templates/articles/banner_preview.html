@@ -1,0 +1,40 @@
+{% extends 'admin_base.html' %}
+{% load static %}
+{% block title %}Preview Banner{% endblock %}
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/homepage.css' %}">
+    <link rel="stylesheet" href="{% static 'css/admin.css' %}">
+{% endblock %}
+
+{% block admin_content %}
+<h1 class="admin-page-title">Preview Tampilan Banner di Beranda</h1>
+
+<div class="hero-banner" id="heroBanner">
+    <div class="hero-slides">
+        {% for banner in banners %}
+        <a href="{{ banner.link_url|default:'#' }}" class="hero-slide {% if forloop.first %}active{% endif %}">
+            <img src="{{ banner.image.url }}" alt="{{ banner.title }}">
+            {% if banner.title %}
+            <div class="hero-slide-overlay"><h2>{{ banner.title }}</h2></div>
+            {% endif %}
+        </a>
+        {% endfor %}
+    </div>
+    <div class="hero-dots">
+        {% for banner in banners %}
+            <button class="hero-dot {% if forloop.first %}active{% endif %}" data-index="{{ forloop.counter0 }}"></button>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+document.querySelectorAll('.hero-dot').forEach((dot, i) => {
+    dot.addEventListener('click', () => {
+        document.querySelectorAll('.hero-slide').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.hero-dot').forEach(d => d.classList.remove('active'));
+        document.querySelectorAll('.hero-slide')[i].classList.add('active');
+        dot.classList.add('active');
+    });
+});
+</script>
+{% endblock %}

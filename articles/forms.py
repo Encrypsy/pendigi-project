@@ -1,5 +1,5 @@
 from django import forms
-from .models import Articles
+from .models import Articles, Banner
 from articles.models import Categories
 
 class CategoryForm(forms.ModelForm):
@@ -18,4 +18,13 @@ class ArticleUploadForm(forms.ModelForm):
         widgets = {
             'category': forms.RadioSelect(),
             'content': forms.Textarea(attrs={'placeholder': 'Tulis isi artikel kamu di sini...'}),
+        }
+
+class BannerForm(forms.ModelForm):
+    class Meta:
+        model = Banner
+        fields = ['title', 'image', 'link_url', 'order', 'is_active']
+        widgets = {
+            'title': forms.TextInput(attrs={'placeholder': 'Judul banner (opsional)'}),
+            'link_url': forms.TextInput(attrs={'placeholder': '/articles/5/ atau https://...'}),
         }

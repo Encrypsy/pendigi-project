@@ -1,0 +1,18 @@
+{% extends 'admin_base.html' %}
+{% load static %}
+{% block title %}Tambah Banner{% endblock %}
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/admin.css' %}">
+    <link rel="stylesheet" href="{% static 'css/forms.css' %}">
+{% endblock %}
+
+{% block admin_content %}
+<div class="upload-card">
+    <h2>Tambah Banner Baru</h2>
+    <form method="post" enctype="multipart/form-data" class="auth-form">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Simpan Banner</button>
+    </form>
+</div>
+{% endblock %}
