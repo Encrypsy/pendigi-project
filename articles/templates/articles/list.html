@@ -45,7 +45,6 @@
 
   <div class="homepage-columns">
     <div class="latest-col">
-      <h2 class="section-title">Artikel Terbaru</h2>
       <div class="article-grid article-grid-2col">
         {% if active_category or search_query %}
           {% for article in articles %}
@@ -68,6 +67,7 @@
             <p>Belum ada artikel yang sesuai.</p>
           {% endfor %}
         {% else %}
+          <h2 class="section-title">Artikel Terbaru</h2>
           {% for article in latest_articles %}
             <a href="{% url 'articles:article_detail' article.pk %}" class="article-card">
               {% if article.thumbnail %}
