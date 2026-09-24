@@ -75,7 +75,7 @@ def article_list(request):
         ).select_related(
             'category', 
             'contributor'
-        ).order_by('-created_at')[:4]
+        )
 
     query = request.GET.get('q', '').strip()
     if query:
@@ -96,6 +96,8 @@ def article_list(request):
     featured_stories = Stories.objects.filter(
         status=FictionStatusStory.APPROVED
     ).exclude(cover='').select_related('author').order_by('-views_count')[:12]
+
+    articles = articles.order_by('-created_at')[:4]
 
     return render(request, 'articles/list.html', {
         'articles': articles,
