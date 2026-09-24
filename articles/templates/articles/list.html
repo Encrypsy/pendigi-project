@@ -99,10 +99,28 @@ Beranda
     <div class="fiction-carousel">
       {% for story in featured_stories %}
       <a href="{% url 'fiction:story_detail' story.pk %}" class="fiction-cover-item">
-        <img src="{{ story.cover.url }}" alt="{{ story.title }}">
+        <img src="{{ story.cover.url }}" class="fiction-cover-img" alt="{{ story.title }}">
+
         <div class="fiction-cover-info">
-          <strong>{{ story.title }}</strong>
-          <span>{{ story.author.username }}</span>
+          <strong class="fiction-cover-title">{{ story.title }}</strong>
+
+          <div class="fiction-cover-author">
+            {% if story.author.profile_picture %}
+            <img src="{{ story.author.profile_picture.url }}" class="fiction-author-avatar">
+            {% else %}
+            <div class="fiction-author-avatar fiction-author-placeholder">{{ story.author.username|first|upper }}</div>
+            {% endif %}
+            <span>{{ story.author.username }}</span>
+          </div>
+
+          <div class="fiction-cover-meta">
+            <span>👁 {{ story.views_count }}</span>
+            <span>☰ {{ story.total_chapters }} bab</span>
+          </div>
+          <span
+            class="fiction-status-badge {% if story.is_completed %}status-completed{% else %}status-ongoing{% endif %}">
+            {% if story.is_completed %}Tamat{% else %}Berlangsung{% endif %}
+          </span>
         </div>
       </a>
       {% endfor %}
