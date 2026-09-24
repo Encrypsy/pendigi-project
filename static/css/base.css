@@ -172,3 +172,7 @@ a { color: inherit; }
     text-align: center;
     box-sizing: border-box;
 }
+
+.navbar-collapse {
+    display: contents;
+}
