@@ -45,7 +45,7 @@ Beranda
   <div class="latest-col">
     <h2 class="section-title">Artikel Terbaru</h2>
     <div class="article-grid article-grid-2col">
-      {% for article in articles %}
+      {% for article in latest_articles %}
       <a href="{% url 'articles:article_detail' article.pk %}" class="article-card">
         {% if article.thumbnail %}
         <img src="{{ article.thumbnail.url }}" class="article-thumb" alt="{{ article.title }}" />

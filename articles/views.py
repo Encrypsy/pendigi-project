@@ -97,10 +97,19 @@ def article_list(request):
         status=FictionStatusStory.APPROVED
     ).exclude(cover='').select_related('author').order_by('-views_count')[:12]
 
-    articles = articles.order_by('-created_at')[:4]
+    articles = articles.order_by('-created_at')
+
+    # HOME
+    latest_articles = Articles.objects.filter(
+        status=StatusArticle.APPROVED
+    ).select_related(
+        'category',
+        'contributor'
+    ).order_by('-created_at')[:4]
 
     return render(request, 'articles/list.html', {
         'articles': articles,
+        'latest_articles': latest_articles,
         'categories': categories,
         'active_category': category_slug,
         'banner_items': banner_items,
