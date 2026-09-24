@@ -96,7 +96,7 @@ def article_list(request):
         'articles': articles,
         'categories': categories,
         'active_category': category_slug,
-        'banner_articles': banner_items,
+        'banner_items': banner_items,
         'trending_articles': trending_articles,
         'featured_stories': featured_stories,
         'search_query': query,
