@@ -139,3 +139,36 @@ a { color: inherit; }
     .auth-links form { width: 100%; }
     .auth-links .link-button { padding: 10px; border: 1px solid var(--divider); border-radius: 8px; }
 }
+
+.btn-outline {
+    display: inline-block;
+    padding: 8px 18px;
+    border: 1.5px solid var(--brown);
+    border-radius: 20px;
+    color: var(--brown) !important;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all .15s ease;
+}
+.btn-outline:hover { background: var(--brown); color: #fff !important; }
+
+.btn-solid {
+    display: inline-block;
+    padding: 8px 18px;
+    background: var(--brown);
+    border: 1.5px solid var(--brown);
+    border-radius: 20px;
+    color: #fff !important;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background .15s ease;
+}
+.btn-solid:hover { background: var(--brown-dark); }
+
+.auth-links a, .auth-links .btn-cta, .auth-links .btn-outline, .auth-links .btn-solid, .auth-links .link-button {
+    width: 100%;
+    text-align: center;
+    box-sizing: border-box;
+}

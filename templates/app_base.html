@@ -1,71 +1,72 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block body %}
-  <header class="navbar">
-    <a href="{% url 'articles:article_list' %}" class="brand"><img src="{% static 'images/pendigi-logo-tulisan.svg' %}" alt="Pena Digital" class="logo" /></a>
+<header class="navbar">
+  <a href="{% url 'articles:article_list' %}" class="brand"><img src="{% static 'images/pendigi-logo-tulisan.svg' %}"
+      alt="Pena Digital" class="logo" /></a>
 
-    <button class="navbar-toggle" id="navbarToggle" aria-label="Buka menu">
-        <span></span><span></span><span></span>
-    </button>
+  <button class="navbar-toggle" id="navbarToggle" aria-label="Buka menu">
+    <span></span><span></span><span></span>
+  </button>
 
-    <div class="navbar-collapse" id="navbarCollapse">
-        <nav class="nav-links">
-          {% for cat in navbar_categories %}
-            {% if cat.name|lower == 'fiksi' %}
-              <a href="{% url 'fiction:story_list' %}">{{ cat.name }}</a>
-            {% else %}
-              <a href="{% url 'articles:article_list' %}?kategori={{ cat.name|urlencode }}">{{ cat.name }}</a>
-            {% endif %}
-          {% endfor %}
-        </nav>
+  <div class="navbar-collapse" id="navbarCollapse">
+    <nav class="nav-links">
+      {% for cat in navbar_categories %}
+      {% if cat.name|lower == 'fiksi' %}
+      <a href="{% url 'fiction:story_list' %}">{{ cat.name }}</a>
+      {% else %}
+      <a href="{% url 'articles:article_list' %}?kategori={{ cat.name|urlencode }}">{{ cat.name }}</a>
+      {% endif %}
+      {% endfor %}
+    </nav>
 
-        <div class="auth-links">
-          {% if user.is_authenticated %}
-            {% if user.role == 'admin' or user.is_superuser %}
-              <a href="{% url 'dashboard' %}" class="btn-cta">Dashboard</a>
-            {% elif user.status_kontributor == 'approved' %}
-              <a href="{% url 'articles:upload_article' %}" class="btn-cta">Tulis Artikel</a>
-              <a href="{% url 'fiction:create_story' %}" class="btn-cta">Tulis Cerita</a>
-            {% elif user.status_kontributor == 'pending' %}
-              <span class="btn-cta btn-disabled">Menunggu Verifikasi</span>
-            {% else %}
-              <a href="{% url 'apply_contributor' %}" class="btn-cta">Jadi Kontributor</a>
-            {% endif %}
+    <div class="auth-links">
+      {% if user.is_authenticated %}
+      {% if user.role == 'admin' or user.is_superuser %}
+      <a href="{% url 'dashboard' %}" class="btn-cta">Dashboard</a>
+      {% elif user.status_kontributor == 'approved' %}
+      <a href="{% url 'articles:upload_article' %}" class="btn-cta">Tulis Artikel</a>
+      <a href="{% url 'fiction:create_story' %}" class="btn-cta">Tulis Cerita</a>
+      {% elif user.status_kontributor == 'pending' %}
+      <span class="btn-cta btn-disabled">Menunggu Verifikasi</span>
+      {% else %}
+      <a href="{% url 'apply_contributor' %}" class="btn-cta">Jadi Kontributor</a>
+      {% endif %}
 
-            <a href="{% url 'profile' %}">{{ user.username }}</a>
-            <form action="{% url 'logout' %}" method="post" style="display:inline;">
-              {% csrf_token %}
-              <button type="submit" class="link-button">Logout</button>
-            </form>
-          {% else %}
-            <a href="{% url 'login' %}">Login</a>
-            <a href="{% url 'register' %}">Daftar</a>
-          {% endif %}
-        </div>
+      <a href="{% url 'profile' %}">{{ user.username }}</a>
+      <form action="{% url 'logout' %}" method="post" style="display:inline;">
+        {% csrf_token %}
+        <button type="submit" class="link-button">Logout</button>
+      </form>
+      {% else %}
+      <a href="{% url 'login' %}" class="btn-outline">Login</a>
+      <a href="{% url 'register' %}" class="btn-solid">Daftar</a>
+      {% endif %}
     </div>
-  </header>
+  </div>
+</header>
 
-  <main class="content">
-    {% if messages %}
-      <ul class="messages">
-        {% for message in messages %}
-          <li class="{{ message.tags }}">{{ message }}</li>
-        {% endfor %}
-      </ul>
-    {% endif %}
+<main class="content">
+  {% if messages %}
+  <ul class="messages">
+    {% for message in messages %}
+    <li class="{{ message.tags }}">{{ message }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
 
-    {% block content %}
-    {% endblock %}
-  </main>
+  {% block content %}
+  {% endblock %}
+</main>
 
-  <footer class="footer">
-    <p>&copy; {% now 'Y' %} Pena Digital</p>
-  </footer>
+<footer class="footer">
+  <p>&copy; {% now 'Y' %} Pena Digital</p>
+</footer>
 
 <script>
-document.getElementById('navbarToggle').addEventListener('click', function () {
+  document.getElementById('navbarToggle').addEventListener('click', function () {
     document.getElementById('navbarCollapse').classList.toggle('is-open');
     this.classList.toggle('is-active');
-});
+  });
 </script>
 {% endblock %}
