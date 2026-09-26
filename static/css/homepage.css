@@ -114,14 +114,13 @@
 
 .homepage-columns {
     display: grid;
-    grid-template-columns: 2fr 1fr;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
     gap: 32px;
     align-items: start;
+    width: 100%;
+    box-sizing: border-box;
 }
 
-.article-grid-2col {
-    grid-template-columns: repeat(2, 1fr);
-}
 
 .trending-list {
     display: flex;
@@ -221,7 +220,7 @@
 
 .fiction-cover-title {
     display: -webkit-box;
-    -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
     font-size: 0.85rem;
@@ -309,3 +308,22 @@
 .rank-2 { background: linear-gradient(135deg, #C0C0C0, #A0A0A0); }
 .rank-3 { background: linear-gradient(135deg, #CD7F32, #A85C25); }
 .rank-4 { background: var(--divider); color: var(--text); }
+
+.latest-col {
+    min-width: 0;
+    width: 100%;
+}
+
+.latest-col .article-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.trending-col { min-width: 0; width: 100%; }
+
+@media (max-width: 800px) {
+    .homepage-columns { grid-template-columns: 1fr; }
+    .latest-col .article-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 480px) {
+    .latest-col .article-grid { grid-template-columns: 1fr; }
+}

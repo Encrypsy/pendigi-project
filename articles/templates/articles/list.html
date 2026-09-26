@@ -45,7 +45,7 @@
 
   <div class="homepage-columns">
     <div class="latest-col">
-      <div class="article-grid article-grid-2col">
+      <div class="article-grid">
         {% if active_category or search_query %}
           {% for article in articles %}
             <a href="{% url 'articles:article_detail' article.pk %}" class="article-card">
