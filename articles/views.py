@@ -289,17 +289,46 @@ def banner_list(request):
     return render(request, 'articles/banner_list.html', {'banners': banners})
 
 
+def _is_ajax(request):
+    return request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+
+
 @admin_required
 def banner_create(request):
     if request.method == 'POST':
         form = BannerForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Banner berhasil ditambahkan.')
+            if _is_ajax(request):
+                return JsonResponse({'ok': True})
+            messages.success(request, 'Banner ditambahkan.')
             return redirect('articles:banner_list')
+        if _is_ajax(request):
+            return render(request, 'articles/banner_form_modal.html', {'form': form, 'is_edit': False}, status=400)
     else:
         form = BannerForm()
-    return render(request, 'articles/banner_form.html', {'form': form})
+
+    return render(request, 'articles/banner_form_modal.html', {'form': form, 'is_edit': False})
+
+
+@admin_required
+def banner_edit(request, pk):
+    banner = get_object_or_404(Banner, pk=pk)
+
+    if request.method == 'POST':
+        form = BannerForm(request.POST, request.FILES, instance=banner)
+        if form.is_valid():
+            form.save()
+            if _is_ajax(request):
+                return JsonResponse({'ok': True})
+            messages.success(request, 'Banner diperbarui.')
+            return redirect('articles:banner_list')
+        if _is_ajax(request):
+            return render(request, 'articles/banner_form_modal.html', {'form': form, 'is_edit': True, 'banner': banner}, status=400)
+    else:
+        form = BannerForm(instance=banner)
+
+    return render(request, 'articles/banner_form_modal.html', {'form': form, 'is_edit': True, 'banner': banner})
 
 
 @admin_required

@@ -39,8 +39,17 @@ class Articles(models.Model):
     def __str__(self):
         return self.title
 
+class BannerType(models.TextChoices):
+    ARTIKEL = "artikel", "Artikel/Berita"
+    FIKSI = "fiksi", "Fiksi"
+    EVENT = "event", "Event"
+    UMUM = "umum", "Umum"
+
+
 class Banner(models.Model):
     title = models.CharField(max_length=100, blank=True, help_text="Opsional, judul yang muncul di overlay banner")
+    description = models.TextField(blank=True, help_text="Opsional, deskripsi singkat banner")
+    type = models.CharField(max_length=20, choices=BannerType.choices, default=BannerType.UMUM)
     image = models.ImageField(upload_to='banners/')
     link_url = models.CharField(max_length=255, blank=True, help_text="Opsional, arahkan ke URL tertentu saat banner diklik")
     order = models.PositiveIntegerField(default=0, help_text="Angka kecil tampil lebih dulu")

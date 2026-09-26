@@ -1,0 +1,6 @@
+<form method="post" enctype="multipart/form-data" class="auth-form" id="bannerModalForm"
+      action="{% if is_edit %}{% url 'articles:banner_edit' banner.pk %}{% else %}{% url 'articles:banner_create' %}{% endif %}">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">{% if is_edit %}Simpan Perubahan{% else %}Tambah Banner{% endif %}</button>
+</form>

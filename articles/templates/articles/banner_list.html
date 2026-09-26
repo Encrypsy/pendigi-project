@@ -4,6 +4,8 @@
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'css/admin.css' %}">
     <link rel="stylesheet" href="{% static 'css/table.css' %}">
+    <link rel="stylesheet" href="{% static 'css/forms.css' %}">
+    <link rel="stylesheet" href="{% static 'css/modal.css' %}">
 {% endblock %}
 
 {% block admin_content %}
@@ -11,19 +13,21 @@
     <h1 class="admin-page-title">Kelola Banner</h1>
     <div style="display:flex; gap:10px;">
         <a href="{% url 'articles:banner_preview' %}" target="_blank" class="btn-secondary">Preview</a>
-        <a href="{% url 'articles:banner_create' %}" class="btn-primary">+ Tambah Banner</a>
+        <button type="button" class="btn-primary" onclick="openBannerModal('{% url 'articles:banner_create' %}')">+ Tambah Banner</button>
     </div>
 </div>
 
 <table class="data-table">
     <thead>
-        <tr><th>Gambar</th><th>Judul</th><th>Urutan</th><th>Status</th><th>Aksi</th></tr>
+        <tr><th>Gambar</th><th>Judul</th><th>Deskripsi</th><th>Tipe</th><th>Urutan</th><th>Status</th><th>Aksi</th></tr>
     </thead>
     <tbody>
         {% for banner in banners %}
         <tr>
             <td><img src="{{ banner.image.url }}" class="table-thumb" alt=""></td>
             <td>{{ banner.title|default:"-" }}</td>
+            <td class="comment-preview">{{ banner.description|default:"-"|truncatewords:8 }}</td>
+            <td><span class="tag-chip-static">{{ banner.get_type_display }}</span></td>
             <td>{{ banner.order }}</td>
             <td>
                 <form action="{% url 'articles:banner_toggle_active' banner.pk %}" method="post" style="display:inline;">
@@ -34,15 +38,73 @@
                 </form>
             </td>
             <td>
-                <form action="{% url 'articles:banner_delete' banner.pk %}" method="post" onsubmit="return confirm('Hapus banner ini?');" style="display:inline;">
-                    {% csrf_token %}
-                    <button type="submit" class="btn-reject">Hapus</button>
-                </form>
+                <div class="table-actions">
+                    <button type="button" class="edit-link" style="background:none;border:none;cursor:pointer;"
+                            onclick="openBannerModal('{% url 'articles:banner_edit' banner.pk %}')">Edit</button>
+                    <form action="{% url 'articles:banner_delete' banner.pk %}" method="post" onsubmit="return confirm('Hapus banner ini?');" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-reject">Hapus</button>
+                    </form>
+                </div>
             </td>
         </tr>
         {% empty %}
-        <tr><td colspan="5">Belum ada banner.</td></tr>
+        <tr><td colspan="7">Belum ada banner.</td></tr>
         {% endfor %}
     </tbody>
 </table>
+
+<div class="modal-overlay" id="bannerModalOverlay">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3 id="bannerModalTitle">Banner</h3>
+            <button type="button" class="modal-close" onclick="closeBannerModal()">&times;</button>
+        </div>
+        <div class="modal-body" id="bannerModalBody">
+            </div>
+    </div>
+</div>
+
+<script>
+function openBannerModal(url) {
+    fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(res => res.text())
+        .then(html => {
+            document.getElementById('bannerModalBody').innerHTML = html;
+            document.getElementById('bannerModalOverlay').classList.add('is-open');
+            attachBannerFormSubmit();
+        });
+}
+
+function closeBannerModal() {
+    document.getElementById('bannerModalOverlay').classList.remove('is-open');
+}
+
+function attachBannerFormSubmit() {
+    const form = document.getElementById('bannerModalForm');
+    if (!form) return;
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        fetch(form.action, {
+            method: 'POST',
+            body: new FormData(form),
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(res => {
+            if (res.ok) {
+                window.location.reload();
+            } else {
+                return res.text().then(html => {
+                    document.getElementById('bannerModalBody').innerHTML = html;
+                    attachBannerFormSubmit();
+                });
+            }
+        });
+    });
+}
+
+document.getElementById('bannerModalOverlay').addEventListener('click', function (e) {
+    if (e.target === this) closeBannerModal();
+});
+</script>
 {% endblock %}
