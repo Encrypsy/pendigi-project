@@ -1,0 +1,35 @@
+{% load query_tags %}
+<div class="table-pagination">
+    <div class="per-page-select">
+        <label>Tampilkan</label>
+        <select id="perPageSelect" onchange="updatePerPage(this.value)">
+            {% for opt in per_page_options %}
+                <option value="{{ opt }}" {% if per_page == opt %}selected{% endif %}>{{ opt }}</option>
+            {% endfor %}
+        </select>
+        <span>per halaman</span>
+    </div>
+
+    {% if page_obj.paginator.num_pages > 1 %}
+    <div class="pagination-controls">
+        {% if page_obj.has_previous %}
+            <a href="?{% url_replace page=1 %}" class="page-btn">&laquo;</a>
+            <a href="?{% url_replace page=page_obj.previous_page_number %}" class="page-btn">&lsaquo;</a>
+        {% endif %}
+        <span class="page-info">Halaman {{ page_obj.number }} dari {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+            <a href="?{% url_replace page=page_obj.next_page_number %}" class="page-btn">&rsaquo;</a>
+            <a href="?{% url_replace page=page_obj.paginator.num_pages %}" class="page-btn">&raquo;</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function updatePerPage(val) {
+    const url = new URL(window.location);
+    url.searchParams.set('per_page', val);
+    url.searchParams.set('page', 1);
+    window.location.href = url.toString();
+}
+</script>

@@ -1,9 +1,13 @@
+from django.http.response import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse
 from django.views.decorators.http import require_POST
 from django.contrib import messages
 from django.db.models import F, Avg, Count
+from django.utils import timezone
+from django.utils.dateparse import parse_date
+from django.core.paginator import Paginator
 
 from interactions.views import _attach_comment_meta, _sort_comments
 from .models import Articles, Banner, Categories, StatusArticle
@@ -12,7 +16,6 @@ from accounts.models import StatusKontributor
 from interactions.models import Comments, Ratings, Bookmarks, StatusComment
 from interactions.forms import CommentForm, RatingForm
 from reading_journal.models import ReadingActivity, ActionType
-from django.utils import timezone
 from accounts.decorators import admin_required
 from accounts.decorators import admin_required
 from .forms import CategoryForm
@@ -286,7 +289,64 @@ def article_comments_partial(request, pk):
 @admin_required
 def banner_list(request):
     banners = Banner.objects.all()
-    return render(request, 'articles/banner_list.html', {'banners': banners})
+
+    query = request.GET.get('q', '').strip()
+    if query:
+        banners = banners.filter(title__icontains=query)
+
+    status = request.GET.get('status', '')
+    if status == 'aktif':
+        banners = banners.filter(is_active=True)
+    elif status == 'nonaktif':
+        banners = banners.filter(is_active=False)
+
+    sort = request.GET.get('sort', 'order')
+    sort_map = {'order': 'order', 'terbaru': '-created_at', 'terlama': 'created_at'}
+    banners = banners.order_by(sort_map.get(sort, 'order'))
+
+    date_from = request.GET.get('date_from', '')
+    date_to = request.GET.get('date_to', '')
+    if date_from:
+        parsed = parse_date(date_from)
+        if parsed:
+            banners = banners.filter(created_at__date__gte=parsed)
+    if date_to:
+        parsed = parse_date(date_to)
+        if parsed:
+            banners = banners.filter(created_at__date__lte=parsed)
+
+    try:
+        per_page = int(request.GET.get('per_page', 10))
+        if per_page not in (10, 25, 50):
+            per_page = 10
+    except ValueError:
+        per_page = 10
+
+    paginator = Paginator(banners, per_page)
+    page_obj = paginator.get_page(request.GET.get('page', 1))
+
+    filters = [
+        {
+            'name': 'status', 'label': 'Status', 'value': status,
+            'options': [('', 'Semua Status'), ('aktif', 'Aktif'), ('nonaktif', 'Nonaktif')],
+        },
+        {
+            'name': 'sort', 'label': 'Urutan', 'value': sort,
+            'options': [('order', 'Urutan Tampil'), ('terbaru', 'Terbaru'), ('terlama', 'Terlama')],
+        },
+    ]
+
+    return render(request, 'articles/banner_list.html', {
+        'page_obj': page_obj,
+        'banners': page_obj.object_list,
+        'search_query': query,
+        'filters': filters,
+        'date_from': date_from,
+        'date_to': date_to,
+        'per_page': per_page,
+        'per_page_options': [10, 25, 50],
+        'reset_url': reverse('articles:banner_list'),
+    })
 
 
 def _is_ajax(request):
@@ -352,3 +412,30 @@ def banner_toggle_active(request, pk):
 def banner_preview(request):
     banners = Banner.objects.filter(is_active=True)
     return render(request, 'articles/banner_preview.html', {'banners': banners})
+
+@admin_required
+@require_POST
+def banner_bulk_action(request):
+    ids = request.POST.getlist('selected_ids')
+    action = request.POST.get('bulk_action')
+
+    if not ids:
+        messages.error(request, 'Pilih minimal 1 banner terlebih dahulu.')
+        return redirect('articles:banner_list')
+
+    qs = Banner.objects.filter(pk__in=ids)
+
+    if action == 'delete':
+        count = qs.count()
+        qs.delete()
+        messages.success(request, f'{count} banner berhasil dihapus.')
+    elif action == 'activate':
+        qs.update(is_active=True)
+        messages.success(request, f'{qs.count()} banner diaktifkan.')
+    elif action == 'deactivate':
+        qs.update(is_active=False)
+        messages.success(request, f'{qs.count()} banner dinonaktifkan.')
+    else:
+        messages.error(request, 'Aksi tidak dikenali.')
+
+    return redirect(request.META.get('HTTP_REFERER', reverse('articles:banner_list')))

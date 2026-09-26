@@ -1,0 +1,33 @@
+<form method="get" class="table-toolbar">
+    <div class="toolbar-search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+            <circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input type="text" name="q" value="{{ search_query }}" placeholder="{{ search_placeholder|default:'Cari...' }}">
+        <button type="submit" class="toolbar-search-btn">Cari</button>
+    </div>
+
+    {% for f in filters %}
+    <div class="toolbar-filter">
+        <label>{{ f.label }}</label>
+        <select name="{{ f.name }}" onchange="this.form.submit()">
+            {% for value, label in f.options %}
+                <option value="{{ value }}" {% if f.value == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    {% endfor %}
+
+    {% if show_date_filter %}
+    <div class="toolbar-filter">
+        <label>Dari</label>
+        <input type="date" name="date_from" value="{{ date_from }}" onchange="this.form.submit()">
+    </div>
+    <div class="toolbar-filter">
+        <label>Sampai</label>
+        <input type="date" name="date_to" value="{{ date_to }}" onchange="this.form.submit()">
+    </div>
+    {% endif %}
+
+    <a href="{{ reset_url }}" class="toolbar-reset">Reset Filter</a>
+</form>
