@@ -1,0 +1,7 @@
+<form method="post" class="auth-form" id="articleMetaForm" action="{% url 'articles:admin_edit_article_meta' article.pk %}">
+    {% csrf_token %}
+    <p><strong>{{ article.title }}</strong></p>
+    <p class="hint-text">oleh {{ article.contributor.username }}</p>
+    {{ form.as_p }}
+    <button type="submit">Simpan Perubahan</button>
+</form>

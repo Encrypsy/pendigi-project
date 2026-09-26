@@ -1,0 +1,152 @@
+{% extends 'admin_base.html' %}
+{% load static %}
+{% block title %}Kelola Artikel{% endblock %}
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/admin.css' %}">
+    <link rel="stylesheet" href="{% static 'css/table.css' %}">
+    <link rel="stylesheet" href="{% static 'css/admin-table.css' %}">
+    <link rel="stylesheet" href="{% static 'css/forms.css' %}">
+    <link rel="stylesheet" href="{% static 'css/modal.css' %}">
+{% endblock %}
+
+{% block admin_content %}
+<h1 class="admin-page-title">Kelola Artikel</h1>
+
+{% include 'partials/table_toolbar.html' with search_placeholder="Cari judul artikel..." %}
+
+<form method="post" action="{% url 'articles:admin_article_bulk_action' %}" id="bulkForm" onsubmit="return confirmBulk()">
+    {% csrf_token %}
+    <div class="bulk-action-bar">
+        <select name="bulk_action">
+            <option value="">-- Aksi Massal --</option>
+            <option value="feature">Jadikan Unggulan</option>
+            <option value="takedown">Cabut Tayangan</option>
+            <option value="delete">Hapus Permanen</option>
+        </select>
+        <button type="submit" class="btn-secondary">Terapkan</button>
+        <span class="bulk-selected-count" id="selectedCount"></span>
+    </div>
+
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th style="width:36px;"><input type="checkbox" id="selectAll" onclick="toggleAll(this)"></th>
+                <th>Judul</th>
+                <th>Kategori</th>
+                <th>Penulis</th>
+                <th>Views</th>
+                <th>Status</th>
+                <th>Unggulan</th>
+                <th>Aksi</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for article in articles %}
+            <tr>
+                <td><input type="checkbox" name="selected_ids" value="{{ article.pk }}" class="row-checkbox" onchange="updateSelectedCount()"></td>
+                <td><a href="{% url 'articles:article_detail' article.pk %}" target="_blank">{{ article.title }}</a></td>
+                <td>{{ article.category.name }}</td>
+                <td>{{ article.contributor.username }}</td>
+                <td>{{ article.views_count }}</td>
+                <td><span class="status-badge status-{{ article.status }}">{{ article.get_status_display }}</span></td>
+                <td>
+                    {% if article.status == 'approved' %}
+                    <form action="{% url 'articles:admin_toggle_featured' article.pk %}" method="post" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="status-badge {% if article.is_featured %}status-approved{% else %}status-rejected{% endif %}" style="border:none;cursor:pointer;">
+                            {% if article.is_featured %}★ Ya{% else %}Tidak{% endif %}
+                        </button>
+                    </form>
+                    {% else %}
+                        <span class="hint-text">-</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <div class="table-actions">
+                        <button type="button" class="edit-link" style="background:none;border:none;cursor:pointer;"
+                                onclick="openArticleModal('{% url 'articles:admin_edit_article_meta' article.pk %}')">Edit</button>
+                        {% if article.status == 'approved' %}
+                        <button type="button" class="btn-reject" onclick="takedownArticle({{ article.pk }})">Cabut</button>
+                        {% endif %}
+                        <button type="button" class="btn-reject" onclick="deleteArticle({{ article.pk }})">Hapus</button>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="8" class="empty-state">Tidak ada artikel yang sesuai.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</form>
+
+{% include 'partials/table_pagination.html' %}
+
+<div class="modal-overlay" id="articleModalOverlay">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3>Edit Metadata Artikel</h3>
+            <button type="button" class="modal-close" onclick="closeArticleModal()">&times;</button>
+        </div>
+        <div class="modal-body" id="articleModalBody"></div>
+    </div>
+</div>
+
+<form id="singleTakedownForm" method="post" style="display:none;">{% csrf_token %}</form>
+<form id="singleDeleteBulkForm" method="post" style="display:none;">{% csrf_token %}</form>
+
+<script>
+function toggleAll(checkbox) {
+    document.querySelectorAll('.row-checkbox').forEach(cb => cb.checked = checkbox.checked);
+    updateSelectedCount();
+}
+function updateSelectedCount() {
+    const count = document.querySelectorAll('.row-checkbox:checked').length;
+    document.getElementById('selectedCount').textContent = count > 0 ? `${count} dipilih` : '';
+}
+function confirmBulk() {
+    const action = document.querySelector('select[name="bulk_action"]').value;
+    const count = document.querySelectorAll('.row-checkbox:checked').length;
+    if (!action) { alert('Pilih aksi massal terlebih dahulu.'); return false; }
+    if (count === 0) { alert('Pilih minimal 1 artikel.'); return false; }
+    return confirm(`Yakin mau proses ${count} artikel?`);
+}
+function takedownArticle(id) {
+    if (!confirm('Cabut artikel ini dari tayangan?')) return;
+    const form = document.getElementById('singleTakedownForm');
+    form.action = `/articles/kelola/artikel/${id}/takedown/`;
+    form.submit();
+}
+function deleteArticle(id) {
+    if (!confirm('Hapus artikel ini secara PERMANEN? Aksi ini tidak bisa dibatalkan.')) return;
+    const form = document.createElement('form');
+    form.method = 'post';
+    form.action = `/articles/kelola/artikel/bulk/`;
+    form.innerHTML = `{% csrf_token %}<input type="hidden" name="selected_ids" value="${id}"><input type="hidden" name="bulk_action" value="delete">`;
+    document.body.appendChild(form);
+    form.submit();
+}
+function openArticleModal(url) {
+    fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(res => res.text())
+        .then(html => {
+            document.getElementById('articleModalBody').innerHTML = html;
+            document.getElementById('articleModalOverlay').classList.add('is-open');
+            attachArticleFormSubmit();
+        });
+}
+function closeArticleModal() { document.getElementById('articleModalOverlay').classList.remove('is-open'); }
+function attachArticleFormSubmit() {
+    const form = document.getElementById('articleMetaForm');
+    if (!form) return;
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        fetch(form.action, { method: 'POST', body: new FormData(form), headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(res => {
+            if (res.ok) { window.location.reload(); }
+            else { return res.text().then(html => { document.getElementById('articleModalBody').innerHTML = html; attachArticleFormSubmit(); }); }
+        });
+    });
+}
+document.getElementById('articleModalOverlay').addEventListener('click', function (e) { if (e.target === this) closeArticleModal(); });
+</script>
+{% endblock %}

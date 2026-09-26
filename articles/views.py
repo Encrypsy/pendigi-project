@@ -11,7 +11,7 @@ from django.core.paginator import Paginator
 
 from interactions.views import _attach_comment_meta, _sort_comments
 from .models import Articles, Banner, Categories, StatusArticle
-from .forms import ArticleUploadForm, BannerForm
+from .forms import ArticleMetaForm, ArticleUploadForm, BannerForm
 from accounts.models import StatusKontributor
 from interactions.models import Comments, Ratings, Bookmarks, StatusComment
 from interactions.forms import CommentForm, RatingForm
@@ -508,3 +508,127 @@ def banner_bulk_action(request):
         messages.error(request, 'Aksi tidak dikenali.')
 
     return redirect(request.META.get('HTTP_REFERER', reverse('articles:banner_list')))
+
+@admin_required
+def admin_article_list(request):
+    articles = Articles.objects.select_related('category', 'contributor')
+
+    query = request.GET.get('q', '').strip()
+    if query:
+        articles = articles.filter(title__icontains=query)
+
+    status = request.GET.get('status', '')
+    if status:
+        articles = articles.filter(status=status)
+
+    category_id = request.GET.get('category', '')
+    if category_id:
+        articles = articles.filter(category_id=category_id)
+
+    sort = request.GET.get('sort', 'terbaru')
+    sort_map = {'terbaru': '-created_at', 'terlama': 'created_at', 'populer': '-views_count'}
+    articles = articles.order_by(sort_map.get(sort, '-created_at'))
+
+    try:
+        per_page = int(request.GET.get('per_page', 10))
+        if per_page not in (10, 25, 50):
+            per_page = 10
+    except ValueError:
+        per_page = 10
+
+    paginator = Paginator(articles, per_page)
+    page_obj = paginator.get_page(request.GET.get('page', 1))
+
+    filters = [
+        {
+            'name': 'status', 'label': 'Status', 'value': status,
+            'options': [('', 'Semua Status'), ('approved', 'Approved'), ('pending', 'Pending'), ('rejected', 'Rejected')],
+        },
+        {
+            'name': 'category', 'label': 'Kategori', 'value': category_id,
+            'options': [('', 'Semua Kategori')] + [(str(c.pk), c.name) for c in Categories.objects.all()],
+        },
+        {
+            'name': 'sort', 'label': 'Urutan', 'value': sort,
+            'options': [('terbaru', 'Terbaru'), ('terlama', 'Terlama'), ('populer', 'Terpopuler')],
+        },
+    ]
+
+    return render(request, 'articles/admin_article_list.html', {
+        'page_obj': page_obj,
+        'articles': page_obj.object_list,
+        'search_query': query,
+        'filters': filters,
+        'per_page': per_page,
+        'per_page_options': [10, 25, 50],
+        'reset_url': reverse('articles:admin_article_list'),
+        'active_menu': 'master',
+    })
+
+
+@admin_required
+def admin_edit_article_meta(request, pk):
+    article = get_object_or_404(Articles, pk=pk)
+
+    if request.method == 'POST':
+        form = ArticleMetaForm(request.POST, instance=article)
+        if form.is_valid():
+            form.save()
+            if _is_ajax(request):
+                return JsonResponse({'ok': True})
+            messages.success(request, 'Artikel diperbarui.')
+            return redirect('articles:admin_article_list')
+        if _is_ajax(request):
+            return render(request, 'articles/admin_article_meta_modal.html', {'form': form, 'article': article}, status=400)
+    else:
+        form = ArticleMetaForm(instance=article)
+
+    return render(request, 'articles/admin_article_meta_modal.html', {'form': form, 'article': article})
+
+
+@admin_required
+@require_POST
+def admin_takedown_article(request, pk):
+    article = get_object_or_404(Articles, pk=pk)
+    article.status = StatusArticle.REJECTED
+    article.is_featured = False
+    article.save()
+    messages.success(request, f'Artikel "{article.title}" dicabut dari tayangan.')
+    return redirect(request.META.get('HTTP_REFERER', reverse('articles:admin_article_list')))
+
+
+@admin_required
+@require_POST
+def admin_toggle_featured(request, pk):
+    article = get_object_or_404(Articles, pk=pk, status=StatusArticle.APPROVED)
+    article.is_featured = not article.is_featured
+    article.save()
+    return redirect(request.META.get('HTTP_REFERER', reverse('articles:admin_article_list')))
+
+
+@admin_required
+@require_POST
+def admin_article_bulk_action(request):
+    ids = request.POST.getlist('selected_ids')
+    action = request.POST.get('bulk_action')
+
+    if not ids:
+        messages.error(request, 'Pilih minimal 1 artikel terlebih dahulu.')
+        return redirect('articles:admin_article_list')
+
+    qs = Articles.objects.filter(pk__in=ids)
+
+    if action == 'delete':
+        count = qs.count()
+        qs.delete()
+        messages.success(request, f'{count} artikel dihapus permanen.')
+    elif action == 'takedown':
+        qs.update(status=StatusArticle.REJECTED, is_featured=False)
+        messages.success(request, f'{qs.count()} artikel dicabut dari tayangan.')
+    elif action == 'feature':
+        count = qs.filter(status=StatusArticle.APPROVED).update(is_featured=True)
+        messages.success(request, f'{count} artikel dijadikan unggulan.')
+    else:
+        messages.error(request, 'Aksi tidak dikenali.')
+
+    return redirect(request.META.get('HTTP_REFERER', reverse('articles:admin_article_list')))

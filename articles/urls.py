@@ -27,4 +27,9 @@ urlpatterns = [
     path('kelola/banner/<int:pk>/edit/', views.banner_edit, name='banner_edit'),
     path('kelola/banner/bulk/', views.banner_bulk_action, name='banner_bulk_action'),
     path('kelola/kategori/bulk/', views.category_bulk_action, name='category_bulk_action'),
+    path('kelola/artikel/', views.admin_article_list, name='admin_article_list'),
+    path('kelola/artikel/<int:pk>/edit/', views.admin_edit_article_meta, name='admin_edit_article_meta'),
+    path('kelola/artikel/<int:pk>/takedown/', views.admin_takedown_article, name='admin_takedown_article'),
+    path('kelola/artikel/<int:pk>/feature/', views.admin_toggle_featured, name='admin_toggle_featured'),
+    path('kelola/artikel/bulk/', views.admin_article_bulk_action, name='admin_article_bulk_action'),
 ]

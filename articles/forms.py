@@ -20,6 +20,11 @@ class ArticleUploadForm(forms.ModelForm):
             'content': forms.Textarea(attrs={'placeholder': 'Tulis isi artikel kamu di sini...'}),
         }
 
+class ArticleMetaForm(forms.ModelForm):
+    class Meta:
+        model = Articles
+        fields = ['category', 'is_featured']
+
 class BannerForm(forms.ModelForm):
     class Meta:
         model = Banner

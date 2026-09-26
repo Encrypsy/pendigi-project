@@ -29,6 +29,7 @@ class Articles(models.Model):
         related_name='articles'
     )
     status = models.CharField(max_length=20, choices=StatusArticle.choices, default=StatusArticle.PENDING)
+    is_featured = models.BooleanField(default=False)
     views_count = models.PositiveIntegerField(default=0)
     published_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
