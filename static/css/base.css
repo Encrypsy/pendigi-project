@@ -26,7 +26,6 @@ a { color: inherit; }
     background: #ffffff;
     border-bottom: 1px solid var(--divider);
     gap: 24px;
-    flex-wrap: nowrap;
 }
 
 .brand { display: flex; align-items: center; flex-shrink: 0; text-decoration: none; }
@@ -174,5 +173,9 @@ a { color: inherit; }
 }
 
 .navbar-collapse {
-    display: contents;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex: 1;
+    gap: 24px;
 }
