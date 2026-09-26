@@ -26,4 +26,5 @@ urlpatterns = [
     path('kelola/banner/preview/', views.banner_preview, name='banner_preview'),
     path('kelola/banner/<int:pk>/edit/', views.banner_edit, name='banner_edit'),
     path('kelola/banner/bulk/', views.banner_bulk_action, name='banner_bulk_action'),
+    path('kelola/kategori/bulk/', views.category_bulk_action, name='category_bulk_action'),
 ]

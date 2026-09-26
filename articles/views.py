@@ -24,8 +24,42 @@ from fiction.models import Stories, StatusStory as FictionStatusStory
 
 @admin_required
 def category_list(request):
-    categories = Categories.objects.annotate(article_count=Count('articles')).order_by('name')
-    return render(request, 'articles/category_list.html', {'categories': categories})
+    categories = Categories.objects.annotate(article_count=Count('articles'))
+
+    query = request.GET.get('q', '').strip()
+    if query:
+        categories = categories.filter(name__icontains=query)
+
+    sort = request.GET.get('sort', 'name')
+    sort_map = {'name': 'name', 'terbanyak': '-article_count', 'tersedikit': 'article_count'}
+    categories = categories.order_by(sort_map.get(sort, 'name'))
+
+    try:
+        per_page = int(request.GET.get('per_page', 10))
+        if per_page not in (10, 25, 50):
+            per_page = 10
+    except ValueError:
+        per_page = 10
+
+    paginator = Paginator(categories, per_page)
+    page_obj = paginator.get_page(request.GET.get('page', 1))
+
+    filters = [
+        {
+            'name': 'sort', 'label': 'Urutan', 'value': sort,
+            'options': [('name', 'Nama A-Z'), ('terbanyak', 'Artikel Terbanyak'), ('tersedikit', 'Artikel Tersedikit')],
+        },
+    ]
+
+    return render(request, 'articles/category_list.html', {
+        'page_obj': page_obj,
+        'categories': page_obj.object_list,
+        'search_query': query,
+        'filters': filters,
+        'per_page': per_page,
+        'per_page_options': [10, 25, 50],
+        'reset_url': reverse('articles:category_list'),
+    })
 
 
 @admin_required
@@ -34,12 +68,16 @@ def category_create(request):
         form = CategoryForm(request.POST)
         if form.is_valid():
             form.save()
+            if _is_ajax(request):
+                return JsonResponse({'ok': True})
             messages.success(request, 'Kategori berhasil ditambahkan.')
             return redirect('articles:category_list')
+        if _is_ajax(request):
+            return render(request, 'articles/category_form_modal.html', {'form': form, 'is_edit': False}, status=400)
     else:
         form = CategoryForm()
 
-    return render(request, 'articles/category_form.html', {'form': form, 'is_edit': False})
+    return render(request, 'articles/category_form_modal.html', {'form': form, 'is_edit': False})
 
 
 @admin_required
@@ -50,12 +88,43 @@ def category_edit(request, pk):
         form = CategoryForm(request.POST, instance=category)
         if form.is_valid():
             form.save()
+            if _is_ajax(request):
+                return JsonResponse({'ok': True})
             messages.success(request, 'Kategori berhasil diperbarui.')
             return redirect('articles:category_list')
+        if _is_ajax(request):
+            return render(request, 'articles/category_form_modal.html', {'form': form, 'is_edit': True, 'category': category}, status=400)
     else:
         form = CategoryForm(instance=category)
 
-    return render(request, 'articles/category_form.html', {'form': form, 'is_edit': True, 'category': category})
+    return render(request, 'articles/category_form_modal.html', {'form': form, 'is_edit': True, 'category': category})
+
+
+@admin_required
+@require_POST
+def category_bulk_action(request):
+    ids = request.POST.getlist('selected_ids')
+    action = request.POST.get('bulk_action')
+
+    if not ids:
+        messages.error(request, 'Pilih minimal 1 kategori terlebih dahulu.')
+        return redirect('articles:category_list')
+
+    qs = Categories.objects.filter(pk__in=ids)
+
+    if action == 'delete':
+        blocked = qs.filter(articles__isnull=False).distinct()
+        if blocked.exists():
+            names = ', '.join(blocked.values_list('name', flat=True))
+            messages.error(request, f'Kategori berikut tidak bisa dihapus karena masih dipakai artikel: {names}')
+        else:
+            count = qs.count()
+            qs.delete()
+            messages.success(request, f'{count} kategori berhasil dihapus.')
+    else:
+        messages.error(request, 'Aksi tidak dikenali.')
+
+    return redirect(request.META.get('HTTP_REFERER', reverse('articles:category_list')))
 
 
 @admin_required
