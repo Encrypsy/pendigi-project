@@ -45,6 +45,10 @@
 
   <div class="homepage-columns">
     <div class="latest-col">
+      {% if not active_category and not search_query %}
+        <h2 class="section-title">Artikel Terbaru</h2>
+      {% endif %}
+
       <div class="article-grid">
         {% if active_category or search_query %}
           {% for article in articles %}
@@ -54,12 +58,9 @@
               {% else %}
                 <div class="article-thumb article-thumb-placeholder">📄</div>
               {% endif %}
-
               <div class="article-card-body">
                 <span class="category-tag">{{ article.category.name }}</span>
-
                 <h3>{{ article.title }}</h3>
-
                 <p class="author">oleh {{ article.contributor.username }}</p>
               </div>
             </a>
@@ -67,7 +68,6 @@
             <p>Belum ada artikel yang sesuai.</p>
           {% endfor %}
         {% else %}
-          <h2 class="section-title">Artikel Terbaru</h2>
           {% for article in latest_articles %}
             <a href="{% url 'articles:article_detail' article.pk %}" class="article-card">
               {% if article.thumbnail %}
@@ -75,12 +75,9 @@
               {% else %}
                 <div class="article-thumb article-thumb-placeholder">📄</div>
               {% endif %}
-
               <div class="article-card-body">
                 <span class="category-tag">{{ article.category.name }}</span>
-
                 <h3>{{ article.title }}</h3>
-
                 <p class="author">oleh {{ article.contributor.username }}</p>
               </div>
             </a>
@@ -142,9 +139,13 @@
                   <span>☰ {{ story.total_chapters }} bab</span>
                 </div>
                 <span class="fiction-status-badge {% if story.is_completed %}
+                    
                     status-completed
+
                   {% else %}
+                    
                     status-ongoing
+
                   {% endif %}">
                   {% if story.is_completed %}
                     Tamat
