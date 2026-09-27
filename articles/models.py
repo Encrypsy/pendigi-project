@@ -47,14 +47,51 @@ class BannerType(models.TextChoices):
     UMUM = "umum", "Umum"
 
 
+class BannerPlacement(models.TextChoices):
+    HOMEPAGE = "homepage", "Halaman Utama"
+    FICTION = "fiction", "Halaman Fiksi"
+
+
 class Banner(models.Model):
-    title = models.CharField(max_length=100, blank=True, help_text="Opsional, judul yang muncul di overlay banner")
-    description = models.TextField(blank=True, help_text="Opsional, deskripsi singkat banner")
-    type = models.CharField(max_length=20, choices=BannerType.choices, default=BannerType.UMUM)
+    title = models.CharField(
+        max_length=100,
+        blank=True,
+        help_text="Opsional, judul yang muncul di overlay banner"
+    )
+
+    description = models.TextField(
+        blank=True,
+        help_text="Opsional, deskripsi singkat banner"
+    )
+
+    type = models.CharField(
+        max_length=20,
+        choices=BannerType.choices,
+        default=BannerType.UMUM
+    )
+
+    # BARU
+    placement = models.CharField(
+        max_length=20,
+        choices=BannerPlacement.choices,
+        default=BannerPlacement.HOMEPAGE
+    )
+
     image = models.ImageField(upload_to='banners/')
-    link_url = models.CharField(max_length=255, blank=True, help_text="Opsional, arahkan ke URL tertentu saat banner diklik")
-    order = models.PositiveIntegerField(default=0, help_text="Angka kecil tampil lebih dulu")
+
+    link_url = models.CharField(
+        max_length=255,
+        blank=True,
+        help_text="Opsional, arahkan ke URL tertentu saat banner diklik"
+    )
+
+    order = models.PositiveIntegerField(
+        default=0,
+        help_text="Angka kecil tampil lebih dulu"
+    )
+
     is_active = models.BooleanField(default=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

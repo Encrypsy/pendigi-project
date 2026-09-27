@@ -119,3 +119,53 @@
 }
 .page-btn:hover { background: var(--paper); }
 .page-info { font-size: 0.82rem; color: #6b6862; }
+
+.banner-page-tabs {
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+    margin: 24px 0 0;
+    border-bottom: 1px solid var(--divider);
+}
+
+.banner-page-tab {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 11px 22px;
+
+    background: #eeeae4;
+    color: var(--text);
+
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 600;
+
+    border: 1px solid var(--divider);
+    border-bottom: none;
+
+    border-radius: 8px 8px 0 0;
+
+    transition: background .15s ease, color .15s ease;
+}
+
+.banner-page-tab:hover {
+    background: #e4ddd4;
+}
+
+.banner-page-tab.active {
+    background: #ffffff;
+    color: var(--brown);
+    position: relative;
+}
+
+.banner-page-tab.active::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    height: 2px;
+    background: #ffffff;
+}

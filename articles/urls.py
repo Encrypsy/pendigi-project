@@ -20,6 +20,7 @@ urlpatterns = [
     path('kelola/kategori/<int:pk>/edit/', views.category_edit, name='category_edit'),
     path('kelola/kategori/<int:pk>/hapus/', views.category_delete, name='category_delete'),
     path('kelola/banner/', views.banner_list, name='banner_list'),
+    path('kelola/banner/fiction/', views.fiction_banner_list, name='fiction_banner_list'),
     path('kelola/banner/tambah/', views.banner_create, name='banner_create'),
     path('kelola/banner/<int:pk>/hapus/', views.banner_delete, name='banner_delete'),
     path('kelola/banner/<int:pk>/toggle/', views.banner_toggle_active, name='banner_toggle_active'),

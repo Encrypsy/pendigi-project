@@ -10,7 +10,7 @@ from django.utils.dateparse import parse_date
 from django.core.paginator import Paginator
 
 from interactions.views import _attach_comment_meta, _sort_comments
-from .models import Articles, Banner, Categories, StatusArticle
+from .models import Articles, Banner, BannerType, Categories, StatusArticle
 from .forms import ArticleMetaForm, ArticleUploadForm, BannerForm
 from accounts.models import StatusKontributor
 from interactions.models import Comments, Ratings, Bookmarks, StatusComment
@@ -357,7 +357,7 @@ def article_comments_partial(request, pk):
 
 @admin_required
 def banner_list(request):
-    banners = Banner.objects.all()
+    banners = Banner.objects.exclude(type=BannerType.FIKSI)
 
     query = request.GET.get('q', '').strip()
     if query:
@@ -370,15 +370,21 @@ def banner_list(request):
         banners = banners.filter(is_active=False)
 
     sort = request.GET.get('sort', 'order')
-    sort_map = {'order': 'order', 'terbaru': '-created_at', 'terlama': 'created_at'}
+    sort_map = {
+        'order': 'order',
+        'terbaru': '-created_at',
+        'terlama': 'created_at'
+    }
     banners = banners.order_by(sort_map.get(sort, 'order'))
 
     date_from = request.GET.get('date_from', '')
     date_to = request.GET.get('date_to', '')
+
     if date_from:
         parsed = parse_date(date_from)
         if parsed:
             banners = banners.filter(created_at__date__gte=parsed)
+
     if date_to:
         parsed = parse_date(date_to)
         if parsed:
@@ -396,12 +402,24 @@ def banner_list(request):
 
     filters = [
         {
-            'name': 'status', 'label': 'Status', 'value': status,
-            'options': [('', 'Semua Status'), ('aktif', 'Aktif'), ('nonaktif', 'Nonaktif')],
+            'name': 'status',
+            'label': 'Status',
+            'value': status,
+            'options': [
+                ('', 'Semua Status'),
+                ('aktif', 'Aktif'),
+                ('nonaktif', 'Nonaktif')
+            ],
         },
         {
-            'name': 'sort', 'label': 'Urutan', 'value': sort,
-            'options': [('order', 'Urutan Tampil'), ('terbaru', 'Terbaru'), ('terlama', 'Terlama')],
+            'name': 'sort',
+            'label': 'Urutan',
+            'value': sort,
+            'options': [
+                ('order', 'Urutan Tampil'),
+                ('terbaru', 'Terbaru'),
+                ('terlama', 'Terlama')
+            ],
         },
     ]
 
@@ -415,6 +433,90 @@ def banner_list(request):
         'per_page': per_page,
         'per_page_options': [10, 25, 50],
         'reset_url': reverse('articles:banner_list'),
+        'banner_page': 'homepage',
+    })
+    
+@admin_required
+def fiction_banner_list(request):
+    banners = Banner.objects.filter(type=BannerType.FIKSI)
+
+    query = request.GET.get('q', '').strip()
+    if query:
+        banners = banners.filter(title__icontains=query)
+
+    status = request.GET.get('status', '')
+    if status == 'aktif':
+        banners = banners.filter(is_active=True)
+    elif status == 'nonaktif':
+        banners = banners.filter(is_active=False)
+
+    sort = request.GET.get('sort', 'order')
+
+    sort_map = {
+        'order': 'order',
+        'terbaru': '-created_at',
+        'terlama': 'created_at'
+    }
+
+    banners = banners.order_by(sort_map.get(sort, 'order'))
+
+    date_from = request.GET.get('date_from', '')
+    date_to = request.GET.get('date_to', '')
+
+    if date_from:
+        parsed = parse_date(date_from)
+        if parsed:
+            banners = banners.filter(created_at__date__gte=parsed)
+
+    if date_to:
+        parsed = parse_date(date_to)
+        if parsed:
+            banners = banners.filter(created_at__date__lte=parsed)
+
+    try:
+        per_page = int(request.GET.get('per_page', 10))
+        if per_page not in (10, 25, 50):
+            per_page = 10
+    except ValueError:
+        per_page = 10
+
+    paginator = Paginator(banners, per_page)
+    page_obj = paginator.get_page(request.GET.get('page', 1))
+
+    filters = [
+        {
+            'name': 'status',
+            'label': 'Status',
+            'value': status,
+            'options': [
+                ('', 'Semua Status'),
+                ('aktif', 'Aktif'),
+                ('nonaktif', 'Nonaktif')
+            ],
+        },
+        {
+            'name': 'sort',
+            'label': 'Urutan',
+            'value': sort,
+            'options': [
+                ('order', 'Urutan Tampil'),
+                ('terbaru', 'Terbaru'),
+                ('terlama', 'Terlama')
+            ],
+        },
+    ]
+
+    return render(request, 'articles/banner_list.html', {
+        'page_obj': page_obj,
+        'banners': page_obj.object_list,
+        'search_query': query,
+        'filters': filters,
+        'date_from': date_from,
+        'date_to': date_to,
+        'per_page': per_page,
+        'per_page_options': [10, 25, 50],
+        'reset_url': reverse('articles:fiction_banner_list'),
+        'banner_page': 'fiction',
     })
 
 
@@ -424,20 +526,37 @@ def _is_ajax(request):
 
 @admin_required
 def banner_create(request):
+    is_fiction = request.GET.get('page') == 'fiction'
+
     if request.method == 'POST':
         form = BannerForm(request.POST, request.FILES)
+
         if form.is_valid():
-            form.save()
+            banner = form.save(commit=False)
+
+            if is_fiction:
+                banner.type = BannerType.FIKSI
+
+            banner.save()
+
             if _is_ajax(request):
                 return JsonResponse({'ok': True})
+
             messages.success(request, 'Banner ditambahkan.')
+
+            if is_fiction:
+                return redirect('articles:fiction_banner_list')
+
             return redirect('articles:banner_list')
-        if _is_ajax(request):
-            return render(request, 'articles/banner_form_modal.html', {'form': form, 'is_edit': False}, status=400)
+
     else:
         form = BannerForm()
 
-    return render(request, 'articles/banner_form_modal.html', {'form': form, 'is_edit': False})
+    return render(request, 'articles/banner_form_modal.html', {
+        'form': form,
+        'is_edit': False,
+        'is_fiction': is_fiction,
+    })
 
 
 @admin_required
@@ -479,8 +598,28 @@ def banner_toggle_active(request, pk):
 
 
 def banner_preview(request):
-    banners = Banner.objects.filter(is_active=True)
-    return render(request, 'articles/banner_preview.html', {'banners': banners})
+    page = request.GET.get('page', 'homepage')
+
+    if page == 'fiction':
+        banners = Banner.objects.filter(
+            type=BannerType.FIKSI,
+            is_active=True
+        )
+    else:
+        banners = Banner.objects.exclude(
+            type=BannerType.FIKSI
+        ).filter(
+            is_active=True
+        )
+
+    return render(
+        request,
+        'articles/banner_preview.html',
+        {
+            'banners': banners,
+            'banner_page': page,
+        }
+    )
 
 @admin_required
 @require_POST

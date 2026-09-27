@@ -11,11 +11,41 @@
 
 {% block admin_content %}
 <div class="page-header-row">
-    <h1 class="admin-page-title">Kelola Banner</h1>
+    <h1 class="admin-page-title">
+    {% if banner_page == 'fiction' %}
+        Kelola Banner Fiction
+    {% else %}
+        Kelola Banner Homepage
+    {% endif %}
+</h1>
     <div style="display:flex; gap:10px;">
-        <a href="{% url 'articles:banner_preview' %}" target="_blank" class="btn-secondary">Preview</a>
-        <button type="button" class="btn-primary" onclick="openBannerModal('{% url 'articles:banner_create' %}')">+ Tambah Banner Baru</button>
+        <a
+    href="{% url 'articles:banner_preview' %}?page={{ banner_page }}"
+    target="_blank"
+    class="btn-secondary">
+    Preview
+</a>
+        <button
+    type="button"
+    class="btn-primary"
+    onclick="openBannerModal(
+        '{% url 'articles:banner_create' %}?page={{ banner_page }}'
+    )">
+    + Tambah Banner Baru
+</button>
     </div>
+</div>
+
+<div class="banner-page-tabs">
+    <a href="{% url 'articles:banner_list' %}"
+       class="banner-page-tab {% if banner_page == 'homepage' %}active{% endif %}">
+        Homepage
+    </a>
+
+    <a href="{% url 'articles:fiction_banner_list' %}"
+       class="banner-page-tab {% if banner_page == 'fiction' %}active{% endif %}">
+        Fiction
+    </a>
 </div>
 
 {% include 'partials/table_toolbar.html' with search_placeholder="Cari banner..." %}
