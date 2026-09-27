@@ -1,11 +1,11 @@
-{% extends 'app_base.html' %}
+{% extends 'fiction/fiction_base.html' %}
 {% load static %}
 {% block title %}Cerita Saya{% endblock %}
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/table.css' %}">
 {% endblock %}
 
-{% block content %}
+{% block fiction_content %}
 <div class="page-header-row">
     <h1 class="section-title">Cerita Saya</h1>
     <a href="{% url 'fiction:create_story' %}" class="btn-primary">+ Tulis Cerita Baru</a>

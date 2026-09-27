@@ -164,8 +164,21 @@ def admin_review_story(request, pk):
     return render(request, 'fiction/admin_review.html', {'story': story, 'chapters': chapters})
 
 def story_list(request):
-    stories = Stories.objects.filter(status=StatusStory.APPROVED).select_related('author')
-    return render(request, 'fiction/story_list.html', {'stories': stories})
+    stories = Stories.objects.filter(
+        status=StatusStory.APPROVED
+    ).select_related('author')
+
+    query = request.GET.get('q', '').strip()
+
+    if query:
+        stories = stories.filter(
+            title__icontains=query
+        )
+
+    return render(request, 'fiction/story_list.html', {
+        'stories': stories,
+        'search_query': query,
+    })
 
 
 def story_detail(request, pk):

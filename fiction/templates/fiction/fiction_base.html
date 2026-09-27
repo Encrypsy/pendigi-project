@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block body %}
+
+<link rel="stylesheet" href="{% static 'css/fiction-navbar.css' %}">
+
+{% include 'fiction/partials/fiction_navbar.html' %}
+
+<main class="fiction-page-content">
+    {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <li class="{{ message.tags }}">{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    {% block fiction_content %}
+    {% endblock %}
+</main>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    const exploreButton = document.getElementById('fictionExploreButton');
+    const exploreMenu = document.getElementById('fictionExploreMenu');
+
+    const writeButton = document.getElementById('fictionWriteButton');
+    const writeMenu = document.getElementById('fictionWriteMenu');
+
+    const mobileButton = document.getElementById('fictionMobileButton');
+    const mobileMenu = document.getElementById('fictionMobileMenu');
+
+    function closeDropdowns() {
+        exploreMenu?.classList.remove('is-open');
+        writeMenu?.classList.remove('is-open');
+    }
+
+    exploreButton?.addEventListener('click', function (event) {
+        event.stopPropagation();
+
+        writeMenu?.classList.remove('is-open');
+        exploreMenu?.classList.toggle('is-open');
+    });
+
+    writeButton?.addEventListener('click', function (event) {
+        event.stopPropagation();
+
+        exploreMenu?.classList.remove('is-open');
+        writeMenu?.classList.toggle('is-open');
+    });
+
+    mobileButton?.addEventListener('click', function () {
+        mobileMenu?.classList.toggle('is-open');
+        mobileButton.classList.toggle('is-active');
+    });
+
+    document.addEventListener('click', function (event) {
+        if (
+            !exploreMenu?.contains(event.target) &&
+            !exploreButton?.contains(event.target)
+        ) {
+            exploreMenu?.classList.remove('is-open');
+        }
+
+        if (
+            !writeMenu?.contains(event.target) &&
+            !writeButton?.contains(event.target)
+        ) {
+            writeMenu?.classList.remove('is-open');
+        }
+    });
+
+});
+</script>
+
+{% endblock %}

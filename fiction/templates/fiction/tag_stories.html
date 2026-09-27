@@ -1,11 +1,11 @@
-{% extends 'app_base.html' %}
+{% extends 'fiction/fiction_base.html' %}
 {% load static %}
 {% block title %}Tag: {{ tag }}{% endblock %}
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'css/profile.css' %}">
 {% endblock %}
 
-{% block content %}
+{% block fiction_content %}
 <h1 class="section-title">Cerita dengan tag "{{ tag }}"</h1>
 
 <div class="story-mini-grid">

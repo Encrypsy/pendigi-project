@@ -1,4 +1,4 @@
-{% extends 'app_base.html' %}
+{% extends 'fiction/fiction_base.html' %}
 {% load static %}
 {% block title %}
   {{ story.title }} - Bab {{ chapter.chapter_number }}
@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="{% static 'css/articles.css' %}" />
 {% endblock %}
 
-{% block content %}
+{% block fiction_content %}
   <div class="reader-header">
     <a href="{% url 'fiction:story_detail' story.pk %}" class="reader-header-story">
       {% if story.cover %}

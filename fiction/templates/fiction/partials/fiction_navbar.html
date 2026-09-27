@@ -1,0 +1,206 @@
+<header class="fiction-navbar">
+
+    <div class="fiction-navbar__inner">
+
+        <!-- LOGO -->
+        <a
+            href="{% url 'articles:article_list' %}"
+            class="fiction-navbar__brand"
+        >
+            <img
+                src="{% static 'images/pendigi-logo-tulisan.svg' %}"
+                alt="Pena Digital"
+            >
+        </a>
+
+
+        <!-- MOBILE TOGGLE -->
+        <button
+            type="button"
+            class="fiction-navbar__mobile-toggle"
+            id="fictionMobileButton"
+            aria-label="Buka menu"
+        >
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+
+
+        <!-- DESKTOP / MOBILE NAV -->
+        <div
+            class="fiction-navbar__navigation"
+            id="fictionMobileMenu"
+        >
+
+            <!-- JELAJAHI -->
+            <div class="fiction-navbar__dropdown">
+
+                <button
+                    type="button"
+                    class="fiction-navbar__button"
+                    id="fictionExploreButton"
+                >
+                    Jelajahi
+                    <span class="fiction-navbar__arrow">⌄</span>
+                </button>
+
+                <div
+                    class="fiction-navbar__dropdown-menu fiction-navbar__explore-menu"
+                    id="fictionExploreMenu"
+                >
+
+                    <div class="fiction-navbar__dropdown-title">
+                        JELAJAHI
+                    </div>
+
+                    <div class="fiction-navbar__tag-grid">
+
+                        {% for tag in fiction_tags %}
+
+                            <a
+                                href="{% url 'fiction:tag_stories' tag=tag %}"
+                                class="fiction-navbar__tag"
+                            >
+                                {{ tag }}
+                            </a>
+
+                        {% empty %}
+
+                            <span class="fiction-navbar__empty">
+                                Belum ada genre.
+                            </span>
+
+                        {% endfor %}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- SEARCH -->
+            <form
+                action="{% url 'fiction:story_list' %}"
+                method="get"
+                class="fiction-navbar__search"
+            >
+
+                <svg
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                >
+                    <circle cx="11" cy="11" r="7"></circle>
+                    <line
+                        x1="21"
+                        y1="21"
+                        x2="16.65"
+                        y2="16.65"
+                    ></line>
+                </svg>
+
+                <input
+                    type="search"
+                    name="q"
+                    value="{{ request.GET.q|default:'' }}"
+                    placeholder="Cari cerita..."
+                    autocomplete="off"
+                >
+
+            </form>
+
+
+            <!-- BAGIAN KANAN -->
+            <div class="fiction-navbar__right">
+
+                {% if user.is_authenticated %}
+
+                    {% if user.status_kontributor == 'approved' %}
+
+                        <!-- TULIS -->
+                        <div class="fiction-navbar__dropdown">
+
+                            <button
+                                type="button"
+                                class="fiction-navbar__button"
+                                id="fictionWriteButton"
+                            >
+                                Tulis
+                                <span class="fiction-navbar__arrow">⌄</span>
+                            </button>
+
+                            <div
+                                class="fiction-navbar__dropdown-menu fiction-navbar__write-menu"
+                                id="fictionWriteMenu"
+                            >
+
+                                <a
+                                    href="{% url 'fiction:create_story' %}"
+                                    class="fiction-navbar__write-item"
+                                >
+                                    <strong>Membuat cerita baru</strong>
+                                    <span>Mulai menulis cerita</span>
+                                </a>
+
+                                <a
+                                    href="{% url 'fiction:my_stories' %}"
+                                    class="fiction-navbar__write-item"
+                                >
+                                    <strong>Cerita saya</strong>
+                                    <span>Kelola cerita yang kamu tulis</span>
+                                </a>
+
+                            </div>
+
+                        </div>
+
+                    {% endif %}
+
+
+                    <!-- PROFILE -->
+                    <a
+                        href="{% url 'profile' %}"
+                        class="fiction-navbar__profile"
+                    >
+
+                        {% if user.profile_picture %}
+                            <img
+                                src="{{ user.profile_picture.url }}"
+                                alt="{{ user.username }}"
+                            >
+                        {% else %}
+                            <span class="fiction-navbar__profile-placeholder">
+                                {{ user.username|first|upper }}
+                            </span>
+                        {% endif %}
+
+                        <span>{{ user.username }}</span>
+
+                    </a>
+
+                {% else %}
+
+                    <a
+                        href="{% url 'login' %}"
+                        class="fiction-navbar__login"
+                    >
+                        Login
+                    </a>
+
+                    <a
+                        href="{% url 'register' %}"
+                        class="fiction-navbar__register"
+                    >
+                        Daftar
+                    </a>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+</header>

@@ -1,4 +1,4 @@
-{% extends 'app_base.html' %}
+{% extends 'fiction/fiction_base.html' %}
 {% load static %}
 {% block title %}{{ story.title }}{% endblock %}
 {% block extra_css %}
@@ -6,7 +6,7 @@
 <link rel="stylesheet" href="{% static 'css/story-detail.css' %}">
 {% endblock %}
 
-{% block content %}
+{% block fiction_content %}
 <div class="story-hero">
     <div class="story-hero-cover">
         {% if story.cover %}

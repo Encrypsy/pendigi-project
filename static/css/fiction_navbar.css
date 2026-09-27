@@ -1,0 +1,439 @@
+.fiction-navbar {
+    position: relative;
+    width: 100%;
+    height: 68px;
+    background: #ffffff;
+    border-bottom: 1px solid #e8e5df;
+    z-index: 1000;
+}
+
+.fiction-navbar__inner {
+    width: min(1200px, calc(100% - 48px));
+    height: 100%;
+    margin: 0 auto;
+
+    display: flex;
+    align-items: center;
+    gap: 28px;
+}
+
+
+/* =========================
+   BRAND
+========================= */
+
+.fiction-navbar__brand {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.fiction-navbar__brand img {
+    display: block;
+    width: auto;
+    height: 44px;
+}
+
+
+/* =========================
+   NAVIGATION
+========================= */
+
+.fiction-navbar__navigation {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    min-width: 0;
+    gap: 24px;
+}
+
+.fiction-navbar__right {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin-left: auto;
+}
+
+
+/* =========================
+   BUTTON
+========================= */
+
+.fiction-navbar__button {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    padding: 10px 4px;
+
+    background: none;
+    border: none;
+
+    color: #2a2420;
+    font-size: 14px;
+    font-weight: 500;
+
+    cursor: pointer;
+}
+
+.fiction-navbar__button:hover {
+    color: #6b4226;
+}
+
+.fiction-navbar__arrow {
+    font-size: 15px;
+}
+
+
+/* =========================
+   SEARCH
+========================= */
+
+.fiction-navbar__search {
+    display: flex;
+    align-items: center;
+
+    width: min(420px, 100%);
+    height: 42px;
+
+    background: #ffffff;
+    border: 1px solid #d9d5ce;
+    border-radius: 7px;
+
+    padding: 0 13px;
+
+    transition: border-color .15s ease,
+                box-shadow .15s ease;
+}
+
+.fiction-navbar__search:focus-within {
+    border-color: #6b4226;
+    box-shadow: 0 0 0 3px rgba(107, 66, 38, .08);
+}
+
+.fiction-navbar__search svg {
+    width: 18px;
+    height: 18px;
+
+    flex-shrink: 0;
+
+    stroke: #77716b;
+    fill: none;
+    stroke-width: 2;
+}
+
+.fiction-navbar__search input {
+    width: 100%;
+
+    border: none;
+    outline: none;
+
+    padding: 0 10px;
+
+    font-size: 14px;
+    color: #2a2420;
+    background: transparent;
+}
+
+
+/* =========================
+   DROPDOWN
+========================= */
+
+.fiction-navbar__dropdown {
+    position: relative;
+}
+
+.fiction-navbar__dropdown-menu {
+    position: absolute;
+    top: calc(100% + 12px);
+    left: 0;
+
+    display: none;
+
+    background: #ffffff;
+    border: 1px solid #e5e0d8;
+    border-radius: 8px;
+
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .12);
+
+    z-index: 2000;
+}
+
+.fiction-navbar__dropdown-menu.is-open {
+    display: block;
+}
+
+
+/* =========================
+   EXPLORE
+========================= */
+
+.fiction-navbar__explore-menu {
+    width: 620px;
+    padding: 20px;
+}
+
+.fiction-navbar__dropdown-title {
+    margin-bottom: 16px;
+
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: .04em;
+
+    color: #2a2420;
+}
+
+.fiction-navbar__tag-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px 28px;
+}
+
+.fiction-navbar__tag {
+    display: block;
+
+    padding: 9px 0;
+
+    color: #38322e;
+    font-size: 14px;
+
+    text-decoration: none;
+}
+
+.fiction-navbar__tag:hover {
+    color: #6b4226;
+}
+
+
+/* =========================
+   WRITE
+========================= */
+
+.fiction-navbar__write-menu {
+    width: 250px;
+    padding: 8px;
+    right: 0;
+    left: auto;
+}
+
+.fiction-navbar__write-item {
+    display: flex;
+    flex-direction: column;
+
+    padding: 13px 14px;
+
+    border-radius: 6px;
+
+    text-decoration: none;
+    color: #2a2420;
+}
+
+.fiction-navbar__write-item:hover {
+    background: #f7f4ef;
+}
+
+.fiction-navbar__write-item strong {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.fiction-navbar__write-item span {
+    margin-top: 3px;
+
+    color: #8a847d;
+    font-size: 12px;
+}
+
+
+/* =========================
+   PROFILE
+========================= */
+
+.fiction-navbar__profile {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    color: #2a2420;
+
+    font-size: 14px;
+    text-decoration: none;
+
+    white-space: nowrap;
+}
+
+.fiction-navbar__profile img,
+.fiction-navbar__profile-placeholder {
+    width: 34px;
+    height: 34px;
+
+    border-radius: 50%;
+}
+
+.fiction-navbar__profile img {
+    object-fit: cover;
+}
+
+.fiction-navbar__profile-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #6b4226;
+    color: #ffffff;
+
+    font-size: 13px;
+    font-weight: 600;
+}
+
+
+/* =========================
+   AUTH
+========================= */
+
+.fiction-navbar__login,
+.fiction-navbar__register {
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.fiction-navbar__login {
+    color: #2a2420;
+}
+
+.fiction-navbar__register {
+    padding: 8px 16px;
+
+    background: #6b4226;
+    color: #ffffff;
+
+    border-radius: 20px;
+    font-weight: 600;
+}
+
+
+/* =========================
+   MOBILE BUTTON
+========================= */
+
+.fiction-navbar__mobile-toggle {
+    display: none;
+
+    width: 38px;
+    height: 38px;
+
+    border: none;
+    background: none;
+
+    cursor: pointer;
+
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+}
+
+.fiction-navbar__mobile-toggle span {
+    display: block;
+
+    width: 23px;
+    height: 2px;
+
+    background: #6b4226;
+
+    border-radius: 2px;
+}
+
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 900px) {
+
+    .fiction-navbar {
+        height: auto;
+        min-height: 64px;
+    }
+
+    .fiction-navbar__inner {
+        width: calc(100% - 32px);
+        min-height: 64px;
+        flex-wrap: wrap;
+        gap: 0;
+    }
+
+    .fiction-navbar__brand {
+        flex: 1;
+    }
+
+    .fiction-navbar__brand img {
+        height: 40px;
+    }
+
+    .fiction-navbar__mobile-toggle {
+        display: flex;
+    }
+
+    .fiction-navbar__navigation {
+        display: none;
+
+        width: 100%;
+        flex-direction: column;
+        align-items: stretch;
+
+        padding: 16px 0;
+
+        gap: 10px;
+    }
+
+    .fiction-navbar__navigation.is-open {
+        display: flex;
+    }
+
+    .fiction-navbar__right {
+        width: 100%;
+        margin-left: 0;
+
+        flex-direction: column;
+        align-items: stretch;
+
+        gap: 10px;
+    }
+
+    .fiction-navbar__search {
+        width: 100%;
+        order: 1;
+    }
+
+    .fiction-navbar__dropdown {
+        width: 100%;
+    }
+
+    .fiction-navbar__button {
+        width: 100%;
+        justify-content: space-between;
+        padding: 12px 4px;
+
+        border-bottom: 1px solid #e8e2d9;
+    }
+
+    .fiction-navbar__dropdown-menu {
+        position: static;
+        width: 100% !important;
+
+        margin-top: 6px;
+
+        box-shadow: none;
+        border-radius: 6px;
+    }
+
+    .fiction-navbar__tag-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .fiction-navbar__profile {
+        padding: 10px 4px;
+    }
+
+}

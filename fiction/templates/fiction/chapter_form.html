@@ -1,4 +1,4 @@
-{% extends 'app_base.html' %}
+{% extends 'fiction/fiction_base.html' %}
 {% load static %}
 {% block title %}{% if is_edit %}Edit Bab {{ chapter_number }}{% else %}Tulis Bab {{ chapter_number }}{% endif %}
 {%endblock %}
@@ -9,7 +9,7 @@
 <link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet">
 {% endblock %}
 
-{% block content %}
+{% block fiction_content %}
 <div class="upload-card chapter-editor-card">
     <h2>{{ story.title }} — Bab {{ chapter_number }}</h2>
     <p class="auth-subtitle">Tulis judul dan isi bab di bawah ini</p>
