@@ -36,18 +36,6 @@
     </div>
 </div>
 
-<div class="banner-page-tabs">
-    <a href="{% url 'articles:banner_list' %}"
-       class="banner-page-tab {% if banner_page == 'homepage' %}active{% endif %}">
-        Homepage
-    </a>
-
-    <a href="{% url 'articles:fiction_banner_list' %}"
-       class="banner-page-tab {% if banner_page == 'fiction' %}active{% endif %}">
-        Fiction
-    </a>
-</div>
-
 {% include 'partials/table_toolbar.html' with search_placeholder="Cari banner..." %}
 
 <form method="post" action="{% url 'articles:banner_bulk_action' %}" id="bulkForm" onsubmit="return confirmBulk()">
@@ -62,6 +50,18 @@
         <button type="submit" class="btn-secondary">Terapkan</button>
         <span class="bulk-selected-count" id="selectedCount"></span>
     </div>
+
+    <div class="banner-page-tabs">
+    <a href="{% url 'articles:banner_list' %}"
+       class="banner-page-tab {% if banner_page == 'homepage' %}active{% endif %}">
+        Homepage
+    </a>
+
+    <a href="{% url 'articles:fiction_banner_list' %}"
+       class="banner-page-tab {% if banner_page == 'fiction' %}active{% endif %}">
+        Fiction
+    </a>
+</div>
 
     <table class="data-table">
         <thead>
