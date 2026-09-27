@@ -118,6 +118,44 @@ class ReadingProgress(models.Model):
     def __str__(self):
         return f'{self.user.username} - {self.story.title} - Bab {self.last_chapter_number}'
 
+    @property
+    def last_chapter(self):
+        """
+        Mengambil object chapter terakhir yang dibaca.
+        """
+        return self.story.chapters.filter(
+            chapter_number=self.last_chapter_number
+        ).first()
+
+    @property
+    def total_chapters(self):
+        """
+        Total bab yang tersedia pada cerita.
+        """
+        return self.story.chapters.count()
+
+    @property
+    def progress_percentage(self):
+        """
+        Persentase progress membaca.
+        """
+        total = self.total_chapters
+
+        if total == 0:
+            return 0
+
+        return min(
+            int((self.last_chapter_number / total) * 100),
+            100
+        )
+
+    @property
+    def next_chapter_number(self):
+        """
+        Bab berikutnya yang harus dibaca.
+        """
+        return self.last_chapter_number + 1
+
 class Chapters(models.Model):
     story = models.ForeignKey(Stories, on_delete=models.CASCADE, related_name='chapters')
     chapter_number = models.PositiveIntegerField()

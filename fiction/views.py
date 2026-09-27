@@ -165,50 +165,53 @@ def admin_review_story(request, pk):
     return render(request, 'fiction/admin_review.html', {'story': story, 'chapters': chapters})
 
 def story_list(request):
+
     stories = Stories.objects.filter(
         status=StatusStory.APPROVED
-    )
+    ).select_related('author')
 
     banners = Banner.objects.filter(
         type=BannerType.FIKSI,
         is_active=True
     ).order_by('order', '-created_at')
 
-    # Rekomendasi sementara
     recommended_stories = stories[:12]
 
     continue_reading = []
 
     if request.user.is_authenticated:
+
         progress_list = (
             ReadingProgress.objects
             .filter(
                 user=request.user,
-                last_chapter_number__gt=0
+                last_chapter_number__gt=0,
+                story__status=StatusStory.APPROVED,
             )
-            .select_related('story')
+            .select_related(
+                'story',
+                'story__author'
+            )
             .order_by('-updated_at')
         )
 
         for progress in progress_list:
-            story = progress.story
 
-            total_chapters = story.chapters.count()
+            total_chapters = progress.total_chapters
 
+            # Abaikan progress yang sudah sampai bab terakhir
             if total_chapters == 0:
                 continue
 
-            progress_percentage = min(
-                int((progress.last_chapter_number / total_chapters) * 100),
-                100
-            )
+            if progress.last_chapter_number >= total_chapters:
+                continue
 
-            story.reading_progress = progress
-            story.progress_percentage = progress_percentage
-            story.last_chapter = progress.last_chapter_number
-            story.total_chapters_count = total_chapters
+            continue_reading.append(progress)
 
-            continue_reading.append(story)
+            # Kita hanya perlu data lebih dari 2 untuk
+            # menentukan apakah tombol "Lihat Selengkapnya" muncul
+            if len(continue_reading) >= 3:
+                break
 
     return render(
         request,
@@ -217,7 +220,7 @@ def story_list(request):
             'stories': stories,
             'banners': banners,
             'recommended_stories': recommended_stories,
-            'continue_reading': continue_reading,
+            'continue_reading': continue_reading[:2],
             'continue_reading_count': len(continue_reading),
         }
     )
