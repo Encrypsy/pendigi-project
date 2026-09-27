@@ -88,6 +88,35 @@ class FavoriteStories(models.Model):
 
     def __str__(self):
         return f'{self.user.username} favorited {self.story.title}'
+    
+class ReadingProgress(models.Model):
+    user = models.ForeignKey(
+        Users,
+        on_delete=models.CASCADE,
+        related_name='reading_progress'
+    )
+
+    story = models.ForeignKey(
+        Stories,
+        on_delete=models.CASCADE,
+        related_name='reading_progress'
+    )
+
+    last_chapter_number = models.PositiveIntegerField(default=0)
+
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'story'],
+                name='unique_user_story_reading_progress'
+            )
+        ]
+        ordering = ['-updated_at']
+
+    def __str__(self):
+        return f'{self.user.username} - {self.story.title} - Bab {self.last_chapter_number}'
 
 class Chapters(models.Model):
     story = models.ForeignKey(Stories, on_delete=models.CASCADE, related_name='chapters')

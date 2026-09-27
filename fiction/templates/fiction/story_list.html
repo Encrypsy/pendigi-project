@@ -1,33 +1,291 @@
 {% extends 'fiction/fiction_base.html' %}
 {% load static %}
+
 {% block title %}Fiksi{% endblock %}
+
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/profile.css' %}">
+<link rel="stylesheet" href="{% static 'css/fiction-home.css' %}">
 {% endblock %}
 
 {% block fiction_content %}
-<h1 class="section-title">Fiksi</h1>
 
-<div class="story-mini-grid story-browse-grid">
-    {% for story in stories %}
-    <a href="{% url 'fiction:story_detail' story.pk %}" class="story-mini-card">
-        <div class="story-cover-wrap">
-            {% if story.cover %}
-                <img src="{{ story.cover.url }}" class="story-mini-cover" alt="{{ story.title }}">
-            {% else %}
-                <div class="story-mini-cover story-mini-placeholder">📖</div>
-            {% endif %}
-            {% if story.target_pembaca == 'dewasa' %}
-                <span class="age-badge">18+</span>
-            {% endif %}
+<div class="fiction-home">
+
+    <!-- ================= BANNER ================= -->
+
+    {% if banners %}
+    <section class="fiction-banner-section">
+
+        <div class="fiction-banner-slider">
+
+            {% for banner in banners %}
+            <a
+                href="{{ banner.link_url|default:'#' }}"
+                class="fiction-banner-slide {% if forloop.first %}active{% endif %}"
+            >
+                <img
+                    src="{{ banner.image.url }}"
+                    alt="{{ banner.title|default:'Banner Fiksi' }}"
+                >
+
+                {% if banner.title %}
+                <div class="fiction-banner-overlay">
+                    <h2>{{ banner.title }}</h2>
+
+                    {% if banner.description %}
+                    <p>{{ banner.description }}</p>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </a>
+            {% endfor %}
+
         </div>
-        <div class="story-mini-info">
-            <strong>{{ story.title }}</strong>
-            <span class="story-mini-chapters">{{ story.get_genre_display }} &middot; {{ story.total_chapters }} bab</span>
+
+        {% if banners|length > 1 %}
+        <div class="fiction-banner-dots">
+            {% for banner in banners %}
+            <button
+                type="button"
+                class="{% if forloop.first %}active{% endif %}"
+                data-index="{{ forloop.counter0 }}"
+            ></button>
+            {% endfor %}
         </div>
-    </a>
-    {% empty %}
-        <p class="hint-text">Belum ada cerita yang tayang.</p>
-    {% endfor %}
+        {% endif %}
+
+    </section>
+    {% endif %}
+
+
+    <!-- ================= REKOMENDASI ================= -->
+
+    <section class="fiction-section">
+
+        <div class="fiction-section-header">
+            <h2>Cerita Pilihan untuk Kamu</h2>
+        </div>
+
+        <div class="story-horizontal-container">
+
+            <div class="story-horizontal-track">
+
+                {% for story in recommended_stories %}
+
+                <a
+                    href="{% url 'fiction:story_detail' story.pk %}"
+                    class="fiction-story-card"
+                >
+
+                    <div class="fiction-story-cover-wrap">
+
+                        {% if story.cover %}
+                        <img
+                            src="{{ story.cover.url }}"
+                            alt="{{ story.title }}"
+                            class="fiction-story-cover"
+                        >
+                        {% else %}
+                        <div class="fiction-story-placeholder">
+                            📖
+                        </div>
+                        {% endif %}
+
+                    </div>
+
+                    <div class="fiction-story-info">
+
+                        <h3>{{ story.title }}</h3>
+
+                        <p class="fiction-story-author">
+                            {{ story.author.username }}
+                        </p>
+
+                        <span class="fiction-story-genre">
+                            {{ story.get_genre_display }}
+                        </span>
+
+                    </div>
+
+                </a>
+
+                {% empty %}
+
+                <p class="empty-fiction">
+                    Belum ada cerita yang tersedia.
+                </p>
+
+                {% endfor %}
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ================= CONTINUE READING ================= -->
+
+    {% if request.user.is_authenticated and continue_reading %}
+
+    <section class="fiction-section continue-reading-section">
+
+        <div class="fiction-section-header">
+            <div>
+                <h2>Lanjutkan Membaca</h2>
+                <p>
+                    Lanjutkan cerita yang belum selesai kamu baca.
+                </p>
+            </div>
+        </div>
+
+
+        <div class="continue-reading-list">
+
+            {% for progress in continue_reading|slice:":2" %}
+
+            <article class="continue-reading-card">
+
+                <div class="continue-cover">
+
+                    {% if progress.story.cover %}
+                    <img
+                        src="{{ progress.story.cover.url }}"
+                        alt="{{ progress.story.title }}"
+                    >
+                    {% else %}
+                    <div class="continue-cover-placeholder">
+                        📖
+                    </div>
+                    {% endif %}
+
+                </div>
+
+
+                <div class="continue-content">
+
+                    <h3>
+                        {{ progress.story.title }}
+                    </h3>
+
+                    <p class="continue-author">
+                        oleh {{ progress.story.author.username }}
+                    </p>
+
+                    <p class="continue-description">
+                        {{ progress.story.description|truncatewords:30 }}
+                    </p>
+
+
+                    <div class="continue-progress-info">
+                        <span>
+                            Bab {{ progress.last_chapter.chapter_number }}
+                            dari {{ progress.total_chapters }}
+                        </span>
+
+                        <span>
+                            {{ progress.progress_percentage }}%
+                        </span>
+                    </div>
+
+
+                    <div class="continue-progress">
+                        <div
+                            class="continue-progress-bar"
+                            style="width: {{ progress.progress_percentage }}%;"
+                        ></div>
+                    </div>
+
+
+                    <a
+                        href="{% url 'fiction:read_chapter' progress.story.pk progress.next_chapter_number %}"
+                        class="continue-button"
+                    >
+                        Lanjut Membaca
+                    </a>
+
+                </div>
+
+            </article>
+
+            {% endfor %}
+
+        </div>
+
+
+        {% if continue_reading_count > 2 %}
+        <div class="continue-more">
+
+            <a href="#" class="continue-more-button">
+                Lihat Selengkapnya
+            </a>
+
+        </div>
+        {% endif %}
+
+    </section>
+
+    {% endif %}
+
 </div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    const slides = document.querySelectorAll('.fiction-banner-slide');
+    const dots = document.querySelectorAll('.fiction-banner-dots button');
+
+    if (slides.length > 1) {
+
+        let currentIndex = 0;
+
+        function showSlide(index) {
+
+            slides.forEach(slide => {
+                slide.classList.remove('active');
+            });
+
+            dots.forEach(dot => {
+                dot.classList.remove('active');
+            });
+
+            slides[index].classList.add('active');
+
+            if (dots[index]) {
+                dots[index].classList.add('active');
+            }
+
+            currentIndex = index;
+        }
+
+        dots.forEach((dot, index) => {
+
+            dot.addEventListener('click', function () {
+                showSlide(index);
+            });
+
+        });
+
+        setInterval(function () {
+
+            let nextIndex = currentIndex + 1;
+
+            if (nextIndex >= slides.length) {
+                nextIndex = 0;
+            }
+
+            showSlide(nextIndex);
+
+        }, 5000);
+
+    }
+
+});
+</script>
+
 {% endblock %}
