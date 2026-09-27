@@ -167,13 +167,14 @@ def admin_review_story(request, pk):
 def story_list(request):
     stories = Stories.objects.filter(
         status=StatusStory.APPROVED
-    ).prefetch_related('chapters')
+    )
 
     banners = Banner.objects.filter(
         type=BannerType.FIKSI,
         is_active=True
     ).order_by('order', '-created_at')
 
+    # Rekomendasi sementara
     recommended_stories = stories[:12]
 
     continue_reading = []
@@ -181,45 +182,45 @@ def story_list(request):
     if request.user.is_authenticated:
         progress_list = (
             ReadingProgress.objects
-            .filter(user=request.user)
-            .select_related('story', 'story__author', 'last_chapter')
-            .prefetch_related('story__chapters')
+            .filter(
+                user=request.user,
+                last_chapter_number__gt=0
+            )
+            .select_related('story')
             .order_by('-updated_at')
         )
 
         for progress in progress_list:
-            if not progress.last_chapter:
+            story = progress.story
+
+            total_chapters = story.chapters.count()
+
+            if total_chapters == 0:
                 continue
 
-            total_chapters = progress.story.chapters.count()
-
-            # Kalau sudah sampai bab terakhir,
-            # jangan masukkan ke continue reading
-            if progress.last_chapter.chapter_number >= total_chapters:
-                continue
-
-            progress.total_chapters = total_chapters
-            progress.progress_percentage = round(
-                (progress.last_chapter.chapter_number / total_chapters) * 100
+            progress_percentage = min(
+                int((progress.last_chapter_number / total_chapters) * 100),
+                100
             )
 
-            progress.next_chapter_number = (
-                progress.last_chapter.chapter_number + 1
-            )
+            story.reading_progress = progress
+            story.progress_percentage = progress_percentage
+            story.last_chapter = progress.last_chapter_number
+            story.total_chapters_count = total_chapters
 
-            continue_reading.append(progress)
+            continue_reading.append(story)
 
     return render(
-    request,
-    'fiction/story_list.html',
-    {
-        'stories': stories,
-        'banners': banners,
-        'recommended_stories': recommended_stories,
-        'continue_reading': continue_reading,
-        'continue_reading_count': len(continue_reading),
-    }
-)
+        request,
+        'fiction/story_list.html',
+        {
+            'stories': stories,
+            'banners': banners,
+            'recommended_stories': recommended_stories,
+            'continue_reading': continue_reading,
+            'continue_reading_count': len(continue_reading),
+        }
+    )
 
 def story_detail(request, pk):
     story = get_object_or_404(Stories, pk=pk, status=StatusStory.APPROVED)
@@ -248,12 +249,12 @@ def read_chapter(request, pk, chapter_number):
     
     if request.user.is_authenticated:
         ReadingProgress.objects.update_or_create(
-            user=request.user,
-            story=story,
-            defaults={
-                'last_chapter': chapter,
-            }
-        )
+        user=request.user,
+        story=story,
+        defaults={
+            'last_chapter_number': chapter_number
+        }
+    )
 
     Chapters.objects.filter(pk=chapter.pk).update(views_count=F('views_count') + 1)
     chapter.refresh_from_db(fields=['views_count'])
