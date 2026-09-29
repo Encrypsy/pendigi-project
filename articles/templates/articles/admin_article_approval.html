@@ -1,0 +1,269 @@
+{% extends 'admin_base.html' %}
+{% load static %}
+
+{% block title %}Kelola Artikel{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/admin.css' %}">
+<link rel="stylesheet" href="{% static 'css/table.css' %}">
+<link rel="stylesheet" href="{% static 'css/admin-table.css' %}">
+{% endblock %}
+
+{% block admin_content %}
+
+<div class="page-header-row">
+
+    <h1 class="admin-page-title">
+        Kelola Artikel
+    </h1>
+
+</div>
+
+
+{% include 'partials/table_toolbar.html' with search_placeholder="Cari artikel..." %}
+
+
+<!-- ================= TAB STATUS ================= -->
+
+<div class="article-status-tabs">
+
+    <a
+        href="{% url 'articles:admin_article_list' 'pending' %}"
+        class="article-status-tab {% if article_status == 'pending' %}active{% endif %}"
+    >
+        Pending
+        <span class="tab-count">{{ status_counts.pending }}</span>
+    </a>
+
+    <a
+        href="{% url 'articles:admin_article_list' 'approved' %}"
+        class="article-status-tab {% if article_status == 'approved' %}active{% endif %}"
+    >
+        Approved
+        <span class="tab-count">{{ status_counts.approved }}</span>
+    </a>
+
+    <a
+        href="{% url 'articles:admin_article_list' 'rejected' %}"
+        class="article-status-tab {% if article_status == 'rejected' %}active{% endif %}"
+    >
+        Rejected
+        <span class="tab-count">{{ status_counts.rejected }}</span>
+    </a>
+
+</div>
+
+
+<!-- ================= TABLE ================= -->
+
+<table class="data-table">
+
+    <thead>
+        <tr>
+            <th>Thumbnail</th>
+            <th>Judul</th>
+            <th>Kategori</th>
+            <th>Kontributor</th>
+            <th>Status</th>
+            <th>Tanggal</th>
+            <th>Aksi</th>
+        </tr>
+    </thead>
+
+    <tbody>
+
+        {% for article in articles %}
+
+        <tr>
+
+            <!-- Thumbnail -->
+            <td>
+
+                {% if article.thumbnail %}
+
+                    <img
+                        src="{{ article.thumbnail.url }}"
+                        class="table-thumb"
+                        alt="{{ article.title }}"
+                    >
+
+                {% else %}
+
+                    <div class="table-thumb table-thumb-placeholder">
+                        📄
+                    </div>
+
+                {% endif %}
+
+            </td>
+
+
+            <!-- Judul -->
+            <td>
+
+                <a
+                    href="{% url 'articles:article_detail' article.pk %}"
+                    target="_blank"
+                >
+                    {{ article.title }}
+                </a>
+
+            </td>
+
+
+            <!-- Kategori -->
+            <td>
+                {{ article.category.name }}
+            </td>
+
+
+            <!-- Kontributor -->
+            <td>
+                {{ article.contributor.username }}
+            </td>
+
+
+            <!-- Status -->
+            <td>
+
+                {% if article.status == 'pending' %}
+
+                    <span class="status-badge status-pending">
+                        Pending
+                    </span>
+
+                {% elif article.status == 'approved' %}
+
+                    <span class="status-badge status-approved">
+                        Approved
+                    </span>
+
+                {% elif article.status == 'rejected' %}
+
+                    <span class="status-badge status-rejected">
+                        Rejected
+                    </span>
+
+                {% endif %}
+
+            </td>
+
+
+            <!-- Tanggal -->
+            <td>
+                {{ article.created_at|date:"d M Y" }}
+            </td>
+
+
+            <!-- Aksi -->
+            <td>
+
+                <div class="table-actions">
+
+                    {% if article.status == 'pending' %}
+
+                        <form
+                            action="{% url 'articles:admin_approve_article' article.pk %}"
+                            method="post"
+                        >
+                            {% csrf_token %}
+
+                            <button
+                                type="submit"
+                                class="btn-approve"
+                            >
+                                Approve
+                            </button>
+
+                        </form>
+
+
+                        <form
+                            action="{% url 'articles:admin_reject_article' article.pk %}"
+                            method="post"
+                        >
+                            {% csrf_token %}
+
+                            <button
+                                type="submit"
+                                class="btn-reject"
+                            >
+                                Reject
+                            </button>
+
+                        </form>
+
+                    {% elif article.status == 'approved' %}
+
+                        <form
+                            action="{% url 'articles:admin_reject_article' article.pk %}"
+                            method="post"
+                        >
+                            {% csrf_token %}
+
+                            <button
+                                type="submit"
+                                class="btn-reject"
+                            >
+                                Reject
+                            </button>
+
+                        </form>
+
+                    {% elif article.status == 'rejected' %}
+
+                        <form
+                            action="{% url 'articles:admin_approve_article' article.pk %}"
+                            method="post"
+                        >
+                            {% csrf_token %}
+
+                            <button
+                                type="submit"
+                                class="btn-approve"
+                            >
+                                Approve
+                            </button>
+
+                        </form>
+
+                    {% endif %}
+
+                </div>
+
+            </td>
+
+        </tr>
+
+
+        {% empty %}
+
+        <tr>
+
+            <td colspan="7" class="empty-state">
+
+                {% if article_status == 'pending' %}
+                    Tidak ada artikel yang menunggu approval.
+
+                {% elif article_status == 'approved' %}
+                    Belum ada artikel yang disetujui.
+
+                {% elif article_status == 'rejected' %}
+                    Belum ada artikel yang ditolak.
+
+                {% endif %}
+
+            </td>
+
+        </tr>
+
+        {% endfor %}
+
+    </tbody>
+
+</table>
+
+
+{% include 'partials/table_pagination.html' %}
+
+{% endblock %}
