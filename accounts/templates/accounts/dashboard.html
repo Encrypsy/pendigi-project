@@ -81,7 +81,7 @@
             <span class="review-text">Artikel Pending</span>
             <span class="review-count">{{ stats.pending_articles }}</span>
         </a>
-        <a href="{% url 'interactions:admin_pending_comments' %}" class="review-item">
+        <a href="{% url 'interactions:admin_comment_approval' %}" class="review-item">
             <span class="review-dot dot-yellow"></span>
             <span class="review-text">Komentar Pending</span>
             <span class="review-count">{{ stats.pending_comments }}</span>
