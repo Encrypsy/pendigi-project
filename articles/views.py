@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.urls import reverse
 from django.views.decorators.http import require_POST
 from django.contrib import messages
-from django.db.models import F, Avg, Count
+from django.db.models import F, Avg, Count, Q
 from django.utils import timezone
 from django.utils.dateparse import parse_date
 from django.core.paginator import Paginator
@@ -321,12 +321,67 @@ def admin_article_approval(request, status='pending'):
     if status not in allowed_statuses:
         return redirect('articles:admin_article_approval')
 
+    # =========================
+    # DATA ARTIKEL
+    # =========================
+
     articles = Articles.objects.filter(
         status=allowed_statuses[status]
     ).select_related(
         'category',
         'contributor'
     )
+
+
+    # =========================
+    # SEARCH
+    # =========================
+
+    query = request.GET.get('q', '').strip()
+
+    if query:
+        articles = articles.filter(
+            Q(title__icontains=query) |
+            Q(contributor__username__icontains=query) |
+            Q(category__name__icontains=query)
+        )
+
+
+    # =========================
+    # URUTAN
+    # =========================
+
+    articles = articles.order_by('-created_at')
+
+
+    # =========================
+    # JUMLAH DATA PER HALAMAN
+    # =========================
+
+    try:
+        per_page = int(request.GET.get('per_page', 10))
+
+        if per_page not in (10, 25, 50):
+            per_page = 10
+
+    except (ValueError, TypeError):
+        per_page = 10
+
+
+    # =========================
+    # PAGINATION
+    # =========================
+
+    paginator = Paginator(articles, per_page)
+
+    page_number = request.GET.get('page', 1)
+
+    page_obj = paginator.get_page(page_number)
+
+
+    # =========================
+    # JUMLAH ARTIKEL PER STATUS
+    # =========================
 
     status_counts = {
         'pending': Articles.objects.filter(
@@ -342,13 +397,32 @@ def admin_article_approval(request, status='pending'):
         ).count(),
     }
 
+
+    # =========================
+    # RENDER
+    # =========================
+
     return render(
         request,
         'articles/admin_article_approval.html',
         {
-            'articles': articles,
+            'articles': page_obj.object_list,
+
+            # pagination
+            'page_obj': page_obj,
+            'per_page': per_page,
+            'per_page_options': [10, 25, 50],
+
+            # search
+            'search_query': query,
+
+            # status
             'article_status': status,
             'status_counts': status_counts,
+
+            # PENTING:
+            # jangan kirim 'filters'
+            # karena halaman approval tidak memakai filter.
         }
     )
 
