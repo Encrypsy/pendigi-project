@@ -9,6 +9,8 @@ from .models import CommentDislikes, CommentLikes, Comments, Ratings, Bookmarks,
 from .forms import CommentForm, RatingForm
 from reading_journal.models import ReadingActivity, ActionType
 from accounts.decorators import admin_required
+from django.db.models import Q
+from django.core.paginator import Paginator
 
 
 @login_required
@@ -160,29 +162,157 @@ def toggle_comment_dislike(request, comment_id):
     return redirect('articles:article_detail', pk=comment.article.pk)
 
 @admin_required
-def admin_pending_comments(request):
-    comments = Comments.objects.filter(status=StatusComment.PENDING).select_related('user', 'article')
-    return render(request, 'interactions/admin_pending.html', {'comments': comments})
+def admin_comment_approval(request, status='pending'):
 
+    allowed_statuses = {
+        'pending': StatusComment.PENDING,
+        'approved': StatusComment.APPROVED,
+        'rejected': StatusComment.REJECTED,
+    }
+
+    if status not in allowed_statuses:
+        return redirect('interactions:admin_comment_approval')
+
+
+    # =========================
+    # DATA KOMENTAR
+    # =========================
+
+    comments = Comments.objects.filter(
+        status=allowed_statuses[status]
+    ).select_related(
+        'user',
+        'article'
+    )
+
+
+    # =========================
+    # SEARCH
+    # =========================
+
+    query = request.GET.get('q', '').strip()
+
+    if query:
+        comments = comments.filter(
+            Q(content__icontains=query) |
+            Q(user__username__icontains=query) |
+            Q(article__title__icontains=query)
+        )
+
+
+    # =========================
+    # URUTAN
+    # =========================
+
+    comments = comments.order_by('-created_at')
+
+
+    # =========================
+    # JUMLAH DATA PER HALAMAN
+    # =========================
+
+    try:
+        per_page = int(request.GET.get('per_page', 10))
+
+        if per_page not in (10, 25, 50):
+            per_page = 10
+
+    except (ValueError, TypeError):
+        per_page = 10
+
+
+    # =========================
+    # PAGINATION
+    # =========================
+
+    paginator = Paginator(comments, per_page)
+
+    page_number = request.GET.get('page', 1)
+
+    page_obj = paginator.get_page(page_number)
+
+
+    # =========================
+    # JUMLAH PER STATUS
+    # =========================
+
+    status_counts = {
+        'pending': Comments.objects.filter(
+            status=StatusComment.PENDING
+        ).count(),
+
+        'approved': Comments.objects.filter(
+            status=StatusComment.APPROVED
+        ).count(),
+
+        'rejected': Comments.objects.filter(
+            status=StatusComment.REJECTED
+        ).count(),
+    }
+
+
+    # =========================
+    # RENDER
+    # =========================
+
+    return render(
+        request,
+        'interactions/admin_comment_approval.html',
+        {
+            'comments': page_obj.object_list,
+
+            # pagination
+            'page_obj': page_obj,
+            'per_page': per_page,
+            'per_page_options': [10, 25, 50],
+
+            # search
+            'search_query': query,
+
+            # status
+            'comment_status': status,
+            'status_counts': status_counts,
+        }
+    )
 
 @admin_required
 @require_POST
 def admin_approve_comment(request, pk):
+
     comment = get_object_or_404(Comments, pk=pk)
+
     comment.status = StatusComment.APPROVED
     comment.save()
-    messages.success(request, 'Komentar disetujui.')
-    return redirect('interactions:admin_pending_comments')
+
+    messages.success(
+        request,
+        'Komentar berhasil disetujui.'
+    )
+
+    return redirect(
+        'interactions:admin_comment_approval_status',
+        status='pending'
+    )
 
 
 @admin_required
 @require_POST
 def admin_reject_comment(request, pk):
+
     comment = get_object_or_404(Comments, pk=pk)
+
     comment.status = StatusComment.REJECTED
     comment.save()
-    messages.success(request, 'Komentar ditolak.')
-    return redirect('interactions:admin_pending_comments')
+
+    messages.success(
+        request,
+        'Komentar berhasil ditolak.'
+    )
+
+    return redirect(
+        'interactions:admin_comment_approval_status',
+        status='pending'
+    )
 
 def _attach_comment_meta(comments, request, like_url_name, dislike_url_name, url_kwargs, post_url=None):
     result = []
