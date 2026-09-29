@@ -1,7 +1,7 @@
 {% extends 'admin_base.html' %}
 {% load static %}
 
-{% block title %}Kelola Artikel{% endblock %}
+{% block title %}Approval Artikel{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/admin.css' %}">
@@ -9,13 +9,20 @@
 <link rel="stylesheet" href="{% static 'css/admin-table.css' %}">
 {% endblock %}
 
+
 {% block admin_content %}
 
 <div class="page-header-row">
 
     <h1 class="admin-page-title">
-        Kelola Artikel
-    </h1>
+    {% if article_status == 'pending' %}
+        Artikel Menunggu Approval
+    {% elif article_status == 'approved' %}
+        Artikel Disetujui
+    {% elif article_status == 'rejected' %}
+        Artikel Ditolak
+    {% endif %}
+</h1>
 
 </div>
 
@@ -23,32 +30,38 @@
 {% include 'partials/table_toolbar.html' with search_placeholder="Cari artikel..." %}
 
 
-<!-- ================= TAB STATUS ================= -->
+<!-- ================= STATUS TABS ================= -->
 
 <div class="article-status-tabs">
 
     <a
-        href="{% url 'articles:admin_article_list' 'pending' %}"
+        href="{% url 'articles:admin_article_approval_status' 'pending' %}"
         class="article-status-tab {% if article_status == 'pending' %}active{% endif %}"
     >
         Pending
-        <span class="tab-count">{{ status_counts.pending }}</span>
+        <span class="tab-count">
+            {{ status_counts.pending }}
+        </span>
     </a>
 
     <a
-        href="{% url 'articles:admin_article_list' 'approved' %}"
+        href="{% url 'articles:admin_article_approval_status' 'approved' %}"
         class="article-status-tab {% if article_status == 'approved' %}active{% endif %}"
     >
         Approved
-        <span class="tab-count">{{ status_counts.approved }}</span>
+        <span class="tab-count">
+            {{ status_counts.approved }}
+        </span>
     </a>
 
     <a
-        href="{% url 'articles:admin_article_list' 'rejected' %}"
+        href="{% url 'articles:admin_article_approval_status' 'rejected' %}"
         class="article-status-tab {% if article_status == 'rejected' %}active{% endif %}"
     >
         Rejected
-        <span class="tab-count">{{ status_counts.rejected }}</span>
+        <span class="tab-count">
+            {{ status_counts.rejected }}
+        </span>
     </a>
 
 </div>
@@ -59,6 +72,7 @@
 <table class="data-table">
 
     <thead>
+
         <tr>
             <th>Thumbnail</th>
             <th>Judul</th>
@@ -68,7 +82,9 @@
             <th>Tanggal</th>
             <th>Aksi</th>
         </tr>
+
     </thead>
+
 
     <tbody>
 
@@ -77,6 +93,7 @@
         <tr>
 
             <!-- Thumbnail -->
+
             <td>
 
                 {% if article.thumbnail %}
@@ -99,6 +116,7 @@
 
 
             <!-- Judul -->
+
             <td>
 
                 <a
@@ -112,18 +130,21 @@
 
 
             <!-- Kategori -->
+
             <td>
                 {{ article.category.name }}
             </td>
 
 
             <!-- Kontributor -->
+
             <td>
                 {{ article.contributor.username }}
             </td>
 
 
             <!-- Status -->
+
             <td>
 
                 {% if article.status == 'pending' %}
@@ -150,86 +171,55 @@
 
 
             <!-- Tanggal -->
+
             <td>
                 {{ article.created_at|date:"d M Y" }}
             </td>
 
 
             <!-- Aksi -->
+
             <td>
 
-                <div class="table-actions">
+                {% if article_status == 'pending' %}
 
-                    {% if article.status == 'pending' %}
+<div class="table-actions">
 
-                        <form
-                            action="{% url 'articles:admin_approve_article' article.pk %}"
-                            method="post"
-                        >
-                            {% csrf_token %}
+    <form
+        action="{% url 'articles:admin_approve_article' article.pk %}"
+        method="post"
+    >
+        {% csrf_token %}
+        <button type="submit" class="btn-approve">
+            Approve
+        </button>
+    </form>
 
-                            <button
-                                type="submit"
-                                class="btn-approve"
-                            >
-                                Approve
-                            </button>
+    <form
+        action="{% url 'articles:admin_reject_article' article.pk %}"
+        method="post"
+    >
+        {% csrf_token %}
+        <button type="submit" class="btn-reject">
+            Reject
+        </button>
+    </form>
 
-                        </form>
+</div>
 
+{% elif article_status == 'approved' %}
 
-                        <form
-                            action="{% url 'articles:admin_reject_article' article.pk %}"
-                            method="post"
-                        >
-                            {% csrf_token %}
+<span class="status-badge status-approved">
+    Approved
+</span>
 
-                            <button
-                                type="submit"
-                                class="btn-reject"
-                            >
-                                Reject
-                            </button>
+{% elif article_status == 'rejected' %}
 
-                        </form>
+<span class="status-badge status-rejected">
+    Rejected
+</span>
 
-                    {% elif article.status == 'approved' %}
-
-                        <form
-                            action="{% url 'articles:admin_reject_article' article.pk %}"
-                            method="post"
-                        >
-                            {% csrf_token %}
-
-                            <button
-                                type="submit"
-                                class="btn-reject"
-                            >
-                                Reject
-                            </button>
-
-                        </form>
-
-                    {% elif article.status == 'rejected' %}
-
-                        <form
-                            action="{% url 'articles:admin_approve_article' article.pk %}"
-                            method="post"
-                        >
-                            {% csrf_token %}
-
-                            <button
-                                type="submit"
-                                class="btn-approve"
-                            >
-                                Approve
-                            </button>
-
-                        </form>
-
-                    {% endif %}
-
-                </div>
+{% endif %}
 
             </td>
 
@@ -243,12 +233,15 @@
             <td colspan="7" class="empty-state">
 
                 {% if article_status == 'pending' %}
+
                     Tidak ada artikel yang menunggu approval.
 
                 {% elif article_status == 'approved' %}
+
                     Belum ada artikel yang disetujui.
 
                 {% elif article_status == 'rejected' %}
+
                     Belum ada artikel yang ditolak.
 
                 {% endif %}
@@ -265,5 +258,6 @@
 
 
 {% include 'partials/table_pagination.html' %}
+
 
 {% endblock %}

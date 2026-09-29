@@ -310,75 +310,23 @@ def delete_article(request, pk):
     return redirect('articles:my_articles')
 
 @admin_required
-def admin_article_approval(request):
+def admin_article_approval(request, status='pending'):
 
-    status = request.GET.get('status', 'pending')
-
-    valid_statuses = {
+    allowed_statuses = {
         'pending': StatusArticle.PENDING,
         'approved': StatusArticle.APPROVED,
         'rejected': StatusArticle.REJECTED,
     }
 
-    if status not in valid_statuses:
-        status = 'pending'
+    if status not in allowed_statuses:
+        return redirect('articles:admin_article_approval')
 
     articles = Articles.objects.filter(
-        status=valid_statuses[status]
+        status=allowed_statuses[status]
     ).select_related(
         'category',
         'contributor'
     )
-
-
-    # ================= SEARCH =================
-
-    query = request.GET.get('q', '').strip()
-
-    if query:
-        articles = articles.filter(
-            title__icontains=query
-        )
-
-
-    # ================= SORT =================
-
-    sort = request.GET.get('sort', 'terbaru')
-
-    sort_map = {
-        'terbaru': '-created_at',
-        'terlama': 'created_at',
-        'judul': 'title',
-    }
-
-    articles = articles.order_by(
-        sort_map.get(sort, '-created_at')
-    )
-
-
-    # ================= PAGINATION =================
-
-    try:
-        per_page = int(request.GET.get('per_page', 10))
-
-        if per_page not in (10, 25, 50):
-            per_page = 10
-
-    except ValueError:
-        per_page = 10
-
-
-    paginator = Paginator(
-        articles,
-        per_page
-    )
-
-    page_obj = paginator.get_page(
-        request.GET.get('page', 1)
-    )
-
-
-    # ================= JUMLAH STATUS =================
 
     status_counts = {
         'pending': Articles.objects.filter(
@@ -394,43 +342,13 @@ def admin_article_approval(request):
         ).count(),
     }
 
-
-    # ================= FILTER =================
-
-    filters = [
-        {
-            'name': 'sort',
-            'label': 'Urutan',
-            'value': sort,
-            'options': [
-                ('terbaru', 'Terbaru'),
-                ('terlama', 'Terlama'),
-                ('judul', 'Judul A-Z'),
-            ],
-        },
-    ]
-
-
     return render(
         request,
         'articles/admin_article_approval.html',
         {
-            'page_obj': page_obj,
-            'articles': page_obj.object_list,
-
+            'articles': articles,
             'article_status': status,
             'status_counts': status_counts,
-
-            'search_query': query,
-
-            'filters': filters,
-
-            'per_page': per_page,
-            'per_page_options': [10, 25, 50],
-
-            'reset_url': reverse(
-                'articles:admin_article_approval'
-            ),
         }
     )
 

@@ -12,13 +12,33 @@ urlpatterns = [
     path('<int:pk>/edit/', views.edit_article, name='edit_article'),
     path('<int:pk>/delete/', views.delete_article, name='delete_article'),
     path('<int:pk>/komentar-partial/', views.article_comments_partial, name='article_comments_partial'),
-    path('kelola/approval-article/<usr:status>', views.admin_article_approval, name='admin_article_approval'),
+
+    # ================= APPROVAL ARTIKEL =================
+
+    path(
+        'kelola/approval-article/',
+        views.admin_article_approval,
+        name='admin_article_approval'
+    ),
+
+    path(
+        'kelola/approval-article/<str:status>/',
+        views.admin_article_approval,
+        name='admin_article_approval_status'
+    ),
+
     path('kelola/<int:pk>/approve/', views.admin_approve_article, name='admin_approve_article'),
     path('kelola/<int:pk>/reject/', views.admin_reject_article, name='admin_reject_article'),
+
+    # ================= KATEGORI =================
+
     path('kelola/kategori/', views.category_list, name='category_list'),
     path('kelola/kategori/tambah/', views.category_create, name='category_create'),
     path('kelola/kategori/<int:pk>/edit/', views.category_edit, name='category_edit'),
     path('kelola/kategori/<int:pk>/hapus/', views.category_delete, name='category_delete'),
+
+    # ================= BANNER =================
+
     path('kelola/banner/', views.banner_list, name='banner_list'),
     path('kelola/banner/fiction/', views.fiction_banner_list, name='fiction_banner_list'),
     path('kelola/banner/tambah/', views.banner_create, name='banner_create'),
@@ -28,6 +48,9 @@ urlpatterns = [
     path('kelola/banner/<int:pk>/edit/', views.banner_edit, name='banner_edit'),
     path('kelola/banner/bulk/', views.banner_bulk_action, name='banner_bulk_action'),
     path('kelola/kategori/bulk/', views.category_bulk_action, name='category_bulk_action'),
+
+    # ================= KELOLA ARTIKEL =================
+
     path('kelola/artikel/', views.admin_article_list, name='admin_article_list'),
     path('kelola/artikel/<int:pk>/edit/', views.admin_edit_article_meta, name='admin_edit_article_meta'),
     path('kelola/artikel/<int:pk>/takedown/', views.admin_takedown_article, name='admin_takedown_article'),
