@@ -76,7 +76,7 @@
 
     <div class="card review-widget">
         <h3>Perlu Ditinjau</h3>
-        <a href="{% url 'articles:admin_pending_articles' %}" class="review-item">
+        <a href="{% url 'articles:admin_article_approval' %}" class="review-item">
             <span class="review-dot dot-red"></span>
             <span class="review-text">Artikel Pending</span>
             <span class="review-count">{{ stats.pending_articles }}</span>
