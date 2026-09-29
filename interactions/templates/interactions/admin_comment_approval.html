@@ -1,0 +1,289 @@
+{% extends 'admin_base.html' %}
+{% load static %}
+
+{% block title %}Approval Komentar{% endblock %}
+
+{% block extra_css %}
+
+<link rel="stylesheet" href="{% static 'css/admin.css' %}">
+<link rel="stylesheet" href="{% static 'css/table.css' %}">
+<link rel="stylesheet" href="{% static 'css/admin-table.css' %}">
+
+{% endblock %}
+
+
+{% block admin_content %}
+
+
+<div class="page-header-row">
+
+    <h1 class="admin-page-title">
+
+        {% if comment_status == 'pending' %}
+            Komentar Menunggu Approval
+
+        {% elif comment_status == 'approved' %}
+            Komentar Disetujui
+
+        {% elif comment_status == 'rejected' %}
+            Komentar Ditolak
+
+        {% endif %}
+
+    </h1>
+
+</div>
+
+
+<!-- ================= SEARCH ================= -->
+
+{% include 'partials/table_toolbar.html' with search_placeholder="Cari komentar..." %}
+
+
+<!-- ================= STATUS TABS ================= -->
+
+<div class="article-status-tabs">
+
+    <a
+        href="{% url 'interactions:admin_comment_approval_status' 'pending' %}"
+        class="article-status-tab {% if comment_status == 'pending' %}active{% endif %}"
+    >
+
+        Pending
+
+        <span class="tab-count">
+            {{ status_counts.pending }}
+        </span>
+
+    </a>
+
+
+    <a
+        href="{% url 'interactions:admin_comment_approval_status' 'approved' %}"
+        class="article-status-tab {% if comment_status == 'approved' %}active{% endif %}"
+    >
+
+        Approved
+
+        <span class="tab-count">
+            {{ status_counts.approved }}
+        </span>
+
+    </a>
+
+
+    <a
+        href="{% url 'interactions:admin_comment_approval_status' 'rejected' %}"
+        class="article-status-tab {% if comment_status == 'rejected' %}active{% endif %}"
+    >
+
+        Rejected
+
+        <span class="tab-count">
+            {{ status_counts.rejected }}
+        </span>
+
+    </a>
+
+</div>
+
+
+<!-- ================= TABLE ================= -->
+
+<table class="data-table">
+
+    <thead>
+
+        <tr>
+
+            <th>User</th>
+
+            <th>Artikel</th>
+
+            <th>Isi Komentar</th>
+
+            <th>Status</th>
+
+            <th>Tanggal</th>
+
+            <th>Aksi</th>
+
+        </tr>
+
+    </thead>
+
+
+    <tbody>
+
+        {% for comment in comments %}
+
+        <tr>
+
+
+            <!-- USER -->
+
+            <td>
+                {{ comment.user.username }}
+            </td>
+
+
+            <!-- ARTIKEL -->
+
+            <td>
+
+                <a
+                    href="{% url 'articles:article_detail' comment.article.pk %}"
+                    target="_blank"
+                >
+                    {{ comment.article.title }}
+                </a>
+
+            </td>
+
+
+            <!-- KOMENTAR -->
+
+            <td class="comment-preview">
+                {{ comment.content }}
+            </td>
+
+
+            <!-- STATUS -->
+
+            <td>
+
+                {% if comment.status == 'pending' %}
+
+                    <span class="status-badge status-pending">
+                        Pending
+                    </span>
+
+                {% elif comment.status == 'approved' %}
+
+                    <span class="status-badge status-approved">
+                        Approved
+                    </span>
+
+                {% elif comment.status == 'rejected' %}
+
+                    <span class="status-badge status-rejected">
+                        Rejected
+                    </span>
+
+                {% endif %}
+
+            </td>
+
+
+            <!-- TANGGAL -->
+
+            <td>
+                {{ comment.created_at|date:"d M Y H:i" }}
+            </td>
+
+
+            <!-- AKSI -->
+
+            <td>
+
+                {% if comment_status == 'pending' %}
+
+                    <div class="table-actions">
+
+                        <form
+                            action="{% url 'interactions:admin_approve_comment' comment.pk %}"
+                            method="post"
+                        >
+
+                            {% csrf_token %}
+
+                            <button
+                                type="submit"
+                                class="btn-approve"
+                            >
+                                Approve
+                            </button>
+
+                        </form>
+
+
+                        <form
+                            action="{% url 'interactions:admin_reject_comment' comment.pk %}"
+                            method="post"
+                        >
+
+                            {% csrf_token %}
+
+                            <button
+                                type="submit"
+                                class="btn-reject"
+                            >
+                                Reject
+                            </button>
+
+                        </form>
+
+                    </div>
+
+
+                {% elif comment_status == 'approved' %}
+
+                    <span class="status-badge status-approved">
+                        Approved
+                    </span>
+
+
+                {% elif comment_status == 'rejected' %}
+
+                    <span class="status-badge status-rejected">
+                        Rejected
+                    </span>
+
+                {% endif %}
+
+            </td>
+
+
+        </tr>
+
+
+        {% empty %}
+
+        <tr>
+
+            <td
+                colspan="6"
+                class="empty-state"
+            >
+
+                {% if comment_status == 'pending' %}
+
+                    Tidak ada komentar yang menunggu approval.
+
+                {% elif comment_status == 'approved' %}
+
+                    Belum ada komentar yang disetujui.
+
+                {% elif comment_status == 'rejected' %}
+
+                    Belum ada komentar yang ditolak.
+
+                {% endif %}
+
+            </td>
+
+        </tr>
+
+        {% endfor %}
+
+    </tbody>
+
+</table>
+
+
+<!-- ================= PAGINATION ================= -->
+
+{% include 'partials/table_pagination.html' %}
+
+
+{% endblock %}
