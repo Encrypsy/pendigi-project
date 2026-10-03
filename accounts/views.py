@@ -184,12 +184,32 @@ def author_dashboard(request):
     if request.user.status_kontributor != 'approved':
         return redirect('articles:article_list')
 
+    my_articles = Articles.objects.filter(
+        contributor=request.user
+    )
+
+    approved_count = my_articles.filter(
+        status=StatusArticle.APPROVED
+    ).count()
+
+    pending_count = my_articles.filter(
+        status=StatusArticle.PENDING
+    ).count()
+
+    rejected_count = my_articles.filter(
+        status=StatusArticle.REJECTED
+    ).count()
+
     return render(
         request,
         'author_dashboard.html',
         {
             'breadcrumb': 'Dashboard Penulis',
             'active_menu': 'dashboard',
+
+            'approved_count': approved_count,
+            'pending_count': pending_count,
+            'rejected_count': rejected_count,
         }
     )
 

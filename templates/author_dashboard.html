@@ -39,11 +39,11 @@ Dashboard Penulis
             </span>
 
             <strong class="author-stat-value">
-                0
-            </strong>
+    {{ approved_count }}
+</strong>
 
             <span class="author-stat-description">
-                yang di-approved
+                approved
             </span>
 
         </div>
@@ -56,11 +56,11 @@ Dashboard Penulis
             </span>
 
             <strong class="author-stat-value">
-                0
+                {{ pending_count }}
             </strong>
 
             <span class="author-stat-description">
-                yang masih pending
+                pending
             </span>
 
         </div>
@@ -73,11 +73,11 @@ Dashboard Penulis
             </span>
 
             <strong class="author-stat-value">
-                0
+                {{rejected_count}}
             </strong>
 
             <span class="author-stat-description">
-                yang ditolak
+                ditolak
             </span>
 
         </div>
