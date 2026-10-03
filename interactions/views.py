@@ -25,36 +25,60 @@ def submit_comment(request, pk):
         comment.article = article
 
         parent_id = request.POST.get('parent_id')
+
         if parent_id:
-            parent_comment = get_object_or_404(Comments, pk=parent_id, article=article)
+            parent_comment = get_object_or_404(
+                Comments,
+                pk=parent_id,
+                article=article
+            )
             comment.parent = parent_comment
 
-        # Admin nggak perlu approval buat komentar sendiri
+        # Admin tidak perlu approval
         if request.user.role == 'admin' or request.user.is_superuser:
             comment.status = StatusComment.APPROVED
-        
 
         comment.save()
 
-        ReadingActivity.objects.create(user=request.user, article=article, action_type=ActionType.COMMENTED)
-        
-        # Buat notifikasi untuk pemilik artikel
-        Activity.objects.create(
-            recipient=article.contributor,
-            actor=request.user,
+        ReadingActivity.objects.create(
+            user=request.user,
             article=article,
-            action_type=Activity.ActionType.COMMENT,
-            message="Memberikan komentar pada konten Anda",
+            action_type=ActionType.COMMENTED
         )
-        
-        if comment.status == StatusComment.APPROVED:
-            messages.success(request, 'Komentar berhasil dikirim.')
-        else:
-            messages.success(request, 'Komentar terkirim, menunggu approval admin.')
-    else:
-        messages.error(request, 'Komentar gagal dikirim, pastikan tidak kosong.')
 
-    return redirect('articles:article_detail', pk=pk)
+        # ==========================================
+        # NOTIFIKASI AKTIVITAS UNTUK PENULIS
+        # ==========================================
+
+        if comment.status == StatusComment.APPROVED:
+            Activity.objects.create(
+                recipient=article.contributor,
+                actor=request.user,
+                article=article,
+                action_type=Activity.ActionType.COMMENT,
+            )
+
+            messages.success(
+                request,
+                'Komentar berhasil dikirim.'
+            )
+
+        else:
+            messages.success(
+                request,
+                'Komentar terkirim, menunggu approval admin.'
+            )
+
+    else:
+        messages.error(
+            request,
+            'Komentar gagal dikirim, pastikan tidak kosong.'
+        )
+
+    return redirect(
+        'articles:article_detail',
+        pk=pk
+    )
 
 
 @login_required
