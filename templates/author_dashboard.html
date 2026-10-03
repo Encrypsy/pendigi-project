@@ -99,46 +99,70 @@ Dashboard Penulis
 
     <div class="activity-item">
 
-        {% if activity.actor.profile_picture %}
+    <!-- Avatar -->
+    <div class="activity-avatar">
+        {% if activity.actor and activity.actor.profile_picture %}
             <img
                 src="{{ activity.actor.profile_picture.url }}"
                 alt="{{ activity.actor.username }}"
-                class="activity-avatar"
             >
         {% else %}
-            <div class="activity-avatar activity-avatar-placeholder">
+            <div class="activity-avatar-placeholder">
                 {{ activity.actor.username|first|upper }}
             </div>
         {% endif %}
+    </div>
 
+    <!-- Isi notifikasi -->
+    <div class="activity-content">
 
-        <div class="activity-info">
-
-            <div class="activity-text">
-                <span class="activity-username">
-                    {{ activity.actor.username }}
-                </span>
-
-                {{ activity.get_action_type_display }}
-                <strong>{{ activity.article.title }}</strong>
-            </div>
-
-            <div class="activity-time">
-                {{ activity.created_at|timesince }} yang lalu
-            </div>
-
+        <!-- BARIS 1 -->
+        <div class="activity-username">
+            {% if activity.actor %}
+                {{ activity.actor.username }}
+            {% else %}
+                Admin
+            {% endif %}
         </div>
 
+        <!-- BARIS 2 -->
+        <div class="activity-action">
+            {{ activity.get_action_type_display }}
 
-        {% if activity.article.thumbnail %}
+            {% if activity.article %}
+                <span class="activity-separator">·</span>
+
+                <a
+                    href="{% url 'articles:article_detail' activity.article.pk %}"
+                    class="activity-title"
+                    title="{{ activity.article.title }}"
+                >
+                    {{ activity.article.title }}
+                </a>
+            {% endif %}
+        </div>
+
+        <!-- BARIS 3 -->
+        <div class="activity-time">
+            {{ activity.created_at|timesince }} yang lalu
+        </div>
+
+    </div>
+
+    <!-- Thumbnail -->
+    {% if activity.article and activity.article.thumbnail %}
+        <a
+            href="{% url 'articles:article_detail' activity.article.pk %}"
+            class="activity-thumbnail"
+        >
             <img
                 src="{{ activity.article.thumbnail.url }}"
                 alt="{{ activity.article.title }}"
-                class="activity-thumbnail"
             >
-        {% endif %}
+        </a>
+    {% endif %}
 
-    </div>
+</div>
 
     {% empty %}
 
