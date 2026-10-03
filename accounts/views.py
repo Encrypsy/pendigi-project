@@ -11,7 +11,7 @@ from django.db.models import Count
 from django.utils import timezone
 from datetime import timedelta
 from articles.models import Articles, StatusArticle, Categories
-from interactions.models import ArticleViewHistory, Comments, StatusComment, Ratings
+from interactions.models import Activity, ArticleViewHistory, Comments, StatusComment, Ratings
 from articles.models import Articles, StatusArticle, Categories
 from fiction.models import Stories, StatusStory as FictionStatusStory
 from reading_journal.models import ReadingActivity
@@ -344,6 +344,20 @@ def author_dashboard(request):
         pending_count,
         rejected_count,
     ]
+    
+    # ==========================================
+# NOTIFIKASI AKTIVITAS
+# ==========================================
+
+    activities = (
+        Activity.objects
+        .filter(recipient=request.user)
+        .select_related(
+            'actor',
+            'article',
+        )
+        .order_by('-created_at')[:10]
+    )
 
 
     # ==========================================
@@ -383,6 +397,7 @@ def author_dashboard(request):
 
         'performance_filter': performance_filter,
         'popular_contents': popular_contents,
+        'activities': activities,
     }
 )
 

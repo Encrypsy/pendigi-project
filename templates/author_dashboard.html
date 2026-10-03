@@ -95,13 +95,123 @@ Dashboard Penulis
 
             <div class="activity-list">
 
-                <!-- nanti data aktivitas masuk di sini -->
+    {% for activity in activities %}
 
-                <p class="empty-state">
-                    Belum ada aktivitas.
-                </p>
+        <div class="activity-item">
+
+            <!-- Avatar -->
+            <div class="activity-avatar">
+
+                {% if activity.actor and activity.actor.profile_picture %}
+
+                    <img
+                        src="{{ activity.actor.profile_picture.url }}"
+                        alt="{{ activity.actor.username }}"
+                    >
+
+                {% elif activity.actor %}
+
+                    {{ activity.actor.username|first|upper }}
+
+                {% else %}
+
+                    ⚙
+
+                {% endif %}
 
             </div>
+
+
+            <!-- Isi aktivitas -->
+            <div class="activity-content">
+
+                <div class="activity-text">
+
+                    {% if activity.actor %}
+                        <strong>
+                            {{ activity.actor.username }}
+                        </strong>
+                    {% else %}
+                        <strong>
+                            Admin
+                        </strong>
+                    {% endif %}
+
+
+                    {% if activity.action_type == 'comment' %}
+
+                        memberikan komentar pada
+
+                    {% elif activity.action_type == 'rating' %}
+
+                        memberikan rating pada
+
+                    {% elif activity.action_type == 'approved' %}
+
+                        menyetujui
+
+                    {% elif activity.action_type == 'rejected' %}
+
+                        menolak
+
+                    {% endif %}
+
+
+                    {% if activity.article %}
+
+                        <strong>
+                            {{ activity.article.title }}
+                        </strong>
+
+                    {% endif %}
+
+                </div>
+
+
+                {% if activity.message %}
+
+                    <div class="activity-message">
+                        {{ activity.message }}
+                    </div>
+
+                {% endif %}
+
+
+                <div class="activity-time">
+                    {{ activity.created_at|timesince }} yang lalu
+                </div>
+
+            </div>
+
+
+            <!-- Thumbnail konten -->
+            {% if activity.article and activity.article.thumbnail %}
+
+                <a
+                    href="{% url 'articles:article_detail' activity.article.pk %}"
+                    class="activity-thumbnail"
+                >
+
+                    <img
+                        src="{{ activity.article.thumbnail.url }}"
+                        alt="{{ activity.article.title }}"
+                    >
+
+                </a>
+
+            {% endif %}
+
+        </div>
+
+    {% empty %}
+
+        <div class="activity-empty">
+            Belum ada aktivitas.
+        </div>
+
+    {% endfor %}
+
+</div>
 
         </div>
 

@@ -5,7 +5,7 @@ from django.contrib import messages
 from django.urls import reverse
 from django.views.decorators.http import require_POST
 from articles.models import Articles
-from .models import CommentDislikes, CommentLikes, Comments, Ratings, Bookmarks, StatusComment
+from .models import Activity, CommentDislikes, CommentLikes, Comments, Ratings, Bookmarks, StatusComment
 from .forms import CommentForm, RatingForm
 from reading_journal.models import ReadingActivity, ActionType
 from accounts.decorators import admin_required
@@ -38,6 +38,15 @@ def submit_comment(request, pk):
 
         ReadingActivity.objects.create(user=request.user, article=article, action_type=ActionType.COMMENTED)
         
+        # Buat notifikasi untuk pemilik artikel
+        Activity.objects.create(
+            recipient=article.contributor,
+            actor=request.user,
+            article=article,
+            action_type=Activity.ActionType.COMMENT,
+            message="Memberikan komentar pada konten Anda",
+        )
+        
         if comment.status == StatusComment.APPROVED:
             messages.success(request, 'Komentar berhasil dikirim.')
         else:
@@ -56,16 +65,45 @@ def submit_rating(request, pk):
     form = RatingForm(request.POST)
 
     if form.is_valid():
-        Ratings.objects.update_or_create(
-            user=request.user, article=article,
-            defaults={'rating_value': form.cleaned_data['rating_value']}
+
+        rating_value = form.cleaned_data['rating_value']
+
+        rating, created = Ratings.objects.update_or_create(
+            user=request.user,
+            article=article,
+            defaults={
+                'rating_value': rating_value
+            }
         )
-        ReadingActivity.objects.create(user=request.user, article=article, action_type=ActionType.RATED)
+
+        # ==========================================
+        # NOTIFIKASI UNTUK PENULIS
+        # ==========================================
+
+        if created:
+            Activity.objects.create(
+                recipient=article.contributor,
+                actor=request.user,
+                article=article,
+                action_type=Activity.ActionType.RATING,
+                message=f"Memberikan rating {rating_value}/5 pada konten Anda",
+            )
+
+        ReadingActivity.objects.create(
+            user=request.user,
+            article=article,
+            action_type=ActionType.RATED
+        )
+
         messages.success(request, 'Rating tersimpan!')
+
     else:
         messages.error(request, 'Rating tidak valid.')
 
-    return redirect('articles:article_detail', pk=pk)
+    return redirect(
+        'articles:article_detail',
+        pk=pk
+    )
 
 
 @login_required

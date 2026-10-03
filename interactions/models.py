@@ -100,3 +100,64 @@ class ArticleViewHistory(models.Model):
 
     def __str__(self):
         return f"{self.article.title} - {self.viewed_at}"
+    
+class Activity(models.Model):
+
+    class ActionType(models.TextChoices):
+        COMMENT = "comment", "Memberikan komentar"
+        RATING = "rating", "Memberikan rating"
+        APPROVED = "approved", "Konten disetujui"
+        REJECTED = "rejected", "Konten ditolak"
+
+    # User yang menerima notifikasi
+    recipient = models.ForeignKey(
+        Users,
+        on_delete=models.CASCADE,
+        related_name='received_activities'
+    )
+
+    # User yang melakukan aktivitas
+    actor = models.ForeignKey(
+        Users,
+        on_delete=models.CASCADE,
+        related_name='performed_activities',
+        null=True,
+        blank=True
+    )
+
+    # Konten yang berkaitan dengan aktivitas
+    article = models.ForeignKey(
+        Articles,
+        on_delete=models.CASCADE,
+        related_name='activities',
+        null=True,
+        blank=True
+    )
+
+    action_type = models.CharField(
+        max_length=20,
+        choices=ActionType.choices
+    )
+
+    # Bisa dipakai untuk menyimpan informasi tambahan
+    # misalnya rating = 4
+    message = models.CharField(
+        max_length=255,
+        blank=True
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        actor = self.actor.username if self.actor else "System"
+
+        return (
+            f"{actor} - "
+            f"{self.get_action_type_display()} - "
+            f"{self.article.title if self.article else '-'}"
+        )

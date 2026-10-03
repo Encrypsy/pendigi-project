@@ -13,7 +13,7 @@ from interactions.views import _attach_comment_meta, _sort_comments
 from .models import Articles, Banner, BannerType, Categories, StatusArticle
 from .forms import ArticleMetaForm, ArticleUploadForm, BannerForm
 from accounts.models import StatusKontributor
-from interactions.models import Comments, Ratings, Bookmarks, StatusComment, ArticleViewHistory
+from interactions.models import Activity, Comments, Ratings, Bookmarks, StatusComment, ArticleViewHistory
 from interactions.forms import CommentForm, RatingForm
 from reading_journal.models import ReadingActivity, ActionType
 from accounts.decorators import admin_required
@@ -438,6 +438,15 @@ def admin_approve_article(request, pk):
     article.status = StatusArticle.APPROVED
     article.published_at = timezone.now()
     article.save()
+    
+    Activity.objects.create(
+        recipient=article.contributor,
+        actor=request.user,
+        article=article,
+        action_type=Activity.ActionType.APPROVED,
+        message="Konten Anda telah disetujui oleh admin",
+    )
+    
     messages.success(request, f'Artikel "{article.title}" disetujui.')
     return redirect('articles:admin_article_approval')
 
@@ -448,6 +457,15 @@ def admin_reject_article(request, pk):
     article = get_object_or_404(Articles, pk=pk)
     article.status = StatusArticle.REJECTED
     article.save()
+    
+    Activity.objects.create(
+        recipient=article.contributor,
+        actor=request.user,
+        article=article,
+        action_type=Activity.ActionType.REJECTED,
+        message="Konten Anda ditolak oleh admin",
+    )
+    
     messages.success(request, f'Artikel "{article.title}" ditolak.')
     return redirect('articles:admin_article_approval')
 

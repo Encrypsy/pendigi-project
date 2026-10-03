@@ -14,7 +14,7 @@ class ActionType(models.TextChoices):
 
 class ReadingActivity(models.Model):
     user = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='activities')
-    article = models.ForeignKey(Articles, on_delete=models.CASCADE, related_name='activities')
+    article = models.ForeignKey(Articles, on_delete=models.CASCADE, related_name='reading_activities')
     action_type = models.CharField(max_length=30, choices=ActionType.choices)
     created_at = models.DateTimeField(auto_now_add=True)
 
