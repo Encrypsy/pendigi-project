@@ -1,23 +1,27 @@
-{% extends 'base.html' %}
+{% extends 'app_base.html' %}
 {% load static %}
 
-{% block body %}
+{% block extra_css %}
+    {{ block.super }}
+{% endblock %}
 
-<link rel="stylesheet" href="{% static 'css/fiction-navbar.css' %}">
-
-{% include 'fiction/partials/fiction_navbar.html' %}
+{% block content %}
 
 <main class="fiction-page-content">
+
     {% if messages %}
         <ul class="messages">
             {% for message in messages %}
-                <li class="{{ message.tags }}">{{ message }}</li>
+                <li class="{{ message.tags }}">
+                    {{ message }}
+                </li>
             {% endfor %}
         </ul>
     {% endif %}
 
     {% block fiction_content %}
     {% endblock %}
+
 </main>
 
 <script>
