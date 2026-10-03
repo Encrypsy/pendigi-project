@@ -89,95 +89,91 @@ a { color: inherit; }
     box-sizing: border-box;
 }
 
-/* =========================
+/* =====================================================
    NAVBAR
-========================= */
+===================================================== */
 
 .navbar {
+    position: relative;
+
     display: flex;
     align-items: center;
-    justify-content: space-between;
+
     width: 100%;
-    padding: 12px 32px;
+
+    padding: 10px 32px;
+
     background: #fff;
+
     border-bottom: 1px solid var(--divider);
-    gap: 24px;
+
+    gap: 28px;
+
+    z-index: 1000;
 }
+
+
+/* =====================================================
+   LOGO
+===================================================== */
 
 .brand {
     display: flex;
     align-items: center;
+
     flex-shrink: 0;
+
     text-decoration: none;
 }
 
 .logo {
-    height: 50px;
+    display: block;
+
     width: auto;
-    display: block;
-}
-
-/* Tombol hamburger */
-.navbar-toggle {
-    display: none;
-    flex-direction: column;
-    justify-content: center;
-    gap: 5px;
-    width: 34px;
-    height: 34px;
-    padding: 0;
-    background: none;
-    border: none;
-    cursor: pointer;
-    flex-shrink: 0;
-}
-
-.navbar-toggle span {
-    display: block;
-    width: 100%;
-    height: 2.5px;
-    background: var(--brown);
-    border-radius: 2px;
-    transition: transform .2s ease, opacity .2s ease;
-}
-
-.navbar-toggle.is-active span:nth-child(1) {
-    transform: translateY(7.5px) rotate(45deg);
-}
-
-.navbar-toggle.is-active span:nth-child(2) {
-    opacity: 0;
-}
-
-.navbar-toggle.is-active span:nth-child(3) {
-    transform: translateY(-7.5px) rotate(-45deg);
+    height: 50px;
 }
 
 
-/* Container menu + auth */
+/* =====================================================
+   NAVBAR COLLAPSE
+===================================================== */
+
 .navbar-collapse {
     display: flex;
+
     align-items: center;
     justify-content: space-between;
+
     flex: 1;
-    gap: 24px;
+
     min-width: 0;
+
+    gap: 24px;
 }
 
 
-/* Navigation */
+/* =====================================================
+   NAV LINKS
+===================================================== */
+
 .nav-links {
     display: flex;
+
     align-items: center;
-    gap: 18px;
-    flex-wrap: nowrap;
+
+    gap: 20px;
+
     white-space: nowrap;
 }
 
 .nav-links a {
-    font-size: 0.92rem;
-    text-decoration: none;
     color: var(--text);
+
+    font-size: 0.92rem;
+
+    text-decoration: none;
+
+    transition: color .15s ease;
 }
 
 .nav-links a:hover {
@@ -185,65 +181,396 @@ a { color: inherit; }
 }
 
 
-/* Auth */
-.auth-links {
+/* =====================================================
+   RIGHT SIDE
+===================================================== */
+
+.navbar-actions {
     display: flex;
+
     align-items: center;
-    gap: 12px;
-    white-space: nowrap;
+
+    gap: 14px;
+
     flex-shrink: 0;
 }
 
-.auth-links a {
-    text-decoration: none;
-    color: var(--ink-dark);
-    font-size: 0.9rem;
+
+/* =====================================================
+   ICON BUTTON
+===================================================== */
+
+.navbar-icon-button {
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    width: 38px;
+    height: 38px;
+
+    padding: 0;
+
+    border: none;
+
+    background: transparent;
+
+    color: var(--brown);
+
+    cursor: pointer;
+
+    border-radius: 50%;
+
+    transition:
+        background .15s ease,
+        color .15s ease;
 }
 
-.link-button {
-    background: none;
+.navbar-icon-button:hover {
+    background: #f2eee7;
+}
+
+.plus-icon {
+    font-size: 32px;
+
+    font-weight: 300;
+
+    line-height: 1;
+}
+
+
+/* =====================================================
+   PROFILE BUTTON
+===================================================== */
+
+.navbar-profile-button {
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    width: 40px;
+    height: 40px;
+
+    padding: 0;
+
     border: none;
-    color: var(--ink-dark);
-    font-size: 0.9rem;
+
+    background: transparent;
+
+    cursor: pointer;
+
+    border-radius: 50%;
+}
+
+
+/* =====================================================
+   PROFILE AVATAR
+===================================================== */
+
+.navbar-profile-avatar {
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    width: 38px;
+    height: 38px;
+
+    border-radius: 50%;
+
+    object-fit: cover;
+
+    background: #d8d3c8;
+
+    color: var(--text);
+
+    font-size: .9rem;
+    font-weight: 600;
+}
+
+.navbar-profile-placeholder {
+    user-select: none;
+}
+
+
+/* =====================================================
+   DROPDOWN
+===================================================== */
+
+.navbar-dropdown {
+    position: relative;
+}
+
+
+/* =====================================================
+   DROPDOWN MENU
+===================================================== */
+
+.navbar-dropdown-menu {
+    position: absolute;
+
+    top: calc(100% + 8px);
+
+    right: 0;
+
+    min-width: 210px;
+
+    background: #fff;
+
+    border: 1px solid var(--divider);
+
+    border-radius: 8px;
+
+    box-shadow: 0 8px 24px rgba(0, 0, 0, .10);
+
+    overflow: hidden;
+
+    opacity: 0;
+
+    visibility: hidden;
+
+    transform: translateY(-5px);
+
+    transition:
+        opacity .15s ease,
+        transform .15s ease,
+        visibility .15s ease;
+
+    z-index: 1100;
+}
+
+
+.navbar-dropdown.is-open
+.navbar-dropdown-menu {
+    opacity: 1;
+
+    visibility: visible;
+
+    transform: translateY(0);
+}
+
+
+/* =====================================================
+   DROPDOWN TITLE
+===================================================== */
+
+.navbar-dropdown-title {
+    padding: 12px 14px;
+
+    font-size: .78rem;
+
+    font-weight: 600;
+
+    color: #8a8880;
+
+    border-bottom: 1px solid var(--divider);
+
+    text-transform: uppercase;
+
+    letter-spacing: .03em;
+}
+
+
+/* =====================================================
+   DROPDOWN USERNAME
+===================================================== */
+
+.navbar-dropdown-username {
+    padding: 12px 14px;
+
+    font-size: .85rem;
+
+    font-weight: 600;
+
+    color: var(--text);
+
+    background: #faf8f4;
+
+    border-bottom: 1px solid var(--divider);
+}
+
+
+/* =====================================================
+   DROPDOWN LINKS
+===================================================== */
+
+.navbar-dropdown-menu > a,
+.navbar-dropdown-menu > form > button {
+
+    display: block;
+
+    width: 100%;
+
+    padding: 11px 14px;
+
+    border: none;
+
+    background: transparent;
+
+    color: var(--text);
+
+    font-size: .87rem;
+
+    text-align: left;
+
+    text-decoration: none;
+
+    cursor: pointer;
+
+    box-sizing: border-box;
+}
+
+.navbar-dropdown-menu > a:hover,
+.navbar-dropdown-menu > form > button:hover {
+
+    background: #f5f1ea;
+
+    color: var(--brown);
+}
+
+
+/* =====================================================
+   DISABLED ITEM
+===================================================== */
+
+.navbar-dropdown-disabled {
+    padding: 11px 14px;
+
+    color: #99958d;
+
+    font-size: .87rem;
+
+    cursor: default;
+}
+
+
+/* =====================================================
+   LOGOUT
+===================================================== */
+
+.navbar-dropdown-menu > form {
+    margin: 0;
+
+    border-top: 1px solid var(--divider);
+}
+
+
+/* =====================================================
+   MOBILE TOGGLE
+===================================================== */
+
+.navbar-toggle {
+
+    display: none;
+
+    flex-direction: column;
+
+    justify-content: center;
+
+    gap: 5px;
+
+    width: 36px;
+    height: 36px;
+
+    padding: 0;
+
+    border: none;
+
+    background: transparent;
+
     cursor: pointer;
 }
 
+.navbar-toggle span {
 
-/* =========================
+    display: block;
+
+    width: 100%;
+    height: 2.5px;
+
+    background: var(--brown);
+
+    border-radius: 2px;
+
+    transition:
+        transform .2s ease,
+        opacity .2s ease;
+}
+
+
+.navbar-toggle.is-active
+span:nth-child(1) {
+
+    transform:
+        translateY(7.5px)
+        rotate(45deg);
+}
+
+.navbar-toggle.is-active
+span:nth-child(2) {
+
+    opacity: 0;
+}
+
+.navbar-toggle.is-active
+span:nth-child(3) {
+
+    transform:
+        translateY(-7.5px)
+        rotate(-45deg);
+}
+
+/* =====================================================
    MOBILE
-========================= */
+===================================================== */
 
 @media (max-width: 860px) {
 
     .navbar {
+
         flex-wrap: wrap;
-        padding: 12px 20px;
+
+        padding: 10px 20px;
+
         gap: 0;
     }
+
 
     .brand {
         flex: 1;
     }
 
+
+    .logo {
+        height: 46px;
+    }
+
+
     .navbar-toggle {
         display: flex;
     }
 
-    /*
-     * PENTING:
-     * collapse harus mengambil SATU BARIS PENUH
-     * di bawah logo + hamburger.
-     */
+
+    /* ---------------------------------------------
+       COLLAPSE
+    --------------------------------------------- */
+
     .navbar-collapse {
+
         display: none;
+
         flex: 0 0 100%;
+
         width: 100%;
         min-width: 100%;
 
         flex-direction: column;
+
         align-items: stretch;
 
         margin-top: 12px;
+
         padding-top: 12px;
 
         border-top: 1px solid var(--divider);
@@ -251,57 +578,159 @@ a { color: inherit; }
         gap: 0;
     }
 
+
     .navbar-collapse.is-open {
         display: flex;
     }
 
 
-    /* Menu kategori */
+    /* ---------------------------------------------
+       NAV LINKS
+    --------------------------------------------- */
+
     .nav-links {
+
         display: flex;
+
         flex-direction: column;
+
         align-items: stretch;
+
         width: 100%;
+
         gap: 0;
     }
 
+
     .nav-links a {
+
         display: block;
+
         width: 100%;
+
         padding: 12px 4px;
+
         border-bottom: 1px solid var(--divider);
     }
 
 
-    /* Login / user / dashboard */
-    .auth-links {
+    /* ---------------------------------------------
+       ACTIONS
+    --------------------------------------------- */
+
+    .navbar-actions {
+
         display: flex;
+
         flex-direction: column;
+
         align-items: stretch;
+
         width: 100%;
 
         margin-top: 12px;
+
         gap: 8px;
     }
 
-    .auth-links a,
-    .auth-links .btn-cta,
-    .auth-links .btn-outline,
-    .auth-links .btn-solid,
-    .auth-links .link-button {
-        display: block;
+
+    /* ---------------------------------------------
+       DROPDOWNS
+    --------------------------------------------- */
+
+    .navbar-dropdown {
+
         width: 100%;
+    }
+
+
+    .navbar-icon-button {
+
+        width: 100%;
+        height: 42px;
+
+        justify-content: center;
+
+        border: 1px solid var(--divider);
+
+        border-radius: 8px;
+    }
+
+
+    .navbar-profile-button {
+
+        width: 100%;
+        height: 42px;
+
+        justify-content: center;
+
+        border: 1px solid var(--divider);
+
+        border-radius: 8px;
+    }
+
+
+    /* ---------------------------------------------
+       DROPDOWN MOBILE
+    --------------------------------------------- */
+
+    .navbar-dropdown-menu {
+
+        position: static;
+
+        width: 100%;
+
+        min-width: 0;
+
+        margin-top: 6px;
+
+        box-shadow: none;
+
+        border-radius: 8px;
+
+        transform: none;
+    }
+
+
+    .navbar-dropdown.is-open
+    .navbar-dropdown-menu {
+
+        transform: none;
+    }
+
+
+    /* ---------------------------------------------
+       CREATE BUTTON
+    --------------------------------------------- */
+
+    .create-dropdown {
+        order: 1;
+    }
+
+
+    /* ---------------------------------------------
+       PROFILE
+    --------------------------------------------- */
+
+    .profile-dropdown {
+        order: 2;
+    }
+
+
+    /* ---------------------------------------------
+       LOGIN / REGISTER
+    --------------------------------------------- */
+
+    .navbar-actions > .btn-outline,
+    .navbar-actions > .btn-solid {
+
+        display: block;
+
+        width: 100%;
+
         text-align: center;
+
         box-sizing: border-box;
     }
 
-    .auth-links form {
-        width: 100%;
-    }
-
-    .auth-links .link-button {
-        padding: 10px;
-        border: 1px solid var(--divider);
-        border-radius: 8px;
-    }
 }

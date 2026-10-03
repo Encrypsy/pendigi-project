@@ -1,72 +1,409 @@
 {% extends 'base.html' %}
 {% load static %}
+
 {% block body %}
+
 <header class="navbar">
-  <a href="{% url 'articles:article_list' %}" class="brand"><img src="{% static 'images/pendigi-logo-tulisan.svg' %}"
-      alt="Pena Digital" class="logo" /></a>
 
-  <button class="navbar-toggle" id="navbarToggle" aria-label="Buka menu">
-    <span></span><span></span><span></span>
-  </button>
+    <!-- ================= LOGO ================= -->
 
-  <div class="navbar-collapse" id="navbarCollapse">
-    <nav class="nav-links">
-      {% for cat in navbar_categories %}
-      {% if cat.name|lower == 'fiksi' %}
-      <a href="{% url 'fiction:story_list' %}">{{ cat.name }}</a>
-      {% else %}
-      <a href="{% url 'articles:article_list' %}?kategori={{ cat.name|urlencode }}">{{ cat.name }}</a>
-      {% endif %}
-      {% endfor %}
-    </nav>
+    <a
+        href="{% url 'articles:article_list' %}"
+        class="brand"
+    >
+        <img
+            src="{% static 'images/pendigi-logo-tulisan.svg' %}"
+            alt="Pena Digital"
+            class="logo"
+        >
+    </a>
 
-    <div class="auth-links">
-      {% if user.is_authenticated %}
-      {% if user.role == 'admin' or user.is_superuser %}
-      <a href="{% url 'dashboard' %}" class="btn-cta">Dashboard</a>
-      {% elif user.status_kontributor == 'approved' %}
-      <a href="{% url 'articles:upload_article' %}" class="btn-cta">Tulis Artikel</a>
-      <a href="{% url 'fiction:create_story' %}" class="btn-cta">Tulis Cerita</a>
-      {% elif user.status_kontributor == 'pending' %}
-      <span class="btn-cta btn-disabled">Menunggu Verifikasi</span>
-      {% else %}
-      <a href="{% url 'apply_contributor' %}" class="btn-cta">Jadi Kontributor</a>
-      {% endif %}
 
-      <a href="{% url 'profile' %}">{{ user.username }}</a>
-      <form action="{% url 'logout' %}" method="post" style="display:inline;">
-        {% csrf_token %}
-        <button type="submit" class="link-button">Logout</button>
-      </form>
-      {% else %}
-      <a href="{% url 'login' %}" class="btn-outline">Login</a>
-      <a href="{% url 'register' %}" class="btn-solid">Daftar</a>
-      {% endif %}
+    <!-- ================= MOBILE TOGGLE ================= -->
+
+    <button
+        class="navbar-toggle"
+        id="navbarToggle"
+        aria-label="Buka menu"
+        aria-expanded="false"
+    >
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+
+
+    <!-- ================= NAVBAR CONTENT ================= -->
+
+    <div
+        class="navbar-collapse"
+        id="navbarCollapse"
+    >
+
+        <!-- ================= MENU ================= -->
+
+        <nav class="nav-links">
+
+            {% for cat in navbar_categories %}
+
+                {% if cat.name|lower == 'fiksi' %}
+
+                    <a href="{% url 'fiction:story_list' %}">
+                        {{ cat.name }}
+                    </a>
+
+                {% else %}
+
+                    <a
+                        href="{% url 'articles:article_list' %}?kategori={{ cat.name|urlencode }}"
+                    >
+                        {{ cat.name }}
+                    </a>
+
+                {% endif %}
+
+            {% endfor %}
+
+        </nav>
+
+
+        <!-- ================= RIGHT SIDE ================= -->
+
+        <div class="navbar-actions">
+
+            {% if user.is_authenticated %}
+
+                <!-- ================= AUTHOR CREATE BUTTON ================= -->
+
+                {% if user.status_kontributor == 'approved' and user.role != 'admin' %}
+
+                    <div class="navbar-dropdown create-dropdown">
+
+                        <button
+                            type="button"
+                            class="navbar-icon-button"
+                            aria-label="Buat konten"
+                            aria-expanded="false"
+                        >
+                            <span class="plus-icon">+</span>
+                        </button>
+
+                        <div class="navbar-dropdown-menu create-menu">
+
+                            <div class="navbar-dropdown-title">
+                                Buat Konten
+                            </div>
+
+                            <a href="{% url 'articles:upload_article' %}">
+                                Artikel
+                            </a>
+
+                            <a href="{% url 'fiction:create_story' %}">
+                                Fiksi
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                {% endif %}
+
+
+                <!-- ================= PROFILE ================= -->
+
+                <div class="navbar-dropdown profile-dropdown">
+
+                    <button
+                        type="button"
+                        class="navbar-profile-button"
+                        aria-label="Menu profil"
+                        aria-expanded="false"
+                    >
+
+                        {% if user.profile_picture %}
+
+                            <img
+                                src="{{ user.profile_picture.url }}"
+                                alt="{{ user.username }}"
+                                class="navbar-profile-avatar"
+                            >
+
+                        {% else %}
+
+                            <span class="navbar-profile-avatar navbar-profile-placeholder">
+                                {{ user.username|first|upper }}
+                            </span>
+
+                        {% endif %}
+
+                    </button>
+
+
+                    <!-- PROFILE DROPDOWN -->
+
+                    <div class="navbar-dropdown-menu profile-menu">
+
+                        <div class="navbar-dropdown-username">
+                            {{ user.username }}
+                        </div>
+
+
+                        <a href="{% url 'profile' %}">
+                            Lihat Profil
+                        </a>
+
+
+                        <a href="#">
+                            Riwayat Bacaan
+                        </a>
+
+
+                        {% if user.role == 'admin' or user.is_superuser %}
+
+                            <a href="{% url 'dashboard' %}">
+                                Dashboard
+                            </a>
+
+                        {% elif user.status_kontributor == 'approved' %}
+
+                            <a href="{% url 'dashboard' %}">
+                                Dashboard
+                            </a>
+
+                        {% elif user.status_kontributor == 'pending' %}
+
+                            <div class="navbar-dropdown-disabled">
+                                Menunggu Verifikasi
+                            </div>
+
+                        {% else %}
+
+                            <a href="{% url 'apply_contributor' %}">
+                                Daftar menjadi penulis
+                            </a>
+
+                        {% endif %}
+
+
+                        <!-- LOGOUT -->
+
+                        <form
+                            action="{% url 'logout' %}"
+                            method="post"
+                        >
+                            {% csrf_token %}
+
+                            <button type="submit">
+                                Logout
+                            </button>
+                        </form>
+
+                    </div>
+
+                </div>
+
+            {% else %}
+
+                <!-- ================= GUEST ================= -->
+
+                <a
+                    href="{% url 'login' %}"
+                    class="btn-outline"
+                >
+                    Login
+                </a>
+
+                <a
+                    href="{% url 'register' %}"
+                    class="btn-solid"
+                >
+                    Daftar
+                </a>
+
+            {% endif %}
+
+        </div>
+
     </div>
-  </div>
+
 </header>
 
-<main class="content">
-  {% if messages %}
-  <ul class="messages">
-    {% for message in messages %}
-    <li class="{{ message.tags }}">{{ message }}</li>
-    {% endfor %}
-  </ul>
-  {% endif %}
 
-  {% block content %}
-  {% endblock %}
+<!-- ================= MAIN ================= -->
+
+<main class="content">
+
+    {% if messages %}
+
+        <ul class="messages">
+
+            {% for message in messages %}
+
+                <li class="{{ message.tags }}">
+                    {{ message }}
+                </li>
+
+            {% endfor %}
+
+        </ul>
+
+    {% endif %}
+
+
+    {% block content %}
+    {% endblock %}
+
 </main>
 
+
+<!-- ================= FOOTER ================= -->
+
 <footer class="footer">
-  <p>&copy; {% now 'Y' %} Pena Digital</p>
+
+    <p>
+        &copy; {% now 'Y' %} Pena Digital
+    </p>
+
 </footer>
 
+
+<!-- ================= NAVBAR JS ================= -->
+
 <script>
-  document.getElementById('navbarToggle').addEventListener('click', function () {
-    document.getElementById('navbarCollapse').classList.toggle('is-open');
-    this.classList.toggle('is-active');
-  });
+
+document.addEventListener('DOMContentLoaded', function () {
+
+    const navbarToggle =
+        document.getElementById('navbarToggle');
+
+    const navbarCollapse =
+        document.getElementById('navbarCollapse');
+
+
+    /*
+     * MOBILE MENU
+     */
+
+    navbarToggle.addEventListener('click', function () {
+
+        const isOpen =
+            navbarCollapse.classList.toggle('is-open');
+
+        navbarToggle.classList.toggle(
+            'is-active',
+            isOpen
+        );
+
+        navbarToggle.setAttribute(
+            'aria-expanded',
+            isOpen
+        );
+
+    });
+
+
+    /*
+     * DROPDOWN
+     */
+
+    const dropdowns =
+        document.querySelectorAll('.navbar-dropdown');
+
+
+    dropdowns.forEach(function (dropdown) {
+
+        const button =
+            dropdown.querySelector(
+                ':scope > button'
+            );
+
+        if (!button) return;
+
+
+        button.addEventListener('click', function (event) {
+
+            event.stopPropagation();
+
+
+            const wasOpen =
+                dropdown.classList.contains('is-open');
+
+
+            /*
+             * Tutup dropdown lain
+             */
+
+            dropdowns.forEach(function (item) {
+
+                item.classList.remove('is-open');
+
+                const itemButton =
+                    item.querySelector(
+                        ':scope > button'
+                    );
+
+                if (itemButton) {
+
+                    itemButton.setAttribute(
+                        'aria-expanded',
+                        'false'
+                    );
+
+                }
+
+            });
+
+
+            /*
+             * Buka dropdown yang diklik
+             */
+
+            if (!wasOpen) {
+
+                dropdown.classList.add('is-open');
+
+                button.setAttribute(
+                    'aria-expanded',
+                    'true'
+                );
+
+            }
+
+        });
+
+    });
+
+
+    /*
+     * Klik di luar dropdown = tutup
+     */
+
+    document.addEventListener('click', function () {
+
+        dropdowns.forEach(function (dropdown) {
+
+            dropdown.classList.remove('is-open');
+
+            const button =
+                dropdown.querySelector(
+                    ':scope > button'
+                );
+
+            if (button) {
+
+                button.setAttribute(
+                    'aria-expanded',
+                    'false'
+                );
+
+            }
+
+        });
+
+    });
+
+});
+
 </script>
+
 {% endblock %}
