@@ -184,9 +184,18 @@ def author_dashboard(request):
     if request.user.status_kontributor != 'approved':
         return redirect('articles:article_list')
 
+    # ==========================================
+    # SEMUA KONTEN MILIK PENULIS
+    # ==========================================
+
     my_articles = Articles.objects.filter(
         contributor=request.user
-    )
+    ).select_related('category')
+
+
+    # ==========================================
+    # STAT CARD
+    # ==========================================
 
     approved_count = my_articles.filter(
         status=StatusArticle.APPROVED
@@ -200,6 +209,49 @@ def author_dashboard(request):
         status=StatusArticle.REJECTED
     ).count()
 
+
+    # ==========================================
+    # BAR CHART
+    # PERFORMA KONTEN BERDASARKAN VIEWS
+    # ==========================================
+
+    performance_articles = my_articles.order_by(
+        '-views'
+    )[:10]
+
+    performance_labels = [
+        article.title
+        for article in performance_articles
+    ]
+
+    performance_views = [
+        article.views
+        for article in performance_articles
+    ]
+
+
+    # ==========================================
+    # DONUT CHART
+    # DISTRIBUSI STATUS
+    # ==========================================
+
+    distribution_labels = [
+        'Approved',
+        'Pending',
+        'Rejected',
+    ]
+
+    distribution_values = [
+        approved_count,
+        pending_count,
+        rejected_count,
+    ]
+
+
+    # ==========================================
+    # RENDER
+    # ==========================================
+
     return render(
         request,
         'author_dashboard.html',
@@ -210,6 +262,22 @@ def author_dashboard(request):
             'approved_count': approved_count,
             'pending_count': pending_count,
             'rejected_count': rejected_count,
+
+            'performance_labels': json.dumps(
+                performance_labels
+            ),
+
+            'performance_views': json.dumps(
+                performance_views
+            ),
+
+            'distribution_labels': json.dumps(
+                distribution_labels
+            ),
+
+            'distribution_values': json.dumps(
+                distribution_values
+            ),
         }
     )
 

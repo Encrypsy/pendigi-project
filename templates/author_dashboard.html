@@ -93,28 +93,28 @@ Dashboard Penulis
 
         <div class="author-chart-card">
 
-            <h2>
-                Grafik Performa Konten
-            </h2>
+    <h2>
+        Grafik Performa Konten
+    </h2>
 
-            <p class="author-chart-placeholder">
-                Bar Chart
-            </p>
+    <div class="author-chart-container">
+        <canvas id="authorPerformanceChart"></canvas>
+    </div>
 
-        </div>
+</div>
 
 
         <div class="author-chart-card">
 
-            <h2>
-                Grafik Distribusi Konten
-            </h2>
+    <h2>
+        Grafik Distribusi Konten
+    </h2>
 
-            <p class="author-chart-placeholder">
-                Donut Chart
-            </p>
+    <div class="author-chart-container author-donut-container">
+        <canvas id="authorDistributionChart"></canvas>
+    </div>
 
-        </div>
+</div>
 
     </section>
 
@@ -153,5 +153,160 @@ Dashboard Penulis
     </section>
 
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+
+document.addEventListener('DOMContentLoaded', function () {
+
+    /* ==========================================
+       DATA DARI DJANGO
+    ========================================== */
+
+    const performanceLabels =
+        JSON.parse('{{ performance_labels|escapejs }}');
+
+    const performanceViews =
+        JSON.parse('{{ performance_views|escapejs }}');
+
+    const distributionLabels =
+        JSON.parse('{{ distribution_labels|escapejs }}');
+
+    const distributionValues =
+        JSON.parse('{{ distribution_values|escapejs }}');
+
+
+    /* ==========================================
+       BAR CHART
+    ========================================== */
+
+    const performanceCanvas =
+        document.getElementById(
+            'authorPerformanceChart'
+        );
+
+    if (performanceCanvas) {
+
+        new Chart(
+            performanceCanvas,
+            {
+                type: 'bar',
+
+                data: {
+                    labels: performanceLabels,
+
+                    datasets: [
+                        {
+                            label: 'Views',
+
+                            data: performanceViews,
+
+                            borderWidth: 1,
+
+                            borderRadius: 6
+                        }
+                    ]
+                },
+
+                options: {
+
+                    responsive: true,
+
+                    maintainAspectRatio: false,
+
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+
+                    scales: {
+
+                        y: {
+                            beginAtZero: true,
+
+                            ticks: {
+                                precision: 0
+                            }
+                        },
+
+                        x: {
+
+                            ticks: {
+
+                                maxRotation: 45,
+
+                                minRotation: 0
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            }
+        );
+
+    }
+
+
+    /* ==========================================
+       DONUT CHART
+    ========================================== */
+
+    const distributionCanvas =
+        document.getElementById(
+            'authorDistributionChart'
+        );
+
+    if (distributionCanvas) {
+
+        new Chart(
+            distributionCanvas,
+            {
+                type: 'doughnut',
+
+                data: {
+
+                    labels: distributionLabels,
+
+                    datasets: [
+                        {
+                            data: distributionValues,
+
+                            borderWidth: 2
+                        }
+                    ]
+
+                },
+
+                options: {
+
+                    responsive: true,
+
+                    maintainAspectRatio: false,
+
+                    cutout: '65%',
+
+                    plugins: {
+
+                        legend: {
+                            position: 'bottom'
+                        }
+
+                    }
+
+                }
+
+            }
+        );
+
+    }
+
+});
+
+</script>
 
 {% endblock %}
