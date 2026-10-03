@@ -1,0 +1,458 @@
+/* =========================================
+   AUTHOR DASHBOARD
+========================================= */
+
+.author-layout {
+    min-height: 100vh;
+    display: flex;
+    background: var(--paper);
+}
+
+
+/* =========================================
+   SIDEBAR
+========================================= */
+
+.author-sidebar {
+    width: 250px;
+    min-width: 250px;
+    min-height: 100vh;
+
+    background: #fff;
+
+    border-right: 1px solid var(--divider);
+
+    display: flex;
+    flex-direction: column;
+
+    position: sticky;
+    top: 0;
+
+    height: 100vh;
+
+    z-index: 1000;
+}
+
+
+/* =========================================
+   SIDEBAR HEADER
+========================================= */
+
+.author-sidebar-header {
+    height: 82px;
+
+    display: flex;
+    align-items: center;
+
+    padding: 0 24px;
+
+    border-bottom: 1px solid var(--divider);
+}
+
+
+.author-sidebar-header a {
+    display: flex;
+    align-items: center;
+}
+
+
+.author-logo {
+    width: 145px;
+    height: auto;
+    display: block;
+}
+
+
+/* =========================================
+   NAVIGATION
+========================================= */
+
+.author-nav {
+    padding: 24px 14px;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 4px;
+
+    overflow-y: auto;
+}
+
+
+.author-nav-group-label {
+    display: block;
+
+    padding: 10px 14px 8px;
+
+    font-size: 0.72rem;
+    font-weight: 700;
+
+    color: #99938a;
+
+    letter-spacing: 0.08em;
+}
+
+
+.author-nav-link {
+    width: 100%;
+
+    min-height: 44px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+
+    padding: 10px 14px;
+
+    border: none;
+    border-radius: 8px;
+
+    background: transparent;
+
+    color: var(--text);
+
+    text-decoration: none;
+
+    font-size: 0.9rem;
+
+    cursor: pointer;
+
+    text-align: left;
+
+    transition:
+        background .15s ease,
+        color .15s ease;
+}
+
+
+.author-nav-link:hover {
+    background: #f5f0e8;
+    color: var(--brown);
+}
+
+
+.author-nav-link.is-active {
+    background: #f0e7db;
+    color: var(--brown);
+
+    font-weight: 600;
+}
+
+
+.author-nav-icon {
+    width: 22px;
+
+    flex-shrink: 0;
+
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    font-size: 1rem;
+}
+
+
+.author-nav-link-text {
+    flex: 1;
+}
+
+
+/* =========================================
+   DROPDOWN
+========================================= */
+
+.author-nav-dropdown {
+    display: flex;
+    flex-direction: column;
+}
+
+
+.author-nav-dropdown-toggle {
+    font-family: inherit;
+}
+
+
+.author-nav-caret {
+    margin-left: auto;
+
+    font-size: 0.75rem;
+
+    transition:
+        transform .2s ease;
+}
+
+
+.author-nav-dropdown.is-open
+.author-nav-caret {
+    transform: rotate(180deg);
+}
+
+
+.author-nav-submenu {
+    display: none;
+
+    flex-direction: column;
+
+    margin-left: 36px;
+
+    border-left: 1px solid var(--divider);
+
+    padding: 4px 0 4px 10px;
+}
+
+
+.author-nav-dropdown.is-open
+.author-nav-submenu {
+    display: flex;
+}
+
+
+.author-nav-submenu a {
+    padding: 9px 10px;
+
+    color: #6f6a63;
+
+    font-size: 0.84rem;
+
+    text-decoration: none;
+
+    border-radius: 6px;
+}
+
+
+.author-nav-submenu a:hover {
+    background: #f5f0e8;
+
+    color: var(--brown);
+}
+
+
+/* =========================================
+   SETTINGS
+========================================= */
+
+.author-nav-settings {
+    margin-top: auto;
+
+    padding-top: 20px;
+
+    border-top: 1px solid var(--divider);
+}
+
+
+/* =========================================
+   MAIN
+========================================= */
+
+.author-main {
+    flex: 1;
+
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+}
+
+
+/* =========================================
+   TOPBAR
+========================================= */
+
+.author-topbar {
+    height: 72px;
+
+    padding: 0 28px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: space-between;
+
+    background: #fff;
+
+    border-bottom: 1px solid var(--divider);
+}
+
+
+.author-topbar-left {
+    display: flex;
+
+    align-items: center;
+
+    gap: 14px;
+}
+
+
+.author-breadcrumb {
+    font-size: 0.88rem;
+
+    color: #77716a;
+}
+
+
+/* =========================================
+   PROFILE
+========================================= */
+
+.author-profile {
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+}
+
+
+.author-profile-avatar {
+    width: 38px;
+    height: 38px;
+
+    border-radius: 50%;
+
+    object-fit: cover;
+
+    display: block;
+}
+
+
+.author-avatar-placeholder {
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    background: #e7dfd4;
+
+    color: var(--brown);
+
+    font-weight: 700;
+}
+
+
+.author-profile-name {
+    font-size: 0.88rem;
+
+    color: var(--text);
+
+    font-weight: 500;
+}
+
+
+/* =========================================
+   CONTENT
+========================================= */
+
+.author-content {
+    flex: 1;
+
+    padding: 32px;
+
+    min-width: 0;
+}
+
+
+/* =========================================
+   MOBILE BUTTON
+========================================= */
+
+.author-mobile-toggle {
+    display: none;
+
+    width: 38px;
+    height: 38px;
+
+    border: 1px solid var(--divider);
+
+    border-radius: 8px;
+
+    background: #fff;
+
+    color: var(--brown);
+
+    font-size: 1.1rem;
+
+    cursor: pointer;
+}
+
+
+/* =========================================
+   OVERLAY
+========================================= */
+
+.author-sidebar-overlay {
+    display: none;
+}
+
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width: 860px) {
+
+    .author-sidebar {
+        position: fixed;
+
+        top: 0;
+        left: 0;
+
+        width: 260px;
+        min-width: 260px;
+
+        transform: translateX(-100%);
+
+        transition:
+            transform .25s ease;
+
+        box-shadow: 4px 0 20px rgba(0, 0, 0, .08);
+    }
+
+
+    .author-sidebar.is-open {
+        transform: translateX(0);
+    }
+
+
+    .author-sidebar-overlay {
+        position: fixed;
+
+        inset: 0;
+
+        background: rgba(0, 0, 0, .25);
+
+        z-index: 900;
+    }
+
+
+    .author-sidebar-overlay.is-visible {
+        display: block;
+    }
+
+
+    .author-mobile-toggle {
+        display: inline-flex;
+
+        align-items: center;
+        justify-content: center;
+    }
+
+
+    .author-topbar {
+        height: 64px;
+
+        padding: 0 16px;
+    }
+
+
+    .author-content {
+        padding: 20px 16px;
+    }
+
+
+    .author-profile-name {
+        display: none;
+    }
+
+}

@@ -1,0 +1,382 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/author-dashboard.css' %}">
+{% endblock %}
+
+{% block body %}
+
+<div class="author-layout">
+
+    <!-- ================= SIDEBAR ================= -->
+
+    <aside class="author-sidebar">
+
+        <!-- LOGO -->
+
+        <div class="author-sidebar-header">
+
+            <a href="{% url 'articles:article_list' %}">
+                <img
+                    src="{% static 'images/pendigi-logo-tulisan.svg' %}"
+                    alt="Pena Digital"
+                    class="author-logo"
+                >
+            </a>
+
+        </div>
+
+
+        <!-- NAVIGATION -->
+
+        <nav class="author-nav">
+
+            <!-- MAIN -->
+
+            <span class="author-nav-group-label">
+                MAIN
+            </span>
+
+
+            <!-- DASHBOARD -->
+
+            <a
+                href="{% url 'dashboard' %}"
+                class="author-nav-link {% if active_menu == 'dashboard' %}is-active{% endif %}"
+            >
+                <span class="author-nav-icon">▦</span>
+                <span>Dashboard</span>
+            </a>
+
+
+            <!-- KONTEN SAYA -->
+
+            <div
+                class="author-nav-dropdown
+                {% if active_menu == 'content' %}is-open{% endif %}"
+            >
+
+                <button
+                    type="button"
+                    class="author-nav-link author-nav-dropdown-toggle"
+                    aria-expanded="{% if active_menu == 'content' %}true{% else %}false{% endif %}"
+                >
+
+                    <span class="author-nav-icon">✎</span>
+
+                    <span class="author-nav-link-text">
+                        Konten Saya
+                    </span>
+
+                    <span class="author-nav-caret">
+                        ▾
+                    </span>
+
+                </button>
+
+
+                <div class="author-nav-submenu">
+
+                    <a href="#">
+                        Semua Konten
+                    </a>
+
+                    <a href="#">
+                        Draft
+                    </a>
+
+                    <a href="#">
+                        Pending
+                    </a>
+
+                    <a href="#">
+                        Dipublikasikan
+                    </a>
+
+                    <a href="#">
+                        Ditolak
+                    </a>
+
+                </div>
+
+            </div>
+
+
+            <!-- BUAT KONTEN -->
+
+            <a
+                href="#"
+                class="author-nav-link"
+            >
+                <span class="author-nav-icon">＋</span>
+                <span>Buat Konten</span>
+            </a>
+
+
+            <!-- KOMENTAR -->
+
+            <a
+                href="#"
+                class="author-nav-link"
+            >
+                <span class="author-nav-icon">💬</span>
+                <span>Komentar</span>
+            </a>
+
+
+            <!-- STATISTIK -->
+
+            <a
+                href="#"
+                class="author-nav-link"
+            >
+                <span class="author-nav-icon">📊</span>
+                <span>Statistik</span>
+            </a>
+
+
+            <!-- SETTINGS -->
+
+            <div class="author-nav-settings">
+
+                <span class="author-nav-group-label">
+                    SETTINGS
+                </span>
+
+
+                <a
+                    href="#"
+                    class="author-nav-link"
+                >
+                    <span class="author-nav-icon">⚙</span>
+                    <span>Pengaturan</span>
+                </a>
+
+
+                <a
+                    href="{% url 'articles:article_list' %}"
+                    class="author-nav-link"
+                >
+                    <span class="author-nav-icon">↩</span>
+                    <span>Kembali ke Situs</span>
+                </a>
+
+            </div>
+
+        </nav>
+
+    </aside>
+
+
+    <!-- ================= MAIN ================= -->
+
+    <div class="author-main">
+
+
+        <!-- TOPBAR -->
+
+        <header class="author-topbar">
+
+            <div class="author-topbar-left">
+
+                <button
+                    type="button"
+                    class="author-mobile-toggle"
+                    id="authorMobileToggle"
+                    aria-label="Buka menu"
+                    aria-expanded="false"
+                >
+                    ☰
+                </button>
+
+                <div class="author-breadcrumb">
+                    Home / {{ breadcrumb|default:'Dashboard' }}
+                </div>
+
+            </div>
+
+
+            <!-- PROFILE -->
+
+            <div class="author-profile">
+
+                {% if user.profile_picture %}
+
+                    <img
+                        src="{{ user.profile_picture.url }}"
+                        alt="{{ user.username }}"
+                        class="author-profile-avatar"
+                    >
+
+                {% else %}
+
+                    <div class="author-profile-avatar author-avatar-placeholder">
+                        {{ user.username|first|upper }}
+                    </div>
+
+                {% endif %}
+
+                <span class="author-profile-name">
+                    {{ user.username }}
+                </span>
+
+            </div>
+
+        </header>
+
+
+        <!-- CONTENT -->
+
+        <main class="author-content">
+
+            {% if messages %}
+
+                <ul class="messages">
+
+                    {% for message in messages %}
+
+                        <li class="{{ message.tags }}">
+                            {{ message }}
+                        </li>
+
+                    {% endfor %}
+
+                </ul>
+
+            {% endif %}
+
+
+            {% block author_content %}
+            {% endblock %}
+
+        </main>
+
+    </div>
+
+</div>
+
+
+<!-- ================= MOBILE OVERLAY ================= -->
+
+<div
+    class="author-sidebar-overlay"
+    id="authorSidebarOverlay"
+>
+</div>
+
+
+<script>
+
+document.addEventListener('DOMContentLoaded', function () {
+
+    /*
+     * =========================
+     * SIDEBAR DROPDOWN
+     * =========================
+     */
+
+    const dropdownButtons =
+        document.querySelectorAll(
+            '.author-nav-dropdown-toggle'
+        );
+
+
+    dropdownButtons.forEach(function (button) {
+
+        button.addEventListener('click', function () {
+
+            const dropdown =
+                button.closest(
+                    '.author-nav-dropdown'
+                );
+
+            const isOpen =
+                dropdown.classList.toggle(
+                    'is-open'
+                );
+
+
+            button.setAttribute(
+                'aria-expanded',
+                isOpen
+            );
+
+        });
+
+    });
+
+
+    /*
+     * =========================
+     * MOBILE SIDEBAR
+     * =========================
+     */
+
+    const mobileToggle =
+        document.getElementById(
+            'authorMobileToggle'
+        );
+
+    const sidebar =
+        document.querySelector(
+            '.author-sidebar'
+        );
+
+    const overlay =
+        document.getElementById(
+            'authorSidebarOverlay'
+        );
+
+
+    function closeSidebar() {
+
+        sidebar?.classList.remove(
+            'is-open'
+        );
+
+        overlay?.classList.remove(
+            'is-visible'
+        );
+
+        mobileToggle?.setAttribute(
+            'aria-expanded',
+            'false'
+        );
+
+    }
+
+
+    mobileToggle?.addEventListener(
+        'click',
+        function () {
+
+            const isOpen =
+                sidebar.classList.toggle(
+                    'is-open'
+                );
+
+            overlay.classList.toggle(
+                'is-visible',
+                isOpen
+            );
+
+            mobileToggle.setAttribute(
+                'aria-expanded',
+                isOpen
+            );
+
+        }
+    );
+
+
+    overlay?.addEventListener(
+        'click',
+        closeSidebar
+    );
+
+});
+
+</script>
+
+{% endblock %}
