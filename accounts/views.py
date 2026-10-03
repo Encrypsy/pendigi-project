@@ -216,7 +216,7 @@ def author_dashboard(request):
     # ==========================================
 
     performance_articles = my_articles.order_by(
-        '-views'
+        '-views_count'
     )[:10]
 
     performance_labels = [
@@ -225,7 +225,7 @@ def author_dashboard(request):
     ]
 
     performance_views = [
-        article.views
+        article.views_count
         for article in performance_articles
     ]
 
