@@ -109,19 +109,69 @@ Dashboard Penulis
         <!-- POPULER -->
         <div class="author-card popular-card">
 
-            <h2>Konten Terpopuler</h2>
+    <h2>Konten Terpopuler</h2>
 
-            <div class="popular-list">
+    <div class="popular-list">
 
-                <!-- nanti 3 konten terpopuler -->
+        {% for content in popular_contents %}
 
-                <p class="empty-state">
-                    Belum ada data konten.
-                </p>
+            <a
+                href="{% url 'articles:article_detail' content.pk %}"
+                class="popular-item"
+            >
 
-            </div>
+                <div class="popular-rank">
+                    {{ forloop.counter }}
+                </div>
 
-        </div>
+                <div class="popular-thumbnail">
+
+                    {% if content.thumbnail %}
+                        <img
+                            src="{{ content.thumbnail.url }}"
+                            alt="{{ content.title }}"
+                        >
+                    {% else %}
+                        <div class="popular-thumbnail-placeholder">
+                            —
+                        </div>
+                    {% endif %}
+
+                </div>
+
+                <div class="popular-info">
+
+                    <h3>
+                        {{ content.title }}
+                    </h3>
+
+                    <div class="popular-meta">
+
+                        <span>
+                            👁 {{ content.views_count }} views
+                        </span>
+
+                        <span>
+                            💬 {{ content.total_comments }} komentar
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </a>
+
+        {% empty %}
+
+            <p class="empty-state">
+                Belum ada data konten.
+            </p>
+
+        {% endfor %}
+
+    </div>
+
+</div>
 
     </section>
 

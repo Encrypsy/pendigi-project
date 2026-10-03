@@ -1004,3 +1004,133 @@
     }
 
 }
+
+/* =========================================
+   KONTEN TERPOPULER
+========================================= */
+
+.popular-list {
+    margin-top: 20px;
+}
+
+.popular-item {
+    display: grid;
+    grid-template-columns: 32px 80px minmax(0, 1fr);
+    align-items: center;
+    gap: 14px;
+
+    padding: 14px 0;
+
+    color: inherit;
+    text-decoration: none;
+
+    border-bottom: 1px solid var(--divider);
+
+    transition: background .15s ease;
+}
+
+.popular-item:last-child {
+    border-bottom: none;
+}
+
+.popular-item:hover {
+    background: #faf7f1;
+}
+
+
+/* RANK */
+
+.popular-rank {
+    color: var(--brown);
+    font-size: 1.3rem;
+    font-weight: 700;
+    text-align: center;
+}
+
+
+/* THUMBNAIL */
+
+.popular-thumbnail {
+    width: 80px;
+    height: 60px;
+
+    overflow: hidden;
+
+    border-radius: 6px;
+    background: #eee;
+}
+
+.popular-thumbnail img {
+    width: 100%;
+    height: 100%;
+
+    object-fit: cover;
+
+    display: block;
+}
+
+.popular-thumbnail-placeholder {
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    color: #999;
+}
+
+
+/* INFO */
+
+.popular-info {
+    min-width: 0;
+}
+
+.popular-info h3 {
+    margin: 0 0 8px;
+
+    color: var(--text);
+
+    font-size: 0.95rem;
+    font-weight: 600;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.popular-meta {
+    display: flex;
+    gap: 14px;
+
+    color: #8a8880;
+
+    font-size: 0.8rem;
+}
+
+
+/* MOBILE */
+
+@media (max-width: 600px) {
+
+    .popular-item {
+        grid-template-columns: 28px 70px minmax(0, 1fr);
+        gap: 10px;
+    }
+
+    .popular-thumbnail {
+        width: 70px;
+        height: 55px;
+    }
+
+    .popular-info h3 {
+        white-space: normal;
+    }
+
+    .popular-meta {
+        flex-direction: column;
+        gap: 3px;
+    }
+
+}

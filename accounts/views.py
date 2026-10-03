@@ -2,6 +2,7 @@ from django.contrib.auth import login
 from django.contrib.auth.views import LoginView
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.db import models
 from django.shortcuts import get_object_or_404, render, redirect
 from .forms import RegisterForm, ContributorApplicationForm, ProfileUpdateForm
 from .models import StatusKontributor, ContributorApplication, Users
@@ -191,6 +192,23 @@ def author_dashboard(request):
     my_articles = Articles.objects.filter(
         contributor=request.user
     ).select_related('category')
+    
+    popular_contents = (
+    my_articles
+    .filter(status=StatusArticle.APPROVED)
+    .annotate(
+        total_comments=Count(
+            'comments',
+            filter=models.Q(
+                comments__status=StatusComment.APPROVED
+            )
+        )
+    )
+    .order_by(
+        '-views_count',
+        '-total_comments'
+    )[:3]
+)
 
 
     # ==========================================
@@ -364,6 +382,7 @@ def author_dashboard(request):
         ),
 
         'performance_filter': performance_filter,
+        'popular_contents': popular_contents,
     }
 )
 
