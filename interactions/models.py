@@ -86,3 +86,17 @@ class CommentDislikes(models.Model):
 
     class Meta:
         constraints = [models.UniqueConstraint(fields=['user', 'comment'], name='unique_user_comment_dislike')]
+        
+class ArticleViewHistory(models.Model):
+    article = models.ForeignKey(
+        'articles.Articles',
+        on_delete=models.CASCADE,
+        related_name='view_history'
+    )
+    viewed_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['viewed_at']
+
+    def __str__(self):
+        return f"{self.article.title} - {self.viewed_at}"

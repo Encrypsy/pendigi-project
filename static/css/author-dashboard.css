@@ -638,3 +638,130 @@
 .author-donut-container {
     height: 230px;
 }
+
+/* ==========================================
+   PERFORMANCE CHART
+========================================== */
+
+.performance-card {
+    min-width: 0;
+}
+
+.dashboard-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 24px;
+}
+
+.dashboard-card-header h3 {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 700;
+}
+
+.dashboard-card-header p {
+    margin-top: 5px;
+    font-size: 0.85rem;
+    color: #8a8880;
+}
+
+
+/* ==========================================
+   FILTER
+========================================== */
+
+.performance-filter select {
+    appearance: none;
+    padding: 8px 34px 8px 12px;
+
+    border: 1px solid var(--divider);
+    border-radius: 8px;
+
+    background-color: #fff;
+    color: var(--text);
+
+    font-size: 0.82rem;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    background-image:
+        linear-gradient(45deg, transparent 50%, #6B4226 50%),
+        linear-gradient(135deg, #6B4226 50%, transparent 50%);
+
+    background-position:
+        calc(100% - 15px) 50%,
+        calc(100% - 10px) 50%;
+
+    background-size:
+        5px 5px,
+        5px 5px;
+
+    background-repeat: no-repeat;
+}
+
+.performance-filter select:focus {
+    outline: none;
+    border-color: var(--brown);
+}
+
+
+/* ==========================================
+   CHART CONTAINER
+========================================== */
+
+.performance-chart-wrapper {
+    position: relative;
+
+    width: 100%;
+    height: 300px;
+}
+
+.performance-chart-wrapper canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+
+/* ==========================================
+   EMPTY STATE
+========================================== */
+
+.chart-empty {
+    height: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    color: #8a8880;
+    font-size: 0.9rem;
+}
+
+
+/* ==========================================
+   MOBILE
+========================================== */
+
+@media (max-width: 600px) {
+
+    .dashboard-card-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .performance-filter {
+        width: 100%;
+    }
+
+    .performance-filter select {
+        width: 100%;
+    }
+
+    .performance-chart-wrapper {
+        height: 250px;
+    }
+
+}

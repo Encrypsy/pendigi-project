@@ -10,7 +10,7 @@ from django.db.models import Count
 from django.utils import timezone
 from datetime import timedelta
 from articles.models import Articles, StatusArticle, Categories
-from interactions.models import Comments, StatusComment, Ratings
+from interactions.models import ArticleViewHistory, Comments, StatusComment, Ratings
 from articles.models import Articles, StatusArticle, Categories
 from fiction.models import Stories, StatusStory as FictionStatusStory
 from reading_journal.models import ReadingActivity
@@ -211,6 +211,86 @@ def author_dashboard(request):
 
 
     # ==========================================
+    # HISTORY VIEW
+    # ==========================================
+
+    view_history = ArticleViewHistory.objects.filter(
+        article__contributor=request.user
+    )
+    
+    # ==========================================
+    # FILTER PERFORMA
+    # ==========================================
+
+    performance_filter = request.GET.get('period', '30')
+
+    today = timezone.localdate()
+
+    if performance_filter == '7':
+        start_date = today - timedelta(days=6)
+
+    elif performance_filter == '30':
+        start_date = today - timedelta(days=29)
+
+    elif performance_filter == 'month':
+        start_date = today.replace(day=1)
+
+    else:
+        performance_filter = '30'
+        start_date = today - timedelta(days=29)
+
+
+    # ==========================================
+    # BASELINE VIEW SEBELUM PERIODE
+    # ==========================================
+
+    baseline_views = view_history.filter(
+        viewed_at__date__lt=start_date
+    ).count()
+
+
+    # ==========================================
+    # VIEW DI DALAM PERIODE
+    # ==========================================
+
+    filtered_view_history = view_history.filter(
+        viewed_at__date__gte=start_date,
+        viewed_at__date__lte=today
+    )
+
+    # ==========================================
+    # VIEW PER TANGGAL
+    # ==========================================
+
+    daily_views = (
+        filtered_view_history
+        .annotate(date=TruncDate('viewed_at'))
+        .values('date')
+        .annotate(total=Count('id'))
+        .order_by('date')
+    )
+
+
+    # ==========================================
+    # DATA GRAFIK PERFORMA
+    # CUMULATIVE VIEWS
+    # ==========================================
+
+    performance_data = []
+
+    cumulative = baseline_views
+
+    for item in daily_views:
+
+        cumulative += item['total']
+
+        performance_data.append({
+            'date': item['date'].strftime('%b %-d'),
+            'views': cumulative,
+        })
+
+
+    # ==========================================
     # BAR CHART
     # PERFORMA KONTEN BERDASARKAN VIEWS
     # ==========================================
@@ -253,33 +333,39 @@ def author_dashboard(request):
     # ==========================================
 
     return render(
-        request,
-        'author_dashboard.html',
-        {
-            'breadcrumb': 'Dashboard Penulis',
-            'active_menu': 'dashboard',
+    request,
+    'author_dashboard.html',
+    {
+        'breadcrumb': 'Dashboard Penulis',
+        'active_menu': 'dashboard',
 
-            'approved_count': approved_count,
-            'pending_count': pending_count,
-            'rejected_count': rejected_count,
+        'approved_count': approved_count,
+        'pending_count': pending_count,
+        'rejected_count': rejected_count,
 
-            'performance_labels': json.dumps(
-                performance_labels
-            ),
+        'performance_data': json.dumps(
+            performance_data
+        ),
 
-            'performance_views': json.dumps(
-                performance_views
-            ),
+        'performance_labels': json.dumps(
+            performance_labels
+        ),
 
-            'distribution_labels': json.dumps(
-                distribution_labels
-            ),
+        'performance_views': json.dumps(
+            performance_views
+        ),
 
-            'distribution_values': json.dumps(
-                distribution_values
-            ),
-        }
-    )
+        'distribution_labels': json.dumps(
+            distribution_labels
+        ),
+
+        'distribution_values': json.dumps(
+            distribution_values
+        ),
+
+        'performance_filter': performance_filter,
+    }
+)
 
 @admin_required
 def admin_pending_contributors(request):

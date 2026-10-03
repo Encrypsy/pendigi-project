@@ -91,15 +91,60 @@ Dashboard Penulis
 
     <section class="author-dashboard-charts">
 
-        <div class="author-chart-card">
+       <div class="dashboard-card performance-card">
 
-    <h2>
-        Grafik Performa Konten
-    </h2>
+            <div class="dashboard-card-header">
 
-    <div class="author-chart-container">
-        <canvas id="authorPerformanceChart"></canvas>
+                <div>
+                    <h3>Performa Konten</h3>
+                    <p>Total views seluruh konten</p>
+                </div>
+
+            <form method="get" class="performance-filter">
+
+                <select name="period" onchange="this.form.submit()">
+
+                    <option value="7"
+                        {% if performance_filter == '7' %}selected{% endif %}>
+                        7 Hari
+                    </option>
+
+                    <option value="30"
+                        {% if performance_filter == '30' %}selected{% endif %}>
+                        30 Hari
+                    </option>
+
+                    <option value="month"
+                        {% if performance_filter == 'month' %}selected{% endif %}>
+                        Bulan Ini
+                    </option>
+
+                </select>
+
+            </form>
+
+        </div>
+
+
+    <div class="performance-chart-wrapper">
+
+        {% if performance_data != '[]' %}
+
+            <canvas id="performanceChart"></canvas>
+
+        {% else %}
+
+            <div class="chart-empty">
+                Belum ada data views pada periode ini.
+            </div>
+
+        {% endif %}
+
     </div>
+
+</div>
+
+</div>
 
 </div>
 
@@ -181,64 +226,127 @@ document.addEventListener('DOMContentLoaded', function () {
        BAR CHART
     ========================================== */
 
-    const performanceCanvas =
-        document.getElementById(
-            'authorPerformanceChart'
-        );
+    const canvas = document.getElementById('performanceChart');
 
-    if (performanceCanvas) {
+    if (!canvas) {
+        return;
+    }
 
-        new Chart(
-            performanceCanvas,
-            {
-                type: 'bar',
 
-                data: {
-                    labels: performanceLabels,
+    const performanceData = {{ performance_data|safe }};
 
-                    datasets: [
-                        {
-                            label: 'Views',
 
-                            data: performanceViews,
+    const labels = performanceData.map(function (item) {
+        return item.date;
+    });
 
-                            borderWidth: 1,
 
-                            borderRadius: 6
-                        }
-                    ]
+    const views = performanceData.map(function (item) {
+        return item.views;
+    });
+
+
+    new Chart(canvas, {
+
+        type: 'line',
+
+        data: {
+
+            labels: labels,
+
+            datasets: [
+                {
+                    label: 'Total Views',
+
+                    data: views,
+
+                    borderWidth: 2,
+
+                    tension: 0.35,
+
+                    fill: true,
+
+                    pointRadius: 3,
+
+                    pointHoverRadius: 6,
+
+                    pointHitRadius: 12
+                }
+            ]
+
+        },
+
+
+        options: {
+
+            responsive: true,
+
+            maintainAspectRatio: false,
+
+
+            interaction: {
+                mode: 'index',
+                intersect: false
+            },
+
+
+            plugins: {
+
+                legend: {
+                    display: false
                 },
 
-                options: {
 
-                    responsive: true,
+                tooltip: {
 
-                    maintainAspectRatio: false,
+                    displayColors: false,
 
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    },
+                    callbacks: {
 
-                    scales: {
-
-                        y: {
-                            beginAtZero: true,
-
-                            ticks: {
-                                precision: 0
-                            }
+                        title: function (items) {
+                            return items[0].label;
                         },
 
-                        x: {
+                        label: function (context) {
 
-                            ticks: {
+                            return 'Total views: ' +
+                                context.parsed.y.toLocaleString('id-ID');
 
-                                maxRotation: 45,
+                        }
 
-                                minRotation: 0
-                            }
+                    }
+
+                }
+
+            },
+
+
+            scales: {
+
+                x: {
+
+                    grid: {
+                        display: false
+                    },
+
+                    ticks: {
+                        maxTicksLimit: 7
+                    }
+
+                },
+
+
+                y: {
+
+                    beginAtZero: true,
+
+                    ticks: {
+
+                        precision: 0,
+
+                        callback: function (value) {
+
+                            return value.toLocaleString('id-ID');
 
                         }
 
@@ -247,9 +355,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
 
             }
-        );
 
-    }
+        }
+
+    });
+
 
 
     /* ==========================================

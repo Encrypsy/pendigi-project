@@ -13,7 +13,7 @@ from interactions.views import _attach_comment_meta, _sort_comments
 from .models import Articles, Banner, BannerType, Categories, StatusArticle
 from .forms import ArticleMetaForm, ArticleUploadForm, BannerForm
 from accounts.models import StatusKontributor
-from interactions.models import Comments, Ratings, Bookmarks, StatusComment
+from interactions.models import Comments, Ratings, Bookmarks, StatusComment, ArticleViewHistory
 from interactions.forms import CommentForm, RatingForm
 from reading_journal.models import ReadingActivity, ActionType
 from accounts.decorators import admin_required
@@ -196,6 +196,10 @@ def article_detail(request, pk):
 
     Articles.objects.filter(pk=pk).update(views_count=F('views_count') + 1)
     article.refresh_from_db(fields=['views_count'])
+    
+    ArticleViewHistory.objects.create(
+    article=article
+)
 
     sort = request.GET.get('sort', 'recent')
     comments_qs = article.comments.filter(status=StatusComment.APPROVED, parent__isnull=True).select_related('user')
