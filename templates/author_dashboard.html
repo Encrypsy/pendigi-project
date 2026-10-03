@@ -1,0 +1,157 @@
+{% extends 'author_base.html' %}
+
+{% block title %}
+Dashboard Penulis
+{% endblock %}
+
+{% block author_content %}
+
+<div class="author-dashboard">
+
+    <!-- =========================
+         HEADER
+    ========================== -->
+
+    <section class="author-dashboard-header">
+
+        <h1>
+            Selamat datang,<br>
+            {{ user.username }}
+        </h1>
+
+        <p>
+            Kelola dan pantau semua konten yang kamu buat di Pena Digital.
+        </p>
+
+    </section>
+
+
+    <!-- =========================
+         STAT CARDS
+    ========================== -->
+
+    <section class="author-stat-grid">
+
+        <div class="author-stat-card">
+
+            <span class="author-stat-title">
+                Total konten
+            </span>
+
+            <strong class="author-stat-value">
+                0
+            </strong>
+
+            <span class="author-stat-description">
+                yang di-approved
+            </span>
+
+        </div>
+
+
+        <div class="author-stat-card">
+
+            <span class="author-stat-title">
+                Total konten
+            </span>
+
+            <strong class="author-stat-value">
+                0
+            </strong>
+
+            <span class="author-stat-description">
+                yang masih pending
+            </span>
+
+        </div>
+
+
+        <div class="author-stat-card">
+
+            <span class="author-stat-title">
+                Total konten
+            </span>
+
+            <strong class="author-stat-value">
+                0
+            </strong>
+
+            <span class="author-stat-description">
+                yang ditolak
+            </span>
+
+        </div>
+
+    </section>
+
+
+    <!-- =========================
+         CHART SECTION
+    ========================== -->
+
+    <section class="author-dashboard-charts">
+
+        <div class="author-chart-card">
+
+            <h2>
+                Grafik Performa Konten
+            </h2>
+
+            <p class="author-chart-placeholder">
+                Bar Chart
+            </p>
+
+        </div>
+
+
+        <div class="author-chart-card">
+
+            <h2>
+                Grafik Distribusi Konten
+            </h2>
+
+            <p class="author-chart-placeholder">
+                Donut Chart
+            </p>
+
+        </div>
+
+    </section>
+
+
+    <!-- =========================
+         BOTTOM SECTION
+    ========================== -->
+
+    <section class="author-dashboard-bottom">
+
+        <div class="author-activity-card">
+
+            <h2>
+                Notifikasi Aktivitas
+            </h2>
+
+            <div class="author-empty-state">
+                Belum ada aktivitas.
+            </div>
+
+        </div>
+
+
+        <div class="author-popular-card">
+
+            <h2>
+                Konten Terpopuler
+            </h2>
+
+            <div class="author-empty-state">
+                Belum ada data konten.
+            </div>
+
+        </div>
+
+    </section>
+
+</div>
+
+{% endblock %}

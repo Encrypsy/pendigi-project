@@ -456,3 +456,170 @@
     }
 
 }
+
+.author-dashboard {
+    padding: 8px 0;
+}
+
+
+/* =========================
+   HEADER
+========================= */
+
+.author-dashboard-header {
+    margin-bottom: 28px;
+}
+
+.author-dashboard-header h1 {
+    margin: 0 0 12px;
+    font-size: 2rem;
+    line-height: 1.2;
+    color: var(--brown);
+}
+
+.author-dashboard-header p {
+    margin: 0;
+    color: #6f6a63;
+}
+
+
+/* =========================
+   STAT CARDS
+========================= */
+
+.author-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.author-stat-card {
+    background: #fff;
+    border: 1px solid var(--divider);
+    border-radius: 10px;
+    padding: 20px;
+    min-height: 130px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.author-stat-title {
+    font-size: 0.9rem;
+    color: #6f6a63;
+}
+
+.author-stat-value {
+    margin-top: 6px;
+    font-size: 2rem;
+    color: var(--brown);
+}
+
+.author-stat-description {
+    font-size: 0.85rem;
+    color: #777;
+}
+
+
+/* =========================
+   CHART
+========================= */
+
+.author-dashboard-charts {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.author-chart-card {
+    background: #fff;
+    border: 1px solid var(--divider);
+    border-radius: 10px;
+    padding: 20px;
+    min-height: 300px;
+}
+
+.author-chart-card h2,
+.author-activity-card h2,
+.author-popular-card h2 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: var(--text);
+}
+
+.author-chart-placeholder {
+    min-height: 220px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    color: #aaa;
+}
+
+
+/* =========================
+   BOTTOM
+========================= */
+
+.author-dashboard-bottom {
+    display: grid;
+    grid-template-columns: 0.9fr 1.5fr;
+    gap: 16px;
+}
+
+.author-activity-card,
+.author-popular-card {
+    background: #fff;
+    border: 1px solid var(--divider);
+    border-radius: 10px;
+    padding: 20px;
+    min-height: 300px;
+}
+
+.author-empty-state {
+    min-height: 230px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    color: #999;
+}
+
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 900px) {
+
+    .author-stat-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .author-dashboard-charts {
+        grid-template-columns: 1fr;
+    }
+
+    .author-dashboard-bottom {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+
+@media (max-width: 600px) {
+
+    .author-dashboard-header h1 {
+        font-size: 1.6rem;
+    }
+
+    .author-stat-card {
+        min-height: 110px;
+    }
+
+}

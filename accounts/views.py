@@ -177,6 +177,21 @@ def dashboard_view(request):
         'category_labels': json.dumps([c.name for c in articles_per_category]),
         'category_data': json.dumps([c.article_count for c in articles_per_category]),
     })
+    
+@login_required
+def author_dashboard(request):
+
+    if request.user.status_kontributor != 'approved':
+        return redirect('articles:article_list')
+
+    return render(
+        request,
+        'author_dashboard.html',
+        {
+            'breadcrumb': 'Dashboard Penulis',
+            'active_menu': 'dashboard',
+        }
+    )
 
 @admin_required
 def admin_pending_contributors(request):
