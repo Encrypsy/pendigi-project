@@ -99,7 +99,7 @@ Dashboard Penulis
 
     <div class="activity-item">
 
-    <!-- Avatar -->
+    <!-- AVATAR -->
     <div class="activity-avatar">
         {% if activity.actor and activity.actor.profile_picture %}
             <img
@@ -108,15 +108,20 @@ Dashboard Penulis
             >
         {% else %}
             <div class="activity-avatar-placeholder">
-                {{ activity.actor.username|first|upper }}
+                {% if activity.actor %}
+                    {{ activity.actor.username|first|upper }}
+                {% else %}
+                    A
+                {% endif %}
             </div>
         {% endif %}
     </div>
 
-    <!-- Isi notifikasi -->
+
+    <!-- CONTENT -->
     <div class="activity-content">
 
-        <!-- BARIS 1 -->
+        <!-- BARIS 1: USERNAME -->
         <div class="activity-username">
             {% if activity.actor %}
                 {{ activity.actor.username }}
@@ -125,31 +130,34 @@ Dashboard Penulis
             {% endif %}
         </div>
 
-        <!-- BARIS 2 -->
+
+        <!-- BARIS 2: ACTION -->
         <div class="activity-action">
             {{ activity.get_action_type_display }}
-
-            {% if activity.article %}
-                <span class="activity-separator">·</span>
-
-                <a
-                    href="{% url 'articles:article_detail' activity.article.pk %}"
-                    class="activity-title"
-                    title="{{ activity.article.title }}"
-                >
-                    {{ activity.article.title }}
-                </a>
-            {% endif %}
         </div>
 
-        <!-- BARIS 3 -->
+
+        <!-- BARIS 3: JUDUL -->
+        {% if activity.article %}
+            <a
+                href="{% url 'articles:article_detail' activity.article.pk %}"
+                class="activity-title"
+                title="{{ activity.article.title }}"
+            >
+                {{ activity.article.title }}
+            </a>
+        {% endif %}
+
+
+        <!-- BARIS 4: WAKTU -->
         <div class="activity-time">
             {{ activity.created_at|timesince }} yang lalu
         </div>
 
     </div>
 
-    <!-- Thumbnail -->
+
+    <!-- THUMBNAIL -->
     {% if activity.article and activity.article.thumbnail %}
         <a
             href="{% url 'articles:article_detail' activity.article.pk %}"
