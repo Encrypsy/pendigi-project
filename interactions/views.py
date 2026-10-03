@@ -45,18 +45,28 @@ def submit_comment(request, pk):
             article=article,
             action_type=ActionType.COMMENTED
         )
+        
+        print("DEBUG COMMENT STATUS:", comment.status)
+        print("DEBUG ARTICLE CONTRIBUTOR:", article.contributor)
+        print("DEBUG REQUEST USER:", request.user)
 
         # ==========================================
         # NOTIFIKASI AKTIVITAS UNTUK PENULIS
         # ==========================================
 
         if comment.status == StatusComment.APPROVED:
+            
+            print("DEBUG: MASUK KE ACTIVITY COMMENT")
+            
             Activity.objects.create(
                 recipient=article.contributor,
                 actor=request.user,
                 article=article,
                 action_type=Activity.ActionType.COMMENT,
+                message='Memberikan komentar',
             )
+            
+            print("DEBUG: ACTIVITY BERHASIL DIBUAT")
 
             messages.success(
                 request,
