@@ -294,52 +294,34 @@ document.addEventListener('DOMContentLoaded', function () {
        DONUT CHART
     ========================================== */
 
-    const distributionCanvas =
-        document.getElementById(
-            'authorDistributionChart'
-        );
+    const distributionCtx =
+        document.getElementById('distributionChart');
 
-    if (distributionCanvas) {
+    if (distributionCtx) {
 
-        new Chart(
-            distributionCanvas,
-            {
-                type: 'doughnut',
+        new Chart(distributionCtx, {
+            type: 'doughnut',
 
-                data: {
+            data: {
+                labels: {{ distribution_labels|safe }},
+                datasets: [{
+                    data: {{ distribution_values|safe }}
+                }]
+            },
 
-                    labels: distributionLabels,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
 
-                    datasets: [
-                        {
-                            data: distributionValues,
-
-                            borderWidth: 2
-                        }
-                    ]
-
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
                 },
 
-                options: {
-
-                    responsive: true,
-
-                    maintainAspectRatio: false,
-
-                    cutout: '65%',
-
-                    plugins: {
-
-                        legend: {
-                            position: 'bottom'
-                        }
-
-                    }
-
-                }
-
+                cutout: '65%'
             }
-        );
+        });
 
     }
 
