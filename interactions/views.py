@@ -356,6 +356,18 @@ def admin_approve_comment(request, pk):
     comment.status = StatusComment.APPROVED
     comment.save()
 
+    # ==========================================
+    # NOTIFIKASI UNTUK PENULIS
+    # ==========================================
+
+    Activity.objects.create(
+        recipient=comment.article.contributor,
+        actor=comment.user,
+        article=comment.article,
+        action_type=Activity.ActionType.COMMENT,
+        message='Memberikan komentar',
+    )
+
     messages.success(
         request,
         'Komentar berhasil disetujui.'
