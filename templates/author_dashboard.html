@@ -8,12 +8,8 @@ Dashboard Penulis
 
 <div class="author-dashboard">
 
-    <!-- =========================
-         HEADER
-    ========================== -->
-
-    <section class="author-dashboard-header">
-
+    <!-- HEADER -->
+    <section class="author-welcome">
         <h1>
             Selamat datang,<br>
             {{ user.username }}
@@ -22,175 +18,107 @@ Dashboard Penulis
         <p>
             Kelola dan pantau semua konten yang kamu buat di Pena Digital.
         </p>
-
     </section>
 
 
-    <!-- =========================
-         STAT CARDS
-    ========================== -->
-
-    <section class="author-stat-grid">
+    <!-- STAT CARD -->
+    <section class="author-stat-cards">
 
         <div class="author-stat-card">
-
-            <span class="author-stat-title">
-                Total konten
-            </span>
-
-            <strong class="author-stat-value">
-    {{ approved_count }}
-</strong>
-
-            <span class="author-stat-description">
-                approved
-            </span>
-
+            <span>Total konten</span>
+            <strong>{{ approved_count }}</strong>
+            <small>approved</small>
         </div>
 
-
         <div class="author-stat-card">
-
-            <span class="author-stat-title">
-                Total konten
-            </span>
-
-            <strong class="author-stat-value">
-                {{ pending_count }}
-            </strong>
-
-            <span class="author-stat-description">
-                pending
-            </span>
-
+            <span>Total konten</span>
+            <strong>{{ pending_count }}</strong>
+            <small>pending</small>
         </div>
 
-
         <div class="author-stat-card">
-
-            <span class="author-stat-title">
-                Total konten
-            </span>
-
-            <strong class="author-stat-value">
-                {{rejected_count}}
-            </strong>
-
-            <span class="author-stat-description">
-                ditolak
-            </span>
-
+            <span>Total konten</span>
+            <strong>{{ rejected_count }}</strong>
+            <small>ditolak</small>
         </div>
 
     </section>
 
 
-    <!-- =========================
-         CHART SECTION
-    ========================== -->
+    <!-- CHART AREA -->
+    <section class="author-chart-grid">
 
-    <section class="author-dashboard-charts">
+        <!-- PERFORMA -->
+        <div class="author-card performance-card">
 
-       <div class="dashboard-card performance-card">
-
-            <div class="dashboard-card-header">
-
+            <div class="author-card-header">
                 <div>
-                    <h3>Performa Konten</h3>
+                    <h2>Performa Konten</h2>
                     <p>Total views seluruh konten</p>
                 </div>
 
-            <form method="get" class="performance-filter">
-
-                <select name="period" onchange="this.form.submit()">
-
-                    <option value="7"
-                        {% if performance_filter == '7' %}selected{% endif %}>
-                        7 Hari
-                    </option>
-
-                    <option value="30"
-                        {% if performance_filter == '30' %}selected{% endif %}>
-                        30 Hari
-                    </option>
-
-                    <option value="month"
-                        {% if performance_filter == 'month' %}selected{% endif %}>
-                        Bulan Ini
-                    </option>
-
+                <select id="performanceFilter">
+                    <option value="7">7 Hari</option>
+                    <option value="30">30 Hari</option>
+                    <option value="month">Bulan Ini</option>
                 </select>
+            </div>
 
-            </form>
+            <div class="chart-container">
+                <canvas id="performanceChart"></canvas>
+            </div>
 
         </div>
 
 
-    <div class="performance-chart-wrapper">
+        <!-- DISTRIBUSI -->
+        <div class="author-card distribution-card">
 
-        {% if performance_data != '[]' %}
+            <h2>Grafik Distribusi Konten</h2>
 
-            <canvas id="performanceChart"></canvas>
-
-        {% else %}
-
-            <div class="chart-empty">
-                Belum ada data views pada periode ini.
+            <div class="chart-container">
+                <canvas id="distributionChart"></canvas>
             </div>
 
-        {% endif %}
-
-    </div>
-
-</div>
-
-</div>
-
-</div>
-
-
-        <div class="author-chart-card">
-
-    <h2>
-        Grafik Distribusi Konten
-    </h2>
-
-    <div class="author-chart-container author-donut-container">
-        <canvas id="authorDistributionChart"></canvas>
-    </div>
-
-</div>
+        </div>
 
     </section>
 
 
-    <!-- =========================
-         BOTTOM SECTION
-    ========================== -->
+    <!-- BOTTOM AREA -->
+    <section class="author-bottom-grid">
 
-    <section class="author-dashboard-bottom">
+        <!-- NOTIFIKASI -->
+        <div class="author-card activity-card">
 
-        <div class="author-activity-card">
+            <h2>Notifikasi Aktivitas</h2>
 
-            <h2>
-                Notifikasi Aktivitas
-            </h2>
+            <div class="activity-list">
 
-            <div class="author-empty-state">
-                Belum ada aktivitas.
+                <!-- nanti data aktivitas masuk di sini -->
+
+                <p class="empty-state">
+                    Belum ada aktivitas.
+                </p>
+
             </div>
 
         </div>
 
 
-        <div class="author-popular-card">
+        <!-- POPULER -->
+        <div class="author-card popular-card">
 
-            <h2>
-                Konten Terpopuler
-            </h2>
+            <h2>Konten Terpopuler</h2>
 
-            <div class="author-empty-state">
-                Belum ada data konten.
+            <div class="popular-list">
+
+                <!-- nanti 3 konten terpopuler -->
+
+                <p class="empty-state">
+                    Belum ada data konten.
+                </p>
+
             </div>
 
         </div>

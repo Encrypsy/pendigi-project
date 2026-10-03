@@ -765,3 +765,242 @@
     }
 
 }
+
+/* =========================================
+   AUTHOR DASHBOARD
+========================================= */
+
+.author-dashboard {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 32px;
+}
+
+
+/* =========================================
+   WELCOME
+========================================= */
+
+.author-welcome {
+    margin-bottom: 28px;
+}
+
+.author-welcome h1 {
+    margin: 0 0 12px;
+    color: var(--brown);
+    font-size: 2rem;
+    line-height: 1.2;
+}
+
+.author-welcome p {
+    margin: 0;
+    color: #746f69;
+    font-size: 0.95rem;
+}
+
+
+/* =========================================
+   STAT CARDS
+========================================= */
+
+.author-stat-cards {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    margin-bottom: 28px;
+}
+
+.author-stat-card {
+    min-height: 120px;
+    padding: 20px;
+    border: 1px solid var(--divider);
+    border-radius: 10px;
+    background: #fff;
+}
+
+.author-stat-card span {
+    display: block;
+    color: #746f69;
+    font-size: 0.9rem;
+    margin-bottom: 8px;
+}
+
+.author-stat-card strong {
+    display: block;
+    color: var(--brown);
+    font-size: 2rem;
+    line-height: 1;
+    margin-bottom: 8px;
+}
+
+.author-stat-card small {
+    color: #8a8880;
+}
+
+
+/* =========================================
+   CHART GRID
+========================================= */
+
+.author-chart-grid {
+    display: grid;
+
+    /*
+     * Performa lebih besar
+     * Distribusi lebih kecil
+     */
+    grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
+
+    gap: 20px;
+
+    margin-bottom: 20px;
+}
+
+
+/* =========================================
+   BOTTOM GRID
+========================================= */
+
+.author-bottom-grid {
+    display: grid;
+
+    /*
+     * Notifikasi lebih kecil
+     * Konten populer lebih besar
+     */
+    grid-template-columns: minmax(280px, 1fr) minmax(0, 2fr);
+
+    gap: 20px;
+}
+
+
+/* =========================================
+   CARD
+========================================= */
+
+.author-card {
+    background: #fff;
+    border: 1px solid var(--divider);
+    border-radius: 10px;
+    padding: 20px;
+    min-width: 0;
+}
+
+.author-card h2 {
+    margin: 0;
+    color: var(--text);
+    font-size: 1.1rem;
+}
+
+
+/* =========================================
+   CARD HEADER
+========================================= */
+
+.author-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.author-card-header p {
+    margin-top: 6px;
+    color: #8a8880;
+    font-size: 0.85rem;
+}
+
+
+/* =========================================
+   FILTER
+========================================= */
+
+#performanceFilter {
+    min-width: 105px;
+    padding: 8px 30px 8px 12px;
+
+    border: 1px solid var(--divider);
+    border-radius: 8px;
+
+    background: #fff;
+    color: var(--text);
+
+    cursor: pointer;
+}
+
+
+/* =========================================
+   CHART
+========================================= */
+
+.chart-container {
+    position: relative;
+    width: 100%;
+    height: 280px;
+}
+
+.chart-container canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+
+/* =========================================
+   EMPTY STATE
+========================================= */
+
+.empty-state {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    min-height: 200px;
+
+    color: #9a9792;
+    font-size: 0.9rem;
+}
+
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width: 900px) {
+
+    .author-dashboard {
+        padding: 24px 18px;
+    }
+
+    .author-chart-grid,
+    .author-bottom-grid {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+
+@media (max-width: 600px) {
+
+    .author-dashboard {
+        padding: 20px 14px;
+    }
+
+    .author-stat-cards {
+        grid-template-columns: 1fr;
+    }
+
+    .author-card-header {
+        flex-direction: column;
+    }
+
+    #performanceFilter {
+        width: 100%;
+    }
+
+    .chart-container {
+        height: 240px;
+    }
+
+}
