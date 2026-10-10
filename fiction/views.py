@@ -5,7 +5,7 @@ from django.urls import reverse
 from accounts.models import StatusKontributor, Follow
 from articles.models import Banner, BannerType
 from interactions.models import StatusComment
-from .models import Stories, Chapters, StatusStory, FavoriteStories, ChapterComments, ChapterCommentLikes, ReadingProgress
+from .models import StatusChapter, Stories, Chapters, StatusStory, FavoriteStories, ChapterComments, ChapterCommentLikes, ReadingProgress
 from .forms import StoryForm, ChapterForm, ChapterCommentForm
 from django.http import JsonResponse
 from accounts.decorators import admin_required
@@ -164,6 +164,55 @@ def admin_approve_story(request, pk):
     story.save()
     messages.success(request, f'Cerita "{story.title}" disetujui.')
     return redirect('fiction:admin_pending_stories')
+
+@admin_required
+@require_POST
+def admin_approve_chapter(request, story_id, chapter_id):
+    story = get_object_or_404(Stories, pk=story_id)
+    chapter = get_object_or_404(
+        Chapters,
+        pk=chapter_id,
+        story=story,
+    )
+
+    chapter.status = StatusChapter.APPROVED
+    chapter.rejection_reason = ''
+    chapter.save(update_fields=['status', 'rejection_reason'])
+
+    messages.success(
+        request,
+        f'Bab {chapter.chapter_number} berhasil disetujui.'
+    )
+
+    return redirect(
+        f"{reverse('fiction:admin_review_story', args=[story.pk])}?bab={chapter.pk}"
+    )
+
+
+@admin_required
+@require_POST
+def admin_reject_chapter(request, story_id, chapter_id):
+    story = get_object_or_404(Stories, pk=story_id)
+    chapter = get_object_or_404(
+        Chapters,
+        pk=chapter_id,
+        story=story,
+    )
+
+    chapter.status = StatusChapter.REJECTED
+    chapter.rejection_reason = request.POST.get(
+        'rejection_reason', ''
+    ).strip()
+    chapter.save(update_fields=['status', 'rejection_reason'])
+
+    messages.warning(
+        request,
+        f'Bab {chapter.chapter_number} ditolak.'
+    )
+
+    return redirect(
+        f"{reverse('fiction:admin_review_story', args=[story.pk])}?bab={chapter.pk}"
+    )
 
 
 @admin_required
