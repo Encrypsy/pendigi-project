@@ -156,11 +156,28 @@ class ReadingProgress(models.Model):
         """
         return self.last_chapter_number + 1
 
+class StatusChapter(models.TextChoices):
+    PENDING = 'pending', 'Menunggu Approval'
+    APPROVED = 'approved', 'Disetujui'
+    REJECTED = 'rejected', 'Ditolak'
+
 class Chapters(models.Model):
-    story = models.ForeignKey(Stories, on_delete=models.CASCADE, related_name='chapters')
+    story = models.ForeignKey(
+        Stories,
+        on_delete=models.CASCADE,
+        related_name='chapters'
+    )
     chapter_number = models.PositiveIntegerField()
     title = models.CharField(max_length=150)
     content = models.TextField()
+
+    status = models.CharField(
+        max_length=10,
+        choices=StatusChapter.choices,
+        default=StatusChapter.PENDING
+    )
+    rejection_reason = models.TextField(blank=True, default='')
+
     views_count = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -168,7 +185,10 @@ class Chapters(models.Model):
     class Meta:
         ordering = ['chapter_number']
         constraints = [
-            models.UniqueConstraint(fields=['story', 'chapter_number'], name='unique_story_chapter_number')
+            models.UniqueConstraint(
+                fields=['story', 'chapter_number'],
+                name='unique_story_chapter_number'
+            )
         ]
 
     def __str__(self):
@@ -176,7 +196,7 @@ class Chapters(models.Model):
 
     def word_count(self):
         return len(self.content.split())
-
+    
 class ChapterComments(models.Model):
     chapter = models.ForeignKey(Chapters, on_delete=models.CASCADE, related_name='comments')
     user = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='chapter_comments')

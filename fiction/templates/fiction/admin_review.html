@@ -1,57 +1,345 @@
-{% extends 'app_base.html' %}
+{% extends 'admin_base.html' %}
 {% load static %}
-{% block title %}Review: {{ story.title }}{% endblock %}
+
+{% block title %}Review Cerita - {{ story.title }}{% endblock %}
+
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/table.css' %}">
-    <link rel="stylesheet" href="{% static 'css/articles.css' %}">
+<link rel="stylesheet" href="{% static 'css/table.css' %}">
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+
+<style>
+    .review-page {
+        color: #49372d;
+    }
+
+    .review-heading {
+        margin-bottom: 24px;
+    }
+
+    .review-heading h1 {
+        margin: 0 0 8px;
+        font-size: 26px;
+    }
+
+    .review-heading p {
+        margin: 0;
+        color: #8b796b;
+        line-height: 1.6;
+    }
+
+    .review-story-card,
+    .review-chapter-card {
+        padding: 22px;
+        margin-bottom: 20px;
+        border: 1px solid #eadfd4;
+        border-radius: 14px;
+        background: #fffdf9;
+    }
+
+    .review-story-info {
+        display: flex;
+        gap: 18px;
+        align-items: flex-start;
+    }
+
+    .review-cover {
+        width: 110px;
+        height: 145px;
+        flex-shrink: 0;
+        border-radius: 9px;
+        object-fit: cover;
+        background: #f0e5d9;
+    }
+
+    .review-cover-placeholder {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 36px;
+    }
+
+    .review-story-details h2 {
+        margin: 0 0 10px;
+        font-size: 21px;
+    }
+
+    .review-story-details p {
+        margin: 6px 0;
+        color: #806d5f;
+        font-size: 14px;
+        line-height: 1.6;
+    }
+
+    .review-description {
+        margin-top: 18px;
+        padding-top: 16px;
+        border-top: 1px solid #eee3d8;
+        line-height: 1.8;
+        white-space: pre-line;
+        overflow-wrap: anywhere;
+    }
+
+    .review-section-title {
+        margin: 0 0 14px;
+        font-size: 19px;
+    }
+
+    .review-chapter-nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 20px;
+    }
+
+    .review-chapter-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 9px 13px;
+        border: 1px solid #e4d6c8;
+        border-radius: 8px;
+        background: #fffaf5;
+        color: #76563f;
+        font-size: 13px;
+        text-decoration: none;
+    }
+
+    .review-chapter-link:hover {
+        background: #f4e8dc;
+    }
+
+    .review-chapter-link.active {
+        border-color: #875b42;
+        background: #875b42;
+        color: #fffaf5;
+    }
+
+    .review-chapter-content {
+        padding: 22px;
+        border: 1px solid #eee3d8;
+        border-radius: 10px;
+        background: #fffaf5;
+        font-size: 15px;
+        line-height: 1.95;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+    }
+
+    .review-chapter-content p {
+        margin: 0;
+    }
+
+    .review-chapter-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-top: 18px;
+    }
+
+    .review-navigation-btn {
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        padding: 10px 15px;
+        border: 1px solid #e2d4c7;
+        border-radius: 8px;
+        background: #fffaf5;
+        color: #76563f;
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .review-navigation-btn:hover {
+        background: #f3e7db;
+    }
+
+    .review-navigation-btn.disabled {
+        opacity: .45;
+        pointer-events: none;
+    }
+
+    .review-empty {
+        padding: 32px 20px;
+        border: 1px dashed #d8c6b5;
+        border-radius: 12px;
+        color: #8b796b;
+        text-align: center;
+    }
+
+    .review-back-link {
+        display: inline-block;
+        margin-bottom: 18px;
+        color: #875b42;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .review-back-link:hover {
+        text-decoration: underline;
+    }
+
+    @media (max-width: 600px) {
+        .review-story-card,
+        .review-chapter-card {
+            padding: 15px;
+        }
+
+        .review-story-info {
+            gap: 12px;
+        }
+
+        .review-cover {
+            width: 82px;
+            height: 112px;
+        }
+
+        .review-story-details h2 {
+            font-size: 18px;
+        }
+
+        .review-chapter-content {
+            padding: 15px;
+            font-size: 14px;
+        }
+    }
+</style>
 {% endblock %}
 
-{% block content %}
-<div class="review-header">
-    <div class="review-cover">
-        {% if story.cover %}
-            <img src="{{ story.cover.url }}" alt="{{ story.title }}">
-        {% else %}
-            <div class="table-thumb-placeholder review-cover-placeholder">📖</div>
-        {% endif %}
-    </div>
-    <div class="review-meta">
-        <span class="status-badge status-{{ story.status }}">{{ story.get_status_display }}</span>
-        <h1>{{ story.title }}</h1>
-        <p class="author">oleh {{ story.author.username }} &middot; {{ story.get_genre_display }} &middot; {{ story.get_target_pembaca_display }}</p>
-        <p class="review-description">{{ story.description|linebreaksbr }}</p>
-        {% if story.tags %}
-            <div class="review-tags">
-                {% for tag in story.tags.split %}
-                    <span class="tag-chip-static">{{ tag }}</span>
-                {% endfor %}
+{% block admin_content %}
+<section class="review-page">
+
+    <a href="{% url 'fiction:admin_pending_stories' %}"
+       class="review-back-link">
+        ← Kembali ke Fiksi Pending
+    </a>
+
+    <header class="review-heading">
+        <h1>Review Cerita</h1>
+        <p>
+            Periksa informasi cerita dan baca setiap bab sebelum
+            mengambil keputusan approval.
+        </p>
+    </header>
+
+    <section class="review-story-card">
+        <div class="review-story-info">
+
+            {% if story.cover %}
+                <img
+                    src="{{ story.cover.url }}"
+                    alt="{{ story.title }}"
+                    class="review-cover"
+                >
+            {% else %}
+                <div class="review-cover review-cover-placeholder">
+                    📖
+                </div>
+            {% endif %}
+
+            <div class="review-story-details">
+                <h2>{{ story.title }}</h2>
+
+                <p>
+                    <strong>Penulis:</strong>
+                    {{ story.author.username }}
+                </p>
+
+                <p>
+                    <strong>Genre:</strong>
+                    {{ story.get_genre_display }}
+                </p>
+
+                <p>
+                    <strong>Jumlah bab:</strong>
+                    {{ chapters.count }}
+                </p>
+
+                <p>
+                    <strong>Dibuat:</strong>
+                    {{ story.created_at|date:"d M Y, H:i" }}
+                </p>
+            </div>
+        </div>
+
+        {% if story.description %}
+            <div class="review-description">
+                <strong>Sinopsis</strong>
+                <p>{{ story.description }}</p>
             </div>
         {% endif %}
-    </div>
-</div>
+    </section>
 
-<div class="review-actions">
-    <form action="{% url 'fiction:admin_approve_story' story.pk %}" method="post">
-        {% csrf_token %}
-        <button type="submit" class="btn-approve">Approve Cerita</button>
-    </form>
-    <form action="{% url 'fiction:admin_reject_story' story.pk %}" method="post">
-        {% csrf_token %}
-        <button type="submit" class="btn-reject">Reject Cerita</button>
-    </form>
-    <a href="{% url 'fiction:admin_pending_stories' %}" class="btn-secondary">Kembali</a>
-</div>
+    <section class="review-chapter-card">
+        <h2 class="review-section-title">Pemeriksaan Bab</h2>
 
-<hr class="review-divider">
+        {% if chapters %}
+            <p>
+                Pilih bab untuk membaca isinya. Pastikan setiap bab
+                sudah diperiksa sebelum mengambil keputusan.
+            </p>
 
-<h2 class="section-title">Isi Cerita ({{ chapters.count }} Bab)</h2>
+            <nav class="review-chapter-nav">
+                {% for chapter in chapters %}
+                    <a
+                        href="?bab={{ chapter.pk }}"
+                        class="review-chapter-link
+                        {% if current_chapter.pk == chapter.pk %}active{% endif %}"
+                    >
+                        Bab {{ chapter.chapter_number }}
+                    </a>
+                {% endfor %}
+            </nav>
 
-{% for chapter in chapters %}
-<div class="chapter-review-block">
-    <h3>Bab {{ chapter.chapter_number }}: {{ chapter.title }}</h3>
-    <div class="chapter-content">{{ chapter.content|safe }}</div>
-</div>
-{% empty %}
-<p class="hint-text">Cerita ini belum punya bab sama sekali.</p>
-{% endfor %}
+            {% if current_chapter %}
+                <h3>
+                    Bab {{ current_chapter.chapter_number }}:
+                    {{ current_chapter.title }}
+                </h3>
+
+                <div class="review-chapter-content">{{ current_chapter.content }}</div>
+
+                <div class="review-chapter-footer">
+                    {% if previous_chapter %}
+                        <a
+                            href="?bab={{ previous_chapter.pk }}"
+                            class="review-navigation-btn"
+                        >
+                            ← Bab Sebelumnya
+                        </a>
+                    {% else %}
+                        <span class="review-navigation-btn disabled">
+                            ← Bab Sebelumnya
+                        </span>
+                    {% endif %}
+
+                    <span>
+                        {{ current_index|add:1 }} / {{ chapters.count }}
+                    </span>
+
+                    {% if next_chapter %}
+                        <a
+                            href="?bab={{ next_chapter.pk }}"
+                            class="review-navigation-btn"
+                        >
+                            Bab Berikutnya →
+                        </a>
+                    {% else %}
+                        <span class="review-navigation-btn disabled">
+                            Bab Berikutnya →
+                        </span>
+                    {% endif %}
+                </div>
+            {% endif %}
+
+        {% else %}
+            <div class="review-empty">
+                Cerita ini belum memiliki bab. Periksa kelengkapan cerita
+                sebelum memberikan keputusan.
+            </div>
+        {% endif %}
+    </section>
+
+</section>
 {% endblock %}

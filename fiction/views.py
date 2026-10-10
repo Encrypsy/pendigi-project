@@ -148,7 +148,11 @@ def delete_chapter(request, story_id, chapter_id):
 @admin_required
 def admin_pending_stories(request):
     stories = Stories.objects.filter(status=StatusStory.PENDING).select_related('author')
-    return render(request, 'fiction/admin_pending.html', {'stories': stories})
+    return render(request, 'fiction/admin_pending.html', {
+    'stories': stories,
+    'breadcrumb': 'Fiksi Pending',
+    'active_menu': 'approval',
+})
 
 
 @admin_required
@@ -175,7 +179,44 @@ def admin_reject_story(request, pk):
 def admin_review_story(request, pk):
     story = get_object_or_404(Stories, pk=pk)
     chapters = story.chapters.all()
-    return render(request, 'fiction/admin_review.html', {'story': story, 'chapters': chapters})
+
+    chapter_id = request.GET.get('bab')
+    current_chapter = None
+
+    if chapters.exists():
+        if chapter_id:
+            current_chapter = get_object_or_404(
+                chapters,
+                pk=chapter_id
+            )
+        else:
+            current_chapter = chapters.first()
+
+    chapter_list = list(chapters)
+
+    current_index = None
+    previous_chapter = None
+    next_chapter = None
+
+    if current_chapter:
+        current_index = chapter_list.index(current_chapter)
+
+        if current_index > 0:
+            previous_chapter = chapter_list[current_index - 1]
+
+        if current_index < len(chapter_list) - 1:
+            next_chapter = chapter_list[current_index + 1]
+
+    return render(request, 'fiction/admin_review.html', {
+        'story': story,
+        'chapters': chapters,
+        'current_chapter': current_chapter,
+        'current_index': current_index,
+        'previous_chapter': previous_chapter,
+        'next_chapter': next_chapter,
+        'breadcrumb': 'Review Fiksi',
+        'active_menu': 'approval',
+    })
 
 def story_list(request):
 
