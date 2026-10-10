@@ -1581,3 +1581,22 @@
         flex-basis: 100%;
     }
 }
+
+.my-content-actions form {
+    margin: 0;
+}
+
+.my-content-actions .my-content-delete {
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: #b54d45;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.my-content-actions .my-content-delete:hover {
+    text-decoration: underline;
+}

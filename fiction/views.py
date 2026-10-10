@@ -69,6 +69,19 @@ def edit_story(request, pk):
 
     return render(request, 'fiction/story_form.html', {'form': form, 'is_edit': True, 'story': story})
 
+@login_required
+@require_POST
+def delete_story(request, pk):
+    story = get_object_or_404(
+        Stories,
+        pk=pk,
+        author=request.user
+    )
+
+    story.delete()
+
+    messages.success(request, 'Cerita berhasil dihapus.')
+    return redirect('fiction:my_stories')
 
 @login_required
 def my_stories(request):
@@ -215,7 +228,7 @@ def story_list(request):
 
     return render(
         request,
-        'fiction/story_list.html',
+        # 'fiction/story_list.html'
         {
             'stories': stories,
             'banners': banners,

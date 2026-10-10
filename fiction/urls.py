@@ -9,6 +9,7 @@ urlpatterns = [
     path('tags/suggest/', views.tag_suggestions, name='tag_suggestions'),
     path('tag/<str:tag>/', views.tag_stories, name='tag_stories'),
     path('<int:pk>/edit/', views.edit_story, name='edit_story'),
+    path('<int:pk>/delete/', views.delete_story, name='delete_story'),
     path('<int:pk>/favorite/', views.toggle_favorite_story, name='toggle_favorite_story'),
     path('<int:story_id>/bab/', views.chapter_list, name='chapter_list'),
     path('<int:story_id>/bab/tambah/', views.add_chapter, name='add_chapter'),

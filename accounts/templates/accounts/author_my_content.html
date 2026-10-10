@@ -125,18 +125,35 @@
                         {% endif %}
                     </td>
 
-                    <td>
+                    <td>                     
                         <div class="my-content-actions">
-                            {% if content.edit_url %}
-                                <a href="{{ content.edit_url }}">Edit</a>
-                            {% endif %}
+                            {% if content.type == 'artikel' %}
+                                <a href="{% url 'articles:edit_article' content.id %}">
+                                    Edit
+                                </a>
 
-                            {% if content.delete_url %}
-                                <a href="{{ content.delete_url }}">Hapus</a>
-                            {% endif %}
+                                <form method="post"
+                                    action="{% url 'articles:delete_article' content.id %}"
+                                    onsubmit="return confirm('Yakin ingin menghapus artikel ini?');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="my-content-delete">
+                                        Hapus
+                                    </button>
+                                </form>
 
-                            {% if not content.edit_url and not content.delete_url %}
-                                —
+                            {% elif content.type == 'fiksi' %}
+                                <a href="{% url 'fiction:edit_story' content.id %}">
+                                    Edit
+                                </a>
+
+                                <form method="post"
+                                    action="{% url 'fiction:delete_story' content.id %}"
+                                    onsubmit="return confirm('Yakin ingin menghapus cerita ini?');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="my-content-delete">
+                                        Hapus
+                                    </button>
+                                </form>
                             {% endif %}
                         </div>
                     </td>
