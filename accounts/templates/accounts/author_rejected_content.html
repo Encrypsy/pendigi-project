@@ -1,0 +1,163 @@
+```django
+{% extends 'author_base.html' %}
+
+{% block title %}Konten Ditolak{% endblock %}
+
+{% block author_content %}
+<section class="my-content-page">
+
+    <div class="my-content-header">
+        <div>
+            <h1>Konten Ditolak</h1>
+            <p>Periksa alasan penolakan dan perbaiki karya sebelum mengirimkannya kembali.</p>
+        </div>
+    </div>
+
+    <nav class="my-content-tabs">
+        <a href="?jenis=semua"
+           class="{% if content_type == 'semua' %}active{% endif %}">
+            Semua Konten
+        </a>
+
+        <a href="?jenis=artikel"
+           class="{% if content_type == 'artikel' %}active{% endif %}">
+            Artikel
+        </a>
+
+        <a href="?jenis=fiksi"
+           class="{% if content_type == 'fiksi' %}active{% endif %}">
+            Fiksi
+        </a>
+
+        <span class="disabled-tab">Esai &amp; Opini · Segera Hadir</span>
+    </nav>
+
+    <form method="get" class="my-content-toolbar">
+        <input type="hidden" name="jenis" value="{{ content_type }}">
+
+        <input
+            type="search"
+            name="q"
+            value="{{ search_query }}"
+            placeholder="Cari judul cerita, bab, atau artikel..."
+        >
+
+        <select name="sort">
+            <option value="terbaru" {% if sort_by == 'terbaru' %}selected{% endif %}>
+                Terbaru
+            </option>
+            <option value="terlama" {% if sort_by == 'terlama' %}selected{% endif %}>
+                Terlama
+            </option>
+            <option value="views" {% if sort_by == 'views' %}selected{% endif %}>
+                Views terbanyak
+            </option>
+        </select>
+
+        <button type="submit">Cari</button>
+    </form>
+
+    <div class="my-content-table-wrapper">
+        <table class="my-content-table">
+            <thead>
+                <tr>
+                    <th>No.</th>
+                    <th>Konten</th>
+                    <th>Tanggal Dibuat</th>
+                    <th>Views</th>
+                    <th>Status</th>
+                    <th>Alasan Penolakan</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for content in page_obj %}
+                <tr>
+                    <td>{{ page_obj.start_index|add:forloop.counter0 }}</td>
+
+                    <td>
+                        <div class="my-content-info">
+                            {% if content.thumbnail %}
+                                <img
+                                    src="{{ content.thumbnail.url }}"
+                                    alt="{{ content.title }}"
+                                    class="my-content-thumbnail"
+                                >
+                            {% else %}
+                                <div class="my-content-thumbnail placeholder">
+                                    Tanpa gambar
+                                </div>
+                            {% endif %}
+
+                            <div class="my-content-title">
+                                <strong>{{ content.title }}</strong>
+
+                                {% if content.type == 'fiksi' %}
+                                    <small>
+                                        Bab {{ content.chapter_number }}:
+                                        {{ content.chapter_title }}
+                                    </small>
+                                {% else %}
+                                    <small>Artikel</small>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </td>
+
+                    <td>{{ content.created_at|date:"d M Y" }}</td>
+                    <td>{{ content.views }}</td>
+
+                    <td>
+                        <span class="content-status rejected-status">
+                            Ditolak
+                        </span>
+                    </td>
+
+                    <td>
+                        {% if content.rejection_reason %}
+                            <div class="rejection-reason">
+                                {{ content.rejection_reason }}
+                            </div>
+                        {% else %}
+                            <span class="empty-reason">
+                                Belum ada alasan yang dicatat.
+                            </span>
+                        {% endif %}
+                    </td>
+                </tr>
+
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="my-content-empty">
+                        Tidak ada konten yang ditolak.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if page_obj.paginator.num_pages > 1 %}
+    <nav class="my-content-pagination">
+        {% if page_obj.has_previous %}
+            <a href="?jenis={{ content_type }}&amp;q={{ search_query|urlencode }}&amp;sort={{ sort_by }}&amp;page={{ page_obj.previous_page_number }}">
+                Sebelumnya
+            </a>
+        {% endif %}
+
+        <span>
+            Halaman {{ page_obj.number }}
+            dari {{ page_obj.paginator.num_pages }}
+        </span>
+
+        {% if page_obj.has_next %}
+            <a href="?jenis={{ content_type }}&amp;q={{ search_query|urlencode }}&amp;sort={{ sort_by }}&amp;page={{ page_obj.next_page_number }}">
+                Berikutnya
+            </a>
+        {% endif %}
+    </nav>
+    {% endif %}
+
+</section>
+{% endblock %}
+```

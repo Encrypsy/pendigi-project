@@ -1758,3 +1758,29 @@
         flex-direction: column;
     }
 }
+
+.rejected-status {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 20px;
+    background: #fbe5e2;
+    color: #a53f36;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.rejection-reason {
+    min-width: 180px;
+    max-width: 320px;
+    color: #795044;
+    font-size: 0.85rem;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.empty-reason {
+    color: #999;
+    font-size: 0.8rem;
+    font-style: italic;
+}

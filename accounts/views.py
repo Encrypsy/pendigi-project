@@ -13,7 +13,7 @@ from datetime import timedelta
 from articles.models import Articles, StatusArticle, Categories
 from interactions.models import Activity, ArticleViewHistory, Comments, StatusComment, Ratings
 from articles.models import Articles, StatusArticle, Categories
-from fiction.models import StatusChapter, Stories, StatusStory as FictionStatusStory
+from fiction.models import Chapters, StatusChapter, Stories, StatusStory as FictionStatusStory
 from reading_journal.models import ReadingActivity
 from datetime import timedelta
 from django.views.decorators.http import require_POST
@@ -632,69 +632,83 @@ def author_rejected_content(request):
     if request.user.status_kontributor != StatusKontributor.APPROVED:
         return redirect('articles:article_list')
 
+    content_type = request.GET.get('jenis', 'semua')
     search_query = request.GET.get('q', '').strip()
+    sort_by = request.GET.get('sort', 'terbaru')
+
+    if content_type not in ['semua', 'artikel', 'fiksi']:
+        content_type = 'semua'
+
+    if sort_by not in ['terbaru', 'terlama', 'views']:
+        sort_by = 'terbaru'
+
     contents = []
 
     # Artikel yang ditolak
-    articles = Articles.objects.filter(
-        contributor=request.user,
-        status=StatusArticle.REJECTED,
-    )
-
-    if search_query:
-        articles = articles.filter(title__icontains=search_query)
-
-    for article in articles:
-        contents.append({
-            'id': article.pk,
-            'title': article.title,
-            'thumbnail': article.thumbnail,
-            'views': article.views_count,
-            'created_at': article.created_at,
-            'type': 'artikel',
-            'status': 'Ditolak',
-            'rejection_reason': getattr(
-                article, 'rejection_reason', ''
-            ),
-        })
-
-    # Fiksi: hanya bab yang ditolak
-    stories = Stories.objects.filter(author=request.user)
-
-    if search_query:
-        stories = stories.filter(title__icontains=search_query)
-
-    for story in stories:
-        rejected_chapters = story.chapters.filter(
-            status=StatusChapter.REJECTED
+    if content_type in ['semua', 'artikel']:
+        articles = Articles.objects.filter(
+            contributor=request.user,
+            status=StatusArticle.REJECTED,
         )
 
-        for chapter in rejected_chapters:
+        if search_query:
+            articles = articles.filter(title__icontains=search_query)
+
+        for article in articles:
+            contents.append({
+                'id': article.pk,
+                'title': article.title,
+                'thumbnail': article.thumbnail,
+                'views': article.views_count,
+                'created_at': article.created_at,
+                'type': 'artikel',
+                'rejection_reason': getattr(
+                    article, 'rejection_reason', ''
+                ),
+            })
+
+    # Bab fiksi yang ditolak
+    if content_type in ['semua', 'fiksi']:
+        chapters = Chapters.objects.filter(
+            story__author=request.user,
+            status=StatusChapter.REJECTED,
+        ).select_related('story')
+
+        if search_query:
+            chapters = chapters.filter(
+                models.Q(story__title__icontains=search_query)
+                | models.Q(title__icontains=search_query)
+            )
+
+        for chapter in chapters:
             contents.append({
                 'id': chapter.pk,
-                'story_id': story.pk,
-                'title': story.title,
+                'story_id': chapter.story_id,
+                'title': chapter.story.title,
                 'chapter_title': chapter.title,
                 'chapter_number': chapter.chapter_number,
-                'thumbnail': story.cover,
+                'thumbnail': chapter.story.cover,
                 'views': chapter.views_count,
                 'created_at': chapter.created_at,
                 'type': 'fiksi',
-                'status': 'Ditolak',
                 'rejection_reason': chapter.rejection_reason,
             })
 
-    contents.sort(
-        key=lambda item: item['created_at'],
-        reverse=True,
-    )
+    if sort_by == 'terbaru':
+        contents.sort(key=lambda item: item['created_at'], reverse=True)
+    elif sort_by == 'terlama':
+        contents.sort(key=lambda item: item['created_at'])
+    elif sort_by == 'views':
+        contents.sort(key=lambda item: item['views'], reverse=True)
 
     paginator = Paginator(contents, 10)
     page_obj = paginator.get_page(request.GET.get('page'))
 
     return render(request, 'accounts/author_rejected_content.html', {
         'page_obj': page_obj,
+        'content_type': content_type,
         'search_query': search_query,
+        'sort_by': sort_by,
         'total_contents': len(contents),
         'breadcrumb': 'Konten Ditolak',
         'active_menu': 'rejected',
