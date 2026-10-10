@@ -128,7 +128,8 @@
                     <td>                     
                         <div class="my-content-actions">
                             {% if content.type == 'artikel' %}
-                                <a href="{% url 'articles:edit_article' content.id %}">
+                                <a href="{% url 'articles:edit_article' content.id %}"
+                                class="content-action-btn edit-btn">
                                     Edit
                                 </a>
 
@@ -136,21 +137,27 @@
                                     action="{% url 'articles:delete_article' content.id %}"
                                     onsubmit="return confirm('Yakin ingin menghapus artikel ini?');">
                                     {% csrf_token %}
-                                    <button type="submit" class="my-content-delete">
+                                    <button type="submit" class="content-action-btn delete-btn">
                                         Hapus
                                     </button>
                                 </form>
 
                             {% elif content.type == 'fiksi' %}
-                                <a href="{% url 'fiction:edit_story' content.id %}">
-                                    Edit
+                                <a href="{% url 'fiction:chapter_list' content.id %}"
+                                class="content-action-btn chapter-btn">
+                                    Kelola Bab
+                                </a>
+
+                                <a href="{% url 'fiction:edit_story' content.id %}"
+                                class="content-action-btn edit-btn">
+                                    Edit Info
                                 </a>
 
                                 <form method="post"
                                     action="{% url 'fiction:delete_story' content.id %}"
                                     onsubmit="return confirm('Yakin ingin menghapus cerita ini?');">
                                     {% csrf_token %}
-                                    <button type="submit" class="my-content-delete">
+                                    <button type="submit" class="content-action-btn delete-btn">
                                         Hapus
                                     </button>
                                 </form>
