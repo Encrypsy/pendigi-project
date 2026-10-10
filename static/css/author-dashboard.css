@@ -1700,3 +1700,26 @@
     white-space: normal;
     min-width: 240px;
 }
+
+.content-status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 7px 11px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.pending-status {
+    background: #fff1d6;
+    color: #95651e;
+    border: 1px solid #f3dfb6;
+}
+
+@media (max-width: 768px) {
+    .my-content-table {
+        min-width: 700px;
+    }
+}

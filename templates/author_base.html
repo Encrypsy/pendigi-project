@@ -83,7 +83,8 @@
                         Semua Konten
                     </a>
 
-                    <a href="#">
+                    <a href="{% url 'author_pending_content' %}"
+                    class="{% if active_menu == 'pending' %}is-active{% endif %}">
                         Pending
                     </a>
 

@@ -538,3 +538,80 @@ def author_my_content(request):
         'breadcrumb': 'Konten Saya',
         'active_menu': 'my_content',
     })
+    
+@login_required
+def author_pending_content(request):
+    if request.user.status_kontributor != StatusKontributor.APPROVED:
+        return redirect('articles:article_list')
+
+    content_type = request.GET.get('jenis', 'semua')
+    search_query = request.GET.get('q', '').strip()
+    sort_by = request.GET.get('sort', 'terbaru')
+
+    if content_type not in ['semua', 'artikel', 'fiksi']:
+        content_type = 'semua'
+
+    if sort_by not in ['terbaru', 'terlama', 'views']:
+        sort_by = 'terbaru'
+
+    contents = []
+
+    if content_type in ['semua', 'artikel']:
+        articles = Articles.objects.filter(
+            contributor=request.user,
+            status=StatusArticle.PENDING
+        )
+
+        if search_query:
+            articles = articles.filter(title__icontains=search_query)
+
+        for article in articles:
+            contents.append({
+                'id': article.pk,
+                'title': article.title,
+                'thumbnail': article.thumbnail,
+                'views': article.views_count,
+                'created_at': article.created_at,
+                'type': 'artikel',
+                'status': 'Menunggu Approval',
+            })
+
+    if content_type in ['semua', 'fiksi']:
+        stories = Stories.objects.filter(
+            author=request.user,
+            status=FictionStatusStory.PENDING
+        )
+
+        if search_query:
+            stories = stories.filter(title__icontains=search_query)
+
+        for story in stories:
+            contents.append({
+                'id': story.pk,
+                'title': story.title,
+                'thumbnail': story.cover,
+                'views': story.views_count,
+                'created_at': story.created_at,
+                'type': 'fiksi',
+                'status': 'Menunggu Approval',
+            })
+
+    if sort_by == 'terbaru':
+        contents.sort(key=lambda item: item['created_at'], reverse=True)
+    elif sort_by == 'terlama':
+        contents.sort(key=lambda item: item['created_at'])
+    elif sort_by == 'views':
+        contents.sort(key=lambda item: item['views'], reverse=True)
+
+    paginator = Paginator(contents, 10)
+    page_obj = paginator.get_page(request.GET.get('page'))
+
+    return render(request, 'accounts/author_pending_content.html', {
+        'page_obj': page_obj,
+        'content_type': content_type,
+        'search_query': search_query,
+        'sort_by': sort_by,
+        'total_contents': len(contents),
+        'breadcrumb': 'Pending',
+        'active_menu': 'pending',
+    })
