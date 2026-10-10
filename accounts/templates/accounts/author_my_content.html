@@ -74,12 +74,12 @@
                 <tr>
                     <th>No.</th>
                     <th>Konten</th>
+                    <th>Tanggal Dibuat</th>
                     <th>Views</th>
                     <th>Rating</th>
                     <th>Aksi</th>
                 </tr>
             </thead>
-
             <tbody>
                 {% for content in page_obj %}
                 <tr>
@@ -113,6 +113,10 @@
                                 </small>
                             </div>
                         </div>
+                    </td>
+
+                    <td>
+                        {{ content.created_at|date:"d M Y" }}
                     </td>
 
                     <td>{{ content.views }}</td>
@@ -168,7 +172,7 @@
 
                 {% empty %}
                 <tr>
-                    <td colspan="5" class="my-content-empty">
+                    <td colspan="6" class="my-content-empty">
                         Belum ada konten yang disetujui atau hasil pencarian
                         tidak ditemukan.
                     </td>
