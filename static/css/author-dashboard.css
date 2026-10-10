@@ -1723,3 +1723,38 @@
         min-width: 700px;
     }
 }
+
+.story-chapter-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 12px;
+    width: 100%;
+}
+
+.story-chapter-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 12px;
+    border: 1px solid var(--divider);
+    border-radius: 8px;
+    background: var(--paper);
+}
+
+.story-chapter-item > span {
+    font-size: 0.85rem;
+    line-height: 1.5;
+}
+
+.story-chapter-item .content-action-btn {
+    flex-shrink: 0;
+}
+
+@media (max-width: 600px) {
+    .story-chapter-item {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}

@@ -98,6 +98,7 @@
 
                             <div class="my-content-title">
                                 <strong>{{ content.title }}</strong>
+
                                 <small>
                                     {% if content.type == 'artikel' %}
                                         Artikel
@@ -105,6 +106,23 @@
                                         Fiksi
                                     {% endif %}
                                 </small>
+
+                                {% if content.type == 'fiksi' %}
+                                    <div class="story-chapter-list">
+                                        {% for chapter in content.chapters %}
+                                            <div class="story-chapter-item">
+                                                <span>
+                                                    Bab {{ chapter.chapter_number }}:
+                                                    {{ chapter.title }}
+                                                </span>
+
+                                                <span class="content-status pending-status">
+                                                    Pending
+                                                </span>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
                             </div>
                         </div>
                     </td>

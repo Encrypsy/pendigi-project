@@ -13,7 +13,7 @@ from datetime import timedelta
 from articles.models import Articles, StatusArticle, Categories
 from interactions.models import Activity, ArticleViewHistory, Comments, StatusComment, Ratings
 from articles.models import Articles, StatusArticle, Categories
-from fiction.models import Stories, StatusStory as FictionStatusStory
+from fiction.models import StatusChapter, Stories, StatusStory as FictionStatusStory
 from reading_journal.models import ReadingActivity
 from datetime import timedelta
 from django.views.decorators.http import require_POST
@@ -486,44 +486,49 @@ def author_my_content(request):
                 'delete_url': None,
             })
 
-    # Fiksi yang sudah disetujui admin
+    # Fiksi: hanya bab yang sudah disetujui
     if content_type in ['semua', 'fiksi']:
-        stories = Stories.objects.filter(
-            author=request.user,
-            status=FictionStatusStory.APPROVED,
+        stories = (
+            Stories.objects
+            .filter(author=request.user)
+            .prefetch_related('chapters')
         )
 
         if search_query:
             stories = stories.filter(title__icontains=search_query)
 
         for story in stories:
-            contents.append({
-                'id': story.pk,
-                'title': story.title,
-                'thumbnail': story.cover,
-                'views': story.views_count,
-                'rating': None,
-                'created_at': story.published_at or story.created_at,
-                'type': 'fiksi',
-                'edit_url': None,
-                'delete_url': None,
-            })
+            approved_chapters = story.chapters.filter(
+                status=StatusChapter.APPROVED
+            )
 
-    # Urutkan gabungan artikel dan fiksi
-    if sort_by == 'terbaru':
-        contents.sort(key=lambda item: item['created_at'], reverse=True)
-    elif sort_by == 'terlama':
-        contents.sort(key=lambda item: item['created_at'])
-    elif sort_by == 'views':
-        contents.sort(key=lambda item: item['views'], reverse=True)
-    elif sort_by == 'rating':
-        contents.sort(
-            key=lambda item: (
-                item['rating'] is not None,
-                item['rating'] or 0,
-            ),
-            reverse=True,
-        )
+            if approved_chapters.exists():
+                contents.append({
+                    'id': story.pk,
+                    'title': story.title,
+                    'thumbnail': story.cover,
+                    'views': story.views_count,
+                    'rating': None,
+                    'created_at': story.created_at,
+                    'type': 'fiksi',
+                    'chapters': approved_chapters,
+                })
+
+        # Urutkan gabungan artikel dan fiksi
+        if sort_by == 'terbaru':
+            contents.sort(key=lambda item: item['created_at'], reverse=True)
+        elif sort_by == 'terlama':
+            contents.sort(key=lambda item: item['created_at'])
+        elif sort_by == 'views':
+            contents.sort(key=lambda item: item['views'], reverse=True)
+        elif sort_by == 'rating':
+            contents.sort(
+                key=lambda item: (
+                    item['rating'] is not None,
+                    item['rating'] or 0,
+                ),
+                reverse=True,
+            )
 
     # Pagination: 10 konten per halaman
     paginator = Paginator(contents, 10)
@@ -576,25 +581,31 @@ def author_pending_content(request):
                 'status': 'Menunggu Approval',
             })
 
+    # Fiksi: hanya bab yang masih menunggu approval
     if content_type in ['semua', 'fiksi']:
         stories = Stories.objects.filter(
-            author=request.user,
-            status=FictionStatusStory.PENDING
+            author=request.user
         )
 
         if search_query:
             stories = stories.filter(title__icontains=search_query)
 
         for story in stories:
-            contents.append({
-                'id': story.pk,
-                'title': story.title,
-                'thumbnail': story.cover,
-                'views': story.views_count,
-                'created_at': story.created_at,
-                'type': 'fiksi',
-                'status': 'Menunggu Approval',
-            })
+            pending_chapters = story.chapters.filter(
+                status=StatusChapter.PENDING
+            )
+
+            if pending_chapters.exists():
+                contents.append({
+                    'id': story.pk,
+                    'title': story.title,
+                    'thumbnail': story.cover,
+                    'views': story.views_count,
+                    'created_at': story.created_at,
+                    'type': 'fiksi',
+                    'status': 'Menunggu Approval',
+                    'chapters': pending_chapters,
+                })
 
     if sort_by == 'terbaru':
         contents.sort(key=lambda item: item['created_at'], reverse=True)
@@ -614,4 +625,77 @@ def author_pending_content(request):
         'total_contents': len(contents),
         'breadcrumb': 'Pending',
         'active_menu': 'pending',
+    })
+    
+@login_required
+def author_rejected_content(request):
+    if request.user.status_kontributor != StatusKontributor.APPROVED:
+        return redirect('articles:article_list')
+
+    search_query = request.GET.get('q', '').strip()
+    contents = []
+
+    # Artikel yang ditolak
+    articles = Articles.objects.filter(
+        contributor=request.user,
+        status=StatusArticle.REJECTED,
+    )
+
+    if search_query:
+        articles = articles.filter(title__icontains=search_query)
+
+    for article in articles:
+        contents.append({
+            'id': article.pk,
+            'title': article.title,
+            'thumbnail': article.thumbnail,
+            'views': article.views_count,
+            'created_at': article.created_at,
+            'type': 'artikel',
+            'status': 'Ditolak',
+            'rejection_reason': getattr(
+                article, 'rejection_reason', ''
+            ),
+        })
+
+    # Fiksi: hanya bab yang ditolak
+    stories = Stories.objects.filter(author=request.user)
+
+    if search_query:
+        stories = stories.filter(title__icontains=search_query)
+
+    for story in stories:
+        rejected_chapters = story.chapters.filter(
+            status=StatusChapter.REJECTED
+        )
+
+        for chapter in rejected_chapters:
+            contents.append({
+                'id': chapter.pk,
+                'story_id': story.pk,
+                'title': story.title,
+                'chapter_title': chapter.title,
+                'chapter_number': chapter.chapter_number,
+                'thumbnail': story.cover,
+                'views': chapter.views_count,
+                'created_at': chapter.created_at,
+                'type': 'fiksi',
+                'status': 'Ditolak',
+                'rejection_reason': chapter.rejection_reason,
+            })
+
+    contents.sort(
+        key=lambda item: item['created_at'],
+        reverse=True,
+    )
+
+    paginator = Paginator(contents, 10)
+    page_obj = paginator.get_page(request.GET.get('page'))
+
+    return render(request, 'accounts/author_rejected_content.html', {
+        'page_obj': page_obj,
+        'search_query': search_query,
+        'total_contents': len(contents),
+        'breadcrumb': 'Konten Ditolak',
+        'active_menu': 'rejected',
     })

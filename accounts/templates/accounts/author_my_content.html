@@ -111,6 +111,26 @@
                                         Fiksi
                                     {% endif %}
                                 </small>
+
+                                {% if content.type == 'fiksi' %}
+                                    <div class="story-chapter-list">
+                                        {% for chapter in content.chapters %}
+                                            <div class="story-chapter-item">
+                                                <span>
+                                                    Bab {{ chapter.chapter_number }}:
+                                                    {{ chapter.title }}
+                                                </span>
+
+                                                <a
+                                                    href="{% url 'fiction:edit_chapter' content.id chapter.pk %}"
+                                                    class="content-action-btn chapter-btn"
+                                                >
+                                                    Kelola Bab
+                                                </a>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
                             </div>
                         </div>
                     </td>
@@ -129,44 +149,33 @@
                         {% endif %}
                     </td>
 
-                    <td>                     
-                        <div class="my-content-actions">
-                            {% if content.type == 'artikel' %}
-                                <a href="{% url 'articles:edit_article' content.id %}"
-                                class="content-action-btn edit-btn">
+                    <td>
+                        {% if content.type == 'artikel' %}
+                            <div class="my-content-actions">
+                                <a
+                                    href="{% url 'articles:edit_article' content.id %}"
+                                    class="content-action-btn edit-btn"
+                                >
                                     Edit
                                 </a>
 
-                                <form method="post"
+                                <form
+                                    method="post"
                                     action="{% url 'articles:delete_article' content.id %}"
-                                    onsubmit="return confirm('Yakin ingin menghapus artikel ini?');">
+                                    onsubmit="return confirm('Yakin ingin menghapus artikel ini?');"
+                                >
                                     {% csrf_token %}
-                                    <button type="submit" class="content-action-btn delete-btn">
+                                    <button
+                                        type="submit"
+                                        class="content-action-btn delete-btn"
+                                    >
                                         Hapus
                                     </button>
                                 </form>
-
-                            {% elif content.type == 'fiksi' %}
-                                <a href="{% url 'fiction:chapter_list' content.id %}"
-                                class="content-action-btn chapter-btn">
-                                    Kelola Bab
-                                </a>
-
-                                <a href="{% url 'fiction:edit_story' content.id %}"
-                                class="content-action-btn edit-btn">
-                                    Edit Info
-                                </a>
-
-                                <form method="post"
-                                    action="{% url 'fiction:delete_story' content.id %}"
-                                    onsubmit="return confirm('Yakin ingin menghapus cerita ini?');">
-                                    {% csrf_token %}
-                                    <button type="submit" class="content-action-btn delete-btn">
-                                        Hapus
-                                    </button>
-                                </form>
-                            {% endif %}
-                        </div>
+                            </div>
+                        {% else %}
+                            <span>—</span>
+                        {% endif %}
                     </td>
                 </tr>
 
