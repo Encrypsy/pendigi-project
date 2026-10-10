@@ -1,0 +1,181 @@
+{% extends 'author_base.html' %}
+
+{% block title %}Konten Saya{% endblock %}
+
+{% block author_content %}
+<section class="my-content-page">
+
+    <div class="my-content-header">
+        <div>
+            <h1>Konten Saya</h1>
+            <p>Kelola artikel dan cerita yang telah disetujui admin.</p>
+        </div>
+    </div>
+
+    <nav class="my-content-tabs">
+        <a href="?jenis=semua"
+           class="{% if content_type == 'semua' %}active{% endif %}">
+            Semua Konten
+        </a>
+
+        <a href="?jenis=artikel"
+           class="{% if content_type == 'artikel' %}active{% endif %}">
+            Artikel
+        </a>
+
+        <a href="?jenis=fiksi"
+           class="{% if content_type == 'fiksi' %}active{% endif %}">
+            Fiksi
+        </a>
+
+        <span class="disabled-tab">
+            Esai &amp; Opini · Segera Hadir
+        </span>
+    </nav>
+
+    <form method="get" class="my-content-toolbar">
+        <input type="hidden" name="jenis" value="{{ content_type }}">
+
+        <input
+            type="search"
+            name="q"
+            value="{{ search_query }}"
+            placeholder="Cari judul konten..."
+        >
+
+        <select name="sort">
+            <option value="terbaru"
+                {% if sort_by == 'terbaru' %}selected{% endif %}>
+                Terbaru
+            </option>
+
+            <option value="terlama"
+                {% if sort_by == 'terlama' %}selected{% endif %}>
+                Terlama
+            </option>
+
+            <option value="views"
+                {% if sort_by == 'views' %}selected{% endif %}>
+                Views terbanyak
+            </option>
+
+            <option value="rating"
+                {% if sort_by == 'rating' %}selected{% endif %}>
+                Rating terbaik
+            </option>
+        </select>
+
+        <button type="submit">Cari</button>
+    </form>
+
+    <div class="my-content-table-wrapper">
+        <table class="my-content-table">
+            <thead>
+                <tr>
+                    <th>No.</th>
+                    <th>Konten</th>
+                    <th>Views</th>
+                    <th>Rating</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for content in page_obj %}
+                <tr>
+                    <td>
+                        {{ page_obj.start_index|add:forloop.counter0 }}
+                    </td>
+
+                    <td>
+                        <div class="my-content-info">
+                            {% if content.thumbnail %}
+                                <img
+                                    src="{{ content.thumbnail.url }}"
+                                    alt="{{ content.title }}"
+                                    class="my-content-thumbnail"
+                                >
+                            {% else %}
+                                <div class="my-content-thumbnail placeholder">
+                                    Tanpa gambar
+                                </div>
+                            {% endif %}
+
+                            <div class="my-content-title">
+                                <strong>{{ content.title }}</strong>
+
+                                <small>
+                                    {% if content.type == 'artikel' %}
+                                        Artikel
+                                    {% else %}
+                                        Fiksi
+                                    {% endif %}
+                                </small>
+                            </div>
+                        </div>
+                    </td>
+
+                    <td>{{ content.views }}</td>
+
+                    <td>
+                        {% if content.rating != None %}
+                            {{ content.rating|floatformat:1 }} / 5
+                        {% else %}
+                            —
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        <div class="my-content-actions">
+                            {% if content.edit_url %}
+                                <a href="{{ content.edit_url }}">Edit</a>
+                            {% endif %}
+
+                            {% if content.delete_url %}
+                                <a href="{{ content.delete_url }}">Hapus</a>
+                            {% endif %}
+
+                            {% if not content.edit_url and not content.delete_url %}
+                                —
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="my-content-empty">
+                        Belum ada konten yang disetujui atau hasil pencarian
+                        tidak ditemukan.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if page_obj.paginator.num_pages > 1 %}
+    <nav class="my-content-pagination">
+
+        {% if page_obj.has_previous %}
+            <a href="?jenis={{ content_type }}&amp;q={{ search_query|urlencode }}&amp;sort={{ sort_by }}&amp;page={{ page_obj.previous_page_number }}">
+                Sebelumnya
+            </a>
+        {% endif %}
+
+        <span>
+            Halaman {{ page_obj.number }}
+            dari {{ page_obj.paginator.num_pages }}
+        </span>
+
+        {% if page_obj.has_next %}
+            <a href="?jenis={{ content_type }}&amp;q={{ search_query|urlencode }}&amp;sort={{ sort_by }}&amp;page={{ page_obj.next_page_number }}">
+                Berikutnya
+            </a>
+        {% endif %}
+
+    </nav>
+    {% endif %}
+
+</section>
+{% endblock %}

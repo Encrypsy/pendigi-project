@@ -7,7 +7,7 @@ from django.shortcuts import get_object_or_404, render, redirect
 from .forms import RegisterForm, ContributorApplicationForm, ProfileUpdateForm
 from .models import StatusKontributor, ContributorApplication, Users
 from .decorators import admin_required
-from django.db.models import Count
+from django.db.models import Count, Avg, Q
 from django.utils import timezone
 from datetime import timedelta
 from articles.models import Articles, StatusArticle, Categories
@@ -20,6 +20,7 @@ from django.views.decorators.http import require_POST
 from .models import Follow
 import json
 from django.db.models.functions import TruncDate
+from django.core.paginator import Paginator
 
 @login_required
 @require_POST
@@ -435,3 +436,105 @@ def admin_reject_contributor(request, pk):
 
     messages.success(request, f'Pengajuan {application.user.username} ditolak.')
     return redirect('admin_pending_contributors')
+
+
+@login_required
+def author_my_content(request):
+    if request.user.status_kontributor != StatusKontributor.APPROVED:
+        return redirect('articles:article_list')
+
+    # Jenis konten yang dipilih
+    content_type = request.GET.get('jenis', 'semua')
+
+    # Pencarian judul
+    search_query = request.GET.get('q', '').strip()
+
+    # Pengurutan
+    sort_by = request.GET.get('sort', 'terbaru')
+    valid_sorts = ['terbaru', 'terlama', 'views', 'rating']
+
+    if sort_by not in valid_sorts:
+        sort_by = 'terbaru'
+
+    contents = []
+
+    # Artikel yang sudah disetujui admin
+    if content_type in ['semua', 'artikel']:
+        articles = (
+            Articles.objects
+            .filter(
+                contributor=request.user,
+                status=StatusArticle.APPROVED,
+            )
+            .select_related('category')
+            .annotate(average_rating=Avg('ratings__rating_value'))
+        )
+
+        if search_query:
+            articles = articles.filter(title__icontains=search_query)
+
+        for article in articles:
+            contents.append({
+                'id': article.pk,
+                'title': article.title,
+                'thumbnail': article.thumbnail,
+                'views': article.views_count,
+                'rating': article.average_rating,
+                'created_at': article.published_at or article.created_at,
+                'type': 'artikel',
+                'edit_url': None,
+                'delete_url': None,
+            })
+
+    # Fiksi yang sudah disetujui admin
+    if content_type in ['semua', 'fiksi']:
+        stories = Stories.objects.filter(
+            author=request.user,
+            status=FictionStatusStory.APPROVED,
+        )
+
+        if search_query:
+            stories = stories.filter(title__icontains=search_query)
+
+        for story in stories:
+            contents.append({
+                'id': story.pk,
+                'title': story.title,
+                'thumbnail': story.cover,
+                'views': story.views_count,
+                'rating': None,
+                'created_at': story.published_at or story.created_at,
+                'type': 'fiksi',
+                'edit_url': None,
+                'delete_url': None,
+            })
+
+    # Urutkan gabungan artikel dan fiksi
+    if sort_by == 'terbaru':
+        contents.sort(key=lambda item: item['created_at'], reverse=True)
+    elif sort_by == 'terlama':
+        contents.sort(key=lambda item: item['created_at'])
+    elif sort_by == 'views':
+        contents.sort(key=lambda item: item['views'], reverse=True)
+    elif sort_by == 'rating':
+        contents.sort(
+            key=lambda item: (
+                item['rating'] is not None,
+                item['rating'] or 0,
+            ),
+            reverse=True,
+        )
+
+    # Pagination: 10 konten per halaman
+    paginator = Paginator(contents, 10)
+    page_obj = paginator.get_page(request.GET.get('page'))
+
+    return render(request, 'accounts/author_my_content.html', {
+        'page_obj': page_obj,
+        'content_type': content_type,
+        'search_query': search_query,
+        'sort_by': sort_by,
+        'total_contents': len(contents),
+        'breadcrumb': 'Konten Saya',
+        'active_menu': 'my_content',
+    })

@@ -1,6 +1,6 @@
 from django.urls import path
 from django.contrib.auth.views import LogoutView
-from .views import CustomLoginView, register_view, apply_contributor, profile_view, dashboard_view, admin_pending_contributors, admin_approve_contributor, admin_reject_contributor, toggle_follow, author_dashboard
+from .views import CustomLoginView, register_view, apply_contributor, profile_view, dashboard_view, admin_pending_contributors, admin_approve_contributor, admin_reject_contributor, toggle_follow, author_dashboard, author_my_content
 
 urlpatterns = [
     path('login/', CustomLoginView.as_view(), name='login'),
@@ -14,4 +14,5 @@ urlpatterns = [
     path('kelola/kontributor/<int:pk>/approve/', admin_approve_contributor, name='admin_approve_contributor'),
     path('kelola/kontributor/<int:pk>/reject/', admin_reject_contributor, name='admin_reject_contributor'),
     path('follow/<str:username>/', toggle_follow, name='toggle_follow'),
+    path('dashboard/penulis/konten/',author_my_content, name='author_my_content'),
 ]

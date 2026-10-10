@@ -78,7 +78,8 @@
 
                 <div class="author-nav-submenu">
 
-                    <a href="#">
+                    <a href="{% url 'author_my_content' %}"
+                    class="{% if active_menu == 'my_content' %}is-active{% endif %}">
                         Semua Konten
                     </a>
 

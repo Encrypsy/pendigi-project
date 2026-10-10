@@ -1273,3 +1273,311 @@
     height: 100%;
     object-fit: cover;
 }
+
+/* ==============================
+   HALAMAN KONTEN SAYA
+============================== */
+
+.my-content-page {
+    color: #49372d;
+    width: 100%;
+}
+
+.my-content-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.my-content-header h1 {
+    margin: 0 0 8px;
+    font-size: 28px;
+    font-weight: 700;
+    color: #49372d;
+}
+
+.my-content-header p {
+    margin: 0;
+    color: #89796e;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+/* TAB KATEGORI */
+
+.my-content-tabs {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    overflow-x: auto;
+    border-bottom: 1px solid #e8ddd2;
+    margin-bottom: 22px;
+}
+
+.my-content-tabs a,
+.my-content-tabs .disabled-tab {
+    display: inline-block;
+    flex-shrink: 0;
+    padding: 12px 2px;
+    color: #89796e;
+    text-decoration: none;
+    font-size: 14px;
+    border-bottom: 3px solid transparent;
+    transition: color 0.2s ease;
+}
+
+.my-content-tabs a:hover {
+    color: #875b42;
+}
+
+.my-content-tabs a.active {
+    color: #875b42;
+    font-weight: 700;
+    border-bottom-color: #875b42;
+}
+
+.my-content-tabs .disabled-tab {
+    color: #b8aaa0;
+    cursor: not-allowed;
+}
+
+/* PENCARIAN DAN PENGURUTAN */
+
+.my-content-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 22px;
+}
+
+.my-content-toolbar input,
+.my-content-toolbar select {
+    min-height: 42px;
+    padding: 10px 12px;
+    border: 1px solid #e2d5c9;
+    border-radius: 8px;
+    background: #fffdf9;
+    color: #49372d;
+    font: inherit;
+    font-size: 14px;
+    outline: none;
+}
+
+.my-content-toolbar input {
+    flex: 1;
+    min-width: 0;
+}
+
+.my-content-toolbar input:focus,
+.my-content-toolbar select:focus {
+    border-color: #a77b5d;
+    box-shadow: 0 0 0 3px rgb(167 123 93 / 12%);
+}
+
+.my-content-toolbar button {
+    min-height: 42px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    background: #875b42;
+    color: #fffaf5;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.my-content-toolbar button:hover {
+    background: #6e4632;
+}
+
+/* TABEL KONTEN */
+
+.my-content-table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    border: 1px solid #eadfd4;
+    border-radius: 12px;
+    background: #fffdf9;
+}
+
+.my-content-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 14px;
+}
+
+.my-content-table th {
+    padding: 16px;
+    background: #f6eee5;
+    color: #725441;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.my-content-table td {
+    padding: 16px;
+    border-top: 1px solid #f0e7df;
+    color: #5f4b3e;
+    vertical-align: middle;
+}
+
+.my-content-table tbody tr {
+    transition: background 0.2s ease;
+}
+
+.my-content-table tbody tr:hover {
+    background: #fcf7f1;
+}
+
+.my-content-info {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-width: 220px;
+}
+
+.my-content-thumbnail {
+    display: block;
+    flex-shrink: 0;
+    width: 64px;
+    height: 76px;
+    border-radius: 7px;
+    object-fit: cover;
+    background: #eee2d6;
+}
+
+.my-content-thumbnail.placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px;
+    color: #927d6d;
+    font-size: 10px;
+    text-align: center;
+}
+
+.my-content-title {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    overflow-wrap: anywhere;
+}
+
+.my-content-title strong {
+    color: #49372d;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.my-content-title small {
+    color: #9a8372;
+    font-size: 12px;
+}
+
+/* AKSI */
+
+.my-content-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    white-space: nowrap;
+}
+
+.my-content-actions a {
+    color: #875b42;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.my-content-actions a:hover {
+    text-decoration: underline;
+}
+
+.my-content-actions a:last-of-type {
+    color: #b54d45;
+}
+
+/* KONTEN KOSONG */
+
+.my-content-empty {
+    padding: 36px 20px !important;
+    color: #9a887a !important;
+    text-align: center;
+}
+
+/* PAGINATION */
+
+.my-content-pagination {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-top: 22px;
+    color: #89796e;
+    font-size: 13px;
+}
+
+.my-content-pagination a {
+    padding: 9px 14px;
+    border: 1px solid #e2d5c9;
+    border-radius: 8px;
+    color: #875b42;
+    text-decoration: none;
+    background: #fffdf9;
+}
+
+.my-content-pagination a:hover {
+    background: #f6eee5;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 768px) {
+    .my-content-header h1 {
+        font-size: 24px;
+    }
+
+    .my-content-tabs {
+        gap: 18px;
+    }
+
+    .my-content-toolbar {
+        flex-wrap: wrap;
+    }
+
+    .my-content-toolbar input {
+        flex-basis: 100%;
+    }
+
+    .my-content-toolbar select {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .my-content-toolbar button {
+        flex-shrink: 0;
+    }
+
+    .my-content-table {
+        min-width: 650px;
+    }
+
+    .my-content-pagination {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .my-content-header h1 {
+        font-size: 22px;
+    }
+
+    .my-content-toolbar select {
+        flex-basis: 100%;
+    }
+}
