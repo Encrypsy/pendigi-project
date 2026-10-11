@@ -1,0 +1,255 @@
+
+/* =========================
+   ARTICLE REVIEW PAGE
+========================= */
+
+.article-review {
+    max-width: 1000px;
+    margin: 24px auto;
+    padding: 32px;
+    background: #ffffff;
+    border: 1px solid #e5d9cc;
+    border-radius: 14px;
+    color: #342c27;
+    box-sizing: border-box;
+}
+
+/* Thumbnail */
+
+.article-review > img {
+    display: block;
+    width: 100%;
+    max-height: 420px;
+    object-fit: contain;
+    background: #f8f4ef;
+    border-radius: 10px;
+    margin-bottom: 24px;
+}
+
+/* Title and metadata */
+
+.article-review h2 {
+    margin: 0 0 14px;
+    font-size: 28px;
+    line-height: 1.4;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.article-review p {
+    line-height: 1.8;
+}
+
+.article-review > p {
+    color: #74685e;
+    font-size: 14px;
+}
+
+.article-review hr {
+    border: 0;
+    border-top: 1px solid #eadfd4;
+    margin: 28px 0;
+}
+
+/* Article content */
+
+.article-review .article-content {
+    color: #342c27;
+    font-size: 16px;
+    line-height: 1.9;
+    overflow-wrap: anywhere;
+    word-break: normal;
+}
+
+.article-review .article-content p {
+    margin: 0 0 18px;
+}
+
+.article-review .article-content h1,
+.article-review .article-content h2,
+.article-review .article-content h3,
+.article-review .article-content h4 {
+    margin: 28px 0 12px;
+    line-height: 1.5;
+}
+
+.article-review .article-content img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 20px auto;
+    border-radius: 8px;
+}
+
+.article-review .article-content blockquote {
+    margin: 20px 0;
+    padding: 12px 20px;
+    border-left: 4px solid #70472f;
+    background: #faf6f1;
+    color: #66564b;
+}
+
+.article-review .article-content pre {
+    max-width: 100%;
+    padding: 16px;
+    overflow-x: auto;
+    background: #f5f1ec;
+    border-radius: 8px;
+}
+
+.article-review .article-content table {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+    border-collapse: collapse;
+}
+
+.article-review .article-content a {
+    color: #70472f;
+    text-decoration: underline;
+}
+
+/* Review headings */
+
+.article-review h3 {
+    margin: 24px 0 12px;
+    font-size: 19px;
+}
+
+/* Rejection form */
+
+.article-review label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.article-review textarea {
+    display: block;
+    width: 100%;
+    min-height: 120px;
+    padding: 14px;
+    box-sizing: border-box;
+    border: 1px solid #d9c9b9;
+    border-radius: 8px;
+    background: #fdfbf8;
+    color: #342c27;
+    font: inherit;
+    font-size: 14px;
+    line-height: 1.6;
+    resize: vertical;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.article-review textarea:focus {
+    outline: none;
+    border-color: #70472f;
+    box-shadow: 0 0 0 3px rgb(112 71 47 / 12%);
+}
+
+/* Action buttons */
+
+.article-review form {
+    margin: 12px 0;
+}
+
+.article-review .btn-approve,
+.article-review .btn-reject {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+    padding: 10px 20px;
+    border: 0;
+    border-radius: 7px;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.2s;
+}
+
+.article-review .btn-approve {
+    background: #dff3e5;
+    color: #21683b;
+}
+
+.article-review .btn-approve:hover {
+    background: #c8e9d3;
+}
+
+.article-review .btn-reject {
+    background: #fce8e5;
+    color: #ad3024;
+}
+
+.article-review .btn-reject:hover {
+    background: #f8d5d0;
+}
+
+.article-review .btn-approve:active,
+.article-review .btn-reject:active {
+    transform: translateY(1px);
+}
+
+/* Rejection reason */
+
+.article-review .rejection-reason {
+    padding: 14px 16px;
+    border: 1px solid #f0cbc5;
+    border-radius: 8px;
+    background: #fff4f2;
+    color: #92372d;
+    overflow-wrap: anywhere;
+}
+
+/* Back link */
+
+.page-header-row > a {
+    color: #70472f;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.page-header-row > a:hover {
+    text-decoration: underline;
+}
+
+/* Responsive */
+
+@media (max-width: 768px) {
+    .article-review {
+        margin: 16px 0;
+        padding: 20px;
+        border-radius: 10px;
+    }
+
+    .article-review h2 {
+        font-size: 23px;
+    }
+
+    .article-review .article-content {
+        font-size: 15px;
+        line-height: 1.8;
+    }
+
+    .article-review > img {
+        max-height: 280px;
+    }
+}
+
+@media (max-width: 480px) {
+    .article-review {
+        padding: 16px;
+    }
+
+    .article-review h2 {
+        font-size: 20px;
+    }
+
+    .article-review .btn-approve,
+    .article-review .btn-reject {
+        width: 100%;
+    }
+}
