@@ -251,27 +251,43 @@ def mark_as_finished(request, pk):
     messages.success(request, 'Artikel ditandai selesai dibaca. Mau catat insight-nya?')
     return redirect('reading_journal:add_note', article_id=article.pk)
 
-
 @login_required
 def upload_article(request):
-    """Use case: Upload artikel (khusus Kontributor)"""
+    """Upload artikel khusus kontributor terverifikasi."""
+
     if request.user.status_kontributor != StatusKontributor.APPROVED:
-        messages.error(request, 'Anda belum terverifikasi sebagai kontributor.')
+        messages.error(
+            request,
+            'Anda belum terverifikasi sebagai kontributor.'
+        )
         return redirect('articles:article_list')
 
     if request.method == 'POST':
         form = ArticleUploadForm(request.POST, request.FILES)
+
         if form.is_valid():
             article = form.save(commit=False)
             article.contributor = request.user
             article.save()
-            messages.success(request, 'Artikel berhasil dikirim, menunggu approval admin.')
+
+            messages.success(
+                request,
+                'Artikel berhasil dikirim, menunggu approval admin.'
+            )
             return redirect('articles:my_articles')
     else:
         form = ArticleUploadForm()
 
-    return render(request, 'articles/upload.html', {'form': form})
-
+    return render(
+        request,
+        'articles/upload.html',
+        {
+            'form': form,
+            'active_menu': 'create_content',
+            'active_create_type': 'article',
+            'breadcrumb': 'Buat Konten / Artikel',
+        }
+    )
 
 @login_required
 def my_articles(request):
