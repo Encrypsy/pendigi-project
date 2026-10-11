@@ -274,7 +274,7 @@ def upload_article(request):
                 request,
                 'Artikel berhasil dikirim, menunggu approval admin.'
             )
-            return redirect('articles:my_articles')
+            return redirect('accounts:author_pending_content')
     else:
         form = ArticleUploadForm()
 
