@@ -274,7 +274,7 @@ def upload_article(request):
                 request,
                 'Artikel berhasil dikirim, menunggu approval admin.'
             )
-            return redirect('/dashboard/penulis/pending/')
+            return redirect('accounts/dashboard/penulis/pending/')
     else:
         form = ArticleUploadForm()
 
