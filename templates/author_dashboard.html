@@ -95,90 +95,92 @@ Dashboard Penulis
 
             <div class="activity-list">
 
-    {% for activity in activities %}
+            {% for activity in activities %}
 
-    <div class="activity-item">
+            <div class="activity-item">
 
-    <!-- AVATAR -->
-    <div class="activity-avatar">
-        {% if activity.actor and activity.actor.profile_picture %}
-            <img
-                src="{{ activity.actor.profile_picture.url }}"
-                alt="{{ activity.actor.username }}"
-            >
-        {% else %}
-            <div class="activity-avatar-placeholder">
-                {% if activity.actor %}
-                    {{ activity.actor.username|first|upper }}
+            <!-- AVATAR -->
+            <div class="activity-avatar">
+                {% if activity.actor and activity.actor.profile_picture %}
+                    <img
+                        src="{{ activity.actor.profile_picture.url }}"
+                        alt="{{ activity.actor.username }}"
+                    >
                 {% else %}
-                    A
+                    <div class="activity-avatar-placeholder">
+                        {% if activity.actor %}
+                            {{ activity.actor.username|first|upper }}
+                        {% else %}
+                            A
+                        {% endif %}
+                    </div>
                 {% endif %}
             </div>
-        {% endif %}
-    </div>
 
+            <!-- CONTENT -->
+            <div class="activity-content">
 
-    <!-- CONTENT -->
-    <div class="activity-content">
+                <!-- BARIS 1: USERNAME -->
+                <div class="activity-username">
+                    {% if activity.actor %}
+                        {{ activity.actor.username }}
+                    {% else %}
+                        Admin
+                    {% endif %}
+                </div>
 
-        <!-- BARIS 1: USERNAME -->
-        <div class="activity-username">
-            {% if activity.actor %}
-                {{ activity.actor.username }}
-            {% else %}
-                Admin
+                <!-- BARIS 2: ACTION -->
+                <div class="activity-action">
+                    {{ activity.get_action_type_display }}
+                </div>
+
+                <!-- BARIS 3: PESAN NOTIFIKASI -->
+                {% if activity.message %}
+                    <div class="activity-message">
+                        {{ activity.message }}
+                    </div>
+                {% endif %}
+
+                <!-- BARIS 4: JUDUL ARTIKEL -->
+                {% if activity.article %}
+                    <a
+                        href="{% url 'articles:article_detail' activity.article.pk %}"
+                        class="activity-title"
+                        title="{{ activity.article.title }}"
+                    >
+                        {{ activity.article.title }}
+                    </a>
+                {% endif %}
+
+                <!-- BARIS 5: WAKTU -->
+                <div class="activity-time">
+                    {{ activity.created_at|timesince }} yang lalu
+                </div>
+
+            </div>
+
+            <!-- THUMBNAIL -->
+            {% if activity.article and activity.article.thumbnail %}
+                <a
+                    href="{% url 'articles:article_detail' activity.article.pk %}"
+                    class="activity-thumbnail"
+                >
+                    <img
+                        src="{{ activity.article.thumbnail.url }}"
+                        alt="{{ activity.article.title }}"
+                    >
+                </a>
             {% endif %}
+
         </div>
 
+            {% empty %}
 
-        <!-- BARIS 2: ACTION -->
-        <div class="activity-action">
-            {{ activity.get_action_type_display }}
-        </div>
+                <div class="activity-empty">
+                    Belum ada aktivitas.
+                </div>
 
-
-        <!-- BARIS 3: JUDUL -->
-        {% if activity.article %}
-            <a
-                href="{% url 'articles:article_detail' activity.article.pk %}"
-                class="activity-title"
-                title="{{ activity.article.title }}"
-            >
-                {{ activity.article.title }}
-            </a>
-        {% endif %}
-
-
-        <!-- BARIS 4: WAKTU -->
-        <div class="activity-time">
-            {{ activity.created_at|timesince }} yang lalu
-        </div>
-
-    </div>
-
-
-    <!-- THUMBNAIL -->
-    {% if activity.article and activity.article.thumbnail %}
-        <a
-            href="{% url 'articles:article_detail' activity.article.pk %}"
-            class="activity-thumbnail"
-        >
-            <img
-                src="{{ activity.article.thumbnail.url }}"
-                alt="{{ activity.article.title }}"
-            >
-        </a>
-    {% endif %}
-
-</div>
-
-    {% empty %}
-
-        <div class="activity-empty">
-            Belum ada aktivitas.
-        </div>
-
-    {% endfor %}
+            {% endfor %}
 
 </div>
         </div>

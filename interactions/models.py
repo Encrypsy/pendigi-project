@@ -116,6 +116,14 @@ class Activity(models.Model):
         related_name='received_activities'
     )
 
+    chapter = models.ForeignKey(
+        'fiction.Chapters',
+        on_delete=models.CASCADE,
+        related_name='activities',
+        null=True,
+        blank=True,
+    )
+
     # User yang melakukan aktivitas
     actor = models.ForeignKey(
         Users,

@@ -1784,3 +1784,10 @@
     font-size: 0.8rem;
     font-style: italic;
 }
+
+.activity-message {
+    font-size: 0.9rem;
+    line-height: 1.6;
+    margin-top: 5px;
+    overflow-wrap: anywhere;
+}

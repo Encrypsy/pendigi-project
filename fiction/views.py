@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.urls import reverse
 from accounts.models import StatusKontributor, Follow
 from articles.models import Banner, BannerType
-from interactions.models import StatusComment
+from interactions.models import StatusComment, Activity
 from .models import StatusChapter, Stories, Chapters, StatusStory, FavoriteStories, ChapterComments, ChapterCommentLikes, ReadingProgress
 from .forms import StoryForm, ChapterForm, ChapterCommentForm
 from django.http import JsonResponse
@@ -195,6 +195,17 @@ def admin_approve_chapter(request, story_id, chapter_id):
     chapter.status = StatusChapter.APPROVED
     chapter.rejection_reason = ''
     chapter.save(update_fields=['status', 'rejection_reason'])
+    
+    Activity.objects.create(
+        recipient=story.author,
+        actor=request.user,
+        chapter=chapter,
+        action_type=Activity.ActionType.APPROVED,
+        message=(
+            f'Admin telah menyetujui cerita "{story.title}", '
+            f'Bab {chapter.chapter_number}: {chapter.title}.'
+        ),
+    )
 
     messages.success(
         request,
@@ -221,6 +232,18 @@ def admin_reject_chapter(request, story_id, chapter_id):
         'rejection_reason', ''
     ).strip()
     chapter.save(update_fields=['status', 'rejection_reason'])
+    
+    Activity.objects.create(
+        recipient=story.author,
+        actor=request.user,
+        chapter=chapter,
+        action_type=Activity.ActionType.REJECTED,
+        message=(
+            f'Admin telah menolak cerita "{story.title}", '
+            f'Bab {chapter.chapter_number}: {chapter.title}. '
+            f'Alasan: {chapter.rejection_reason or "Tidak ada alasan yang dicantumkan."}'
+        ),
+    )
 
     messages.warning(
         request,

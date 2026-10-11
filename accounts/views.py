@@ -356,6 +356,8 @@ def author_dashboard(request):
         .select_related(
             'actor',
             'article',
+            'chapter',
+            'chapter__story',
         )
         .order_by('-created_at')[:10]
     )
