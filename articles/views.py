@@ -440,11 +440,11 @@ def admin_approve_article(request, pk):
     article.save()
     
     Activity.objects.create(
-        recipient=article.contributor,
+        recipient=article.author,
         actor=request.user,
         article=article,
         action_type=Activity.ActionType.APPROVED,
-        message="Konten Anda telah disetujui oleh admin",
+        message=f'Artikel "{article.title}" telah disetujui oleh admin.',
     )
     
     messages.success(request, f'Artikel "{article.title}" disetujui.')
@@ -459,11 +459,14 @@ def admin_reject_article(request, pk):
     article.save()
     
     Activity.objects.create(
-        recipient=article.contributor,
+        recipient=article.author,
         actor=request.user,
         article=article,
         action_type=Activity.ActionType.REJECTED,
-        message="Konten Anda ditolak oleh admin",
+        message=(
+            f'Artikel "{article.title}" ditolak oleh admin. '
+            f'Alasan: {article.rejection_reason or "Tidak ada alasan yang dicantumkan."}'
+        )[:255],
     )
     
     messages.success(request, f'Artikel "{article.title}" ditolak.')
