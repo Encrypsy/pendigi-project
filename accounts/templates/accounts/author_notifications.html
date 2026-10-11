@@ -27,18 +27,39 @@
                 notification-rejected
             {% endif %}">
 
-            <!-- IKON NOTIFIKASI -->
-            <div class="notification-icon">
-                {% if action == 'approved' %}
-                    <span aria-label="Disetujui">✓</span>
-                {% elif action == 'rejected' %}
-                    <span aria-label="Ditolak">!</span>
-                {% else %}
-                    <span aria-hidden="true">●</span>
-                {% endif %}
-            </div>
+            {% if action == 'approved' or action == 'rejected' %}
 
-            <!-- ISI NOTIFIKASI -->
+                <!-- NOTIFIKASI ADMIN: GUNAKAN IKON -->
+                <div class="notification-icon">
+                    {% if action == 'approved' %}
+                        <span aria-label="Disetujui">✓</span>
+                    {% else %}
+                        <span aria-label="Ditolak">!</span>
+                    {% endif %}
+                </div>
+
+            {% else %}
+
+                <!-- USER BIASA: TETAP TAMPILKAN AVATAR -->
+                <div class="activity-avatar">
+                    {% if activity.actor and activity.actor.profile_picture %}
+                        <img
+                            src="{{ activity.actor.profile_picture.url }}"
+                            alt="{{ activity.actor.username }}"
+                        >
+                    {% else %}
+                        <div class="activity-avatar-placeholder">
+                            {% if activity.actor %}
+                                {{ activity.actor.username|first|upper }}
+                            {% else %}
+                                ?
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+
+            {% endif %}
+
             <div class="notification-content">
 
                 <div class="activity-username">
