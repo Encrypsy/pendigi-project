@@ -1,3 +1,4 @@
+from django.db import transaction
 from django.http.response import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
@@ -430,47 +431,94 @@ def admin_article_approval(request, status='pending'):
         }
     )
 
-
 @admin_required
 @require_POST
 def admin_approve_article(request, pk):
-    article = get_object_or_404(Articles, pk=pk)
-    article.status = StatusArticle.APPROVED
-    article.published_at = timezone.now()
-    article.save()
-    
-    Activity.objects.create(
-        recipient=article.author,
-        actor=request.user,
-        article=article,
-        action_type=Activity.ActionType.APPROVED,
-        message=f'Artikel "{article.title}" telah disetujui oleh admin.',
+    article = get_object_or_404(
+        Articles,
+        pk=pk,
+        status=StatusArticle.PENDING,
     )
-    
-    messages.success(request, f'Artikel "{article.title}" disetujui.')
+
+    with transaction.atomic():
+        article.status = StatusArticle.APPROVED
+        article.published_at = timezone.now()
+        article.rejection_reason = ''
+        article.save(update_fields=[
+            'status',
+            'published_at',
+            'rejection_reason',
+        ])
+
+        Activity.objects.create(
+            recipient=article.contributor,
+            actor=request.user,
+            article=article,
+            action_type=Activity.ActionType.APPROVED,
+            message=(
+                f'Artikel "{article.title}" telah disetujui oleh admin.'
+            )[:255],
+        )
+
+    messages.success(
+        request,
+        f'Artikel "{article.title}" berhasil disetujui.',
+    )
     return redirect('articles:admin_article_approval')
 
 
 @admin_required
 @require_POST
 def admin_reject_article(request, pk):
-    article = get_object_or_404(Articles, pk=pk)
-    article.status = StatusArticle.REJECTED
-    article.save()
-    
-    Activity.objects.create(
-        recipient=article.author,
-        actor=request.user,
-        article=article,
-        action_type=Activity.ActionType.REJECTED,
-        message=(
-            f'Artikel "{article.title}" ditolak oleh admin. '
-            f'Alasan: {article.rejection_reason or "Tidak ada alasan yang dicantumkan."}'
-        )[:255],
+    article = get_object_or_404(
+        Articles,
+        pk=pk,
+        status=StatusArticle.PENDING,
     )
-    
-    messages.success(request, f'Artikel "{article.title}" ditolak.')
+
+    reason = request.POST.get('rejection_reason', '').strip()
+
+    with transaction.atomic():
+        article.status = StatusArticle.REJECTED
+        article.rejection_reason = reason
+        article.save(update_fields=[
+            'status',
+            'rejection_reason',
+        ])
+
+        if reason:
+            notification_message = (
+                f'Artikel "{article.title}" ditolak oleh admin. '
+                f'Alasan: {reason}'
+            )
+        else:
+            notification_message = (
+                f'Artikel "{article.title}" ditolak oleh admin.'
+            )
+
+        Activity.objects.create(
+            recipient=article.contributor,
+            actor=request.user,
+            article=article,
+            action_type=Activity.ActionType.REJECTED,
+            message=notification_message[:255],
+        )
+
+    messages.warning(
+        request,
+        f'Artikel "{article.title}" ditolak.',
+    )
     return redirect('articles:admin_article_approval')
+
+@admin_required
+def admin_review_article(request, pk):
+    article = get_object_or_404(Articles, pk=pk)
+
+    return render(
+        request,
+        'articles/admin_review_article.html',
+        {'article': article},
+    )
 
 def article_comments_partial(request, pk):
     article = get_object_or_404(Articles, pk=pk, status=StatusArticle.APPROVED)

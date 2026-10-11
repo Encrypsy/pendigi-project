@@ -28,7 +28,12 @@ class Articles(models.Model):
         limit_choices_to={'status_kontributor': StatusKontributor.APPROVED},
         related_name='articles'
     )
-    status = models.CharField(max_length=20, choices=StatusArticle.choices, default=StatusArticle.PENDING)
+    status = models.CharField(
+        max_length=20, 
+        choices=StatusArticle.choices, 
+        default=StatusArticle.PENDING
+    )
+    rejection_reason = models.TextField(blank=True)
     is_featured = models.BooleanField(default=False)
     views_count = models.PositiveIntegerField(default=0)
     published_at = models.DateTimeField(null=True, blank=True)

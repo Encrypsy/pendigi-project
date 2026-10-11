@@ -29,6 +29,11 @@ urlpatterns = [
 
     path('kelola/<int:pk>/approve/', views.admin_approve_article, name='admin_approve_article'),
     path('kelola/<int:pk>/reject/', views.admin_reject_article, name='admin_reject_article'),
+    path(
+        'admin/approval/review/<int:pk>/',
+        views.admin_review_article,
+        name='admin_review_article',
+    ),
 
     # ================= KATEGORI =================
 

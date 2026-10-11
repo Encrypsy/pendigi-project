@@ -1,0 +1,91 @@
+
+{% extends 'admin_base.html' %}
+{% load static %}
+
+{% block title %}Review Artikel{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/admin.css' %}">
+{% endblock %}
+
+{% block admin_content %}
+<div class="page-header-row">
+    <h1 class="admin-page-title">Review Artikel</h1>
+
+    <a href="{% url 'articles:admin_article_approval' %}">
+        Kembali ke daftar
+    </a>
+</div>
+
+<article class="article-review">
+    {% if article.thumbnail %}
+        <img
+            src="{{ article.thumbnail.url }}"
+            alt="{{ article.title }}"
+            style="max-width: 100%; max-height: 350px; object-fit: contain;"
+        >
+    {% endif %}
+
+    <h2>{{ article.title }}</h2>
+
+    <p>
+        Kategori: {{ article.category.name }} |
+        Kontributor: {{ article.contributor.username }}
+    </p>
+
+    <hr>
+
+    <div class="article-content">
+        {{ article.content|linebreaks }}
+    </div>
+
+    {% if article.status == 'pending' %}
+        <hr>
+
+        <form
+            method="post"
+            action="{% url 'articles:admin_approve_article' article.pk %}"
+        >
+            {% csrf_token %}
+            <button type="submit" class="btn-approve">
+                Approve Artikel
+            </button>
+        </form>
+
+        <h3>Tolak Artikel</h3>
+
+        <form
+            method="post"
+            action="{% url 'articles:admin_reject_article' article.pk %}"
+        >
+            {% csrf_token %}
+
+            <label for="rejection_reason">
+                Alasan penolakan (opsional)
+            </label>
+
+            <textarea
+                id="rejection_reason"
+                name="rejection_reason"
+                rows="4"
+                maxlength="2000"
+                placeholder="Jelaskan alasan penolakan agar penulis dapat memperbaiki artikelnya."
+                style="display: block; width: 100%; margin: 10px 0;"
+            ></textarea>
+
+            <button type="submit" class="btn-reject">
+                Reject Artikel
+            </button>
+        </form>
+
+    {% elif article.status == 'rejected' %}
+        <h3>Artikel ditolak</h3>
+        <p>
+            Alasan:
+            {{ article.rejection_reason|default:"Tidak ada alasan yang dicantumkan." }}
+        </p>
+    {% else %}
+        <p>Artikel ini sudah disetujui.</p>
+    {% endif %}
+</article>
+{% endblock %}

@@ -147,23 +147,28 @@
 
             <td>
 
-                {% if article.status == 'pending' %}
+                {% if article_status == 'pending' %}
 
-                    <span class="status-badge status-pending">
-                        Pending
-                    </span>
+                <div class="table-actions">
+                    <a
+                        href="{% url 'articles:admin_review_article' article.pk %}"
+                        class="btn-approve"
+                    >
+                        Review
+                    </a>
+                </div>
 
-                {% elif article.status == 'approved' %}
+                {% elif article_status == 'approved' %}
 
-                    <span class="status-badge status-approved">
-                        Approved
-                    </span>
+                <span class="status-badge status-approved">
+                    Approved
+                </span>
 
-                {% elif article.status == 'rejected' %}
+                {% elif article_status == 'rejected' %}
 
-                    <span class="status-badge status-rejected">
-                        Rejected
-                    </span>
+                <span class="status-badge status-rejected">
+                    Rejected
+                </span>
 
                 {% endif %}
 
