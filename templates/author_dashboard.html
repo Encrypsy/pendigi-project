@@ -94,92 +94,96 @@ Dashboard Penulis
             <h2>Notifikasi Aktivitas</h2>
 
             <div class="activity-list">
-
             {% for activity in activities %}
+                {% with action=activity.action_type %}
+                <div class="activity-item
+                    {% if action == 'approved' %}
+                        notification-approved
+                    {% elif action == 'rejected' %}
+                        notification-rejected
+                    {% endif %}">
 
-            <div class="activity-item">
+                    <!-- ADMIN: IKON, TANPA AVATAR -->
+                    {% if action == 'approved' or action == 'rejected' %}
+                        <div class="notification-icon">
+                            {% if action == 'approved' %}
+                                <span aria-label="Disetujui">✓</span>
+                            {% else %}
+                                <span aria-label="Ditolak">!</span>
+                            {% endif %}
+                        </div>
 
-            <!-- AVATAR -->
-            <div class="activity-avatar">
-                {% if activity.actor and activity.actor.profile_picture %}
-                    <img
-                        src="{{ activity.actor.profile_picture.url }}"
-                        alt="{{ activity.actor.username }}"
-                    >
-                {% else %}
-                    <div class="activity-avatar-placeholder">
-                        {% if activity.actor %}
-                            {{ activity.actor.username|first|upper }}
-                        {% else %}
-                            A
-                        {% endif %}
-                    </div>
-                {% endif %}
-            </div>
-
-            <!-- CONTENT -->
-            <div class="activity-content">
-
-                <!-- BARIS 1: USERNAME -->
-                <div class="activity-username">
-                    {% if activity.actor %}
-                        {{ activity.actor.username }}
+                    <!-- USER BIASA: AVATAR TETAP ADA -->
                     {% else %}
-                        Admin
+                        <div class="activity-avatar">
+                            {% if activity.actor and activity.actor.profile_picture %}
+                                <img
+                                    src="{{ activity.actor.profile_picture.url }}"
+                                    alt="{{ activity.actor.username }}"
+                                >
+                            {% else %}
+                                <div class="activity-avatar-placeholder">
+                                    {% if activity.actor %}
+                                        {{ activity.actor.username|first|upper }}
+                                    {% else %}
+                                        ?
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                        </div>
                     {% endif %}
-                </div>
 
-                <!-- BARIS 2: ACTION -->
-                <div class="activity-action">
-                    {{ activity.get_action_type_display }}
-                </div>
+                    <div class="activity-content">
+                        <div class="activity-username">
+                            {% if action == 'approved' or action == 'rejected' %}
+                                Admin
+                            {% elif activity.actor %}
+                                {{ activity.actor.username }}
+                            {% else %}
+                                Sistem
+                            {% endif %}
+                        </div>
 
-                <!-- BARIS 3: PESAN NOTIFIKASI -->
-                {% if activity.message %}
-                    <div class="activity-message">
-                        {{ activity.message }}
+                        <div class="activity-action">
+                            {{ activity.get_action_type_display }}
+                        </div>
+
+                        {% if activity.message %}
+                            <div class="activity-message">
+                                {{ activity.message }}
+                            </div>
+                        {% endif %}
+
+                        {% if activity.article %}
+                            <a
+                                href="{% url 'articles:article_detail' activity.article.pk %}"
+                                class="activity-title"
+                            >
+                                {{ activity.article.title }}
+                            </a>
+                        {% endif %}
+
+                        <div class="activity-time">
+                            {{ activity.created_at|timesince }} yang lalu
+                        </div>
                     </div>
-                {% endif %}
 
-                <!-- BARIS 4: JUDUL ARTIKEL -->
-                {% if activity.article %}
-                    <a
-                        href="{% url 'articles:article_detail' activity.article.pk %}"
-                        class="activity-title"
-                        title="{{ activity.article.title }}"
-                    >
-                        {{ activity.article.title }}
-                    </a>
-                {% endif %}
+                    {% if activity.article and activity.article.thumbnail %}
+                        <a
+                            href="{% url 'articles:article_detail' activity.article.pk %}"
+                            class="activity-thumbnail"
+                        >
+                            <img
+                                src="{{ activity.article.thumbnail.url }}"
+                                alt="{{ activity.article.title }}"
+                            >
+                        </a>
+                    {% endif %}
 
-                <!-- BARIS 5: WAKTU -->
-                <div class="activity-time">
-                    {{ activity.created_at|timesince }} yang lalu
                 </div>
-
-            </div>
-
-            <!-- THUMBNAIL -->
-            {% if activity.article and activity.article.thumbnail %}
-                <a
-                    href="{% url 'articles:article_detail' activity.article.pk %}"
-                    class="activity-thumbnail"
-                >
-                    <img
-                        src="{{ activity.article.thumbnail.url }}"
-                        alt="{{ activity.article.title }}"
-                    >
-                </a>
-            {% endif %}
-
-        </div>
-
+                {% endwith %}
             {% empty %}
-
-                <div class="activity-empty">
-                    Belum ada aktivitas.
-                </div>
-
+                <p>Belum ada notifikasi.</p>
             {% endfor %}
 
             {% if total_activities > 2 %}
