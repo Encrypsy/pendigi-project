@@ -10,15 +10,24 @@ class CategoryForm(forms.ModelForm):
             'name': forms.TextInput(attrs={'placeholder': 'Nama kategori, misal: Hot News'})
         }
 
-
 class ArticleUploadForm(forms.ModelForm):
     class Meta:
         model = Articles
         fields = ['title', 'thumbnail', 'category', 'content']
         widgets = {
             'category': forms.RadioSelect(),
-            'content': forms.Textarea(attrs={'placeholder': 'Tulis isi artikel kamu di sini...'}),
+            'content': forms.Textarea(attrs={
+                'placeholder': 'Tulis isi artikel kamu di sini...'
+            }),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields['category'].queryset = Categories.objects.exclude(
+            name__in=['Fiksi', 'Non-Fiksi']
+        )
+
 
 class ArticleMetaForm(forms.ModelForm):
     class Meta:
