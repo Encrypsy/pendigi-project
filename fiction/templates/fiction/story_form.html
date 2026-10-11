@@ -1,12 +1,13 @@
-{% extends 'fiction/fiction_base.html' %}
+{% extends 'author_base.html' %}
 {% load static %}
 {% block title %}{% if is_edit %}Edit Cerita{% else %}Tulis Cerita Baru{% endif %}{% endblock %}
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/upload.css' %}">
-<link rel="stylesheet" href="{% static 'css/story-form.css' %}">
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'css/upload.css' %}">
+    <link rel="stylesheet" href="{% static 'css/story-form.css' %}">
 {% endblock %}
 
-{% block fiction_content %}
+{% block author_content %}
 <div class="page-header">
     <h1>{% if is_edit %}Edit Cerita{% else %}Tambahkan Informasi Cerita{% endif %}</h1>
     <p>{% if is_edit %}Mengedit cerita akan mengembalikan status ke menunggu approval{% else %}Isi detail dasar cerita

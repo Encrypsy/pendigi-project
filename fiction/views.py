@@ -48,7 +48,13 @@ def create_story(request):
     else:
         form = StoryForm()
 
-    return render(request, 'fiction/story_form.html', {'form': form, 'is_edit': False})
+    return render(request, 'fiction/story_form.html', {
+        'form': form,
+        'is_edit': False,
+        'active_menu': 'create_content',
+        'active_create_type': 'fiction',
+        'breadcrumb': 'Buat Konten / Fiksi',
+    })
 
 
 @login_required
@@ -67,7 +73,14 @@ def edit_story(request, pk):
     else:
         form = StoryForm(instance=story)
 
-    return render(request, 'fiction/story_form.html', {'form': form, 'is_edit': True, 'story': story})
+    return render(request, 'fiction/story_form.html', {
+        'form': form,
+        'is_edit': True,
+        'story': story,
+        'active_menu': 'create_content',
+        'active_create_type': 'fiction',
+        'breadcrumb': 'Buat Konten / Fiksi',
+    })
 
 @login_required
 @require_POST
