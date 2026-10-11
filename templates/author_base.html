@@ -96,17 +96,56 @@
 
             </div>
 
-
             <!-- BUAT KONTEN -->
+            <div class="author-nav-dropdown
+                {% if active_menu == 'create_content' %}is-open{% endif %}">
 
-            <a
-                href="#"
-                class="author-nav-link"
-            >
-                <span class="author-nav-icon">＋</span>
-                <span>Buat Konten</span>
-            </a>
+                <button
+                    type="button"
+                    class="author-nav-link author-nav-dropdown-toggle
+                    {% if active_menu == 'create_content' %}is-active{% endif %}"
+                    aria-expanded="{% if active_menu == 'create_content' %}true{% else %}false{% endif %}"
+                >
+                    <span class="author-nav-icon">＋</span>
 
+                    <span class="author-nav-link-text">
+                        Buat Konten
+                    </span>
+
+                    <span class="author-nav-caret">▾</span>
+                </button>
+
+                <div class="author-nav-submenu">
+
+                    <!-- ARTIKEL -->
+                    <a
+                        href="{% url 'articles:upload_article' %}"
+                        class="{% if active_create_type == 'article' %}is-active{% endif %}"
+                    >
+                        Artikel
+                    </a>
+
+                    <!-- FIKSI -->
+                    <a
+                        href="{% url 'fiction:create_story' %}"
+                        class="{% if active_create_type == 'fiction' %}is-active{% endif %}"
+                    >
+                        Fiksi
+                    </a>
+
+                    <!-- ESAI & OPINI -->
+                    <a
+                        href="#"
+                        class="is-coming-soon"
+                        aria-disabled="true"
+                        title="Fitur ini belum tersedia"
+                    >
+                        Esai &amp; Opini
+                        <span class="coming-soon-label">Segera</span>
+                    </a>
+
+                </div>
+            </div>
 
             <!-- KOMENTAR -->
 

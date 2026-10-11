@@ -1996,3 +1996,57 @@
 .notification-row.notification-rejected .activity-time {
     margin-top: 8px;
 }
+
+
+/* =========================
+   BUAT KONTEN DROPDOWN
+========================= */
+
+.author-nav-dropdown-toggle {
+    font-family: inherit;
+}
+
+.author-nav-dropdown-toggle .author-nav-link-text {
+    flex: 1;
+}
+
+.author-nav-dropdown-toggle.is-active {
+    background: #f0e7db;
+    color: var(--brown);
+    font-weight: 600;
+}
+
+.author-nav-dropdown.is-open .author-nav-caret {
+    transform: rotate(180deg);
+}
+
+.author-nav-submenu a.is-active {
+    background: #f0e7db;
+    color: var(--brown);
+    font-weight: 600;
+}
+
+/* Coming Soon */
+
+.author-nav-submenu a.is-coming-soon {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    color: #a49b91;
+    cursor: not-allowed;
+}
+
+.author-nav-submenu a.is-coming-soon:hover {
+    background: transparent;
+    color: #a49b91;
+}
+
+.coming-soon-label {
+    flex-shrink: 0;
+    font-size: 0.65rem;
+    padding: 3px 6px;
+    border-radius: 5px;
+    background: #f5f0e8;
+    color: #8a7765;
+}
