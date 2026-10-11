@@ -335,7 +335,7 @@ def story_list(request):
 
     return render(
         request,
-        # 'fiction/story_list.html'
+        'fiction/story_list.html',
         {
             'stories': stories,
             'banners': banners,
