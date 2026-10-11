@@ -1,0 +1,122 @@
+{% extends 'author_base.html' %}
+
+{% block title %}Notifikasi{% endblock %}
+
+{% block author_content %}
+<div class="author-notifications-page">
+
+    <div class="notifications-header">
+        <div>
+            <h1>Notifikasi</h1>
+            <p>Semua aktivitas yang berkaitan dengan kontenmu.</p>
+        </div>
+
+        <a href="{% url 'author_dashboard' %}">
+            Kembali ke Dashboard
+        </a>
+    </div>
+
+    <div class="author-card notifications-card">
+
+        {% for activity in page_obj %}
+        <div class="notification-row">
+
+            <div class="activity-avatar">
+                {% if activity.actor and activity.actor.profile_picture %}
+                    <img
+                        src="{{ activity.actor.profile_picture.url }}"
+                        alt="{{ activity.actor.username }}"
+                    >
+                {% else %}
+                    <div class="activity-avatar-placeholder">
+                        {% if activity.actor %}
+                            {{ activity.actor.username|first|upper }}
+                        {% else %}
+                            A
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="notification-content">
+
+                <div class="activity-username">
+                    {% if activity.actor %}
+                        {{ activity.actor.username }}
+                    {% else %}
+                        Admin
+                    {% endif %}
+                </div>
+
+                <div class="activity-action">
+                    {{ activity.get_action_type_display }}
+                </div>
+
+                {% if activity.message %}
+                    <p class="activity-message">
+                        {{ activity.message }}
+                    </p>
+                {% endif %}
+
+                {% if activity.article %}
+                    <a
+                        href="{% url 'articles:article_detail' activity.article.pk %}"
+                        class="activity-title"
+                    >
+                        {{ activity.article.title }}
+                    </a>
+                {% endif %}
+
+                <div class="activity-time">
+                    {{ activity.created_at|timesince }} yang lalu
+                </div>
+
+            </div>
+
+            {% if activity.article and activity.article.thumbnail %}
+                <a
+                    href="{% url 'articles:article_detail' activity.article.pk %}"
+                    class="activity-thumbnail"
+                >
+                    <img
+                        src="{{ activity.article.thumbnail.url }}"
+                        alt="{{ activity.article.title }}"
+                    >
+                </a>
+            {% endif %}
+
+        </div>
+
+        {% empty %}
+            <div class="notifications-empty">
+                <h3>Belum ada notifikasi</h3>
+                <p>Notifikasi aktivitasmu akan muncul di sini.</p>
+            </div>
+        {% endfor %}
+
+        {% if page_obj.paginator.num_pages > 1 %}
+        <nav class="notifications-pagination">
+
+            {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}">
+                    Sebelumnya
+                </a>
+            {% endif %}
+
+            <span>
+                Halaman {{ page_obj.number }}
+                dari {{ page_obj.paginator.num_pages }}
+            </span>
+
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}">
+                    Selanjutnya
+                </a>
+            {% endif %}
+
+        </nav>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}

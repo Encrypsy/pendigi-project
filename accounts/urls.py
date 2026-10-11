@@ -1,6 +1,6 @@
 from django.urls import path
 from django.contrib.auth.views import LogoutView
-from .views import CustomLoginView, author_pending_content, author_rejected_content, register_view, apply_contributor, profile_view, dashboard_view, admin_pending_contributors, admin_approve_contributor, admin_reject_contributor, toggle_follow, author_dashboard, author_my_content
+from .views import CustomLoginView, author_notifications, author_pending_content, author_rejected_content, register_view, apply_contributor, profile_view, dashboard_view, admin_pending_contributors, admin_approve_contributor, admin_reject_contributor, toggle_follow, author_dashboard, author_my_content
 
 urlpatterns = [
     path('login/', CustomLoginView.as_view(), name='login'),
@@ -17,4 +17,5 @@ urlpatterns = [
     path('dashboard/penulis/konten/',author_my_content, name='author_my_content'),
     path('dashboard/penulis/pending/', author_pending_content, name='author_pending_content'),
     path('dashboard/penulis/ditolak/', author_rejected_content, name='author_rejected_content'),
+    path('dashboard/penulis/notifikasi/', author_notifications, name='author_notifications'),
 ]

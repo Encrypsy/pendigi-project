@@ -182,6 +182,14 @@ Dashboard Penulis
 
             {% endfor %}
 
+            {% if total_activities > 2 %}
+                <div class="activity-see-all">
+                    <a href="{% url 'author_notifications' %}">
+                        Lihat selengkapnya
+                    </a>
+                </div>
+            {% endif %}
+
 </div>
         </div>
 

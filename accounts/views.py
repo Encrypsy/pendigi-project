@@ -347,8 +347,8 @@ def author_dashboard(request):
     ]
     
     # ==========================================
-# NOTIFIKASI AKTIVITAS
-# ==========================================
+    # NOTIFIKASI AKTIVITAS
+    # ==========================================
 
     activities = (
         Activity.objects
@@ -359,9 +359,12 @@ def author_dashboard(request):
             'chapter',
             'chapter__story',
         )
-        .order_by('-created_at')[:10]
+        .order_by('-created_at')[:2]
     )
 
+    total_activities = Activity.objects.filter(
+        recipient=request.user
+    ).count()
 
     # ==========================================
     # RENDER
@@ -401,6 +404,7 @@ def author_dashboard(request):
         'performance_filter': performance_filter,
         'popular_contents': popular_contents,
         'activities': activities,
+        'total_activities': total_activities,
     }
 )
 
@@ -715,3 +719,33 @@ def author_rejected_content(request):
         'breadcrumb': 'Konten Ditolak',
         'active_menu': 'rejected',
     })
+    
+@login_required
+def author_notifications(request):
+    if request.user.status_kontributor != StatusKontributor.APPROVED:
+        return redirect('articles:article_list')
+
+    activities = (
+        Activity.objects
+        .filter(recipient=request.user)
+        .select_related(
+            'actor',
+            'article',
+            'chapter',
+            'chapter__story',
+        )
+        .order_by('-created_at')
+    )
+
+    paginator = Paginator(activities, 10)
+    page_obj = paginator.get_page(request.GET.get('page'))
+
+    return render(
+        request,
+        'accounts/author_notifications.html',
+        {
+            'page_obj': page_obj,
+            'breadcrumb': 'Notifikasi',
+            'active_menu': 'notifications',
+        },
+    )
