@@ -11,7 +11,7 @@ from django.http import JsonResponse
 from accounts.decorators import admin_required
 from django.views.decorators.http import require_POST
 from django.utils import timezone
-from django.db.models import F
+from django.db.models import F, Count, Q
 from django.http import JsonResponse
 
 def tag_suggestions(request):
@@ -147,12 +147,26 @@ def delete_chapter(request, story_id, chapter_id):
 
 @admin_required
 def admin_pending_stories(request):
-    stories = Stories.objects.filter(status=StatusStory.PENDING).select_related('author')
+    stories = (
+        Stories.objects
+        .filter(chapters__status=StatusChapter.PENDING)
+        .select_related('author')
+        .annotate(
+            total_pending_chapters=Count(
+                'chapters',
+                filter=Q(chapters__status=StatusChapter.PENDING),
+                distinct=True,
+            )
+        )
+        .distinct()
+        .order_by('-created_at')
+    )
+
     return render(request, 'fiction/admin_pending.html', {
-    'stories': stories,
-    'breadcrumb': 'Fiksi Pending',
-    'active_menu': 'approval',
-})
+        'stories': stories,
+        'breadcrumb': 'Fiksi Pending',
+        'active_menu': 'approval',
+    })
 
 
 @admin_required
