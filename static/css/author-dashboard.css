@@ -1968,3 +1968,31 @@
         font-size: 21px;
     }
 }
+
+/* Seimbangkan padding notifikasi admin */
+.notification-row.notification-approved,
+.notification-row.notification-rejected {
+    padding: 14px 18px;
+    align-items: center;
+}
+
+.notification-row.notification-approved .notification-content,
+.notification-row.notification-rejected .notification-content {
+    margin: 0;
+}
+
+.notification-row.notification-approved .activity-action,
+.notification-row.notification-rejected .activity-action {
+    margin: 2px 0 0;
+}
+
+.notification-row.notification-approved .activity-message,
+.notification-row.notification-rejected .activity-message {
+    margin: 8px 0;
+    line-height: 1.5;
+}
+
+.notification-row.notification-approved .activity-time,
+.notification-row.notification-rejected .activity-time {
+    margin-top: 8px;
+}
