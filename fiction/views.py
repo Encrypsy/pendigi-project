@@ -92,7 +92,10 @@ def my_stories(request):
 @login_required
 def chapter_list(request, story_id):
     story = get_object_or_404(Stories, pk=story_id, author=request.user)
-    chapters = story.chapters.all()
+    chapters = Chapters.objects.filter(
+        story=story,
+        status=StatusChapter.APPROVED
+    ).order_by('chapter_number')
     return render(request, 'fiction/chapter_list.html', {'story': story, 'chapters': chapters})
 
 
@@ -348,7 +351,9 @@ def story_detail(request, pk):
     Stories.objects.filter(pk=pk).update(views_count=F('views_count') + 1)
     story.refresh_from_db(fields=['views_count'])
 
-    chapters = story.chapters.all()
+    chapters = story.chapters.filter(
+        status=StatusChapter.APPROVED
+    ).order_by('chapter_number')
     similar_stories = story.get_similar_stories()
 
     is_favorited = False
@@ -362,42 +367,89 @@ def story_detail(request, pk):
         'similar_stories': similar_stories,
     })
 
-
 def read_chapter(request, pk, chapter_number):
-    story = get_object_or_404(Stories, pk=pk, status=StatusStory.APPROVED)
-    chapter = get_object_or_404(Chapters, story=story, chapter_number=chapter_number)
-    
-    if request.user.is_authenticated:
-        ReadingProgress.objects.update_or_create(
-        user=request.user,
-        story=story,
-        defaults={
-            'last_chapter_number': chapter_number
-        }
+    story = get_object_or_404(
+        Stories,
+        pk=pk,
+        status=StatusStory.APPROVED,
     )
 
-    Chapters.objects.filter(pk=chapter.pk).update(views_count=F('views_count') + 1)
+    chapter = get_object_or_404(
+        Chapters,
+        story=story,
+        chapter_number=chapter_number,
+        status=StatusChapter.APPROVED,
+    )
+
+    if request.user.is_authenticated:
+        ReadingProgress.objects.update_or_create(
+            user=request.user,
+            story=story,
+            defaults={
+                'last_chapter_number': chapter_number,
+            },
+        )
+
+    Chapters.objects.filter(pk=chapter.pk).update(
+        views_count=F('views_count') + 1
+    )
     chapter.refresh_from_db(fields=['views_count'])
 
-    all_chapters = story.chapters.all()
-    prev_chapter = story.chapters.filter(chapter_number__lt=chapter_number).order_by('-chapter_number').first()
-    next_chapter = story.chapters.filter(chapter_number__gt=chapter_number).order_by('chapter_number').first()
+    # Hanya bab yang sudah disetujui yang masuk navigasi publik.
+    all_chapters = story.chapters.filter(
+        status=StatusChapter.APPROVED
+    ).order_by('chapter_number')
+
+    prev_chapter = all_chapters.filter(
+        chapter_number__lt=chapter_number
+    ).order_by('-chapter_number').first()
+
+    next_chapter = all_chapters.filter(
+        chapter_number__gt=chapter_number
+    ).order_by('chapter_number').first()
 
     from interactions.views import _attach_comment_meta
 
-    comments_qs = chapter.comments.filter(status=StatusComment.APPROVED, parent__isnull=True).select_related('user').order_by('-created_at')
-    post_url = reverse('fiction:submit_chapter_comment', kwargs={'pk': pk, 'chapter_number': chapter_number})
+    comments_qs = (
+        chapter.comments
+        .filter(
+            status=StatusComment.APPROVED,
+            parent__isnull=True,
+        )
+        .select_related('user')
+        .order_by('-created_at')
+    )
+
+    post_url = reverse(
+        'fiction:submit_chapter_comment',
+        kwargs={
+            'pk': pk,
+            'chapter_number': chapter_number,
+        },
+    )
+
     comments = _attach_comment_meta(
-        comments_qs, request,
-        'fiction:toggle_chapter_comment_like', 'fiction:toggle_chapter_comment_like',
-        url_kwargs={}, post_url=post_url
+        comments_qs,
+        request,
+        'fiction:toggle_chapter_comment_like',
+        'fiction:toggle_chapter_comment_like',
+        url_kwargs={},
+        post_url=post_url,
     )
 
     is_favorited = False
     is_following_author = False
+
     if request.user.is_authenticated:
-        is_favorited = FavoriteStories.objects.filter(user=request.user, story=story).exists()
-        is_following_author = Follow.objects.filter(follower=request.user, following=story.author).exists()
+        is_favorited = FavoriteStories.objects.filter(
+            user=request.user,
+            story=story,
+        ).exists()
+
+        is_following_author = Follow.objects.filter(
+            follower=request.user,
+            following=story.author,
+        ).exists()
 
     return render(request, 'fiction/read_chapter.html', {
         'story': story,
@@ -408,10 +460,18 @@ def read_chapter(request, pk, chapter_number):
         'is_favorited': is_favorited,
         'is_following_author': is_following_author,
         'comments': comments,
-        'total_count': chapter.comments.filter(status=StatusComment.APPROVED).count(),
+        'total_count': chapter.comments.filter(
+            status=StatusComment.APPROVED
+        ).count(),
         'current_sort': 'recent',
         'post_url': post_url,
-        'refresh_url': reverse('fiction:chapter_comments_partial', kwargs={'pk': pk, 'chapter_number': chapter_number}),
+        'refresh_url': reverse(
+            'fiction:chapter_comments_partial',
+            kwargs={
+                'pk': pk,
+                'chapter_number': chapter_number,
+            },
+        ),
     })
 
 @login_required
