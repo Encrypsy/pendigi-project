@@ -1890,3 +1890,81 @@
         align-items: flex-start;
     }
 }
+
+/* Dasar notifikasi */
+.notification-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 18px;
+    border: 1px solid var(--divider);
+    border-radius: 12px;
+    margin-bottom: 12px;
+    transition: background-color 0.2s ease;
+}
+
+/* Ikon status */
+.notification-icon {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-size: 24px;
+    font-weight: 700;
+}
+
+/* Approval: hijau lembut */
+.notification-approved {
+    background: rgba(34, 197, 94, 0.08);
+    border-color: rgba(34, 197, 94, 0.20);
+}
+
+.notification-approved .notification-icon {
+    color: #15803d;
+    background: rgba(34, 197, 94, 0.14);
+}
+
+/* Rejection: merah lembut */
+.notification-rejected {
+    background: rgba(239, 68, 68, 0.07);
+    border-color: rgba(239, 68, 68, 0.18);
+}
+
+.notification-rejected .notification-icon {
+    color: #b91c1c;
+    background: rgba(239, 68, 68, 0.12);
+}
+
+/* Isi notifikasi */
+.notification-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.notification-content .activity-message {
+    margin: 6px 0;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+}
+
+.notification-content .activity-time {
+    margin-top: 8px;
+    font-size: 0.8rem;
+    color: var(--text-muted, #999);
+}
+
+@media (max-width: 600px) {
+    .notification-row {
+        padding: 14px;
+        gap: 10px;
+    }
+
+    .notification-icon {
+        width: 34px;
+        height: 34px;
+        font-size: 21px;
+    }
+}

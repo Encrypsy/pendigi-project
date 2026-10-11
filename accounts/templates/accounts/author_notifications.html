@@ -19,32 +19,35 @@
     <div class="author-card notifications-card">
 
         {% for activity in page_obj %}
-        <div class="notification-row">
+        {% with action=activity.action_type %}
+        <div class="notification-row
+            {% if action == 'approved' %}
+                notification-approved
+            {% elif action == 'rejected' %}
+                notification-rejected
+            {% endif %}">
 
-            <div class="activity-avatar">
-                {% if activity.actor and activity.actor.profile_picture %}
-                    <img
-                        src="{{ activity.actor.profile_picture.url }}"
-                        alt="{{ activity.actor.username }}"
-                    >
+            <!-- IKON NOTIFIKASI -->
+            <div class="notification-icon">
+                {% if action == 'approved' %}
+                    <span aria-label="Disetujui">✓</span>
+                {% elif action == 'rejected' %}
+                    <span aria-label="Ditolak">!</span>
                 {% else %}
-                    <div class="activity-avatar-placeholder">
-                        {% if activity.actor %}
-                            {{ activity.actor.username|first|upper }}
-                        {% else %}
-                            A
-                        {% endif %}
-                    </div>
+                    <span aria-hidden="true">●</span>
                 {% endif %}
             </div>
 
+            <!-- ISI NOTIFIKASI -->
             <div class="notification-content">
 
                 <div class="activity-username">
-                    {% if activity.actor %}
+                    {% if action == 'approved' or action == 'rejected' %}
+                        Admin
+                    {% elif activity.actor %}
                         {{ activity.actor.username }}
                     {% else %}
-                        Admin
+                        Sistem
                     {% endif %}
                 </div>
 
@@ -86,6 +89,7 @@
             {% endif %}
 
         </div>
+        {% endwith %}
 
         {% empty %}
             <div class="notifications-empty">
