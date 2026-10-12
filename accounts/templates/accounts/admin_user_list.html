@@ -1,0 +1,208 @@
+```django
+{% extends 'admin_base.html' %}
+{% load static %}
+
+{% block title %}Kelola User{% endblock %}
+
+{% block extra_css %}
+    {{ block.super }}
+    <style>
+        .user-management { max-width: 1200px; margin: auto; }
+        .user-management-header { margin-bottom: 24px; }
+        .user-management-header h1 { margin: 0 0 8px; }
+        .user-management-header p { color: #888; margin: 0; }
+
+        .user-summary {
+            padding: 20px;
+            margin-bottom: 22px;
+            border: 1px solid #e6d8c8;
+            border-radius: 14px;
+            background: white;
+        }
+
+        .user-summary span { color: #777; font-size: 13px; }
+        .user-summary strong { display: block; font-size: 28px; color: #70472f; }
+
+        .user-filter {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .user-filter input, .user-filter select {
+            min-width: 150px;
+            padding: 11px 12px;
+            border: 1px solid #e2d5c7;
+            border-radius: 8px;
+            background: white;
+        }
+
+        .user-filter input { flex: 1; }
+
+        .user-filter button {
+            padding: 11px 18px;
+            border: 0;
+            border-radius: 8px;
+            background: #70472f;
+            color: white;
+            cursor: pointer;
+        }
+
+        .user-table-wrap {
+            overflow-x: auto;
+            border: 1px solid #e6d8c8;
+            border-radius: 12px;
+            background: white;
+        }
+
+        .user-table { width: 100%; border-collapse: collapse; }
+        .user-table th, .user-table td {
+            padding: 15px;
+            border-bottom: 1px solid #eee5dc;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        .user-table th {
+            background: #faf6f0;
+            color: #70472f;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+
+        .user-identity { display: flex; align-items: center; gap: 10px; }
+        .user-avatar {
+            width: 38px; height: 38px; border-radius: 50%;
+            object-fit: cover; flex-shrink: 0;
+        }
+
+        .user-avatar-fallback {
+            display: grid; place-items: center;
+            background: #efe3d5; color: #70472f; font-weight: 700;
+        }
+
+        .user-email { color: #888; font-size: 12px; margin-top: 4px; }
+
+        .user-badge {
+            display: inline-block; padding: 5px 9px;
+            border-radius: 20px; font-size: 12px;
+            background: #f0ece7; color: #66584b;
+        }
+
+        .user-badge.active { background: #dcfce7; color: #166534; }
+        .user-badge.inactive { background: #fee2e2; color: #991b1b; }
+
+        .user-detail-link { color: #70472f; font-weight: 700; text-decoration: none; }
+        .user-detail-link:hover { text-decoration: underline; }
+
+        .user-empty { padding: 30px; text-align: center; color: #888; }
+
+        @media (max-width: 600px) {
+            .user-filter { flex-direction: column; }
+            .user-filter input, .user-filter select { width: 100%; }
+        }
+    </style>
+{% endblock %}
+
+{% block admin_content %}
+<div class="user-management">
+    <header class="user-management-header">
+        <h1>Kelola User</h1>
+        <p>Kelola akun, periksa status, dan lihat informasi pengguna Pena Digital.</p>
+    </header>
+
+    <div class="user-summary">
+        <span>Total akun terdaftar</span>
+        <strong>{{ total_users }}</strong>
+    </div>
+
+    <form method="get" class="user-filter">
+        <input
+            type="search"
+            name="q"
+            value="{{ query }}"
+            placeholder="Cari username atau email..."
+        >
+
+        <select name="role">
+            <option value="">Semua peran</option>
+            <option value="pembaca" {% if selected_role == 'pembaca' %}selected{% endif %}>Pembaca</option>
+            <option value="kontributor" {% if selected_role == 'kontributor' %}selected{% endif %}>Kontributor disetujui</option>
+        </select>
+
+        <select name="status">
+            <option value="">Semua status akun</option>
+            <option value="aktif" {% if selected_status == 'aktif' %}selected{% endif %}>Aktif</option>
+            <option value="nonaktif" {% if selected_status == 'nonaktif' %}selected{% endif %}>Nonaktif</option>
+        </select>
+
+        <button type="submit">Terapkan</button>
+    </form>
+
+    <div class="user-table-wrap">
+        <table class="user-table">
+            <thead>
+                <tr>
+                    <th>Pengguna</th>
+                    <th>Bergabung</th>
+                    <th>Peran</th>
+                    <th>Status akun</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in users %}
+                <tr>
+                    <td>
+                        <div class="user-identity">
+                            {% if item.profile_picture %}
+                                <img src="{{ item.profile_picture.url }}" alt="" class="user-avatar">
+                            {% else %}
+                                <div class="user-avatar user-avatar-fallback">
+                                    {{ item.username|first|upper }}
+                                </div>
+                            {% endif %}
+
+                            <div>
+                                <strong>{{ item.username }}</strong>
+                                <div class="user-email">{{ item.email|default:"Email belum diisi" }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>{{ item.date_joined|date:"d M Y" }}</td>
+                    <td>
+                        {% if item.is_superuser %}
+                            Admin
+                        {% elif item.status_kontributor == 'approved' %}
+                            Kontributor
+                        {% else %}
+                            Pembaca
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if item.is_active %}
+                            <span class="user-badge active">Aktif</span>
+                        {% else %}
+                            <span class="user-badge inactive">Nonaktif</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'admin_user_detail' item.pk %}" class="user-detail-link">
+                            Detail →
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="user-empty">
+                        Tidak ada pengguna yang cocok dengan pencarianmu.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+```

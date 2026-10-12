@@ -21,6 +21,7 @@ from .models import Follow
 import json
 from django.db.models.functions import TruncDate
 from django.core.paginator import Paginator
+from django.contrib.auth.decorators import user_passes_test
 
 @login_required
 @require_POST
@@ -749,3 +750,52 @@ def author_notifications(request):
             'active_menu': 'notifications',
         },
     )
+    
+def admin_required(view_func):
+    return user_passes_test(
+        lambda user: user.is_authenticated and user.is_staff
+    )(view_func)
+
+
+@admin_required
+def admin_user_list(request):
+    users = Users.objects.all().order_by('-date_joined')
+
+    query = request.GET.get('q', '').strip()
+    role = request.GET.get('role', '').strip()
+    status = request.GET.get('status', '').strip()
+
+    if query:
+        users = users.filter(
+            Q(username__icontains=query) |
+            Q(email__icontains=query)
+        )
+
+    if role == 'kontributor':
+        users = users.filter(
+            status_kontributor=StatusKontributor.APPROVED
+        )
+    elif role == 'pembaca':
+        users = users.filter(role='pembaca')
+
+    if status == 'aktif':
+        users = users.filter(is_active=True)
+    elif status == 'nonaktif':
+        users = users.filter(is_active=False)
+
+    return render(request, 'accounts/admin_user_list.html', {
+        'users': users,
+        'query': query,
+        'selected_role': role,
+        'selected_status': status,
+        'total_users': Users.objects.count(),
+    })
+
+
+@admin_required
+def admin_user_detail(request, pk):
+    user_obj = get_object_or_404(Users, pk=pk)
+
+    return render(request, 'accounts/admin_user_detail.html', {
+        'user_obj': user_obj,
+    })

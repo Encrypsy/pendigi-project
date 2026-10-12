@@ -1,0 +1,97 @@
+```django
+{% extends 'admin_base.html' %}
+
+{% block title %}Detail Pengguna{% endblock %}
+
+{% block extra_css %}
+    {{ block.super }}
+    <style>
+        .user-detail-page { max-width: 850px; margin: auto; }
+        .user-detail-card {
+            padding: 24px; background: white;
+            border: 1px solid #e6d8c8; border-radius: 14px;
+        }
+        .user-detail-header {
+            display: flex; align-items: center; gap: 16px;
+            padding-bottom: 20px; border-bottom: 1px solid #eee5dc;
+        }
+        .user-detail-avatar {
+            width: 72px; height: 72px; border-radius: 50%; object-fit: cover;
+        }
+        .user-detail-fallback {
+            display: grid; place-items: center;
+            background: #efe3d5; color: #70472f; font-size: 25px; font-weight: 700;
+        }
+        .user-detail-header h1 { margin: 0 0 6px; overflow-wrap: anywhere; }
+        .user-detail-header p { margin: 0; color: #888; overflow-wrap: anywhere; }
+        .user-detail-fields {
+            display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 20px; padding: 22px 0;
+        }
+        .user-detail-fields span { display: block; margin-bottom: 6px; color: #888; font-size: 13px; }
+        .user-detail-fields strong { overflow-wrap: anywhere; }
+        .user-back-link { display: inline-block; margin-bottom: 18px; color: #70472f; }
+        @media (max-width: 560px) {
+            .user-detail-fields { grid-template-columns: 1fr; }
+        }
+    </style>
+{% endblock %}
+
+{% block admin_content %}
+<div class="user-detail-page">
+    <a href="{% url 'admin_user_list' %}" class="user-back-link">← Kembali ke Kelola User</a>
+
+    <div class="user-detail-card">
+        <header class="user-detail-header">
+            {% if user_obj.profile_picture %}
+                <img src="{{ user_obj.profile_picture.url }}" alt="" class="user-detail-avatar">
+            {% else %}
+                <div class="user-detail-avatar user-detail-fallback">
+                    {{ user_obj.username|first|upper }}
+                </div>
+            {% endif %}
+
+            <div>
+                <h1>{{ user_obj.username }}</h1>
+                <p>{{ user_obj.email|default:"Email belum diisi" }}</p>
+            </div>
+        </header>
+
+        <div class="user-detail-fields">
+            <div>
+                <span>Nama lengkap</span>
+                <strong>{{ user_obj.get_full_name|default:"Belum diisi" }}</strong>
+            </div>
+            <div>
+                <span>Tanggal bergabung</span>
+                <strong>{{ user_obj.date_joined|date:"d F Y" }}</strong>
+            </div>
+            <div>
+                <span>Status akun</span>
+                <strong>{% if user_obj.is_active %}Aktif{% else %}Nonaktif{% endif %}</strong>
+            </div>
+            <div>
+                <span>Peran</span>
+                <strong>
+                    {% if user_obj.is_superuser %}
+                        Admin
+                    {% elif user_obj.status_kontributor == 'approved' %}
+                        Kontributor
+                    {% else %}
+                        Pembaca
+                    {% endif %}
+                </strong>
+            </div>
+            <div>
+                <span>Status kontributor</span>
+                <strong>{{ user_obj.get_status_kontributor_display|default:"Belum mengajukan" }}</strong>
+            </div>
+            <div>
+                <span>Staff</span>
+                <strong>{% if user_obj.is_staff %}Ya{% else %}Tidak{% endif %}</strong>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+```
