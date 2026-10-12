@@ -1,5 +1,3 @@
-from .models import Activity
-
 
 def navbar_notifications(request):
     if not request.user.is_authenticated:
@@ -8,14 +6,20 @@ def navbar_notifications(request):
             'navbar_unread_count': 0,
         }
 
-    activities = Activity.objects.filter(
-        recipient=request.user
-    ).select_related(
-        'actor',
-        'article',
-        'chapter',
-        'chapter__story',
-    ).order_by('-created_at')
+    # Import model setelah Django siap memproses request
+    from .models import Activity
+
+    activities = (
+        Activity.objects
+        .filter(recipient=request.user)
+        .select_related(
+            'actor',
+            'article',
+            'chapter',
+            'chapter__story',
+        )
+        .order_by('-created_at')
+    )
 
     return {
         'navbar_notifications': activities[:2],

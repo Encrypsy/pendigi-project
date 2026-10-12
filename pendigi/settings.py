@@ -50,8 +50,7 @@ INSTALLED_APPS = [
 
     'cloudinary',
     'cloudinary_storage',
-    
-    'interactions.context_processors.navbar_notifications',
+
 ]
 
 MIDDLEWARE = [
@@ -79,6 +78,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'articles.context_processor.navbar_categories',
+                'interactions.context_processors.navbar_notifications',
                 
                 'fiction.context_processors.fiction_navigation',
             ],
