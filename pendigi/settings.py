@@ -50,6 +50,8 @@ INSTALLED_APPS = [
 
     'cloudinary',
     'cloudinary_storage',
+    
+    'interactions.context_processors.navbar_notifications',
 ]
 
 MIDDLEWARE = [

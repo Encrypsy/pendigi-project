@@ -429,3 +429,13 @@ def _sort_comments(queryset, sort):
 
 def _is_ajax(request):
     return request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+
+@login_required
+@require_POST
+def mark_notifications_read(request):
+    Activity.objects.filter(
+        recipient=request.user,
+        is_read=False,
+    ).update(is_read=True)
+
+    return JsonResponse({'success': True})

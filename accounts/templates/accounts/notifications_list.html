@@ -1,0 +1,48 @@
+
+{% extends 'base.html' %}
+
+{% block body %}
+<main class="content">
+    <h1>Notifikasi</h1>
+
+    {% for activity in page_obj %}
+        <article class="notification-item">
+            <div class="notification-content">
+                <p>
+                    {% if activity.actor %}
+                        <strong>{{ activity.actor.username }}</strong>
+                    {% else %}
+                        <strong>Sistem</strong>
+                    {% endif %}
+
+                    {{ activity.message|default:activity.get_action_type_display }}
+                </p>
+
+                <small>{{ activity.created_at|timesince }} lalu</small>
+            </div>
+        </article>
+    {% empty %}
+        <p>Belum ada notifikasi.</p>
+    {% endfor %}
+
+    {% if page_obj.has_other_pages %}
+        <nav aria-label="Navigasi halaman notifikasi">
+            {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}">
+                    Sebelumnya
+                </a>
+            {% endif %}
+
+            <span>
+                Halaman {{ page_obj.number }} dari {{ page_obj.paginator.num_pages }}
+            </span>
+
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}">
+                    Berikutnya
+                </a>
+            {% endif %}
+        </nav>
+    {% endif %}
+</main>
+{% endblock %}

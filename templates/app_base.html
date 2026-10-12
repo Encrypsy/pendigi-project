@@ -73,6 +73,84 @@
 
             {% if user.is_authenticated %}
 
+            <!-- ================= NOTIFICATION DROPDOWN ================= -->
+            <div class="navbar-dropdown notification-dropdown">
+                <button
+                    type="button"
+                    class="navbar-icon-button notification-button"
+                    aria-label="Notifikasi"
+                    aria-expanded="false"
+                    title="Notifikasi"
+                >
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="22"
+                        height="22"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                    >
+                        <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/>
+                        <path d="M10 21h4"/>
+                    </svg>
+
+                    {% if navbar_unread_count %}
+                        <span class="notification-dot"></span>
+                    {% endif %}
+                </button>
+
+                <div class="navbar-dropdown-menu notification-menu">
+                    <div class="navbar-dropdown-title">
+                        Notifikasi
+                    </div>
+
+                    {% for activity in navbar_notifications %}
+                        <div class="notification-item">
+                            <div class="notification-avatar">
+                                {% if activity.actor and activity.actor.role != 'admin' and not activity.actor.is_superuser and activity.actor.profile_picture %}
+                                    <img
+                                        src="{{ activity.actor.profile_picture.url }}"
+                                        alt="{{ activity.actor.username }}"
+                                    >
+                                {% elif activity.actor and activity.actor.role != 'admin' and not activity.actor.is_superuser %}
+                                    {{ activity.actor.username|first|upper }}
+                                {% else %}
+                                    <span class="notification-system-icon">●</span>
+                                {% endif %}
+                            </div>
+
+                            <div class="notification-content">
+                                <p>
+                                    {% if activity.actor %}
+                                        <strong>{{ activity.actor.username }}</strong>
+                                    {% else %}
+                                        <strong>Sistem</strong>
+                                    {% endif %}
+
+                                    {{ activity.message|default:activity.get_action_type_display }}
+                                </p>
+
+                                <small>{{ activity.created_at|timesince }} lalu</small>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <div class="notification-empty">
+                            Belum ada notifikasi.
+                        </div>
+                    {% endfor %}
+
+                    <a
+                        href="{% url 'notifications_list' %}"
+                        class="notification-see-all"
+                    >
+                        Lihat semua notifikasi
+                    </a>
+                </div>
+            </div>
+
                 <!-- ================= AUTHOR CREATE BUTTON ================= -->
 
                 {% if user.status_kontributor == 'approved' and user.role != 'admin' %}
@@ -278,7 +356,45 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const navbarCollapse =
         document.getElementById('navbarCollapse');
+   
+    const notificationDropdown = document.querySelector(
+        '.notification-dropdown'
+    );
 
+    if (notificationDropdown) {
+        const notificationButton = notificationDropdown.querySelector(
+            ':scope > button'
+        );
+
+        notificationButton.addEventListener('click', async function () {
+            const dot = notificationButton.querySelector('.notification-dot');
+
+            if (!dot) return;
+
+            try {
+                const response = await fetch(
+                    "{% url 'interactions:mark_notifications_read' %}",
+                    {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': '{{ csrf_token }}',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        credentials: 'same-origin'
+                    }
+                );
+
+                if (response.ok) {
+                    dot.remove();
+                }
+            } catch (error) {
+                console.error(
+                    'Gagal menandai notifikasi sebagai dibaca:',
+                    error
+                );
+            }
+        });
+    }
 
     /*
      * MOBILE MENU

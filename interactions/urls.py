@@ -73,4 +73,9 @@ urlpatterns = [
         views.toggle_comment_dislike,
         name='toggle_comment_dislike'
     ),
+    path(
+        'notifikasi/tandai-dibaca/',
+        views.mark_notifications_read,
+        name='mark_notifications_read',
+    ),
 ]

@@ -799,3 +799,30 @@ def admin_user_detail(request, pk):
     return render(request, 'accounts/admin_user_detail.html', {
         'user_obj': user_obj,
     })
+
+
+@login_required
+def notifications_list(request):
+    activities = (
+        Activity.objects
+        .filter(recipient=request.user)
+        .select_related(
+            'actor',
+            'article',
+            'chapter',
+            'chapter__story',
+        )
+        .order_by('-created_at')
+    )
+
+    paginator = Paginator(activities, 10)
+    page_obj = paginator.get_page(request.GET.get('page'))
+
+    return render(
+        request,
+        'accounts/notifications_list.html',
+        {
+            'page_obj': page_obj,
+            'breadcrumb': 'Notifikasi',
+        },
+    )
