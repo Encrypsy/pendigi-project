@@ -1,50 +1,316 @@
-{% extends 'app_base.html' %}
+```django
+{% extends 'author_base.html' %}
 {% load static %}
+
 {% block title %}Verifikasi Kontributor{% endblock %}
+
 {% block extra_css %}
+    {{ block.super }}
     <link rel="stylesheet" href="{% static 'css/table.css' %}">
     <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+    <style>
+        .contributor-review-page {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .contributor-review-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .contributor-review-header h1 {
+            margin: 0 0 8px;
+        }
+
+        .contributor-review-subtitle {
+            margin: 0;
+            color: var(--text-muted, #777);
+            line-height: 1.6;
+        }
+
+        .contributor-count {
+            flex-shrink: 0;
+            padding: 7px 12px;
+            border-radius: 999px;
+            background: #eef2ff;
+            color: #4338ca;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .contributor-applicant-list {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 20px;
+        }
+
+        .contributor-applicant-card {
+            min-width: 0;
+            padding: 22px;
+            border: 1px solid var(--border-color, #e5e7eb);
+            border-radius: 16px;
+            background: var(--card-bg, #fff);
+            box-shadow: 0 3px 12px rgb(0 0 0 / 4%);
+        }
+
+        .contributor-applicant-header {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            padding-bottom: 18px;
+            border-bottom: 1px solid var(--border-color, #e5e7eb);
+        }
+
+        .contributor-applicant-avatar {
+            width: 48px;
+            height: 48px;
+            flex: 0 0 48px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .contributor-applicant-avatar-fallback {
+            display: grid;
+            place-items: center;
+            background: #e8eaff;
+            color: #4f46e5;
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .contributor-applicant-identity {
+            min-width: 0;
+        }
+
+        .contributor-applicant-identity strong {
+            display: block;
+            overflow-wrap: anywhere;
+            font-size: 16px;
+        }
+
+        .contributor-applicant-date {
+            display: block;
+            margin-top: 5px;
+            color: var(--text-muted, #777);
+            font-size: 12px;
+        }
+
+        .contributor-applicant-body {
+            padding: 18px 0;
+        }
+
+        .contributor-field {
+            margin-bottom: 18px;
+        }
+
+        .contributor-field:last-child {
+            margin-bottom: 0;
+        }
+
+        .contributor-field-label {
+            margin: 0 0 7px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .05em;
+            color: var(--text-muted, #777);
+        }
+
+        .contributor-bio {
+            margin: 0;
+            line-height: 1.7;
+            overflow-wrap: anywhere;
+            white-space: pre-line;
+        }
+
+        .contributor-portfolio-link {
+            display: inline-block;
+            max-width: 100%;
+            overflow-wrap: anywhere;
+            color: var(--primary-color, #4f46e5);
+            text-decoration: none;
+        }
+
+        .contributor-portfolio-link:hover {
+            text-decoration: underline;
+        }
+
+        .contributor-applicant-actions {
+            display: flex;
+            gap: 10px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-color, #e5e7eb);
+        }
+
+        .contributor-applicant-actions form {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .contributor-applicant-actions button {
+            width: 100%;
+            min-height: 40px;
+            border: 0;
+            border-radius: 9px;
+            font: inherit;
+            font-weight: 700;
+            cursor: pointer;
+            transition: opacity .2s ease, transform .2s ease;
+        }
+
+        .contributor-applicant-actions button:hover {
+            opacity: .88;
+            transform: translateY(-1px);
+        }
+
+        .contributor-btn-approve {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .contributor-btn-reject {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .contributor-empty-state {
+            grid-column: 1 / -1;
+            padding: 42px 20px;
+            border: 1px dashed var(--border-color, #d1d5db);
+            border-radius: 16px;
+            text-align: center;
+        }
+
+        .contributor-empty-state h2 {
+            margin: 0 0 8px;
+            font-size: 18px;
+        }
+
+        .contributor-empty-state p {
+            margin: 0;
+            color: var(--text-muted, #777);
+            line-height: 1.6;
+        }
+
+        @media (max-width: 760px) {
+            .contributor-applicant-list {
+                grid-template-columns: minmax(0, 1fr);
+            }
+
+            .contributor-review-header {
+                flex-direction: column;
+            }
+
+            .contributor-applicant-card {
+                padding: 18px;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .contributor-applicant-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
 {% endblock %}
 
-{% block content %}
-<h1 class="section-title">Pengajuan Kontributor ({{ applications.count }})</h1>
+{% block author_content %}
+<div class="contributor-review-page">
+    <header class="contributor-review-header">
+        <div>
+            <h1 class="section-title">Pengajuan Kontributor</h1>
+            <p class="contributor-review-subtitle">
+                Periksa bio dan portofolio sebelum menyetujui pengajuan.
+            </p>
+        </div>
 
-<div class="applicant-list">
-    {% for application in applications %}
-    <div class="applicant-card">
-        <div class="applicant-header">
-            {% if application.user.profile_picture %}
-                <img src="{{ application.user.profile_picture.url }}" class="comment-avatar-img">
-            {% else %}
-                <div class="comment-avatar">{{ application.user.username|first|upper }}</div>
-            {% endif %}
-            <div>
-                <strong>{{ application.user.username }}</strong>
-                <span class="applicant-date">Mengajukan {{ application.submitted_at|timesince }} lalu</span>
+        <span class="contributor-count">
+            {{ applications.count }} menunggu
+        </span>
+    </header>
+
+    <div class="contributor-applicant-list">
+        {% for application in applications %}
+            <article class="contributor-applicant-card">
+                <header class="contributor-applicant-header">
+                    {% if application.user.profile_picture %}
+                        <img
+                            src="{{ application.user.profile_picture.url }}"
+                            alt="Foto profil {{ application.user.username }}"
+                            class="contributor-applicant-avatar"
+                        >
+                    {% else %}
+                        <div class="contributor-applicant-avatar contributor-applicant-avatar-fallback">
+                            {{ application.user.username|first|upper }}
+                        </div>
+                    {% endif %}
+
+                    <div class="contributor-applicant-identity">
+                        <strong>{{ application.user.username }}</strong>
+                        <span class="contributor-applicant-date">
+                            Mengajukan {{ application.submitted_at|timesince }} lalu
+                        </span>
+                    </div>
+                </header>
+
+                <div class="contributor-applicant-body">
+                    <section class="contributor-field">
+                        <h2 class="contributor-field-label">Bio</h2>
+                        <p class="contributor-bio">
+                            {{ application.bio|default:"Tidak diisi" }}
+                        </p>
+                    </section>
+
+                    <section class="contributor-field">
+                        <h2 class="contributor-field-label">Link Portofolio</h2>
+                        {% if application.portfolio_link %}
+                            <a
+                                href="{{ application.portfolio_link }}"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="contributor-portfolio-link"
+                            >
+                                {{ application.portfolio_link }}
+                            </a>
+                        {% else %}
+                            <p class="contributor-bio">Tidak disertakan</p>
+                        {% endif %}
+                    </section>
+                </div>
+
+                <div class="contributor-applicant-actions">
+                    <form
+                        action="{% url 'admin_approve_contributor' application.pk %}"
+                        method="post"
+                    >
+                        {% csrf_token %}
+                        <button type="submit" class="contributor-btn-approve">
+                            Approve
+                        </button>
+                    </form>
+
+                    <form
+                        action="{% url 'admin_reject_contributor' application.pk %}"
+                        method="post"
+                    >
+                        {% csrf_token %}
+                        <button type="submit" class="contributor-btn-reject">
+                            Reject
+                        </button>
+                    </form>
+                </div>
+            </article>
+        {% empty %}
+            <div class="contributor-empty-state">
+                <h2>Semua pengajuan sudah diperiksa 🎉</h2>
+                <p>Belum ada pengajuan kontributor yang menunggu verifikasi.</p>
             </div>
-        </div>
-
-        <div class="applicant-body">
-            <p class="applicant-label">Bio</p>
-            <p class="applicant-bio">{{ application.bio|default:"Tidak diisi" }}</p>
-
-            <p class="applicant-label">Link Portofolio</p>
-            <a href="{{ application.portfolio_link }}" target="_blank" class="applicant-link">{{ application.portfolio_link }}</a>
-        </div>
-
-        <div class="table-actions">
-            <form action="{% url 'admin_approve_contributor' application.pk %}" method="post">
-                {% csrf_token %}
-                <button type="submit" class="btn-approve">Approve</button>
-            </form>
-            <form action="{% url 'admin_reject_contributor' application.pk %}" method="post">
-                {% csrf_token %}
-                <button type="submit" class="btn-reject">Reject</button>
-            </form>
-        </div>
+        {% endfor %}
     </div>
-    {% empty %}
-        <p class="hint-text">Tidak ada pengajuan yang menunggu verifikasi.</p>
-    {% endfor %}
 </div>
 {% endblock %}
+```
