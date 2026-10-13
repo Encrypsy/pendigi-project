@@ -1,32 +1,62 @@
 
-{% extends 'base.html' %}
+{% extends 'app_base.html' %}
 
-{% block body %}
-<main class="content">
-    <h1>Notifikasi</h1>
+{% block content %}
+<section class="notifications-page">
+    <header class="notifications-page-header">
+        <div>
+            <h1>{{ breadcrumb }}</h1>
+            <p>Semua aktivitas dan pemberitahuan untukmu.</p>
+        </div>
+    </header>
 
-    {% for activity in page_obj %}
-        <article class="notification-item">
-            <div class="notification-content">
-                <p>
-                    {% if activity.actor %}
-                        <strong>{{ activity.actor.username }}</strong>
+    <div class="notifications-list">
+        {% for activity in page_obj %}
+            <article class="notification-card {% if not activity.is_read %}is-unread{% endif %}">
+                <div class="notification-card-avatar">
+                    {% if activity.actor.profile_picture %}
+                        <img
+                            src="{{ activity.actor.profile_picture.url }}"
+                            alt="{{ activity.actor.username }}"
+                        >
+                    {% elif activity.actor %}
+                        {{ activity.actor.username|first|upper }}
                     {% else %}
-                        <strong>Sistem</strong>
+                        ●
                     {% endif %}
+                </div>
 
-                    {{ activity.message|default:activity.get_action_type_display }}
-                </p>
+                <div class="notification-card-content">
+                    <p>
+                        {% if activity.actor %}
+                            <strong>{{ activity.actor.username }}</strong>
+                        {% else %}
+                            <strong>Sistem</strong>
+                        {% endif %}
 
-                <small>{{ activity.created_at|timesince }} lalu</small>
+                        {{ activity.message|default:activity.get_action_type_display }}
+                    </p>
+
+                    <time datetime="{{ activity.created_at|date:'c' }}">
+                        {{ activity.created_at|timesince }} lalu
+                    </time>
+                </div>
+
+                {% if not activity.is_read %}
+                    <span class="notification-unread-indicator"
+                          aria-label="Belum dibaca"></span>
+                {% endif %}
+            </article>
+        {% empty %}
+            <div class="notifications-empty">
+                <h2>Belum ada notifikasi</h2>
+                <p>Notifikasi baru akan muncul di sini.</p>
             </div>
-        </article>
-    {% empty %}
-        <p>Belum ada notifikasi.</p>
-    {% endfor %}
+        {% endfor %}
+    </div>
 
     {% if page_obj.has_other_pages %}
-        <nav aria-label="Navigasi halaman notifikasi">
+        <nav class="notifications-pagination" aria-label="Navigasi halaman">
             {% if page_obj.has_previous %}
                 <a href="?page={{ page_obj.previous_page_number }}">
                     Sebelumnya
@@ -44,5 +74,5 @@
             {% endif %}
         </nav>
     {% endif %}
-</main>
+</section>
 {% endblock %}

@@ -115,33 +115,52 @@
                     </div>
 
                     {% for activity in navbar_notifications %}
-                        <div class="notification-item">
-                            <div class="notification-avatar">
-                                {% if activity.actor and activity.actor.role != 'admin' and not activity.actor.is_superuser and activity.actor.profile_picture %}
-                                    <img
-                                        src="{{ activity.actor.profile_picture.url }}"
-                                        alt="{{ activity.actor.username }}"
-                                    >
-                                {% elif activity.actor and activity.actor.role != 'admin' and not activity.actor.is_superuser %}
-                                    {{ activity.actor.username|first|upper }}
+                        <div class="notification-item {% if not activity.is_read %}is-unread{% endif %}">                    
+                            <a
+                                href="{% if activity.article_id %}
+                                    {% url 'articles:article_detail' pk=activity.article_id %}
+                                {% elif activity.chapter_id %}
+                                    {% url 'fiction:read_chapter' pk=activity.chapter.story_id chapter_number=activity.chapter.chapter_number %}
                                 {% else %}
-                                    <span class="notification-system-icon">●</span>
-                                {% endif %}
-                            </div>
-
-                            <div class="notification-content">
-                                <p>
-                                    {% if activity.actor %}
-                                        <strong>{{ activity.actor.username }}</strong>
+                                    {% url 'notifications_list' %}
+                                {% endif %}"
+                                class="notification-item {% if not activity.is_read %}is-unread{% endif %}"
+                            >
+                                <div class="notification-avatar">
+                                    {% if activity.actor and activity.actor.role != 'admin' and not activity.actor.is_superuser and activity.actor.profile_picture %}
+                                        <img
+                                            src="{{ activity.actor.profile_picture.url }}"
+                                            alt="{{ activity.actor.username }}"
+                                        >
+                                    {% elif activity.actor and activity.actor.role != 'admin' and not activity.actor.is_superuser %}
+                                        {{ activity.actor.username|first|upper }}
                                     {% else %}
-                                        <strong>Sistem</strong>
+                                        <span class="notification-system-icon">●</span>
                                     {% endif %}
+                                </div>
 
-                                    {{ activity.message|default:activity.get_action_type_display }}
-                                </p>
+                                <div class="notification-content">
+                                    <p>
+                                        {% if activity.actor %}
+                                            <strong>{{ activity.actor.username }}</strong>
+                                        {% else %}
+                                            <strong>Sistem</strong>
+                                        {% endif %}
 
-                                <small>{{ activity.created_at|timesince }} lalu</small>
-                            </div>
+                                        {{ activity.message|default:activity.get_action_type_display }}
+                                    </p>
+
+                                    <small>{{ activity.created_at|timesince }} lalu</small>
+                                </div>
+
+                                {% if not activity.is_read %}
+                                    <span
+                                        class="notification-unread-indicator"
+                                        aria-label="Belum dibaca"
+                                    ></span>
+                                {% endif %}
+                            </a>
+
                         </div>
                     {% empty %}
                         <div class="notification-empty">

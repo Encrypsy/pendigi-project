@@ -862,3 +862,202 @@ span:nth-child(3) {
     white-space: nowrap;
 }
 
+
+/* =====================================================
+   NOTIFICATION DROPDOWN
+===================================================== */
+
+.notification-dropdown {
+    position: relative;
+}
+
+.notification-button {
+    position: relative;
+}
+
+/* Badge jumlah notifikasi belum dibaca */
+.notification-badge {
+    position: absolute;
+    top: -3px;
+    right: -3px;
+
+    min-width: 18px;
+    height: 18px;
+    padding: 0 4px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #b94040;
+    color: #fff;
+    border: 2px solid #fff;
+    border-radius: 999px;
+
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+/* Dropdown */
+.notification-menu {
+    width: 340px;
+    max-width: calc(100vw - 32px);
+    right: 0;
+    left: auto;
+}
+
+/* Header dropdown */
+.notification-menu .navbar-dropdown-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 14px 16px;
+
+    color: var(--brown);
+    background: #fff;
+    font-size: 0.8rem;
+}
+
+/* Item notifikasi */
+.notification-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+
+    padding: 14px 16px;
+
+    border-bottom: 1px solid var(--divider);
+    background: #fff;
+
+    transition: background 0.15s ease;
+}
+
+.notification-item:hover {
+    background: #faf7f0;
+}
+
+.notification-item.is-unread {
+    background: #f4f7f0;
+}
+
+.notification-item.is-unread:hover {
+    background: #edf2e7;
+}
+
+/* Avatar */
+.notification-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+
+    overflow: hidden;
+    border-radius: 50%;
+
+    background: #e5eadc;
+    color: var(--ink-dark);
+
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+.notification-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.notification-system-icon {
+    color: var(--brown);
+    font-size: 14px;
+}
+
+/* Isi notifikasi */
+.notification-content {
+    flex: 1;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.notification-content p {
+    margin: 0;
+    color: var(--text);
+    font-size: 0.82rem;
+    line-height: 1.55;
+}
+
+.notification-content p strong {
+    color: var(--ink-dark);
+}
+
+.notification-content small {
+    display: block;
+    margin-top: 6px;
+    color: #81796f;
+    font-size: 0.72rem;
+}
+
+/* Status belum dibaca */
+.notification-unread-indicator {
+    width: 8px;
+    height: 8px;
+    flex-shrink: 0;
+    margin-top: 6px;
+
+    border-radius: 50%;
+    background: var(--ink);
+}
+
+/* Kondisi kosong */
+.notification-empty {
+    padding: 24px 16px;
+    color: #81796f;
+    text-align: center;
+    font-size: 0.82rem;
+}
+
+/* Link semua notifikasi */
+.notification-see-all {
+    display: block;
+    padding: 13px 16px;
+
+    color: var(--ink-dark);
+    background: #faf8f4;
+
+    border-top: 1px solid var(--divider);
+
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-align: center;
+    text-decoration: none;
+
+    transition: background 0.15s ease;
+}
+
+.notification-see-all:hover {
+    color: var(--brown);
+    background: #f2eee7;
+}
+
+/* Halaman notifikasi di layar kecil */
+@media (max-width: 860px) {
+    .notification-menu {
+        width: 100%;
+        max-width: 100%;
+    }
+}
+
+.notification-item {
+    color: inherit;
+    text-decoration: none;
+}
+
+.notification-item.is-unread {
+    background: #f4f7f0;
+}
