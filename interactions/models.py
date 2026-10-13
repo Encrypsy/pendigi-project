@@ -102,12 +102,23 @@ class ArticleViewHistory(models.Model):
         return f"{self.article.title} - {self.viewed_at}"
     
 class Activity(models.Model):
-
+    
     class ActionType(models.TextChoices):
         COMMENT = "comment", "Memberikan komentar"
         RATING = "rating", "Memberikan rating"
         APPROVED = "approved", "Konten disetujui"
         REJECTED = "rejected", "Konten ditolak"
+
+        # Notifikasi admin
+        CONTRIBUTOR_APPLICATION = "contributor_app", "Pengajuan kontributor"
+        CONTENT_PENDING = "content_pending", "Konten menunggu moderasi"
+
+        # Notifikasi pembaca
+        FOLLOW = "follow", "Pengikut baru"
+        LIKE = "like", "Konten disukai"
+        COMMENT_REPLY = "comment_reply", "Balasan komentar"
+        NEW_CHAPTER = "new_chapter", "Bab baru"
+
 
     # User yang menerima notifikasi
     recipient = models.ForeignKey(

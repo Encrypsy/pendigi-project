@@ -96,10 +96,17 @@
                         <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/>
                         <path d="M10 21h4"/>
                     </svg>
+                    
+                {% if navbar_unread_count %}
+                    <span class="notification-badge">
+                        {% if navbar_unread_count > 99 %}
+                            99+
+                        {% else %}
+                            {{ navbar_unread_count }}
+                        {% endif %}
+                    </span>
+                {% endif %}
 
-                    {% if navbar_unread_count %}
-                        <span class="notification-dot"></span>
-                    {% endif %}
                 </button>
 
                 <div class="navbar-dropdown-menu notification-menu">
@@ -360,41 +367,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const notificationDropdown = document.querySelector(
         '.notification-dropdown'
     );
-
-    if (notificationDropdown) {
-        const notificationButton = notificationDropdown.querySelector(
-            ':scope > button'
-        );
-
-        notificationButton.addEventListener('click', async function () {
-            const dot = notificationButton.querySelector('.notification-dot');
-
-            if (!dot) return;
-
-            try {
-                const response = await fetch(
-                    "{% url 'interactions:mark_notifications_read' %}",
-                    {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRFToken': '{{ csrf_token }}',
-                            'X-Requested-With': 'XMLHttpRequest'
-                        },
-                        credentials: 'same-origin'
-                    }
-                );
-
-                if (response.ok) {
-                    dot.remove();
-                }
-            } catch (error) {
-                console.error(
-                    'Gagal menandai notifikasi sebagai dibaca:',
-                    error
-                );
-            }
-        });
-    }
 
     /*
      * MOBILE MENU

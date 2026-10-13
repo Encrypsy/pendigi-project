@@ -67,3 +67,26 @@ class Follow(models.Model):
 
     def __str__(self):
         return f'{self.follower.username} follows {self.following.username}'
+    
+
+class ActionType(models.TextChoices):
+    COMMENT = "comment", "Memberikan komentar"
+    RATING = "rating", "Memberikan rating"
+    APPROVED = "approved", "Konten disetujui"
+    REJECTED = "rejected", "Konten ditolak"
+
+    # Notifikasi untuk admin
+    CONTRIBUTOR_APPLICATION = (
+        "contributor_application",
+        "Pengajuan kontributor",
+    )
+    CONTENT_PENDING = (
+        "content_pending",
+        "Konten menunggu moderasi",
+    )
+
+    # Notifikasi untuk pembaca
+    FOLLOW = "follow", "Pengikut baru"
+    LIKE = "like", "Konten disukai"
+    COMMENT_REPLY = "comment_reply", "Balasan komentar"
+    NEW_CHAPTER = "new_chapter", "Bab baru"

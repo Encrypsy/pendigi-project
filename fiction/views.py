@@ -5,6 +5,7 @@ from django.urls import reverse
 from accounts.models import StatusKontributor, Follow
 from articles.models import Banner, BannerType
 from interactions.models import StatusComment, Activity
+from interactions.notifications import notify_admins
 from .models import StatusChapter, Stories, Chapters, StatusStory, FavoriteStories, ChapterComments, ChapterCommentLikes, ReadingProgress
 from .forms import StoryForm, ChapterForm, ChapterCommentForm
 from django.http import JsonResponse
@@ -43,6 +44,13 @@ def create_story(request):
             story = form.save(commit=False)
             story.author = request.user
             story.save()
+            
+            notify_admins(
+                actor=request.user,
+                message=f"Cerita '{story.title}' menunggu moderasi.",
+                action_type=Activity.ActionType.CONTENT_PENDING,
+            )
+            
             messages.success(request, 'Detail cerita tersimpan. Sekarang tambahkan bab pertamamu!')
             return redirect('fiction:chapter_list', story_id=story.pk)
     else:
@@ -68,6 +76,13 @@ def edit_story(request, pk):
             updated.status = StatusStory.PENDING
             updated.published_at = None
             updated.save()
+            
+            notify_admins(
+                actor=request.user,
+                message=f'Cerita "{updated.title}" menunggu moderasi ulang.',
+                action_type=Activity.ActionType.CONTENT_PENDING,
+            )
+            
             messages.success(request, 'Detail cerita diperbarui, menunggu approval ulang.')
             return redirect('fiction:my_stories')
     else:
@@ -124,6 +139,16 @@ def add_chapter(request, story_id):
             chapter.story = story
             chapter.chapter_number = next_number
             chapter.save()
+            
+            notify_admins(
+                actor=request.user,
+                message=(
+                    f"Bab '{chapter.title}' dari cerita "
+                    f"'{story.title}' menunggu moderasi."
+                ),
+                action_type=Activity.ActionType.CONTENT_PENDING,
+            )
+            
             messages.success(request, f'Bab {next_number} berhasil disimpan.')
             return redirect('fiction:chapter_list', story_id=story.pk)
     else:

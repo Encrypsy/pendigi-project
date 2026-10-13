@@ -22,6 +22,8 @@ import json
 from django.db.models.functions import TruncDate
 from django.core.paginator import Paginator
 from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth import get_user_model
+from interactions.notifications import notify_admins
 
 @login_required
 @require_POST
@@ -77,6 +79,27 @@ def apply_contributor(request):
             application.user = request.user
             application.status = StatusKontributor.PENDING
             application.save()
+            
+            notify_admins(
+                actor=request.user,
+                message=f"{request.user.username} mengajukan diri sebagai kontributor.",
+                action_type=Activity.ActionType.CONTRIBUTOR_APPLICATION,
+            )
+            
+            admin_users = get_user_model().objects.filter(
+                is_superuser=True
+            )
+
+            for admin in admin_users:
+                Activity.objects.create(
+                    recipient=admin,
+                    actor=request.user,
+                    action_type=Activity.ActionType.CONTRIBUTOR_APPLICATION,
+                    message=(
+                        f'{request.user.username} mengajukan diri '
+                        'sebagai kontributor.'
+                    ),
+                )
 
             request.user.status_kontributor = StatusKontributor.PENDING
             request.user.save()

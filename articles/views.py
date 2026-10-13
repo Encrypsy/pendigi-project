@@ -10,6 +10,7 @@ from django.utils import timezone
 from django.utils.dateparse import parse_date
 from django.core.paginator import Paginator
 
+from interactions.notifications import notify_admins
 from interactions.views import _attach_comment_meta, _sort_comments
 from .models import Articles, Banner, BannerType, Categories, StatusArticle
 from .forms import ArticleMetaForm, ArticleUploadForm, BannerForm
@@ -269,6 +270,12 @@ def upload_article(request):
             article = form.save(commit=False)
             article.contributor = request.user
             article.save()
+            
+            notify_admins(
+                actor=request.user,
+                message=f"Artikel '{article.title}' menunggu moderasi.",
+                action_type=Activity.ActionType.CONTENT_PENDING,
+            )
 
             messages.success(
                 request,
@@ -310,6 +317,13 @@ def edit_article(request, pk):
             updated_article.status = StatusArticle.PENDING
             updated_article.published_at = None
             updated_article.save()
+            
+            notify_admins(
+                actor=request.user,
+                message=f'Artikel "{updated_article.title}" menunggu moderasi ulang.',
+                action_type=Activity.ActionType.CONTENT_PENDING,
+            )
+            
             messages.success(request, 'Artikel diperbarui, menunggu approval ulang dari admin.')
             return redirect('articles:my_articles')
     else:
