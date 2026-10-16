@@ -1061,3 +1061,219 @@ span:nth-child(3) {
 .notification-item.is-unread {
     background: #f4f7f0;
 }
+
+/* ================================
+   HALAMAN NOTIFIKASI
+================================ */
+
+.notifications-page {
+    width: min(100% - 40px, 820px);
+    margin: 40px auto 64px;
+    color: var(--text, #2A2420);
+}
+
+.notifications-page-header {
+    margin-bottom: 28px;
+}
+
+.notifications-page-header h1 {
+    margin: 0 0 8px;
+    font-size: clamp(26px, 4vw, 34px);
+    font-weight: 700;
+    color: var(--ink, #2F5D50);
+}
+
+.notifications-page-header p {
+    margin: 0;
+    color: #77716A;
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+/* Daftar kartu */
+
+.notifications-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.notification-card {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 20px;
+    background: #FFFFFF;
+    border: 1px solid var(--divider, #DDD6C9);
+    border-radius: 14px;
+    box-shadow: 0 2px 8px rgba(47, 40, 32, 0.04);
+    transition:
+        background-color 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.notification-card:hover {
+    border-color: #B9C9BC;
+    transform: translateY(-1px);
+}
+
+/* Notifikasi yang belum dibaca */
+
+.notification-card.is-unread {
+    background: #F0F5EB;
+    border-color: #D8E3D1;
+}
+
+.notification-card.is-unread:hover {
+    background: #EAF2E4;
+}
+
+/* Avatar */
+
+.notification-card-avatar {
+    width: 46px;
+    height: 46px;
+    flex: 0 0 46px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border-radius: 50%;
+    background: #E8E0D3;
+    color: var(--brown, #6B4226);
+    font-size: 17px;
+    font-weight: 700;
+}
+
+.notification-card-avatar img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+/* Isi notifikasi */
+
+.notification-card-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.notification-message {
+    margin: 1px 0 9px;
+    font-size: 15px;
+    line-height: 1.7;
+    overflow-wrap: anywhere;
+}
+
+.notification-message strong {
+    color: var(--ink, #2F5D50);
+    font-weight: 700;
+}
+
+.notification-card-content time {
+    display: block;
+    color: #898178;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+/* Titik belum dibaca */
+
+.notification-unread-indicator {
+    width: 9px;
+    height: 9px;
+    flex: 0 0 9px;
+    margin-top: 7px;
+    border-radius: 50%;
+    background: var(--ink, #2F5D50);
+}
+
+/* Kondisi kosong */
+
+.notifications-empty {
+    padding: 56px 24px;
+    text-align: center;
+    background: #FFFFFF;
+    border: 1px dashed var(--divider, #DDD6C9);
+    border-radius: 14px;
+}
+
+.notifications-empty h2 {
+    margin: 0 0 8px;
+    color: var(--ink, #2F5D50);
+    font-size: 20px;
+}
+
+.notifications-empty p {
+    margin: 0;
+    color: #898178;
+    font-size: 14px;
+}
+
+/* Pagination */
+
+.notifications-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 18px;
+    margin-top: 28px;
+    font-size: 14px;
+}
+
+.notifications-pagination a {
+    padding: 10px 16px;
+    border: 1px solid var(--divider, #DDD6C9);
+    border-radius: 8px;
+    color: var(--ink, #2F5D50);
+    text-decoration: none;
+    font-weight: 600;
+    transition: background-color 0.2s ease;
+}
+
+.notifications-pagination a:hover {
+    background: #EAF2E4;
+}
+
+.notifications-pagination span {
+    color: #77716A;
+}
+
+/* Tampilan HP */
+
+@media (max-width: 600px) {
+    .notifications-page {
+        width: calc(100% - 28px);
+        margin: 28px auto 40px;
+    }
+
+    .notifications-page-header {
+        margin-bottom: 20px;
+    }
+
+    .notification-card {
+        gap: 12px;
+        padding: 15px;
+        border-radius: 12px;
+    }
+
+    .notification-card-avatar {
+        width: 40px;
+        height: 40px;
+        flex-basis: 40px;
+    }
+
+    .notification-message {
+        font-size: 14px;
+        line-height: 1.6;
+    }
+
+    .notifications-pagination {
+        gap: 10px;
+    }
+}
