@@ -109,7 +109,7 @@
                 </button>
                 <div class="reply-list" id="replies-{{ comment.pk }}" style="display:none;">
                     {% for reply in comment.reply_list %}
-                    <div class="comment-row">
+                    <div class="comment-row" id="comment-{{ reply.pk }}">
                         {% if reply.user.profile_picture %}
                             <img src="{{ reply.user.profile_picture.url }}" class="comment-avatar-img comment-avatar-sm">
                         {% else %}
