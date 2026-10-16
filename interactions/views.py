@@ -192,13 +192,25 @@ def submit_comment(request, pk):
         comment = form.save(commit=False)
         comment.user = request.user
         comment.article = article
+
+        parent_comment = None
         parent_id = request.POST.get('parent_id')
+
         if parent_id:
-            comment.parent = get_object_or_404(Comments, pk=parent_id, article=article)
+            parent_comment = get_object_or_404(
+                Comments,
+                pk=parent_id,
+                article=article
+            )
+            comment.parent = parent_comment
+
         if request.user.role == 'admin' or request.user.is_superuser:
             comment.status = StatusComment.APPROVED
+
         comment.save()
-        
+
+        # Notifikasi balasan diletakkan di sini,
+        # sebelum respons AJAX dikembalikan.
         if (
             comment.status == StatusComment.APPROVED
             and parent_comment
@@ -210,13 +222,14 @@ def submit_comment(request, pk):
                 article=article,
                 action_type=Activity.ActionType.COMMENT_REPLY,
                 message=(
-                    f'Membalas komentar Anda: "{parent_comment.content[:60]}" '
-                    f'pada artikel "{article.title}".'
+                    f'Membalas komentar Anda pada artikel '
+                    f'"{article.title}".'
                 )[:255]
             )
-        
+
         if _is_ajax(request):
             return JsonResponse({'ok': True})
+
         return redirect('articles:article_detail', pk=pk)
     else:
         if _is_ajax(request):
