@@ -406,7 +406,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             try {
                 const response = await fetch(
-                    "{% url 'mark_notifications_read' %}",
+                    "{% url 'interactions:mark_notifications_read' %}",
                     {
                         method: 'POST',
                         headers: {
