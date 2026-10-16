@@ -175,6 +175,17 @@ def submit_comment(request, pk):
         if _is_ajax(request):
             return JsonResponse({'ok': True})
         return redirect('articles:article_detail', pk=pk)
+    
+    parent_comment = None
+    parent_id = request.POST.get('parent_id')
+
+    if parent_id:
+        parent_comment = get_object_or_404(
+            Comments,
+            pk=parent_id,
+            article=article
+        )
+        comment.parent = parent_comment
 
     form = CommentForm(request.POST)
     if form.is_valid():
@@ -187,6 +198,20 @@ def submit_comment(request, pk):
         if request.user.role == 'admin' or request.user.is_superuser:
             comment.status = StatusComment.APPROVED
         comment.save()
+        
+        if (
+            comment.status == StatusComment.APPROVED
+            and parent_comment
+            and parent_comment.user_id != request.user.id
+        ):
+            Activity.objects.create(
+                recipient=parent_comment.user,
+                actor=request.user,
+                article=article,
+                action_type=Activity.ActionType.COMMENT_REPLY,
+                message=f"{request.user.username} membalas komentar Anda."
+            )
+        
         if _is_ajax(request):
             return JsonResponse({'ok': True})
         return redirect('articles:article_detail', pk=pk)
@@ -208,16 +233,39 @@ def delete_comment(request, comment_id):
     return redirect('articles:article_detail', pk=article_pk)
 
 
+
 @login_required
 @require_POST
 def toggle_comment_like(request, comment_id):
     comment = get_object_or_404(Comments, pk=comment_id)
-    CommentDislikes.objects.filter(user=request.user, comment=comment).delete()
-    like, created = CommentLikes.objects.get_or_create(user=request.user, comment=comment)
+
+    # Hapus dislike jika pengguna memberi like
+    CommentDislikes.objects.filter(
+        user=request.user,
+        comment=comment
+    ).delete()
+
+    like, created = CommentLikes.objects.get_or_create(
+        user=request.user,
+        comment=comment
+    )
+
     if not created:
+        # Like dibatalkan: jangan kirim notifikasi baru
         like.delete()
+    elif comment.user_id != request.user.id:
+        # Kirim notifikasi hanya jika like baru dari pengguna lain
+        Activity.objects.create(
+            recipient=comment.user,
+            actor=request.user,
+            article=comment.article,
+            action_type=Activity.ActionType.LIKE,
+            message=f"{request.user.username} menyukai komentar Anda."
+        )
+
     if _is_ajax(request):
         return JsonResponse({'ok': True})
+
     return redirect('articles:article_detail', pk=comment.article.pk)
 
 
