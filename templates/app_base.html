@@ -387,6 +387,25 @@ document.addEventListener('DOMContentLoaded', function () {
         '.notification-dropdown'
     );
 
+    const notificationButton = notificationDropdown?.querySelector(
+        ':scope > button'
+    );
+
+    if (notificationButton) {
+        notificationButton.addEventListener('click', function () {
+            const notificationDot = document.querySelector(
+                '.notification-dot'
+            );
+
+            const notificationBadge = document.querySelector(
+                '.notification-badge'
+            );
+
+            if (notificationDot) notificationDot.remove();
+            if (notificationBadge) notificationBadge.remove();
+        });
+    }
+
     /*
      * MOBILE MENU
      */
