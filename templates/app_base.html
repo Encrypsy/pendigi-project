@@ -391,20 +391,50 @@ document.addEventListener('DOMContentLoaded', function () {
         ':scope > button'
     );
 
-    if (notificationButton) {
-        notificationButton.addEventListener('click', function () {
-            const notificationDot = document.querySelector(
-                '.notification-dot'
+    if (notificationButton && notificationDropdown) {
+        notificationButton.addEventListener('click', async function () {
+            // Hanya tandai dibaca saat dropdown dibuka.
+            const isOpening = !notificationDropdown.classList.contains('is-open');
+
+            if (!isOpening) return;
+
+            const badge = document.querySelector(
+                '.notification-badge, .notification-dot'
             );
 
-            const notificationBadge = document.querySelector(
-                '.notification-badge'
-            );
+            if (!badge) return;
 
-            if (notificationDot) notificationDot.remove();
-            if (notificationBadge) notificationBadge.remove();
+            try {
+                const response = await fetch(
+                    "{% url 'mark_notifications_read' %}",
+                    {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': '{{ csrf_token }}',
+                            'X-Requested-With': 'XMLHttpRequest',
+                        },
+                    }
+                );
+
+                if (response.ok) {
+                    badge.remove();
+
+                    document.querySelectorAll(
+                        '.notification-card.is-unread'
+                    ).forEach(card => {
+                        card.classList.remove('is-unread');
+                    });
+
+                    document.querySelectorAll(
+                        '.notification-unread-indicator'
+                    ).forEach(indicator => indicator.remove());
+                }
+            } catch (error) {
+                console.error('Gagal memperbarui notifikasi:', error);
+            }
         });
     }
+
 
     /*
      * MOBILE MENU
