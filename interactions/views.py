@@ -176,16 +176,6 @@ def submit_comment(request, pk):
             return JsonResponse({'ok': True})
         return redirect('articles:article_detail', pk=pk)
     
-    parent_comment = None
-    parent_id = request.POST.get('parent_id')
-
-    if parent_id:
-        parent_comment = get_object_or_404(
-            Comments,
-            pk=parent_id,
-            article=article
-        )
-        comment.parent = parent_comment
 
     form = CommentForm(request.POST)
     if form.is_valid():
