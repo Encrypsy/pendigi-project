@@ -218,7 +218,10 @@ def submit_comment(request, pk):
             )
 
         if _is_ajax(request):
-            return JsonResponse({'ok': True})
+            return JsonResponse({
+                'ok': True,
+                'reload': True,
+            })
 
         return redirect('articles:article_detail', pk=pk)
     else:
