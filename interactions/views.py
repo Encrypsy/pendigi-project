@@ -209,7 +209,10 @@ def submit_comment(request, pk):
                 actor=request.user,
                 article=article,
                 action_type=Activity.ActionType.COMMENT_REPLY,
-                message=f"{request.user.username} membalas komentar Anda."
+                message=(
+                    f'Membalas komentar Anda: "{parent_comment.content[:60]}" '
+                    f'pada artikel "{article.title}".'
+                )[:255]
             )
         
         if _is_ajax(request):
@@ -260,7 +263,10 @@ def toggle_comment_like(request, comment_id):
             actor=request.user,
             article=comment.article,
             action_type=Activity.ActionType.LIKE,
-            message=f"{request.user.username} menyukai komentar Anda."
+            message=(
+                f'Menyukai komentar Anda: "{comment.content[:80]}" '
+                f'pada artikel "{comment.article.title}".'
+            )[:255]
         )
 
     if _is_ajax(request):
