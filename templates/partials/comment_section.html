@@ -148,3 +148,111 @@
         {% endfor %}
     </div>
 </section>
+
+<script>
+(function () {
+    const root = document.getElementById('commentsRoot');
+    if (!root || root.dataset.replyHandlerReady === 'true') return;
+
+    root.dataset.replyHandlerReady = 'true';
+
+    root.addEventListener('submit', async function (event) {
+        const form = event.target.closest('.reply-form, .comment-form');
+
+        if (!form) return;
+
+        event.preventDefault();
+
+        const textarea = form.querySelector('textarea');
+        const button = form.querySelector('button[type="submit"]');
+
+        if (!textarea || !textarea.value.trim()) {
+            textarea?.focus();
+            return;
+        }
+
+        const originalText = button?.textContent;
+
+        if (button) {
+            button.disabled = true;
+            button.textContent = '...';
+        }
+
+        try {
+            const response = await fetch(form.action, {
+                method: 'POST',
+                body: new FormData(form),
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                credentials: 'same-origin'
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || !data.ok) {
+                alert(data.error || 'Komentar gagal dikirim.');
+                return;
+            }
+
+            if (data.status !== 'approved') {
+                alert(data.message);
+            }
+
+            const refreshUrl = new URL(
+                root.dataset.refreshUrl,
+                window.location.origin
+            );
+
+            refreshUrl.searchParams.set(
+                'sort',
+                root.dataset.currentSort || 'recent'
+            );
+
+            const refreshResponse = await fetch(refreshUrl, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                credentials: 'same-origin'
+            });
+
+            if (!refreshResponse.ok) {
+                window.location.reload();
+                return;
+            }
+
+            const html = await refreshResponse.text();
+            const doc = new DOMParser().parseFromString(html, 'text/html');
+            const newRoot = doc.getElementById('commentsRoot');
+
+            if (!newRoot) {
+                window.location.reload();
+                return;
+            }
+
+            root.replaceWith(newRoot);
+
+            if (data.status === 'approved' && data.parent_id) {
+                const replies = document.getElementById(
+                    `replies-${data.parent_id}`
+                );
+                const toggle = document.getElementById(
+                    `toggle-label-${data.parent_id}`
+                );
+
+                if (replies) replies.style.display = 'block';
+
+                if (toggle) {
+                    toggle.textContent = 'Sembunyikan balasan';
+                }
+            }
+        } catch (error) {
+            console.error('Gagal mengirim komentar:', error);
+            alert('Terjadi kesalahan saat mengirim komentar.');
+        } finally {
+            if (button && button.isConnected) {
+                button.disabled = false;
+                button.textContent = originalText || '➤';
+            }
+        }
+    });
+})();
+</script>

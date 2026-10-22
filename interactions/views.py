@@ -13,82 +13,106 @@ from django.db.models import Q
 from django.core.paginator import Paginator
 
 
+
 @login_required
 @require_POST
 def submit_comment(request, pk):
     article = get_object_or_404(Articles, pk=pk)
     form = CommentForm(request.POST)
 
-    if form.is_valid():
-        comment = form.save(commit=False)
-        comment.user = request.user
-        comment.article = article
-
-        parent_id = request.POST.get('parent_id')
-
-        if parent_id:
-            parent_comment = get_object_or_404(
-                Comments,
-                pk=parent_id,
-                article=article
-            )
-            comment.parent = parent_comment
-
-        # Admin tidak perlu approval
-        if request.user.role == 'admin' or request.user.is_superuser:
-            comment.status = StatusComment.APPROVED
-
-        comment.save()
-
-        ReadingActivity.objects.create(
-            user=request.user,
-            article=article,
-            action_type=ActionType.COMMENTED
-        )
-        
-        print("DEBUG COMMENT STATUS:", comment.status)
-        print("DEBUG ARTICLE CONTRIBUTOR:", article.contributor)
-        print("DEBUG REQUEST USER:", request.user)
-
-        # ==========================================
-        # NOTIFIKASI AKTIVITAS UNTUK PENULIS
-        # ==========================================
-
-        if comment.status == StatusComment.APPROVED:
-            
-            print("DEBUG: MASUK KE ACTIVITY COMMENT")
-            
-            Activity.objects.create(
-                recipient=article.contributor,
-                actor=request.user,
-                article=article,
-                action_type=Activity.ActionType.COMMENT,
-                message='Memberikan komentar',
-            )
-            
-            print("DEBUG: ACTIVITY BERHASIL DIBUAT")
-
-            messages.success(
-                request,
-                'Komentar berhasil dikirim.'
+    if not form.is_valid():
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse(
+                {'ok': False, 'error': 'Komentar tidak boleh kosong.'},
+                status=400
             )
 
-        else:
-            messages.success(
-                request,
-                'Komentar terkirim, menunggu approval admin.'
-            )
-
-    else:
         messages.error(
             request,
             'Komentar gagal dikirim, pastikan tidak kosong.'
         )
+        return redirect('articles:article_detail', pk=pk)
 
-    return redirect(
-        'articles:article_detail',
-        pk=pk
+    comment = form.save(commit=False)
+    comment.user = request.user
+    comment.article = article
+
+    parent_id = request.POST.get('parent_id')
+    parent_comment = None
+
+    if parent_id:
+        parent_comment = get_object_or_404(
+            Comments,
+            pk=parent_id,
+            article=article,
+            parent__isnull=True,
+        )
+        comment.parent = parent_comment
+
+    is_admin = (
+        getattr(request.user, 'role', None) == 'admin'
+        or request.user.is_superuser
     )
+
+    if is_admin:
+        comment.status = StatusComment.APPROVED
+
+    comment.save()
+
+    ReadingActivity.objects.create(
+        user=request.user,
+        article=article,
+        action_type=ActionType.COMMENTED,
+    )
+
+    if comment.status == StatusComment.APPROVED:
+        if parent_comment:
+            # Notifikasi untuk pemilik komentar yang dibalas.
+            if parent_comment.user_id != request.user.id:
+                Activity.objects.create(
+                    recipient=parent_comment.user,
+                    actor=request.user,
+                    article=article,
+                    action_type=Activity.ActionType.COMMENT_REPLY,
+                    message=(
+                        f'Membalas komentar Anda pada artikel '
+                        f'"{article.title}".'
+                    )[:255],
+                )
+        else:
+            # Notifikasi komentar utama untuk penulis artikel.
+            if article.contributor_id != request.user.id:
+                Activity.objects.create(
+                    recipient=article.contributor,
+                    actor=request.user,
+                    article=article,
+                    action_type=Activity.ActionType.COMMENT,
+                    message='Memberikan komentar',
+                )
+
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({
+            'ok': True,
+            'comment_id': comment.pk,
+            'parent_id': comment.parent_id,
+            'status': comment.status,
+            'message': (
+                'Balasan berhasil dikirim.'
+                if parent_comment
+                else 'Komentar berhasil dikirim.'
+            ) if comment.status == StatusComment.APPROVED
+            else 'Komentar menunggu persetujuan admin.',
+        })
+
+    if comment.status == StatusComment.APPROVED:
+        messages.success(request, 'Komentar berhasil dikirim.')
+    else:
+        messages.success(
+            request,
+            'Komentar terkirim, menunggu approval admin.'
+        )
+
+    return redirect('articles:article_detail', pk=pk)
 
 
 @login_required
@@ -469,7 +493,11 @@ def _attach_comment_meta(comments, request, like_url_name, dislike_url_name, url
         c.edit_url = post_url
         c.delete_url = reverse('interactions:delete_comment', kwargs={'comment_id': c.pk}) if c.is_owner else None
 
-        replies = list(c.get_all_replies())
+        replies = list(
+            c.get_all_replies().filter(
+                status=StatusComment.APPROVED
+            ).select_related('user', 'parent__user')
+        )
         for r in replies:
             r.is_owner = request.user.is_authenticated and r.user_id == request.user.id
             r.is_liked = request.user.is_authenticated and r.likes.filter(user=request.user).exists()
