@@ -37,24 +37,22 @@ def submit_comment(request, pk):
 
     is_ajax = _is_ajax(request)
 
-    def respond(ok, message, status=200, **extra):
+    def respond(success, message, http_status=200, **extra):
         if is_ajax:
             data = {
-                "ok": ok,
-                "message": message,
+                'ok': success,
+                'success': success,
+                'message': message,
                 **extra,
             }
-            if not ok:
-                data["error"] = message
+            return JsonResponse(data, status=http_status)
 
-            return JsonResponse(data, status=status)
-
-        if ok:
+        if success:
             messages.success(request, message)
         else:
             messages.error(request, message)
 
-        return redirect("articles:article_detail", pk=pk)
+        return redirect('articles:article_detail', pk=pk)
 
     # Edit komentar milik pengguna yang sedang login.
     edit_id = request.POST.get("edit_id")
@@ -166,7 +164,7 @@ def submit_comment(request, pk):
 
     return respond(
         True,
-        message,
+        'Komentar terkirim dan menunggu approval admin.',
         comment_id=comment.pk,
         parent_id=comment.parent_id,
         content=comment.content,
