@@ -2,6 +2,36 @@
 {% load static %}
 
 {% block content %}
+<style>
+    .notification-system-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 46px;
+        height: 46px;
+        border-radius: 50%;
+        flex-shrink: 0;
+        font-size: 23px;
+        font-weight: 700;
+    }
+
+    .notification-approved-icon {
+        background: #E3EBDD;
+        color: #2F5D50;
+    }
+
+    .notification-rejected-icon {
+        background: #F1E5D5;
+        color: #6B4226;
+    }
+
+    .notification-card-avatar img {
+        width: 46px;
+        height: 46px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+</style>
 <section class="notifications-page">
 
     <header class="notifications-page-header">
@@ -16,26 +46,62 @@
         <article class="notification-card {% if not activity.is_read %}is-unread{% endif %}">
 
             <div class="notification-card-avatar">
-                {% if activity.actor and activity.actor.profile_picture %}
-                    <img
-                        src="{{ activity.actor.profile_picture.url }}"
-                        alt="{{ activity.actor.username }}"
-                    >
+                {% if activity.action_type == 'approved' %}
+                    <span class="notification-system-icon notification-approved-icon">✓</span>
+
+                {% elif activity.action_type == 'rejected' %}
+                    <span class="notification-system-icon notification-rejected-icon">!</span>
+
                 {% elif activity.actor %}
-                    <span>{{ activity.actor.username|first|upper }}</span>
+                    {% if activity.actor.profile_picture %}
+                        <img
+                            src="{{ activity.actor.profile_picture.url }}"
+                            alt="{{ activity.actor.username }}"
+                        >
+                    {% else %}
+                        <span>{{ activity.actor.username|first|upper }}</span>
+                    {% endif %}
+
                 {% else %}
-                    <span>!</span>
+                    <span class="notification-system-icon">●</span>
                 {% endif %}
             </div>
 
             <div class="notification-card-content">
                 <p class="notification-message">
-                    {% if activity.actor %}
-                        <strong>{{ activity.actor.username }}</strong>
+
+                    {% if activity.action_type == 'approved' %}
+                        <strong>Konten disetujui</strong>
+
+                        {% if activity.article %}
+                            Artikel "{{ activity.article.title }}" telah disetujui.
+                        {% elif activity.chapter %}
+                            Bab "{{ activity.chapter.title }}" dari karya "{{ activity.chapter.story.title }}" telah disetujui.
+                        {% else %}
+                            Konten kamu telah disetujui.
+                        {% endif %}
+
+                    {% elif activity.action_type == 'rejected' %}
+                        <strong>Konten ditolak</strong>
+
+                        {% if activity.article %}
+                            Artikel "{{ activity.article.title }}" belum disetujui.
+                        {% elif activity.chapter %}
+                            Bab "{{ activity.chapter.title }}" dari karya "{{ activity.chapter.story.title }}" belum disetujui.
+                        {% else %}
+                            Konten kamu belum disetujui.
+                        {% endif %}
+
                     {% else %}
-                        <strong>Sistem</strong>
+                        {% if activity.actor %}
+                            <strong>{{ activity.actor.username }}</strong>
+                        {% else %}
+                            <strong>Sistem</strong>
+                        {% endif %}
+
+                        {{ activity.message|default:activity.get_action_type_display }}
                     {% endif %}
-                    {{ activity.message|default:activity.get_action_type_display }}
+
                 </p>
 
                 <time datetime="{{ activity.created_at|date:'c' }}">
@@ -44,9 +110,11 @@
             </div>
 
             {% if not activity.is_read %}
-                <span class="notification-unread-indicator"
-                      title="Belum dibaca"
-                      aria-label="Belum dibaca"></span>
+                <span
+                    class="notification-unread-indicator"
+                    title="Belum dibaca"
+                    aria-label="Belum dibaca">
+                </span>
             {% endif %}
 
         </article>
@@ -82,4 +150,3 @@
 
 </section>
 {% endblock %}
-```
