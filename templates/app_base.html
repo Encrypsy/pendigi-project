@@ -117,18 +117,22 @@
                     {% for activity in navbar_notifications %}
                         <a href="{% if activity.article_id %}{% url 'articles:article_detail' pk=activity.article_id %}{% elif activity.chapter_id %}{% url 'fiction:read_chapter' pk=activity.chapter.story_id chapter_number=activity.chapter.chapter_number %}{% else %}{% url 'notifications_list' %}{% endif %}"
                         class="notification-item {% if not activity.is_read %}is-unread{% endif %}">
-
+         
                             <div class="notification-avatar">
                                 {% if activity.action_type == 'approved' %}
                                     <span class="notification-system-icon notification-approved-icon">✓</span>
+
                                 {% elif activity.action_type == 'rejected' %}
                                     <span class="notification-system-icon notification-rejected-icon">!</span>
-                                {% elif activity.actor and activity.actor.role != 'admin' and not activity.actor.is_superuser %}
+
+                                {% elif activity.actor %}
                                     {% if activity.actor.profile_picture %}
-                                        <img src="{{ activity.actor.profile_picture.url }}" alt="{{ activity.actor.username }}">
+                                        <img src="{{ activity.actor.profile_picture.url }}"
+                                            alt="{{ activity.actor.username }}">
                                     {% else %}
-                                        {{ activity.actor.username|first|upper }}
+                                        <span>{{ activity.actor.username|first|upper }}</span>
                                     {% endif %}
+
                                 {% else %}
                                     <span class="notification-system-icon">●</span>
                                 {% endif %}
