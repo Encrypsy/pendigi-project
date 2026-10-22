@@ -6,7 +6,6 @@ def navbar_notifications(request):
             'navbar_unread_count': 0,
         }
 
-    # Import model setelah Django siap memproses request
     from .models import Activity
 
     activities = (
@@ -22,8 +21,10 @@ def navbar_notifications(request):
     )
 
     return {
-        'navbar_notifications': activities[:2],
+        'navbar_notifications': activities[:5],
         'navbar_unread_count': activities.filter(
             is_read=False
         ).count(),
     }
+
+

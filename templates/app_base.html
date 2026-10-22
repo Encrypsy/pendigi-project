@@ -113,59 +113,62 @@
                     <div class="navbar-dropdown-title">
                         Notifikasi
                     </div>
-
+   
                     {% for activity in navbar_notifications %}
-                        <div class="notification-item {% if not activity.is_read %}is-unread{% endif %}">                    
-                            <a
-                                href="{% if activity.article_id %}
-                                    {% url 'articles:article_detail' pk=activity.article_id %}
-                                {% elif activity.chapter_id %}
-                                    {% url 'fiction:read_chapter' pk=activity.chapter.story_id chapter_number=activity.chapter.chapter_number %}
-                                {% else %}
-                                    {% url 'notifications_list' %}
-                                {% endif %}"
-                                class="notification-item {% if not activity.is_read %}is-unread{% endif %}"
-                            >
-                                <div class="notification-avatar">
-                                    {% if activity.actor and activity.actor.role != 'admin' and not activity.actor.is_superuser and activity.actor.profile_picture %}
-                                        <img
-                                            src="{{ activity.actor.profile_picture.url }}"
-                                            alt="{{ activity.actor.username }}"
-                                        >
-                                    {% elif activity.actor and activity.actor.role != 'admin' and not activity.actor.is_superuser %}
-                                        {{ activity.actor.username|first|upper }}
-                                    {% else %}
-                                        <span class="notification-system-icon">●</span>
-                                    {% endif %}
-                                </div>
+                        <a href="{% if activity.article_id %}{% url 'articles:article_detail' pk=activity.article_id %}{% elif activity.chapter_id %}{% url 'fiction:read_chapter' pk=activity.chapter.story_id chapter_number=activity.chapter.chapter_number %}{% else %}{% url 'notifications_list' %}{% endif %}"
+                        class="notification-item {% if not activity.is_read %}is-unread{% endif %}">
 
-                                <div class="notification-content">
-                                    <p>
-                                        {% if activity.actor %}
-                                            <strong>{{ activity.actor.username }}</strong>
+                            <div class="notification-avatar">
+                                {% if activity.action_type == 'approved' %}
+                                    <span class="notification-system-icon notification-approved-icon">✓</span>
+                                {% elif activity.action_type == 'rejected' %}
+                                    <span class="notification-system-icon notification-rejected-icon">!</span>
+                                {% elif activity.actor and activity.actor.role != 'admin' and not activity.actor.is_superuser %}
+                                    {% if activity.actor.profile_picture %}
+                                        <img src="{{ activity.actor.profile_picture.url }}" alt="{{ activity.actor.username }}">
+                                    {% else %}
+                                        {{ activity.actor.username|first|upper }}
+                                    {% endif %}
+                                {% else %}
+                                    <span class="notification-system-icon">●</span>
+                                {% endif %}
+                            </div>
+
+                            <div class="notification-content">
+                                <p>
+                                    {% if activity.action_type == 'approved' %}
+                                        <strong>Konten disetujui</strong>
+                                        {% if activity.article %}
+                                            Artikel "{{ activity.article.title }}" telah disetujui oleh admin.
+                                        {% elif activity.chapter %}
+                                            Bab "{{ activity.chapter.title }}" dari karya "{{ activity.chapter.story.title }}" telah disetujui.
                                         {% else %}
-                                            <strong>Sistem</strong>
+                                            Konten kamu telah disetujui.
                                         {% endif %}
 
+                                    {% elif activity.action_type == 'rejected' %}
+                                        <strong>Konten ditolak</strong>
+                                        {% if activity.article %}
+                                            Artikel "{{ activity.article.title }}" belum disetujui.
+                                        {% elif activity.chapter %}
+                                            Bab "{{ activity.chapter.title }}" dari karya "{{ activity.chapter.story.title }}" belum disetujui.
+                                        {% else %}
+                                            Konten kamu belum disetujui.
+                                        {% endif %}
+
+                                    {% else %}
+                                        {% if activity.actor and activity.actor.role != 'admin' and not activity.actor.is_superuser %}
+                                            <strong>{{ activity.actor.username }}</strong>
+                                        {% endif %}
                                         {{ activity.message|default:activity.get_action_type_display }}
-                                    </p>
+                                    {% endif %}
+                                </p>
 
-                                    <small>{{ activity.created_at|timesince }} lalu</small>
-                                </div>
-
-                                {% if not activity.is_read %}
-                                    <span
-                                        class="notification-unread-indicator"
-                                        aria-label="Belum dibaca"
-                                    ></span>
-                                {% endif %}
-                            </a>
-
-                        </div>
+                                <small>{{ activity.created_at|timesince }} lalu</small>
+                            </div>
+                        </a>
                     {% empty %}
-                        <div class="notification-empty">
-                            Belum ada notifikasi.
-                        </div>
+                        <div class="notification-empty">Belum ada notifikasi.</div>
                     {% endfor %}
 
                     <a
