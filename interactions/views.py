@@ -1,43 +1,106 @@
+
 from django.http import JsonResponse
 from django.shortcuts import redirect, get_object_or_404, render
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.urls import reverse
 from django.views.decorators.http import require_POST
-from articles.models import Articles
-from .models import Activity, CommentDislikes, CommentLikes, Comments, Ratings, Bookmarks, StatusComment
-from .forms import CommentForm, RatingForm
-from reading_journal.models import ReadingActivity, ActionType
-from accounts.decorators import admin_required
 from django.db.models import Q
 from django.core.paginator import Paginator
 
+from articles.models import Articles
+from .models import (
+    Activity,
+    CommentDislikes,
+    CommentLikes,
+    Comments,
+    Ratings,
+    Bookmarks,
+    StatusComment,
+)
+from .forms import CommentForm, RatingForm
+from reading_journal.models import ReadingActivity, ActionType
+from accounts.decorators import admin_required
+
+
+def _is_ajax(request):
+    return (
+        request.headers.get("X-Requested-With") == "XMLHttpRequest"
+        or "application/json" in request.headers.get("Accept", "")
+    )
 
 
 @login_required
 @require_POST
 def submit_comment(request, pk):
     article = get_object_or_404(Articles, pk=pk)
+
+    is_ajax = _is_ajax(request)
+
+    def respond(ok, message, status=200, **extra):
+        if is_ajax:
+            data = {
+                "ok": ok,
+                "message": message,
+                **extra,
+            }
+            if not ok:
+                data["error"] = message
+
+            return JsonResponse(data, status=status)
+
+        if ok:
+            messages.success(request, message)
+        else:
+            messages.error(request, message)
+
+        return redirect("articles:article_detail", pk=pk)
+
+    # Edit komentar milik pengguna yang sedang login.
+    edit_id = request.POST.get("edit_id")
+    if edit_id:
+        comment = get_object_or_404(
+            Comments,
+            pk=edit_id,
+            user=request.user,
+            article=article,
+        )
+
+        form = CommentForm(request.POST, instance=comment)
+        if not form.is_valid():
+            return respond(
+                False,
+                "Komentar gagal diperbarui. Periksa kembali isinya.",
+                status=400,
+            )
+
+        updated_comment = form.save(commit=False)
+        updated_comment.save()
+
+        return respond(
+            True,
+            "Komentar berhasil diperbarui.",
+            comment_id=updated_comment.pk,
+            parent_id=updated_comment.parent_id,
+            content=updated_comment.content,
+            username=request.user.username,
+            status=updated_comment.status,
+        )
+
     form = CommentForm(request.POST)
 
     if not form.is_valid():
-        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            return JsonResponse(
-                {'ok': False, 'error': 'Komentar tidak boleh kosong.'},
-                status=400
-            )
-
-        messages.error(
-            request,
-            'Komentar gagal dikirim, pastikan tidak kosong.'
+        return respond(
+            False,
+            "Komentar gagal dikirim. Pastikan isinya tidak kosong.",
+            status=400,
         )
-        return redirect('articles:article_detail', pk=pk)
 
     comment = form.save(commit=False)
     comment.user = request.user
     comment.article = article
 
-    parent_id = request.POST.get('parent_id')
+    parent_id = request.POST.get("parent_id", "").strip()
     parent_comment = None
 
     if parent_id:
@@ -46,11 +109,12 @@ def submit_comment(request, pk):
             pk=parent_id,
             article=article,
             parent__isnull=True,
+            status=StatusComment.APPROVED,
         )
         comment.parent = parent_comment
 
     is_admin = (
-        getattr(request.user, 'role', None) == 'admin'
+        getattr(request.user, "role", None) == "admin"
         or request.user.is_superuser
     )
 
@@ -65,9 +129,9 @@ def submit_comment(request, pk):
         action_type=ActionType.COMMENTED,
     )
 
+    # Notifikasi hanya dikirim untuk komentar yang sudah disetujui.
     if comment.status == StatusComment.APPROVED:
         if parent_comment:
-            # Notifikasi untuk pemilik komentar yang dibalas.
             if parent_comment.user_id != request.user.id:
                 Activity.objects.create(
                     recipient=parent_comment.user,
@@ -79,214 +143,30 @@ def submit_comment(request, pk):
                         f'"{article.title}".'
                     )[:255],
                 )
-        else:
-            # Notifikasi komentar utama untuk penulis artikel.
-            if article.contributor_id != request.user.id:
-                Activity.objects.create(
-                    recipient=article.contributor,
-                    actor=request.user,
-                    article=article,
-                    action_type=Activity.ActionType.COMMENT,
-                    message='Memberikan komentar',
-                )
-
-    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        return JsonResponse({
-            'ok': True,
-            'comment_id': comment.pk,
-            'parent_id': comment.parent_id,
-            'status': comment.status,
-            'message': (
-                'Balasan berhasil dikirim.'
-                if parent_comment
-                else 'Komentar berhasil dikirim.'
-            ) if comment.status == StatusComment.APPROVED
-            else 'Komentar menunggu persetujuan admin.',
-        })
-
-    if comment.status == StatusComment.APPROVED:
-        messages.success(request, 'Komentar berhasil dikirim.')
-    else:
-        messages.success(
-            request,
-            'Komentar terkirim, menunggu approval admin.'
-        )
-
-    return redirect('articles:article_detail', pk=pk)
-
-
-@login_required
-@require_POST
-def submit_rating(request, pk):
-    """Use case: Beri rating & komentar artikel (bagian rating)"""
-    article = get_object_or_404(Articles, pk=pk)
-    form = RatingForm(request.POST)
-
-    if form.is_valid():
-
-        rating_value = form.cleaned_data['rating_value']
-
-        rating, created = Ratings.objects.update_or_create(
-            user=request.user,
-            article=article,
-            defaults={
-                'rating_value': rating_value
-            }
-        )
-
-        # ==========================================
-        # NOTIFIKASI UNTUK PENULIS
-        # ==========================================
-
-        if created:
+        elif article.contributor_id != request.user.id:
             Activity.objects.create(
                 recipient=article.contributor,
                 actor=request.user,
                 article=article,
-                action_type=Activity.ActionType.RATING,
-                message=f"Memberikan rating {rating_value}/5 pada konten Anda",
+                action_type=Activity.ActionType.COMMENT,
+                message=(
+                    f'Memberikan komentar pada artikel '
+                    f'"{article.title}".'
+                )[:255],
             )
 
-        ReadingActivity.objects.create(
-            user=request.user,
-            article=article,
-            action_type=ActionType.RATED
-        )
-
-        messages.success(request, 'Rating tersimpan!')
-
-    else:
-        messages.error(request, 'Rating tidak valid.')
-
-    return redirect(
-        'articles:article_detail',
-        pk=pk
-    )
-
-
-@login_required
-@require_POST
-def toggle_bookmark(request, pk):
-    """Use case: Simpan/bookmark artikel"""
-    article = get_object_or_404(Articles, pk=pk)
-    bookmark, created = Bookmarks.objects.get_or_create(user=request.user, article=article)
-
-    if not created:
-        bookmark.delete()
-        messages.info(request, 'Artikel dihapus dari bookmark.')
-    else:
-        ReadingActivity.objects.create(user=request.user, article=article, action_type=ActionType.BOOKMARKED)
-        messages.success(request, 'Artikel disimpan ke bookmark.')
-
-    return redirect('articles:article_detail', pk=pk)
-
-
-@login_required
-def my_bookmarks(request):
-    bookmarks = request.user.bookmarks.select_related('article').all()
-    return render(request, 'interactions/bookmarks.html', {'bookmarks': bookmarks})
-
-@login_required
-@require_POST
-def submit_comment(request, pk):
-    article = get_object_or_404(Articles, pk=pk)
-
-    is_ajax = (
-        request.headers.get('X-Requested-With') == 'XMLHttpRequest'
-        or 'application/json' in request.headers.get('Accept', '')
-    )
-
-    def respond(success, message, status=200, **extra):
-        if is_ajax:
-            return JsonResponse({
-                'success': success,
-                'message': message,
-                **extra,
-            }, status=status)
-
-        if success:
-            messages.success(request, message)
-        else:
-            messages.error(request, message)
-
-        return redirect('articles:article_detail', pk=pk)
-
-    form = CommentForm(request.POST)
-
-    if not form.is_valid():
-        return respond(
-            False,
-            'Komentar gagal dikirim. Pastikan isinya tidak kosong.',
-            status=400,
-        )
-
-    comment = form.save(commit=False)
-    comment.user = request.user
-    comment.article = article
-
-    parent_id = request.POST.get('parent_id')
-    parent_comment = None
-
-    if parent_id:
-        parent_comment = get_object_or_404(
-            Comments,
-            pk=parent_id,
-            article=article,
-            status=StatusComment.APPROVED,
-        )
-        comment.parent = parent_comment
-
-    if request.user.role == 'admin' or request.user.is_superuser:
-        comment.status = StatusComment.APPROVED
-
-    comment.save()
-
-    ReadingActivity.objects.create(
-        user=request.user,
-        article=article,
-        action_type=ActionType.COMMENTED,
-    )
-
     if comment.status == StatusComment.APPROVED:
-        if parent_comment:
-            # Notifikasi untuk pemilik komentar yang dibalas.
-            if parent_comment.user_id != request.user.id:
-                Activity.objects.create(
-                    recipient=parent_comment.user,
-                    actor=request.user,
-                    article=article,
-                    action_type=Activity.ActionType.COMMENT_REPLY,
-                    message=(
-                        f'membalas komentar Anda: "{comment.content}" '
-                        f'pada artikel "{article.title}".'
-                    ),
-                )
-        else:
-            # Notifikasi komentar utama kepada penulis artikel.
-            if article.contributor_id != request.user.id:
-                Activity.objects.create(
-                    recipient=article.contributor,
-                    actor=request.user,
-                    article=article,
-                    action_type=Activity.ActionType.COMMENT,
-                    message=(
-                        f'memberikan komentar pada artikel "{article.title}".'
-                    ),
-                )
-
-        return respond(
-            True,
-            'Komentar berhasil dikirim.',
-            comment_id=comment.pk,
-            parent_id=comment.parent_id,
-            content=comment.content,
-            username=request.user.username,
-            status=comment.status,
+        message = (
+            "Balasan berhasil dikirim."
+            if parent_comment
+            else "Komentar berhasil dikirim."
         )
+    else:
+        message = "Komentar terkirim dan menunggu persetujuan admin."
 
     return respond(
         True,
-        'Komentar terkirim dan menunggu approval admin.',
+        message,
         comment_id=comment.pk,
         parent_id=comment.parent_id,
         content=comment.content,
@@ -297,14 +177,97 @@ def submit_comment(request, pk):
 
 @login_required
 @require_POST
-def delete_comment(request, comment_id):
-    comment = get_object_or_404(Comments, pk=comment_id, user=request.user)
-    article_pk = comment.article.pk
-    comment.delete()
-    if _is_ajax(request):
-        return JsonResponse({'ok': True})
-    return redirect('articles:article_detail', pk=article_pk)
+def submit_rating(request, pk):
+    article = get_object_or_404(Articles, pk=pk)
+    form = RatingForm(request.POST)
 
+    if not form.is_valid():
+        messages.error(request, "Rating tidak valid.")
+        return redirect("articles:article_detail", pk=pk)
+
+    rating_value = form.cleaned_data["rating_value"]
+
+    rating, created = Ratings.objects.update_or_create(
+        user=request.user,
+        article=article,
+        defaults={"rating_value": rating_value},
+    )
+
+    if (
+        created
+        and article.contributor_id != request.user.id
+    ):
+        Activity.objects.create(
+            recipient=article.contributor,
+            actor=request.user,
+            article=article,
+            action_type=Activity.ActionType.RATING,
+            message=(
+                f"Memberikan rating {rating_value}/5 "
+                "pada konten Anda"
+            )[:255],
+        )
+
+    ReadingActivity.objects.create(
+        user=request.user,
+        article=article,
+        action_type=ActionType.RATED,
+    )
+
+    messages.success(request, "Rating tersimpan!")
+    return redirect("articles:article_detail", pk=pk)
+
+
+@login_required
+@require_POST
+def toggle_bookmark(request, pk):
+    article = get_object_or_404(Articles, pk=pk)
+
+    bookmark, created = Bookmarks.objects.get_or_create(
+        user=request.user,
+        article=article,
+    )
+
+    if not created:
+        bookmark.delete()
+        messages.info(request, "Artikel dihapus dari bookmark.")
+    else:
+        ReadingActivity.objects.get_or_create(
+            user=request.user,
+            article=article,
+            action_type=ActionType.BOOKMARKED,
+        )
+        messages.success(request, "Artikel disimpan ke bookmark.")
+
+    return redirect("articles:article_detail", pk=pk)
+
+
+@login_required
+def my_bookmarks(request):
+    bookmarks = request.user.bookmarks.select_related("article").all()
+
+    return render(
+        request,
+        "interactions/bookmarks.html",
+        {"bookmarks": bookmarks},
+    )
+
+
+@login_required
+@require_POST
+def delete_comment(request, comment_id):
+    comment = get_object_or_404(
+        Comments,
+        pk=comment_id,
+        user=request.user,
+    )
+    article_pk = comment.article_id
+    comment.delete()
+
+    if _is_ajax(request):
+        return JsonResponse({"ok": True})
+
+    return redirect("articles:article_detail", pk=article_pk)
 
 
 @login_required
@@ -312,251 +275,283 @@ def delete_comment(request, comment_id):
 def toggle_comment_like(request, comment_id):
     comment = get_object_or_404(Comments, pk=comment_id)
 
-    # Hapus dislike jika pengguna memberi like
     CommentDislikes.objects.filter(
         user=request.user,
-        comment=comment
+        comment=comment,
     ).delete()
 
     like, created = CommentLikes.objects.get_or_create(
         user=request.user,
-        comment=comment
+        comment=comment,
     )
 
     if not created:
-        # Like dibatalkan: jangan kirim notifikasi baru
         like.delete()
     elif comment.user_id != request.user.id:
-        # Kirim notifikasi hanya jika like baru dari pengguna lain
         Activity.objects.create(
             recipient=comment.user,
             actor=request.user,
             article=comment.article,
             action_type=Activity.ActionType.LIKE,
             message=(
-                f'Menyukai komentar Anda: "{comment.content[:80]}" '
+                f'Menyukai komentar Anda: '
+                f'"{comment.content[:80]}" '
                 f'pada artikel "{comment.article.title}".'
-            )[:255]
+            )[:255],
         )
 
     if _is_ajax(request):
-        return JsonResponse({'ok': True})
+        return JsonResponse({"ok": True})
 
-    return redirect('articles:article_detail', pk=comment.article.pk)
+    return redirect("articles:article_detail", pk=comment.article.pk)
 
 
 @login_required
 @require_POST
 def toggle_comment_dislike(request, comment_id):
     comment = get_object_or_404(Comments, pk=comment_id)
-    CommentLikes.objects.filter(user=request.user, comment=comment).delete()
-    dislike, created = CommentDislikes.objects.get_or_create(user=request.user, comment=comment)
+
+    CommentLikes.objects.filter(
+        user=request.user,
+        comment=comment,
+    ).delete()
+
+    dislike, created = CommentDislikes.objects.get_or_create(
+        user=request.user,
+        comment=comment,
+    )
+
     if not created:
         dislike.delete()
+
     if _is_ajax(request):
-        return JsonResponse({'ok': True})
-    return redirect('articles:article_detail', pk=comment.article.pk)
+        return JsonResponse({"ok": True})
+
+    return redirect("articles:article_detail", pk=comment.article.pk)
+
 
 @admin_required
-def admin_comment_approval(request, status='pending'):
-
+def admin_comment_approval(request, status="pending"):
     allowed_statuses = {
-        'pending': StatusComment.PENDING,
-        'approved': StatusComment.APPROVED,
-        'rejected': StatusComment.REJECTED,
+        "pending": StatusComment.PENDING,
+        "approved": StatusComment.APPROVED,
+        "rejected": StatusComment.REJECTED,
     }
 
     if status not in allowed_statuses:
-        return redirect('interactions:admin_comment_approval')
-
-
-    # =========================
-    # DATA KOMENTAR
-    # =========================
+        return redirect("interactions:admin_comment_approval")
 
     comments = Comments.objects.filter(
         status=allowed_statuses[status]
     ).select_related(
-        'user',
-        'article'
+        "user",
+        "article",
     )
 
-
-    # =========================
-    # SEARCH
-    # =========================
-
-    query = request.GET.get('q', '').strip()
+    query = request.GET.get("q", "").strip()
 
     if query:
         comments = comments.filter(
-            Q(content__icontains=query) |
-            Q(user__username__icontains=query) |
-            Q(article__title__icontains=query)
+            Q(content__icontains=query)
+            | Q(user__username__icontains=query)
+            | Q(article__title__icontains=query)
         )
 
-
-    # =========================
-    # URUTAN
-    # =========================
-
-    comments = comments.order_by('-created_at')
-
-
-    # =========================
-    # JUMLAH DATA PER HALAMAN
-    # =========================
+    comments = comments.order_by("-created_at")
 
     try:
-        per_page = int(request.GET.get('per_page', 10))
-
+        per_page = int(request.GET.get("per_page", 10))
         if per_page not in (10, 25, 50):
             per_page = 10
-
     except (ValueError, TypeError):
         per_page = 10
 
-
-    # =========================
-    # PAGINATION
-    # =========================
-
     paginator = Paginator(comments, per_page)
-
-    page_number = request.GET.get('page', 1)
-
-    page_obj = paginator.get_page(page_number)
-
-
-    # =========================
-    # JUMLAH PER STATUS
-    # =========================
+    page_obj = paginator.get_page(request.GET.get("page", 1))
 
     status_counts = {
-        'pending': Comments.objects.filter(
+        "pending": Comments.objects.filter(
             status=StatusComment.PENDING
         ).count(),
-
-        'approved': Comments.objects.filter(
+        "approved": Comments.objects.filter(
             status=StatusComment.APPROVED
         ).count(),
-
-        'rejected': Comments.objects.filter(
+        "rejected": Comments.objects.filter(
             status=StatusComment.REJECTED
         ).count(),
     }
 
-
-    # =========================
-    # RENDER
-    # =========================
-
     return render(
         request,
-        'interactions/admin_comment_approval.html',
+        "interactions/admin_comment_approval.html",
         {
-            'comments': page_obj.object_list,
-
-            # pagination
-            'page_obj': page_obj,
-            'per_page': per_page,
-            'per_page_options': [10, 25, 50],
-
-            # search
-            'search_query': query,
-
-            # status
-            'comment_status': status,
-            'status_counts': status_counts,
-        }
+            "comments": page_obj.object_list,
+            "page_obj": page_obj,
+            "per_page": per_page,
+            "per_page_options": [10, 25, 50],
+            "search_query": query,
+            "comment_status": status,
+            "status_counts": status_counts,
+        },
     )
+
 
 @admin_required
 @require_POST
 def admin_approve_comment(request, pk):
-
     comment = get_object_or_404(Comments, pk=pk)
 
     comment.status = StatusComment.APPROVED
     comment.save()
 
-    # ==========================================
-    # NOTIFIKASI UNTUK PENULIS
-    # ==========================================
+    # Untuk komentar utama, beri tahu penulis artikel.
+    # Untuk balasan, beri tahu pemilik komentar yang dibalas.
+    if comment.parent_id:
+        recipient = comment.parent.user
+        action_type = Activity.ActionType.COMMENT_REPLY
+        message = (
+            f'Balasan Anda pada artikel "{comment.article.title}" '
+            "telah disetujui."
+        )
+    else:
+        recipient = comment.article.contributor
+        action_type = Activity.ActionType.COMMENT
+        message = (
+            f'Komentar baru pada artikel "{comment.article.title}".'
+        )
 
-    Activity.objects.create(
-        recipient=comment.article.contributor,
-        actor=comment.user,
-        article=comment.article,
-        action_type=Activity.ActionType.COMMENT,
-        message='Memberikan komentar',
-    )
+    if recipient and recipient.pk != comment.user_id:
+        Activity.objects.create(
+            recipient=recipient,
+            actor=comment.user,
+            article=comment.article,
+            action_type=action_type,
+            message=message[:255],
+        )
 
-    messages.success(
-        request,
-        'Komentar berhasil disetujui.'
-    )
+    messages.success(request, "Komentar berhasil disetujui.")
 
     return redirect(
-        'interactions:admin_comment_approval_status',
-        status='pending'
+        "interactions:admin_comment_approval_status",
+        status="pending",
     )
 
 
 @admin_required
 @require_POST
 def admin_reject_comment(request, pk):
-
     comment = get_object_or_404(Comments, pk=pk)
 
     comment.status = StatusComment.REJECTED
     comment.save()
 
-    messages.success(
-        request,
-        'Komentar berhasil ditolak.'
-    )
+    messages.success(request, "Komentar berhasil ditolak.")
 
     return redirect(
-        'interactions:admin_comment_approval_status',
-        status='pending'
+        "interactions:admin_comment_approval_status",
+        status="pending",
     )
 
-def _attach_comment_meta(comments, request, like_url_name, dislike_url_name, url_kwargs, post_url=None):
+
+def _attach_comment_meta(
+    comments,
+    request,
+    like_url_name,
+    dislike_url_name,
+    url_kwargs,
+    post_url=None,
+):
     result = []
-    for c in comments:
-        c.is_owner = request.user.is_authenticated and c.user_id == request.user.id
-        c.is_liked = request.user.is_authenticated and c.likes.filter(user=request.user).exists()
-        c.is_disliked = request.user.is_authenticated and c.dislikes.filter(user=request.user).exists()
-        c.like_url = reverse(like_url_name, kwargs={**url_kwargs, 'comment_id': c.pk})
-        c.dislike_url = reverse(dislike_url_name, kwargs={**url_kwargs, 'comment_id': c.pk})
-        c.edit_url = post_url
-        c.delete_url = reverse('interactions:delete_comment', kwargs={'comment_id': c.pk}) if c.is_owner else None
+
+    for comment in comments:
+        comment.is_owner = (
+            request.user.is_authenticated
+            and comment.user_id == request.user.id
+        )
+        comment.is_liked = (
+            request.user.is_authenticated
+            and comment.likes.filter(user=request.user).exists()
+        )
+        comment.is_disliked = (
+            request.user.is_authenticated
+            and comment.dislikes.filter(user=request.user).exists()
+        )
+
+        comment.like_url = reverse(
+            like_url_name,
+            kwargs={**url_kwargs, "comment_id": comment.pk},
+        )
+        comment.dislike_url = reverse(
+            dislike_url_name,
+            kwargs={**url_kwargs, "comment_id": comment.pk},
+        )
+        comment.edit_url = post_url
+        comment.delete_url = (
+            reverse(
+                "interactions:delete_comment",
+                kwargs={"comment_id": comment.pk},
+            )
+            if comment.is_owner
+            else None
+        )
 
         replies = [
             reply
-            for reply in c.get_all_replies()
+            for reply in comment.get_all_replies()
             if reply.status == StatusComment.APPROVED
         ]
-        for r in replies:
-            r.is_owner = request.user.is_authenticated and r.user_id == request.user.id
-            r.is_liked = request.user.is_authenticated and r.likes.filter(user=request.user).exists()
-            r.parent_username = r.parent.user.username
-            r.like_url = reverse(like_url_name, kwargs={**url_kwargs, 'comment_id': r.pk})
-        c.reply_list = replies
-        result.append(c)
+
+        for reply in replies:
+            reply.is_owner = (
+                request.user.is_authenticated
+                and reply.user_id == request.user.id
+            )
+            reply.is_liked = (
+                request.user.is_authenticated
+                and reply.likes.filter(user=request.user).exists()
+            )
+            reply.is_disliked = (
+                request.user.is_authenticated
+                and reply.dislikes.filter(user=request.user).exists()
+            )
+            reply.parent_username = reply.parent.user.username
+            reply.like_url = reverse(
+                like_url_name,
+                kwargs={**url_kwargs, "comment_id": reply.pk},
+            )
+            reply.dislike_url = reverse(
+                dislike_url_name,
+                kwargs={**url_kwargs, "comment_id": reply.pk},
+            )
+            reply.edit_url = post_url
+            reply.delete_url = (
+                reverse(
+                    "interactions:delete_comment",
+                    kwargs={"comment_id": reply.pk},
+                )
+                if reply.is_owner
+                else None
+            )
+
+        comment.reply_list = replies
+        result.append(comment)
+
     return result
 
 
 def _sort_comments(queryset, sort):
-    if sort == 'oldest':
-        return queryset.order_by('created_at')
-    if sort == 'liked':
-        return sorted(queryset, key=lambda c: c.likes.count(), reverse=True)
-    return queryset.order_by('-created_at')
+    if sort == "oldest":
+        return queryset.order_by("created_at")
 
-def _is_ajax(request):
-    return request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+    if sort == "liked":
+        return sorted(
+            queryset,
+            key=lambda comment: comment.likes.count(),
+            reverse=True,
+        )
+
+    return queryset.order_by("-created_at")
+
 
 @login_required
 @require_POST
@@ -566,4 +561,4 @@ def mark_notifications_read(request):
         is_read=False,
     ).update(is_read=True)
 
-    return JsonResponse({'success': True})
+    return JsonResponse({"success": True, "ok": True})
