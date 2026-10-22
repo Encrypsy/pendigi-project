@@ -493,11 +493,11 @@ def _attach_comment_meta(comments, request, like_url_name, dislike_url_name, url
         c.edit_url = post_url
         c.delete_url = reverse('interactions:delete_comment', kwargs={'comment_id': c.pk}) if c.is_owner else None
 
-        replies = list(
-            c.get_all_replies().filter(
-                status=StatusComment.APPROVED
-            ).select_related('user', 'parent__user')
-        )
+        replies = [
+            reply
+            for reply in c.get_all_replies()
+            if reply.status == StatusComment.APPROVED
+        ]
         for r in replies:
             r.is_owner = request.user.is_authenticated and r.user_id == request.user.id
             r.is_liked = request.user.is_authenticated and r.likes.filter(user=request.user).exists()
