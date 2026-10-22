@@ -190,14 +190,35 @@ def my_bookmarks(request):
 @require_POST
 def submit_comment(request, pk):
     article = get_object_or_404(Articles, pk=pk)
+
+    is_ajax = (
+        request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+        or 'application/json' in request.headers.get('Accept', '')
+    )
+
+    def respond(success, message, status=200, **extra):
+        if is_ajax:
+            return JsonResponse({
+                'success': success,
+                'message': message,
+                **extra,
+            }, status=status)
+
+        if success:
+            messages.success(request, message)
+        else:
+            messages.error(request, message)
+
+        return redirect('articles:article_detail', pk=pk)
+
     form = CommentForm(request.POST)
 
     if not form.is_valid():
-        messages.error(
-            request,
-            'Komentar gagal dikirim, pastikan tidak kosong.'
+        return respond(
+            False,
+            'Komentar gagal dikirim. Pastikan isinya tidak kosong.',
+            status=400,
         )
-        return redirect('articles:article_detail', pk=pk)
 
     comment = form.save(commit=False)
     comment.user = request.user
@@ -215,7 +236,6 @@ def submit_comment(request, pk):
         )
         comment.parent = parent_comment
 
-    # Admin langsung disetujui.
     if request.user.role == 'admin' or request.user.is_superuser:
         comment.status = StatusComment.APPROVED
 
@@ -228,9 +248,8 @@ def submit_comment(request, pk):
     )
 
     if comment.status == StatusComment.APPROVED:
-
         if parent_comment:
-            # Balasan dikirim ke pemilik komentar induk.
+            # Notifikasi untuk pemilik komentar yang dibalas.
             if parent_comment.user_id != request.user.id:
                 Activity.objects.create(
                     recipient=parent_comment.user,
@@ -242,9 +261,8 @@ def submit_comment(request, pk):
                         f'pada artikel "{article.title}".'
                     ),
                 )
-
         else:
-            # Komentar utama dikirim ke penulis artikel.
+            # Notifikasi komentar utama kepada penulis artikel.
             if article.contributor_id != request.user.id:
                 Activity.objects.create(
                     recipient=article.contributor,
@@ -256,15 +274,26 @@ def submit_comment(request, pk):
                     ),
                 )
 
-        messages.success(request, 'Komentar berhasil dikirim.')
-
-    else:
-        messages.success(
-            request,
-            'Komentar terkirim, menunggu approval admin.'
+        return respond(
+            True,
+            'Komentar berhasil dikirim.',
+            comment_id=comment.pk,
+            parent_id=comment.parent_id,
+            content=comment.content,
+            username=request.user.username,
+            status=comment.status,
         )
 
-    return redirect('articles:article_detail', pk=pk)
+    return respond(
+        True,
+        'Komentar terkirim dan menunggu approval admin.',
+        comment_id=comment.pk,
+        parent_id=comment.parent_id,
+        content=comment.content,
+        username=request.user.username,
+        status=comment.status,
+    )
+
 
 @login_required
 @require_POST
