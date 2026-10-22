@@ -1,116 +1,779 @@
+
 {% extends 'app_base.html' %}
 {% load static %}
+
 {% block title %}
-  Beranda
+  {% if active_category %}{{ active_category }}{% else %}Beranda{% endif %}
 {% endblock %}
+
 {% block extra_css %}
-  <link rel="stylesheet" href="{% static 'css/articles.css' %}" />
-  <link rel="stylesheet" href="{% static 'css/homepage.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/articles.css' %}">
+  <link rel="stylesheet" href="{% static 'css/homepage.css' %}">
+
+  <style>
+    /* Search */
+    .search-bar-wrap {
+      display: flex;
+      width: min(100% - 32px, 1000px);
+      margin: 28px auto;
+      overflow: hidden;
+      border: 1px solid #ddd2c3;
+      border-radius: 30px;
+      background: #fff;
+      box-shadow: 0 2px 8px #00000008;
+    }
+
+    .search-bar-input {
+      flex: 1;
+      min-width: 0;
+      padding: 13px 20px;
+      border: 0;
+      outline: none;
+      background: transparent;
+      font: inherit;
+    }
+
+    .search-bar-btn {
+      display: grid;
+      place-items: center;
+      width: 48px;
+      border: 0;
+      background: #6b4226;
+      color: #fff;
+      cursor: pointer;
+    }
+
+    /* Category header */
+    .category-page-header {
+      width: min(100% - 48px, 1400px);
+      margin: 24px auto 0;
+    }
+
+    .category-breadcrumb {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 16px;
+      margin-bottom: 24px;
+      background: #f2f2f2;
+      color: #555;
+      font-size: 14px;
+    }
+
+    .category-breadcrumb a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .category-page-header h1 {
+      margin: 0 0 12px;
+      color: #25211e;
+      font-size: 28px;
+      font-weight: 800;
+    }
+
+    .category-heading-line {
+      height: 5px;
+      background: linear-gradient(to right, #d00000 0 70px, #e9e9e9 70px);
+    }
+
+    /* Category layout */
+    .category-page-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 320px;
+      align-items: start;
+      gap: 32px;
+      width: min(100% - 48px, 1400px);
+      margin: 24px auto 48px;
+    }
+
+    .category-main,
+    .category-sidebar {
+      min-width: 0;
+    }
+
+    .category-section-title {
+      margin: 0 0 18px;
+      color: #29231f;
+      font-size: 23px;
+      font-weight: 800;
+    }
+
+    .category-section-title::after {
+      display: block;
+      width: 64px;
+      height: 4px;
+      margin-top: 10px;
+      background: #d00000;
+      content: "";
+    }
+
+    /* Swipeable slideshow */
+    .category-slideshow {
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 34px;
+      border-radius: 8px;
+      background: #e8e2da;
+    }
+
+    .category-slides-track {
+      position: relative;
+      height: clamp(260px, 34vw, 430px);
+    }
+
+    .category-slide {
+      position: absolute;
+      inset: 0;
+      display: block;
+      overflow: hidden;
+      color: white;
+      text-decoration: none;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity .35s ease;
+    }
+
+    .category-slide.is-active {
+      z-index: 1;
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+
+    .category-slide > img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .category-slide-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      align-items: flex-start;
+      padding: 30px;
+      background: linear-gradient(transparent 20%, rgba(0,0,0,.85));
+    }
+
+    .category-slide-tag {
+      padding: 5px 10px;
+      border-radius: 4px;
+      background: #6b4226;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .category-slide-overlay h2 {
+      max-width: 760px;
+      margin: 12px 0 8px;
+      font-size: clamp(21px, 2.5vw, 34px);
+      line-height: 1.25;
+    }
+
+    .category-slide-overlay p {
+      margin: 0;
+      font-size: 13px;
+    }
+
+    .category-slide-arrow {
+      position: absolute;
+      z-index: 3;
+      top: 50%;
+      display: grid;
+      place-items: center;
+      width: 40px;
+      height: 48px;
+      transform: translateY(-50%);
+      border: 0;
+      border-radius: 5px;
+      background: rgba(255,255,255,.88);
+      color: #29231f;
+      font-size: 30px;
+      cursor: pointer;
+    }
+
+    .category-slide-arrow.prev { left: 12px; }
+    .category-slide-arrow.next { right: 12px; }
+
+    .category-slide-dots {
+      position: absolute;
+      z-index: 3;
+      bottom: 14px;
+      left: 50%;
+      display: flex;
+      gap: 9px;
+      transform: translateX(-50%);
+    }
+
+    .category-slide-dot {
+      width: 9px;
+      height: 9px;
+      padding: 0;
+      border: 0;
+      border-radius: 50%;
+      background: rgba(255,255,255,.65);
+      cursor: pointer;
+    }
+
+    .category-slide-dot.is-active {
+      background: #e00000;
+    }
+
+    .category-slideshow-empty,
+    .category-empty {
+      padding: 28px 20px;
+      border: 1px solid #e5ddd2;
+      border-radius: 8px;
+      color: #71665c;
+      text-align: center;
+    }
+
+    /* Latest news */
+    .category-latest-list {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .category-latest-card {
+      display: grid;
+      grid-template-columns: minmax(160px, 38%) minmax(0, 1fr);
+      gap: 20px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid #e8e0d7;
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .category-latest-card > img,
+    .category-latest-placeholder {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      border-radius: 5px;
+      object-fit: cover;
+      background: #eee8df;
+    }
+
+    .category-latest-placeholder {
+      display: grid;
+      place-items: center;
+      font-size: 32px;
+    }
+
+    .category-latest-info {
+      min-width: 0;
+    }
+
+    .category-latest-info h3 {
+      margin: 0 0 8px;
+      color: #28231f;
+      font-size: 20px;
+      line-height: 1.35;
+    }
+
+    .category-latest-card:hover h3 {
+      color: #b60000;
+    }
+
+    .category-latest-meta {
+      margin-bottom: 8px;
+      color: #82776e;
+      font-size: 12px;
+    }
+
+    .category-latest-excerpt {
+      display: -webkit-box;
+      overflow: hidden;
+      color: #5d554e;
+      font-size: 14px;
+      line-height: 1.55;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 3;
+    }
+
+    /* Sidebar */
+    .category-sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    .category-sidebar-section {
+      padding: 20px;
+      border: 1px solid #e6ddd2;
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    .category-popular-list {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .category-popular-item {
+      display: grid;
+      grid-template-columns: 96px minmax(0, 1fr);
+      gap: 12px;
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .category-popular-item > img,
+    .category-popular-placeholder {
+      width: 96px;
+      height: 72px;
+      border-radius: 4px;
+      object-fit: cover;
+      background: #eee8df;
+    }
+
+    .category-popular-placeholder {
+      display: grid;
+      place-items: center;
+    }
+
+    .category-popular-item h3 {
+      margin: 0 0 6px;
+      color: #302720;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    .category-popular-item:hover h3 {
+      color: #b60000;
+    }
+
+    .category-popular-meta {
+      color: #82776e;
+      font-size: 12px;
+    }
+
+    .category-editor-pick {
+      display: block;
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .category-editor-pick img {
+      display: block;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      margin-bottom: 12px;
+      border-radius: 5px;
+      object-fit: cover;
+    }
+
+    .category-editor-pick h3 {
+      margin: 0 0 8px;
+      font-size: 17px;
+      line-height: 1.4;
+    }
+
+    .category-editor-pick p {
+      margin: 0;
+      color: #82776e;
+      font-size: 13px;
+    }
+
+    .category-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .category-links a {
+      padding: 8px 11px;
+      border: 1px solid #e4d8ca;
+      border-radius: 20px;
+      color: #6b4226;
+      font-size: 13px;
+      text-decoration: none;
+    }
+
+    .category-links a:hover {
+      border-color: #6b4226;
+      background: #f8f2eb;
+    }
+
+    /* Pagination */
+    .category-pagination {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      margin-top: 30px;
+    }
+
+    .category-pagination a,
+    .category-pagination span {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 38px;
+      min-height: 38px;
+      padding: 7px 12px;
+      border: 1px solid #e4ddd5;
+      color: #352a22;
+      font-size: 14px;
+      text-decoration: none;
+    }
+
+    .category-pagination .current {
+      border-color: #c90000;
+      background: #c90000;
+      color: #fff;
+    }
+
+    .category-pagination .disabled {
+      color: #aaa;
+    }
+
+    /* Mobile */
+    @media (max-width: 900px) {
+      .category-page-layout {
+        grid-template-columns: minmax(0, 1fr) 280px;
+        gap: 20px;
+      }
+
+      .category-sidebar-section {
+        padding: 15px;
+      }
+
+      .category-popular-item {
+        grid-template-columns: 78px minmax(0, 1fr);
+        gap: 9px;
+      }
+
+      .category-popular-item > img,
+      .category-popular-placeholder {
+        width: 78px;
+        height: 64px;
+      }
+    }
+
+    @media (max-width: 700px) {
+      .category-page-header,
+      .category-page-layout {
+        width: calc(100% - 28px);
+      }
+
+      .category-page-layout {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .category-slides-track {
+        height: 300px;
+      }
+
+      .category-slide-overlay {
+        padding: 18px;
+      }
+
+      .category-slide-overlay h2 {
+        font-size: 22px;
+      }
+
+      .category-latest-card {
+        grid-template-columns: 120px minmax(0, 1fr);
+        gap: 13px;
+      }
+
+      .category-latest-info h3 {
+        font-size: 16px;
+      }
+
+      .category-latest-excerpt {
+        -webkit-line-clamp: 2;
+      }
+
+      .category-sidebar {
+        margin-top: 10px;
+      }
+    }
+
+    @media (max-width: 420px) {
+      .category-latest-card {
+        grid-template-columns: 100px minmax(0, 1fr);
+        gap: 10px;
+      }
+
+      .category-latest-info h3 {
+        font-size: 14px;
+      }
+
+      .category-latest-excerpt {
+        display: none;
+      }
+
+      .category-slide-arrow {
+        width: 32px;
+        height: 40px;
+      }
+    }
+  </style>
 {% endblock %}
 
 {% block content %}
+
+  {% if active_category %}
+    <header class="category-page-header">
+      <nav class="category-breadcrumb" aria-label="Breadcrumb">
+        <a href="{% url 'articles:article_list' %}">⌂ Beranda</a>
+        <span>›</span>
+        <span>{{ active_category }}</span>
+      </nav>
+      <h1>{{ active_category }}</h1>
+      <div class="category-heading-line"></div>
+    </header>
+  {% endif %}
+
   <form method="get" class="search-bar-wrap">
-    <input type="text" name="q" value="{{ search_query }}" placeholder="Cari artikel..." class="search-bar-input" />
-    <button type="submit" class="search-bar-btn">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
-        <circle cx="11" cy="11" r="7" />
-        <line x1="21" y1="21" x2="16.65" y2="16.65" />
+    {% if active_category %}
+      <input type="hidden" name="kategori" value="{{ active_category }}">
+    {% endif %}
+    <input
+      type="text"
+      name="q"
+      value="{{ search_query }}"
+      placeholder="Cari artikel..."
+      class="search-bar-input"
+      aria-label="Cari artikel"
+    >
+    <button type="submit" class="search-bar-btn" aria-label="Cari">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2" width="18" height="18">
+        <circle cx="11" cy="11" r="7"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
       </svg>
     </button>
   </form>
 
+  {% if active_category %}
+    <div class="category-page-layout">
+      <main class="category-main">
 
-  {% if active_category and not search_query and category_slides %}
-    <section class="category-hero">
-      <div class="category-heading">
-        <div>
-          <span class="category-eyebrow">JELAJAHI TOPIK</span>
-          <h1>{{ active_category }}</h1>
-        </div>
-        <span class="category-article-count">
-          {{ page_obj.paginator.count }} artikel
-        </span>
-      </div>
+        {% if not search_query %}
+          <section class="category-slideshow" aria-label="Berita pilihan">
+            {% if category_slides %}
+              <div class="category-slides-track">
+                {% for article in category_slides %}
+                  <a
+                    href="{% url 'articles:article_detail' article.pk %}"
+                    class="category-slide {% if forloop.first %}is-active{% endif %}"
+                    aria-hidden="{% if forloop.first %}false{% else %}true{% endif %}"
+                  >
+                    <img src="{{ article.thumbnail.url }}" alt="{{ article.title }}">
+                    <div class="category-slide-overlay">
+                      <span class="category-slide-tag">{{ active_category }}</span>
+                      <h2>{{ article.title }}</h2>
+                      <p>
+                        {{ article.created_at|timesince }} lalu
+                        {% if article.contributor %} · {{ article.contributor.username }}{% endif %}
+                      </p>
+                    </div>
+                  </a>
+                {% endfor %}
+              </div>
 
-      <div class="category-hero-grid">
-        {% for article in category_slides %}
-          <a
-            href="{% url 'articles:article_detail' article.pk %}"
-            class="category-hero-card {% if forloop.first %}category-hero-main{% endif %}"
-          >
-            <img src="{{ article.thumbnail.url }}" alt="{{ article.title }}">
+              {% if category_slides|length > 1 %}
+                <button type="button" class="category-slide-arrow prev"
+                        id="categorySlidePrev" aria-label="Sebelumnya">‹</button>
+                <button type="button" class="category-slide-arrow next"
+                        id="categorySlideNext" aria-label="Berikutnya">›</button>
 
-            <div class="category-hero-overlay">
-              <span class="category-tag">{{ article.category.name }}</span>
-              <h2>{{ article.title }}</h2>
-              <span class="category-hero-author">
-                {{ article.created_at|timesince }} lalu
-              </span>
-            </div>
-          </a>
-        {% endfor %}
-      </div>
-    </section>
-  {% endif %}
-
-
-  {% if banner_items and not search_query and not active_category %}
-    <div class="hero-banner" id="heroBanner">
-      <div class="hero-slides" id="heroSlides">
-        {% for banner in banner_items %}
-          <a href="{{ banner.link_url|default:'#' }}" class="hero-slide {% if forloop.first %}active{% endif %}">
-            <img src="{{ banner.image.url }}" alt="{{ banner.title }}" />
-            {% if banner.title %}
-              <div class="hero-slide-overlay">
-                <h2>{{ banner.title }}</h2>
+                <div class="category-slide-dots">
+                  {% for article in category_slides %}
+                    <button
+                      type="button"
+                      class="category-slide-dot {% if forloop.first %}is-active{% endif %}"
+                      data-slide="{{ forloop.counter0 }}"
+                      aria-label="Tampilkan berita {{ forloop.counter }}"
+                      {% if forloop.first %}aria-current="true"{% endif %}
+                    ></button>
+                  {% endfor %}
+                </div>
+              {% endif %}
+            {% else %}
+              <div class="category-slideshow-empty">
+                Belum ada artikel bergambar untuk kategori ini.
               </div>
             {% endif %}
-          </a>
-        {% endfor %}
-      </div>
-      <button class="hero-arrow hero-arrow-prev" id="heroPrev">&#10094;</button>
-      <button class="hero-arrow hero-arrow-next" id="heroNext">&#10095;</button>
-      <div class="hero-dots" id="heroDots">
-        {% for banner in banner_items %}
-          <button class="hero-dot {% if forloop.first %}active{% endif %}" data-index="{{ forloop.counter0 }}"></button>
-        {% endfor %}
-      </div>
-    </div>
-  {% endif %}
-  
-  <div class="homepage-columns {% if active_category %}category-page-columns{% endif %}">
-    <div class="latest-col">
-      {% if active_category %}
-        <h2 class="section-title">Berita Terkini</h2>
-      {% elif not search_query %}
-        <h2 class="section-title">Artikel Terbaru</h2>
-      {% endif %}
+          </section>
+        {% endif %}
 
-      <div class="article-grid">
-        {% if active_category or search_query %}
-          {% for article in page_obj %}
-            <a href="{% url 'articles:article_detail' article.pk %}" class="article-card">
-              {% if article.thumbnail %}
-                <img src="{{ article.thumbnail.url }}" class="article-thumb" alt="{{ article.title }}">
-              {% else %}
-                <div class="article-thumb article-thumb-placeholder">📄</div>
-              {% endif %}
-              <div class="article-card-body">
-                <span class="category-tag">{{ article.category.name }}</span>
-                <h3>{{ article.title }}</h3>
-                <p class="author">oleh {{ article.contributor.username }}</p>
+        <section class="category-latest-section">
+          <h2 class="category-section-title">
+            {% if search_query %}
+              Hasil pencarian
+            {% else %}
+              Berita Terkini
+            {% endif %}
+          </h2>
+
+          <div class="category-latest-list">
+            {% for article in page_obj %}
+              <a href="{% url 'articles:article_detail' article.pk %}"
+                 class="category-latest-card">
+                {% if article.thumbnail %}
+                  <img src="{{ article.thumbnail.url }}" alt="{{ article.title }}">
+                {% else %}
+                  <div class="category-latest-placeholder">📰</div>
+                {% endif %}
+
+                <div class="category-latest-info">
+                  <div class="category-latest-meta">
+                    {{ article.category.name }} · {{ article.created_at|timesince }} lalu
+                  </div>
+                  <h3>{{ article.title }}</h3>
+                  <div class="category-latest-excerpt">
+                    {{ article.content|striptags|truncatewords:28 }}
+                  </div>
+                  <div class="category-latest-meta">
+                    {% if article.contributor %}Oleh {{ article.contributor.username }}{% endif %}
+                  </div>
+                </div>
+              </a>
+            {% empty %}
+              <div class="category-empty">
+                {% if search_query %}
+                  Tidak ada artikel yang cocok dengan pencarianmu.
+                {% else %}
+                  Belum ada artikel dalam kategori ini.
+                {% endif %}
               </div>
+            {% endfor %}
+          </div>
+
+          {% if page_obj.has_other_pages %}
+            <nav class="category-pagination" aria-label="Pagination">
+              {% if page_obj.has_previous %}
+                <a href="?kategori={{ active_category|urlencode }}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}&page=1">«</a>
+                <a href="?kategori={{ active_category|urlencode }}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}&page={{ page_obj.previous_page_number }}">‹</a>
+              {% else %}
+                <span class="disabled">«</span>
+                <span class="disabled">‹</span>
+              {% endif %}
+
+              {% for number in page_obj.paginator.page_range %}
+                {% if number == page_obj.number %}
+                  <span class="current">{{ number }}</span>
+                {% elif number >= page_obj.number|add:'-2' and number <= page_obj.number|add:'2' %}
+                  <a href="?kategori={{ active_category|urlencode }}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}&page={{ number }}">{{ number }}</a>
+                {% endif %}
+              {% endfor %}
+
+              {% if page_obj.has_next %}
+                <a href="?kategori={{ active_category|urlencode }}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}&page={{ page_obj.next_page_number }}">›</a>
+                <a href="?kategori={{ active_category|urlencode }}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}&page={{ page_obj.paginator.num_pages }}">»</a>
+              {% else %}
+                <span class="disabled">›</span>
+                <span class="disabled">»</span>
+              {% endif %}
+            </nav>
+          {% endif %}
+        </section>
+      </main>
+
+      <aside class="category-sidebar">
+        <section class="category-sidebar-section">
+          <h2 class="category-section-title">Terpopuler</h2>
+          <div class="category-popular-list">
+            {% for article in category_popular %}
+              <a href="{% url 'articles:article_detail' article.pk %}"
+                 class="category-popular-item">
+                {% if article.thumbnail %}
+                  <img src="{{ article.thumbnail.url }}" alt="{{ article.title }}">
+                {% else %}
+                  <div class="category-popular-placeholder">📰</div>
+                {% endif %}
+                <div>
+                  <h3>{{ article.title }}</h3>
+                  <div class="category-popular-meta">
+                    {{ article.views_count }} tayangan
+                  </div>
+                </div>
+              </a>
+            {% empty %}
+              <p>Belum ada artikel populer.</p>
+            {% endfor %}
+          </div>
+        </section>
+
+        {% if editor_pick %}
+          <section class="category-sidebar-section">
+            <h2 class="category-section-title">Pilihan Editor</h2>
+            <a href="{% url 'articles:article_detail' editor_pick.pk %}"
+               class="category-editor-pick">
+              {% if editor_pick.thumbnail %}
+                <img src="{{ editor_pick.thumbnail.url }}" alt="{{ editor_pick.title }}">
+              {% endif %}
+              <h3>{{ editor_pick.title }}</h3>
+              <p>{{ editor_pick.created_at|timesince }} lalu</p>
             </a>
-          {% empty %}
-            <p>Belum ada artikel yang sesuai.</p>
+          </section>
+        {% endif %}
+
+        <section class="category-sidebar-section">
+          <h2 class="category-section-title">Jelajahi Kategori</h2>
+          <div class="category-links">
+            {% for category in categories %}
+              <a href="{% url 'articles:article_list' %}?kategori={{ category.name|urlencode }}">
+                {{ category.name }}
+              </a>
+            {% empty %}
+              <p>Belum ada kategori.</p>
+            {% endfor %}
+          </div>
+        </section>
+      </aside>
+    </div>
+
+  {% else %}
+    {# Beranda: pertahankan struktur beranda sebelumnya #}
+    {% if banner_items and not search_query %}
+      <div class="hero-banner" id="heroBanner">
+        <div class="hero-slides" id="heroSlides">
+          {% for banner in banner_items %}
+            <a href="{{ banner.link_url|default:'#' }}"
+               class="hero-slide {% if forloop.first %}active{% endif %}">
+              <img src="{{ banner.image.url }}" alt="{{ banner.title }}">
+              {% if banner.title %}
+                <div class="hero-slide-overlay">
+                  <h2>{{ banner.title }}</h2>
+                </div>
+              {% endif %}
+            </a>
           {% endfor %}
-        {% else %}
+        </div>
+        <button class="hero-arrow hero-arrow-prev" id="heroPrev" type="button">❮</button>
+        <button class="hero-arrow hero-arrow-next" id="heroNext" type="button">❯</button>
+        <div class="hero-dots" id="heroDots">
+          {% for banner in banner_items %}
+            <button class="hero-dot {% if forloop.first %}active{% endif %}"
+                    data-index="{{ forloop.counter0 }}" type="button"></button>
+          {% endfor %}
+        </div>
+      </div>
+    {% endif %}
+
+    <div class="homepage-columns">
+      <div class="latest-col">
+        <h2 class="section-title">Artikel Terbaru</h2>
+        <div class="article-grid">
           {% for article in latest_articles %}
             <a href="{% url 'articles:article_detail' article.pk %}" class="article-card">
               {% if article.thumbnail %}
                 <img src="{{ article.thumbnail.url }}" class="article-thumb" alt="{{ article.title }}">
               {% else %}
-                <div class="article-thumb article-thumb-placeholder">📄</div>
+                <div class="article-thumb article-thumb-placeholder">📰</div>
               {% endif %}
               <div class="article-card-body">
                 <span class="category-tag">{{ article.category.name }}</span>
@@ -121,84 +784,9 @@
           {% empty %}
             <p>Belum ada artikel yang tayang.</p>
           {% endfor %}
-        {% endif %}
+        </div>
       </div>
 
-      {% if active_category or search_query %}
-        {% if page_obj.has_other_pages %}
-          <nav class="category-pagination" aria-label="Navigasi artikel">
-            {% if page_obj.has_previous %}
-              <a href="?{% if active_category %}kategori={{ active_category|urlencode }}&{% endif %}{% if search_query %}q={{ search_query|urlencode }}&{% endif %}page={{ page_obj.previous_page_number }}">«</a>
-            {% endif %}
-
-            {% for num in page_obj.paginator.page_range %}
-              {% if page_obj.number == num %}
-                <span class="current-page">{{ num }}</span>
-              {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                <a href="?{% if active_category %}kategori={{ active_category|urlencode }}&{% endif %}{% if search_query %}q={{ search_query|urlencode }}&{% endif %}page={{ num }}">{{ num }}</a>
-              {% endif %}
-            {% endfor %}
-
-            {% if page_obj.has_next %}
-              <a href="?{% if active_category %}kategori={{ active_category|urlencode }}&{% endif %}{% if search_query %}q={{ search_query|urlencode }}&{% endif %}page={{ page_obj.next_page_number }}">»</a>
-            {% endif %}
-          </nav>
-        {% endif %}
-      {% endif %}
-    </div>
-
-    {% if active_category and not search_query %}
-      <aside class="category-sidebar">
-        <section class="category-sidebar-section">
-          <h2 class="section-title">Terpopuler</h2>
-
-          <div class="category-popular-list">
-            {% for article in category_popular %}
-              <a href="{% url 'articles:article_detail' article.pk %}" class="category-popular-item">
-                {% if article.thumbnail %}
-                  <img src="{{ article.thumbnail.url }}" alt="{{ article.title }}">
-                {% else %}
-                  <div class="category-popular-placeholder">📄</div>
-                {% endif %}
-                <div>
-                  <h3>{{ article.title }}</h3>
-                  <span>👁 {{ article.views_count }} kali dibaca</span>
-                </div>
-              </a>
-            {% empty %}
-              <p>Belum ada artikel populer.</p>
-            {% endfor %}
-          </div>
-        </section>
-
-        <section class="category-sidebar-section explore-categories">
-          <h2 class="section-title">Jelajahi Kategori</h2>
-          <div class="category-chip-list">
-            {% for category in categories %}
-              {% if category.name != active_category %}
-                <a href="{% url 'articles:article_list' %}?kategori={{ category.name|urlencode }}">
-                  {{ category.name }}
-                </a>
-              {% endif %}
-            {% endfor %}
-          </div>
-        </section>
-
-        {% if editor_pick %}
-          <section class="editor-pick-card">
-            <span class="editor-pick-label">PILIHAN UNTUKMU</span>
-            <a href="{% url 'articles:article_detail' editor_pick.pk %}">
-              {% if editor_pick.thumbnail %}
-                <img src="{{ editor_pick.thumbnail.url }}" alt="{{ editor_pick.title }}">
-              {% endif %}
-              <h3>{{ editor_pick.title }}</h3>
-            </a>
-            <p>Artikel pilihan dari kategori {{ active_category }}.</p>
-          </section>
-        {% endif %}
-      </aside>
-
-    {% elif not search_query and not active_category %}
       <div class="trending-col">
         <h2 class="section-title">Artikel Trending</h2>
         <div class="trending-list">
@@ -208,11 +796,13 @@
               {% if article.thumbnail %}
                 <img src="{{ article.thumbnail.url }}" class="trending-thumb" alt="{{ article.title }}">
               {% else %}
-                <div class="trending-thumb trending-thumb-placeholder">📄</div>
+                <div class="trending-thumb trending-thumb-placeholder">📰</div>
               {% endif %}
               <div class="trending-info">
                 <strong>{{ article.title }}</strong>
-                <span class="trending-meta">👁 {{ article.views_count }} · {{ article.category.name }}</span>
+                <span class="trending-meta">
+                  👁 {{ article.views_count }} · {{ article.category.name }}
+                </span>
               </div>
             </a>
           {% empty %}
@@ -220,99 +810,163 @@
           {% endfor %}
         </div>
       </div>
-    {% endif %}
-  </div>
+    </div>
 
-
-  {% if featured_stories and not search_query and not active_category %}
-    <section class="fiction-works-section">
-      <h2 class="section-title">Karya Fiksi</h2>
-      <div class="fiction-carousel-wrap">
-        <div class="fiction-carousel">
-          {% for story in featured_stories %}
-            <a href="{% url 'fiction:story_detail' story.pk %}" class="fiction-cover-item">
-              <img src="{{ story.cover.url }}" class="fiction-cover-img" alt="{{ story.title }}" />
-
-              <div class="fiction-cover-info">
-                <strong class="fiction-cover-title">{{ story.title }}</strong>
-
-                <div class="fiction-cover-author">
-                  {% if story.author.profile_picture %}
-                    <img src="{{ story.author.profile_picture.url }}" class="fiction-author-avatar" />
-                  {% else %}
-                    <div class="fiction-author-avatar fiction-author-placeholder">{{ story.author.username|first|upper }}</div>
-                  {% endif %}
-                  <span>{{ story.author.username }}</span>
+    {% if featured_stories %}
+      <section class="fiction-works-section">
+        <h2 class="section-title">Karya Fiksi</h2>
+        <div class="fiction-carousel-wrap">
+          <div class="fiction-carousel">
+            {% for story in featured_stories %}
+              <a href="{% url 'fiction:story_detail' story.pk %}" class="fiction-cover-item">
+                <img src="{{ story.cover.url }}" class="fiction-cover-img" alt="{{ story.title }}">
+                <div class="fiction-cover-info">
+                  <strong class="fiction-cover-title">{{ story.title }}</strong>
+                  <div class="fiction-cover-author">
+                    {% if story.author.profile_picture %}
+                      <img src="{{ story.author.profile_picture.url }}" class="fiction-author-avatar" alt="">
+                    {% else %}
+                      <div class="fiction-author-avatar fiction-author-placeholder">
+                        {{ story.author.username|first|upper }}
+                      </div>
+                    {% endif %}
+                    <span>{{ story.author.username }}</span>
+                  </div>
+                  <div class="fiction-cover-meta">
+                    <span>👁 {{ story.views_count }}</span>
+                    <span>☰ {{ story.total_chapters }} bab</span>
+                  </div>
+                  <span class="fiction-status-badge {% if story.is_completed %}status-completed{% else %}status-ongoing{% endif %}">
+                    {% if story.is_completed %}Tamat{% else %}Berlangsung{% endif %}
+                  </span>
                 </div>
-
-                <div class="fiction-cover-meta">
-                  <span>👁 {{ story.views_count }}</span>
-                  <span>☰ {{ story.total_chapters }} bab</span>
-                </div>
-                <span class="fiction-status-badge {% if story.is_completed %}
-                    
-                    status-completed
-
-                  {% else %}
-                    
-                    status-ongoing
-
-                  {% endif %}">
-                  {% if story.is_completed %}
-                    Tamat
-                  {% else %}
-                    Berlangsung
-                  {% endif %}
-                </span>
-              </div>
-            </a>
-          {% endfor %}
+              </a>
+            {% endfor %}
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+    {% endif %}
   {% endif %}
 
   <script>
-    ;(function () {
-      const slides = document.querySelectorAll('.hero-slide')
-      const dots = document.querySelectorAll('.hero-dot')
-      if (slides.length === 0) return
-    
-      let current = 0
-      let autoTimer
-    
-      function goToSlide(index) {
-        slides[current].classList.remove('active')
-        dots[current].classList.remove('active')
-        current = (index + slides.length) % slides.length
-        slides[current].classList.add('active')
-        dots[current].classList.add('active')
+    /* Carousel kategori */
+    (function () {
+      const slideshow = document.querySelector('.category-slideshow');
+      if (!slideshow) return;
+
+      const slides = [...slideshow.querySelectorAll('.category-slide')];
+      const dots = [...slideshow.querySelectorAll('.category-slide-dot')];
+      const prev = slideshow.querySelector('#categorySlidePrev');
+      const next = slideshow.querySelector('#categorySlideNext');
+
+      if (slides.length < 2) return;
+
+      let current = 0;
+      let startX = 0;
+      let autoTimer;
+
+      function showSlide(index) {
+        current = (index + slides.length) % slides.length;
+
+        slides.forEach((slide, i) => {
+          const active = i === current;
+          slide.classList.toggle('is-active', active);
+          slide.setAttribute('aria-hidden', String(!active));
+        });
+
+        dots.forEach((dot, i) => {
+          const active = i === current;
+          dot.classList.toggle('is-active', active);
+
+          if (active) dot.setAttribute('aria-current', 'true');
+          else dot.removeAttribute('aria-current');
+        });
       }
-    
-      function startAuto() {
-        autoTimer = setInterval(() => goToSlide(current + 1), 5000)
+
+      function restartAuto() {
+        clearInterval(autoTimer);
+        autoTimer = setInterval(() => showSlide(current + 1), 5000);
       }
-      function resetAuto() {
-        clearInterval(autoTimer)
-        startAuto()
-      }
-    
-      document.getElementById('heroNext').addEventListener('click', () => {
-        goToSlide(current + 1)
-        resetAuto()
-      })
-      document.getElementById('heroPrev').addEventListener('click', () => {
-        goToSlide(current - 1)
-        resetAuto()
-      })
-      dots.forEach((dot, i) =>
+
+      prev?.addEventListener('click', () => {
+        showSlide(current - 1);
+        restartAuto();
+      });
+
+      next?.addEventListener('click', () => {
+        showSlide(current + 1);
+        restartAuto();
+      });
+
+      dots.forEach((dot, index) => {
         dot.addEventListener('click', () => {
-          goToSlide(i)
-          resetAuto()
-        })
-      )
-    
-      startAuto()
-    })()
+          showSlide(index);
+          restartAuto();
+        });
+      });
+
+      slideshow.addEventListener('touchstart', event => {
+        startX = event.changedTouches[0].clientX;
+      }, { passive: true });
+
+      slideshow.addEventListener('touchend', event => {
+        const distance = event.changedTouches[0].clientX - startX;
+        if (Math.abs(distance) > 50) {
+          showSlide(current + (distance < 0 ? 1 : -1));
+          restartAuto();
+        }
+      }, { passive: true });
+
+      slideshow.addEventListener('mouseenter', () => clearInterval(autoTimer));
+      slideshow.addEventListener('mouseleave', restartAuto);
+
+      showSlide(0);
+      restartAuto();
+    })();
+
+    /* Carousel banner beranda */
+    (function () {
+      const slides = [...document.querySelectorAll('.hero-slide')];
+      const dots = [...document.querySelectorAll('.hero-dot')];
+      if (!slides.length || !dots.length) return;
+
+      const prev = document.getElementById('heroPrev');
+      const next = document.getElementById('heroNext');
+      let current = 0;
+      let autoTimer;
+
+      function showSlide(index) {
+        slides[current].classList.remove('active');
+        dots[current].classList.remove('active');
+        current = (index + slides.length) % slides.length;
+        slides[current].classList.add('active');
+        dots[current].classList.add('active');
+      }
+
+      function restartAuto() {
+        clearInterval(autoTimer);
+        autoTimer = setInterval(() => showSlide(current + 1), 5000);
+      }
+
+      prev?.addEventListener('click', () => {
+        showSlide(current - 1);
+        restartAuto();
+      });
+
+      next?.addEventListener('click', () => {
+        showSlide(current + 1);
+        restartAuto();
+      });
+
+      dots.forEach((dot, index) => {
+        dot.addEventListener('click', () => {
+          showSlide(index);
+          restartAuto();
+        });
+      });
+
+      restartAuto();
+    })();
   </script>
+
 {% endblock %}

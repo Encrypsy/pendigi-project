@@ -142,12 +142,11 @@ def category_delete(request, pk):
     messages.success(request, 'Kategori berhasil dihapus.')
     return redirect('articles:category_list')
 
-
-
 def article_list(request):
     query = request.GET.get('q', '').strip()
     category_slug = request.GET.get('kategori', '').strip()
 
+    # Artikel yang sudah disetujui
     articles = (
         Articles.objects
         .filter(status=StatusArticle.APPROVED)
@@ -170,41 +169,43 @@ def article_list(request):
     category_slides = []
     if category_slug and not query:
         category_slides = list(
-            articles.filter(thumbnail__isnull=False)
+            articles
+            .filter(thumbnail__isnull=False)
             .exclude(thumbnail='')
             .order_by('?')[:4]
         )
 
-    # Pagination: 10 artikel per halaman
+    # Pagination berita terkini: 10 artikel per halaman
     paginator = Paginator(articles, 10)
     page_obj = paginator.get_page(request.GET.get('page'))
 
-    # Trending pada beranda
+    # Query khusus artikel dalam kategori aktif
+    category_articles = (
+        Articles.objects
+        .filter(status=StatusArticle.APPROVED)
+        .select_related('category', 'contributor')
+    )
+
+    if category_slug:
+        category_articles = category_articles.filter(
+            category__name__iexact=category_slug
+        )
+
+    # Sidebar: 4 artikel terpopuler dalam kategori aktif
+    category_popular = category_articles.order_by(
+        '-views_count', '-created_at'
+    )[:4]
+
+    # Rekomendasi editor dari artikel terpopuler
+    editor_pick = category_popular.first()
+
+    # Artikel trending untuk beranda
     trending_articles = (
         Articles.objects
         .filter(status=StatusArticle.APPROVED)
         .select_related('category', 'contributor')
-        .order_by('-views_count')[:4]
+        .order_by('-views_count', '-created_at')[:4]
     )
-
-    # Sidebar terpopuler khusus kategori
-    category_popular = Articles.objects.filter(
-        status=StatusArticle.APPROVED
-    ).select_related(
-        'category', 'contributor'
-    )
-
-    if category_slug:
-        category_popular = category_popular.filter(
-            category__name__iexact=category_slug
-        )
-
-    category_popular = category_popular.order_by(
-        '-views_count', '-created_at'
-    )[:4]
-
-    # Rekomendasi editor: artikel dengan views tertinggi
-    editor_pick = category_popular.first()
 
     # Karya fiksi untuk beranda
     featured_stories = (
@@ -215,6 +216,7 @@ def article_list(request):
         .order_by('-views_count')[:12]
     )
 
+    # Artikel terbaru untuk beranda
     latest_articles = (
         Articles.objects
         .filter(status=StatusArticle.APPROVED)
