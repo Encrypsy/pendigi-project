@@ -67,29 +67,39 @@
                 {% endif %}
             </div>
 
-            <div class="notification-card-content">
+            <div class="notification-card-content">          
                 <p class="notification-message">
 
                     {% if activity.action_type == 'approved' %}
                         <strong>Konten disetujui</strong>
-
                         {% if activity.article %}
-                            Artikel "{{ activity.article.title }}" telah disetujui.
+                            Artikel "{{ activity.article.title }}" telah disetujui oleh admin.
                         {% elif activity.chapter %}
-                            Bab "{{ activity.chapter.title }}" dari karya "{{ activity.chapter.story.title }}" telah disetujui.
+                            Bab "{{ activity.chapter.title }}" dari karya "{{ activity.chapter.story.title }}" telah disetujui oleh admin.
                         {% else %}
-                            Konten kamu telah disetujui.
+                            Konten kamu telah disetujui oleh admin.
                         {% endif %}
 
                     {% elif activity.action_type == 'rejected' %}
                         <strong>Konten ditolak</strong>
-
                         {% if activity.article %}
-                            Artikel "{{ activity.article.title }}" belum disetujui.
+                            Artikel "{{ activity.article.title }}" ditolak oleh admin.
                         {% elif activity.chapter %}
-                            Bab "{{ activity.chapter.title }}" dari karya "{{ activity.chapter.story.title }}" belum disetujui.
+                            Bab "{{ activity.chapter.title }}" dari karya "{{ activity.chapter.story.title }}" ditolak oleh admin.
                         {% else %}
-                            Konten kamu belum disetujui.
+                            Konten kamu ditolak oleh admin.
+                        {% endif %}
+
+                    {% elif activity.action_type == 'comment_reply' %}
+                        {% if activity.actor %}
+                            <strong>{{ activity.actor.username }}</strong>
+                        {% endif %}
+                        membalas komentar Anda
+                        {% if activity.article %}
+                            pada artikel "{{ activity.article.title }}"
+                        {% endif %}.
+                        {% if activity.message and 'membalas komentar Anda:' in activity.message %}
+                            {{ activity.message|cut:'membalas komentar Anda:' }}
                         {% endif %}
 
                     {% else %}
@@ -98,7 +108,6 @@
                         {% else %}
                             <strong>Sistem</strong>
                         {% endif %}
-
                         {{ activity.message|default:activity.get_action_type_display }}
                     {% endif %}
 

@@ -190,70 +190,81 @@ def my_bookmarks(request):
 @require_POST
 def submit_comment(request, pk):
     article = get_object_or_404(Articles, pk=pk)
-
-    edit_id = request.POST.get('edit_id')
-    if edit_id:
-        comment = get_object_or_404(Comments, pk=edit_id, user=request.user)
-        comment.content = request.POST.get('content', comment.content)
-        comment.save()
-        if _is_ajax(request):
-            return JsonResponse({'ok': True})
-        return redirect('articles:article_detail', pk=pk)
-    
-
     form = CommentForm(request.POST)
-    if form.is_valid():
-        comment = form.save(commit=False)
-        comment.user = request.user
-        comment.article = article
 
-        parent_comment = None
-        parent_id = request.POST.get('parent_id')
-
-        if parent_id:
-            parent_comment = get_object_or_404(
-                Comments,
-                pk=parent_id,
-                article=article
-            )
-            comment.parent = parent_comment
-
-        if request.user.role == 'admin' or request.user.is_superuser:
-            comment.status = StatusComment.APPROVED
-
-        comment.save()
-
-        # Notifikasi balasan diletakkan di sini,
-        # sebelum respons AJAX dikembalikan.
-        if (
-            comment.status == StatusComment.APPROVED
-            and parent_comment
-            and parent_comment.user_id != request.user.id
-        ):
-            Activity.objects.create(
-                recipient=parent_comment.user,
-                actor=request.user,
-                article=article,
-                action_type=Activity.ActionType.COMMENT_REPLY,
-                message=(
-                    f'Membalas komentar Anda pada artikel '
-                    f'"{article.title}".'
-                )[:255]
-            )
-
-        if _is_ajax(request):
-            return JsonResponse({
-                'ok': True,
-                'reload': True,
-            })
-
+    if not form.is_valid():
+        messages.error(
+            request,
+            'Komentar gagal dikirim, pastikan tidak kosong.'
+        )
         return redirect('articles:article_detail', pk=pk)
+
+    comment = form.save(commit=False)
+    comment.user = request.user
+    comment.article = article
+
+    parent_id = request.POST.get('parent_id')
+    parent_comment = None
+
+    if parent_id:
+        parent_comment = get_object_or_404(
+            Comments,
+            pk=parent_id,
+            article=article,
+            status=StatusComment.APPROVED,
+        )
+        comment.parent = parent_comment
+
+    # Admin langsung disetujui.
+    if request.user.role == 'admin' or request.user.is_superuser:
+        comment.status = StatusComment.APPROVED
+
+    comment.save()
+
+    ReadingActivity.objects.create(
+        user=request.user,
+        article=article,
+        action_type=ActionType.COMMENTED,
+    )
+
+    if comment.status == StatusComment.APPROVED:
+
+        if parent_comment:
+            # Balasan dikirim ke pemilik komentar induk.
+            if parent_comment.user_id != request.user.id:
+                Activity.objects.create(
+                    recipient=parent_comment.user,
+                    actor=request.user,
+                    article=article,
+                    action_type=Activity.ActionType.COMMENT_REPLY,
+                    message=(
+                        f'membalas komentar Anda: "{comment.content}" '
+                        f'pada artikel "{article.title}".'
+                    ),
+                )
+
+        else:
+            # Komentar utama dikirim ke penulis artikel.
+            if article.contributor_id != request.user.id:
+                Activity.objects.create(
+                    recipient=article.contributor,
+                    actor=request.user,
+                    article=article,
+                    action_type=Activity.ActionType.COMMENT,
+                    message=(
+                        f'memberikan komentar pada artikel "{article.title}".'
+                    ),
+                )
+
+        messages.success(request, 'Komentar berhasil dikirim.')
+
     else:
-        if _is_ajax(request):
-            return JsonResponse({'error': 'Komentar tidak boleh kosong.'})
-        messages.error(request, 'Komentar tidak boleh kosong.')
-        return redirect('articles:article_detail', pk=pk)
+        messages.success(
+            request,
+            'Komentar terkirim, menunggu approval admin.'
+        )
 
+    return redirect('articles:article_detail', pk=pk)
 
 @login_required
 @require_POST

@@ -113,11 +113,11 @@
                     <div class="navbar-dropdown-title">
                         Notifikasi
                     </div>
-   
+                    
                     {% for activity in navbar_notifications %}
                         <a href="{% if activity.article_id %}{% url 'articles:article_detail' pk=activity.article_id %}{% elif activity.chapter_id %}{% url 'fiction:read_chapter' pk=activity.chapter.story_id chapter_number=activity.chapter.chapter_number %}{% else %}{% url 'notifications_list' %}{% endif %}"
                         class="notification-item {% if not activity.is_read %}is-unread{% endif %}">
-         
+
                             <div class="notification-avatar">
                                 {% if activity.action_type == 'approved' %}
                                     <span class="notification-system-icon notification-approved-icon">✓</span>
@@ -142,28 +142,47 @@
                                 <p>
                                     {% if activity.action_type == 'approved' %}
                                         <strong>Konten disetujui</strong>
+
                                         {% if activity.article %}
                                             Artikel "{{ activity.article.title }}" telah disetujui oleh admin.
                                         {% elif activity.chapter %}
-                                            Bab "{{ activity.chapter.title }}" dari karya "{{ activity.chapter.story.title }}" telah disetujui.
+                                            Bab "{{ activity.chapter.title }}" dari karya "{{ activity.chapter.story.title }}" telah disetujui oleh admin.
                                         {% else %}
-                                            Konten kamu telah disetujui.
+                                            Konten kamu telah disetujui oleh admin.
                                         {% endif %}
 
                                     {% elif activity.action_type == 'rejected' %}
                                         <strong>Konten ditolak</strong>
+
                                         {% if activity.article %}
-                                            Artikel "{{ activity.article.title }}" belum disetujui.
+                                            Artikel "{{ activity.article.title }}" ditolak oleh admin.
                                         {% elif activity.chapter %}
-                                            Bab "{{ activity.chapter.title }}" dari karya "{{ activity.chapter.story.title }}" belum disetujui.
+                                            Bab "{{ activity.chapter.title }}" dari karya "{{ activity.chapter.story.title }}" ditolak oleh admin.
                                         {% else %}
-                                            Konten kamu belum disetujui.
+                                            Konten kamu ditolak oleh admin.
+                                        {% endif %}
+
+                                    {% elif activity.action_type == 'comment_reply' %}
+                                        {% if activity.actor %}
+                                            <strong>{{ activity.actor.username }}</strong>
+                                        {% endif %}
+                                        {{ activity.message|default:"membalas komentar Anda" }}
+
+                                        {% if activity.article %}
+                                            pada artikel "{{ activity.article.title }}"
+                                        {% endif %}.
+
+                                        {% if activity.message and 'membalas komentar Anda:' in activity.message %}
+                                            {{ activity.message|cut:'membalas komentar Anda:' }}
                                         {% endif %}
 
                                     {% else %}
-                                        {% if activity.actor and activity.actor.role != 'admin' and not activity.actor.is_superuser %}
+                                        {% if activity.actor %}
                                             <strong>{{ activity.actor.username }}</strong>
+                                        {% else %}
+                                            <strong>Sistem</strong>
                                         {% endif %}
+
                                         {{ activity.message|default:activity.get_action_type_display }}
                                     {% endif %}
                                 </p>
