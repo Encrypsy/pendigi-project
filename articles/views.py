@@ -143,50 +143,95 @@ def category_delete(request, pk):
     return redirect('articles:category_list')
 
 
-def article_list(request):
-    articles = Articles.objects.filter(
-        status=StatusArticle.APPROVED
-        ).select_related(
-            'category', 
-            'contributor'
-        )
 
+def article_list(request):
     query = request.GET.get('q', '').strip()
+    category_slug = request.GET.get('kategori', '').strip()
+
+    articles = (
+        Articles.objects
+        .filter(status=StatusArticle.APPROVED)
+        .select_related('category', 'contributor')
+    )
+
     if query:
         articles = articles.filter(title__icontains=query)
 
-    category_slug = request.GET.get('kategori')
     if category_slug:
-        articles = articles.filter(category__name__iexact=category_slug)
-
-    categories = Categories.objects.all()
-
-    banner_items = Banner.objects.filter(is_active=True)
-
-    trending_articles = Articles.objects.filter(
-        status=StatusArticle.APPROVED
-    ).select_related('category').order_by('-views_count')[:4]
-
-    featured_stories = Stories.objects.filter(
-        status=FictionStatusStory.APPROVED
-    ).exclude(cover='').select_related('author').order_by('-views_count')[:12]
+        articles = articles.filter(
+            category__name__iexact=category_slug
+        )
 
     articles = articles.order_by('-created_at')
 
-    # HOME
-    latest_articles = Articles.objects.filter(
+    categories = Categories.objects.all()
+
+    # Slideshow kategori: maksimal 4 artikel acak
+    category_slides = []
+    if category_slug and not query:
+        category_slides = list(
+            articles.filter(thumbnail__isnull=False)
+            .exclude(thumbnail='')
+            .order_by('?')[:4]
+        )
+
+    # Pagination: 10 artikel per halaman
+    paginator = Paginator(articles, 10)
+    page_obj = paginator.get_page(request.GET.get('page'))
+
+    # Trending pada beranda
+    trending_articles = (
+        Articles.objects
+        .filter(status=StatusArticle.APPROVED)
+        .select_related('category', 'contributor')
+        .order_by('-views_count')[:4]
+    )
+
+    # Sidebar terpopuler khusus kategori
+    category_popular = Articles.objects.filter(
         status=StatusArticle.APPROVED
     ).select_related(
-        'category',
-        'contributor'
-    ).order_by('-created_at')[:4]
+        'category', 'contributor'
+    )
+
+    if category_slug:
+        category_popular = category_popular.filter(
+            category__name__iexact=category_slug
+        )
+
+    category_popular = category_popular.order_by(
+        '-views_count', '-created_at'
+    )[:4]
+
+    # Rekomendasi editor: artikel dengan views tertinggi
+    editor_pick = category_popular.first()
+
+    # Karya fiksi untuk beranda
+    featured_stories = (
+        Stories.objects
+        .filter(status=FictionStatusStory.APPROVED)
+        .exclude(cover='')
+        .select_related('author')
+        .order_by('-views_count')[:12]
+    )
+
+    latest_articles = (
+        Articles.objects
+        .filter(status=StatusArticle.APPROVED)
+        .select_related('category', 'contributor')
+        .order_by('-created_at')[:4]
+    )
 
     return render(request, 'articles/list.html', {
         'articles': articles,
+        'page_obj': page_obj,
         'latest_articles': latest_articles,
         'categories': categories,
         'active_category': category_slug,
-        'banner_items': banner_items,
+        'category_slides': category_slides,
+        'category_popular': category_popular,
+        'editor_pick': editor_pick,
+        'banner_items': Banner.objects.filter(is_active=True),
         'trending_articles': trending_articles,
         'featured_stories': featured_stories,
         'search_query': query,

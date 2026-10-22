@@ -19,6 +19,41 @@
     </button>
   </form>
 
+
+  {% if active_category and not search_query and category_slides %}
+    <section class="category-hero">
+      <div class="category-heading">
+        <div>
+          <span class="category-eyebrow">JELAJAHI TOPIK</span>
+          <h1>{{ active_category }}</h1>
+        </div>
+        <span class="category-article-count">
+          {{ page_obj.paginator.count }} artikel
+        </span>
+      </div>
+
+      <div class="category-hero-grid">
+        {% for article in category_slides %}
+          <a
+            href="{% url 'articles:article_detail' article.pk %}"
+            class="category-hero-card {% if forloop.first %}category-hero-main{% endif %}"
+          >
+            <img src="{{ article.thumbnail.url }}" alt="{{ article.title }}">
+
+            <div class="category-hero-overlay">
+              <span class="category-tag">{{ article.category.name }}</span>
+              <h2>{{ article.title }}</h2>
+              <span class="category-hero-author">
+                {{ article.created_at|timesince }} lalu
+              </span>
+            </div>
+          </a>
+        {% endfor %}
+      </div>
+    </section>
+  {% endif %}
+
+
   {% if banner_items and not search_query and not active_category %}
     <div class="hero-banner" id="heroBanner">
       <div class="hero-slides" id="heroSlides">
@@ -42,19 +77,21 @@
       </div>
     </div>
   {% endif %}
-
-  <div class="homepage-columns">
+  
+  <div class="homepage-columns {% if active_category %}category-page-columns{% endif %}">
     <div class="latest-col">
-      {% if not active_category and not search_query %}
+      {% if active_category %}
+        <h2 class="section-title">Berita Terkini</h2>
+      {% elif not search_query %}
         <h2 class="section-title">Artikel Terbaru</h2>
       {% endif %}
 
       <div class="article-grid">
         {% if active_category or search_query %}
-          {% for article in articles %}
+          {% for article in page_obj %}
             <a href="{% url 'articles:article_detail' article.pk %}" class="article-card">
               {% if article.thumbnail %}
-                <img src="{{ article.thumbnail.url }}" class="article-thumb" alt="{{ article.title }}" />
+                <img src="{{ article.thumbnail.url }}" class="article-thumb" alt="{{ article.title }}">
               {% else %}
                 <div class="article-thumb article-thumb-placeholder">📄</div>
               {% endif %}
@@ -71,7 +108,7 @@
           {% for article in latest_articles %}
             <a href="{% url 'articles:article_detail' article.pk %}" class="article-card">
               {% if article.thumbnail %}
-                <img src="{{ article.thumbnail.url }}" class="article-thumb" alt="{{ article.title }}" />
+                <img src="{{ article.thumbnail.url }}" class="article-thumb" alt="{{ article.title }}">
               {% else %}
                 <div class="article-thumb article-thumb-placeholder">📄</div>
               {% endif %}
@@ -86,9 +123,82 @@
           {% endfor %}
         {% endif %}
       </div>
+
+      {% if active_category or search_query %}
+        {% if page_obj.has_other_pages %}
+          <nav class="category-pagination" aria-label="Navigasi artikel">
+            {% if page_obj.has_previous %}
+              <a href="?{% if active_category %}kategori={{ active_category|urlencode }}&{% endif %}{% if search_query %}q={{ search_query|urlencode }}&{% endif %}page={{ page_obj.previous_page_number }}">«</a>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+              {% if page_obj.number == num %}
+                <span class="current-page">{{ num }}</span>
+              {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <a href="?{% if active_category %}kategori={{ active_category|urlencode }}&{% endif %}{% if search_query %}q={{ search_query|urlencode }}&{% endif %}page={{ num }}">{{ num }}</a>
+              {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+              <a href="?{% if active_category %}kategori={{ active_category|urlencode }}&{% endif %}{% if search_query %}q={{ search_query|urlencode }}&{% endif %}page={{ page_obj.next_page_number }}">»</a>
+            {% endif %}
+          </nav>
+        {% endif %}
+      {% endif %}
     </div>
 
-    {% if not search_query and not active_category %}
+    {% if active_category and not search_query %}
+      <aside class="category-sidebar">
+        <section class="category-sidebar-section">
+          <h2 class="section-title">Terpopuler</h2>
+
+          <div class="category-popular-list">
+            {% for article in category_popular %}
+              <a href="{% url 'articles:article_detail' article.pk %}" class="category-popular-item">
+                {% if article.thumbnail %}
+                  <img src="{{ article.thumbnail.url }}" alt="{{ article.title }}">
+                {% else %}
+                  <div class="category-popular-placeholder">📄</div>
+                {% endif %}
+                <div>
+                  <h3>{{ article.title }}</h3>
+                  <span>👁 {{ article.views_count }} kali dibaca</span>
+                </div>
+              </a>
+            {% empty %}
+              <p>Belum ada artikel populer.</p>
+            {% endfor %}
+          </div>
+        </section>
+
+        <section class="category-sidebar-section explore-categories">
+          <h2 class="section-title">Jelajahi Kategori</h2>
+          <div class="category-chip-list">
+            {% for category in categories %}
+              {% if category.name != active_category %}
+                <a href="{% url 'articles:article_list' %}?kategori={{ category.name|urlencode }}">
+                  {{ category.name }}
+                </a>
+              {% endif %}
+            {% endfor %}
+          </div>
+        </section>
+
+        {% if editor_pick %}
+          <section class="editor-pick-card">
+            <span class="editor-pick-label">PILIHAN UNTUKMU</span>
+            <a href="{% url 'articles:article_detail' editor_pick.pk %}">
+              {% if editor_pick.thumbnail %}
+                <img src="{{ editor_pick.thumbnail.url }}" alt="{{ editor_pick.title }}">
+              {% endif %}
+              <h3>{{ editor_pick.title }}</h3>
+            </a>
+            <p>Artikel pilihan dari kategori {{ active_category }}.</p>
+          </section>
+        {% endif %}
+      </aside>
+
+    {% elif not search_query and not active_category %}
       <div class="trending-col">
         <h2 class="section-title">Artikel Trending</h2>
         <div class="trending-list">
@@ -96,13 +206,13 @@
             <a href="{% url 'articles:article_detail' article.pk %}" class="trending-item">
               <span class="trending-rank rank-{{ forloop.counter }}">{{ forloop.counter }}</span>
               {% if article.thumbnail %}
-                <img src="{{ article.thumbnail.url }}" class="trending-thumb" alt="{{ article.title }}" />
+                <img src="{{ article.thumbnail.url }}" class="trending-thumb" alt="{{ article.title }}">
               {% else %}
                 <div class="trending-thumb trending-thumb-placeholder">📄</div>
               {% endif %}
               <div class="trending-info">
                 <strong>{{ article.title }}</strong>
-                <span class="trending-meta">👁 {{ article.views_count }} &middot; {{ article.category.name }}</span>
+                <span class="trending-meta">👁 {{ article.views_count }} · {{ article.category.name }}</span>
               </div>
             </a>
           {% empty %}
@@ -112,6 +222,7 @@
       </div>
     {% endif %}
   </div>
+
 
   {% if featured_stories and not search_query and not active_category %}
     <section class="fiction-works-section">
