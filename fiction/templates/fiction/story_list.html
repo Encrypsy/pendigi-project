@@ -109,80 +109,75 @@
 
             <button type="submit">Cari Cerita</button>
         </form>
-
-
+        
         <!-- KATEGORI FIKSI -->
-        <div class="fiction-discovery__section">
+        <div class="fiction-discovery__section fiction-category-section">
 
             <div class="fiction-discovery__section-heading">
-                <div class="fiction-discovery__eyebrow">
-                    TEMUKAN CERITAMU
-                </div>
-
-                <h2 class="fiction-discovery__heading">
-                    Jelajahi Kategori Fiksi
-                </h2>
-
+                <span class="fiction-discovery__eyebrow">JELAJAHI DUNIA CERITA</span>
+                <h2 class="fiction-discovery__heading">Pilih Genre Favoritmu</h2>
                 <p class="fiction-discovery__description">
-                    Dari romansa hingga fantasi, temukan dunia cerita
-                    yang paling cocok denganmu.
+                    Temukan cerita sesuai suasana hatimu.
                 </p>
             </div>
 
-            <div class="fiction-discovery__chips">
+            <div class="fiction-category-scroll">
+                <div class="fiction-discovery__chips">
 
-                <a
-                    href="{% url 'fiction:story_list' %}{% if search_query %}?q={{ search_query|urlencode }}{% endif %}"
-                    class="fiction-discovery__chip {% if not selected_genre %}is-active{% endif %}"
-                >
-                    Semua Cerita
-                </a>
+                    <a
+                        href="{% url 'fiction:story_list' %}{% if search_query %}?q={{ search_query|urlencode }}{% endif %}"
+                        class="fiction-discovery__chip {% if not selected_genre %}is-active{% endif %}"
+                    >
+                        Semua Cerita
+                    </a>
 
-                {% for genre in genres %}
-                <a
-                    href="?{% if search_query %}q={{ search_query|urlencode }}&amp;{% endif %}genre={{ genre.value|urlencode }}"
-                    class="fiction-discovery__chip {% if selected_genre == genre.value|stringformat:'s' %}is-active{% endif %}"
-                >
-                    {{ genre.label }}
-                </a>
-                {% endfor %}
+                    {% for genre in genres %}
+                    <a
+                        href="?{% if search_query %}q={{ search_query|urlencode }}&amp;{% endif %}genre={{ genre.value|urlencode }}"
+                        class="fiction-discovery__chip {% if selected_genre == genre.value|stringformat:'s' %}is-active{% endif %}"
+                    >
+                        {{ genre.label }}
+                    </a>
+                    {% endfor %}
 
+                </div>
             </div>
+
         </div>
-
-
+        
         <!-- TAG CERITA -->
         {% if popular_tags %}
-        <div class="fiction-discovery__section fiction-discovery__tags-section">
+        <section class="fiction-discovery__section fiction-discovery__tags-section">
 
             <div class="fiction-discovery__section-heading">
-                <h2 class="fiction-discovery__heading">
-                    Tag Cerita
-                </h2>
-
+                <span class="fiction-discovery__eyebrow">CARI BERDASARKAN TEMA</span>
+                <h2 class="fiction-discovery__heading">Lagi Suka Tema Apa?</h2>
                 <p class="fiction-discovery__description">
-                    Punya trope atau tema favorit? Mulai jelajahi dari sini.
+                    Jelajahi cerita dari trope dan topik favorit pembaca.
                 </p>
             </div>
 
             <div class="fiction-discovery__chips">
-                {% for tag in popular_tags %}
+                {% for tag in popular_tags|slice:":6" %}
                 <a
                     href="{% url 'fiction:tag_stories' tag.name %}"
                     class="fiction-discovery__chip fiction-discovery__chip--tag"
                 >
-                    <span>#{{ tag.name }}</span>
-
+                    #{{ tag.name }}
                     {% if tag.count %}
-                    <span class="fiction-tag-count">
-                        {{ tag.count }}
-                    </span>
+                    <span class="fiction-tag-count">{{ tag.count }}</span>
                     {% endif %}
                 </a>
                 {% endfor %}
             </div>
 
-        </div>
+            <a href="{% url 'fiction:story_list' %}#semua-tag"
+            class="fiction-tags-more">
+                Jelajahi tag lainnya
+                <span aria-hidden="true">→</span>
+            </a>
+
+        </section>
         {% endif %}
 
     </section>
@@ -192,7 +187,11 @@
     <section class="fiction-section">
 
         <div class="fiction-section-header">
-            <h2>Cerita Pilihan untuk Kamu</h2>
+            {% if search_query or selected_genre %}
+                <h2>Hasil Penelusuran</h2>
+            {% else %}
+                <h2>Cerita Pilihan untuk Kamu</h2>
+            {% endif %}
         </div>
 
         <div class="story-horizontal-container">
