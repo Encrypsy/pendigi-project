@@ -353,6 +353,14 @@ def story_list(request):
         .select_related('author')
         .annotate(chapter_count=Count('chapters'))
     )
+    
+    popular_stories = (
+        Stories.objects
+        .filter(status=StatusStory.APPROVED)
+        .select_related('author')
+        .annotate(chapter_count=Count('chapters'))
+        .order_by('-views_count', '-published_at')[:5]
+    )
 
     # SEARCH: judul, username penulis, atau tag
     search_query = request.GET.get('q', '').strip()
@@ -470,6 +478,7 @@ def story_list(request):
 
             # Data tag
             'popular_tags': popular_tags,
+            'popular_stories': popular_stories,
         }
     )
 

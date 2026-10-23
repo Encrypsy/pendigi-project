@@ -1757,3 +1757,130 @@
     outline-offset: 3px;
 }
 
+
+/* ===== Cerita Terpopuler ===== */
+
+.fiction-popular-card {
+    overflow: hidden;
+}
+
+.fiction-popular-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.fiction-popular-heading h2 {
+    margin: 0 0 5px;
+    color: var(--text);
+    font-size: 18px;
+}
+
+.fiction-popular-heading p {
+    margin: 0;
+    color: #817970;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.fiction-popular-heading > svg {
+    flex-shrink: 0;
+    color: var(--brown);
+}
+
+.fiction-popular-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.fiction-popular-item {
+    display: grid;
+    grid-template-columns: 22px 48px minmax(0, 1fr);
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #F0EAE2;
+    color: var(--text);
+    text-decoration: none;
+}
+
+.fiction-popular-item:last-child {
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.fiction-popular-rank {
+    color: var(--brown);
+    font-size: 14px;
+    font-weight: 700;
+    text-align: center;
+}
+
+.fiction-popular-cover {
+    width: 48px;
+    aspect-ratio: 3 / 4;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 5px;
+    background: var(--paper);
+    color: var(--brown);
+}
+
+.fiction-popular-cover img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.fiction-popular-info {
+    min-width: 0;
+}
+
+.fiction-popular-info h3 {
+    display: -webkit-box;
+    margin: 0 0 4px;
+    overflow: hidden;
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+}
+
+.fiction-popular-info p {
+    margin: 0 0 5px;
+    overflow: hidden;
+    color: #817970;
+    font-size: 11px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.fiction-popular-views {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--brown);
+    font-size: 11px;
+}
+
+.fiction-popular-item:hover .fiction-popular-info h3 {
+    color: var(--brown);
+}
+
+.fiction-popular-empty {
+    margin: 0;
+    color: #817970;
+    font-size: 13px;
+    line-height: 1.6;
+}
+

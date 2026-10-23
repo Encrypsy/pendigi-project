@@ -263,6 +263,80 @@
             </section>
             {% endif %}
 
+            <!-- CERITA TERPOPULER -->
+            <section class="fiction-sidebar-card fiction-popular-card">
+                <div class="fiction-popular-heading">
+                    <div>
+                        <h2>Cerita Terpopuler</h2>
+                        <p>Cerita yang banyak dibaca.</p>
+                    </div>
+
+                    <svg
+                        width="21"
+                        height="21"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        aria-hidden="true"
+                    >
+                        <path d="m3 17 6-6 4 4 8-8"></path>
+                        <path d="M15 7h6v6"></path>
+                    </svg>
+                </div>
+
+                <div class="fiction-popular-list">
+                    {% for story in popular_stories %}
+                    <a
+                        href="{% url 'fiction:story_detail' story.pk %}"
+                        class="fiction-popular-item"
+                    >
+                        <span class="fiction-popular-rank">
+                            {{ forloop.counter|stringformat:"02d" }}
+                        </span>
+
+                        <div class="fiction-popular-cover">
+                            {% if story.cover %}
+                            <img
+                                src="{{ story.cover.url }}"
+                                alt="{{ story.title }}"
+                                loading="lazy"
+                            >
+                            {% else %}
+                            <span>📖</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="fiction-popular-info">
+                            <h3>{{ story.title }}</h3>
+
+                            <p>{{ story.author.username }}</p>
+
+                            <span class="fiction-popular-views">
+                                <svg
+                                    width="13"
+                                    height="13"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="1.8"
+                                    aria-hidden="true"
+                                >
+                                    <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"></path>
+                                    <circle cx="12" cy="12" r="3"></circle>
+                                </svg>
+
+                                {{ story.views_count }} kali dibaca
+                            </span>
+                        </div>
+                    </a>
+                    {% empty %}
+                    <p class="fiction-popular-empty">
+                        Belum ada cerita populer.
+                    </p>
+                    {% endfor %}
+                </div>
+            </section>
         </aside>
 
     </div>
