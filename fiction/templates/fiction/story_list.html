@@ -13,7 +13,7 @@
 
 <div class="fiction-home">
 
-    <!-- BANNER FIKSI: layout asli dipertahankan -->
+    <!-- ================= BANNER FIKSI ================= -->
     {% if banners %}
     <section class="fiction-banner-section">
         <div class="fiction-banner-slider">
@@ -30,6 +30,7 @@
                 {% if banner.title %}
                 <div class="fiction-banner-overlay">
                     <h2>{{ banner.title }}</h2>
+
                     {% if banner.description %}
                     <p>{{ banner.description }}</p>
                     {% endif %}
@@ -55,15 +56,24 @@
     {% endif %}
 
 
-    <!-- PENCARIAN FIKSI -->
+    <!-- ================= SEARCH & DISCOVERY ================= -->
     <section class="fiction-discovery">
 
+        <!-- SEARCH BAR -->
         <form
             class="fiction-discovery__search"
             method="get"
             action="{% url 'fiction:story_list' %}"
             role="search"
         >
+            {% if selected_genre %}
+            <input
+                type="hidden"
+                name="genre"
+                value="{{ selected_genre }}"
+            >
+            {% endif %}
+
             <svg
                 class="fiction-discovery__search-icon"
                 width="21"
@@ -81,57 +91,79 @@
             <input
                 type="search"
                 name="q"
-                value="{{ request.GET.q|default:'' }}"
+                value="{{ search_query|default:'' }}"
                 placeholder="Cari judul cerita, penulis, atau tag..."
                 aria-label="Cari cerita fiksi"
             >
 
-            <button type="submit">Cari</button>
+            {% if search_query or selected_genre %}
+            <a
+                href="{% url 'fiction:story_list' %}"
+                class="fiction-discovery__reset"
+                aria-label="Hapus pencarian dan filter"
+                title="Reset pencarian"
+            >
+                Reset
+            </a>
+            {% endif %}
+
+            <button type="submit">Cari Cerita</button>
         </form>
 
 
         <!-- KATEGORI FIKSI -->
         <div class="fiction-discovery__section">
-            <div class="fiction-discovery__heading-row">
-                <div>
-                    <h2 class="fiction-discovery__heading">
-                        Jelajahi Kategori Fiksi
-                    </h2>
-                    <p class="fiction-discovery__description">
-                        Temukan cerita sesuai genre favoritmu.
-                    </p>
+
+            <div class="fiction-discovery__section-heading">
+                <div class="fiction-discovery__eyebrow">
+                    TEMUKAN CERITAMU
                 </div>
+
+                <h2 class="fiction-discovery__heading">
+                    Jelajahi Kategori Fiksi
+                </h2>
+
+                <p class="fiction-discovery__description">
+                    Dari romansa hingga fantasi, temukan dunia cerita
+                    yang paling cocok denganmu.
+                </p>
             </div>
 
             <div class="fiction-discovery__chips">
+
                 <a
-                    href="{% url 'fiction:story_list' %}"
-                    class="fiction-discovery__chip {% if not request.GET.genre %}is-active{% endif %}"
+                    href="{% url 'fiction:story_list' %}{% if search_query %}?q={{ search_query|urlencode }}{% endif %}"
+                    class="fiction-discovery__chip {% if not selected_genre %}is-active{% endif %}"
                 >
                     Semua Cerita
                 </a>
 
                 {% for genre in genres %}
                 <a
-                    href="?genre={{ genre.value|urlencode }}"
-                    class="fiction-discovery__chip {% if request.GET.genre == genre.value|stringformat:'s' %}is-active{% endif %}"
+                    href="?{% if search_query %}q={{ search_query|urlencode }}&amp;{% endif %}genre={{ genre.value|urlencode }}"
+                    class="fiction-discovery__chip {% if selected_genre == genre.value|stringformat:'s' %}is-active{% endif %}"
                 >
                     {{ genre.label }}
                 </a>
                 {% endfor %}
+
             </div>
         </div>
 
 
         <!-- TAG CERITA -->
         {% if popular_tags %}
-        <div class="fiction-discovery__section">
-            <h2 class="fiction-discovery__heading">
-                Tag Cerita
-            </h2>
-            <p class="fiction-discovery__description">
-                Jelajahi cerita berdasarkan topik yang kamu suka.
-            </p>
+        <div class="fiction-discovery__section fiction-discovery__tags-section">
+
+            <div class="fiction-discovery__section-heading">
+                <h2 class="fiction-discovery__heading">
+                    Tag Cerita
+                </h2>
+
+                <p class="fiction-discovery__description">
+                    Punya trope atau tema favorit? Mulai jelajahi dari sini.
+                </p>
+            </div>
 
             <div class="fiction-discovery__chips">
                 {% for tag in popular_tags %}
@@ -139,30 +171,40 @@
                     href="{% url 'fiction:tag_stories' tag.name %}"
                     class="fiction-discovery__chip fiction-discovery__chip--tag"
                 >
-                    #{{ tag.name }}
+                    <span>#{{ tag.name }}</span>
+
+                    {% if tag.count %}
+                    <span class="fiction-tag-count">
+                        {{ tag.count }}
+                    </span>
+                    {% endif %}
                 </a>
                 {% endfor %}
             </div>
+
         </div>
         {% endif %}
 
     </section>
 
 
-    <!-- REKOMENDASI: layout asli dipertahankan -->
+    <!-- ================= CERITA PILIHAN ================= -->
     <section class="fiction-section">
+
         <div class="fiction-section-header">
             <h2>Cerita Pilihan untuk Kamu</h2>
         </div>
 
         <div class="story-horizontal-container">
             <div class="story-horizontal-track">
+
                 {% for story in recommended_stories %}
                 <a
                     href="{% url 'fiction:story_detail' story.pk %}"
                     class="fiction-story-card"
                 >
                     <div class="fiction-story-cover-wrap">
+
                         {% if story.cover %}
                         <img
                             src="{{ story.cover.url }}"
@@ -171,43 +213,59 @@
                             loading="lazy"
                         >
                         {% else %}
-                        <div class="fiction-story-placeholder">📖</div>
+                        <div class="fiction-story-placeholder">
+                            📖
+                        </div>
                         {% endif %}
+
                     </div>
 
                     <div class="fiction-story-info">
                         <h3>{{ story.title }}</h3>
+
                         <p class="fiction-story-author">
                             {{ story.author.username }}
                         </p>
+
                         <span class="fiction-story-genre">
                             {{ story.get_genre_display }}
                         </span>
                     </div>
                 </a>
+
                 {% empty %}
                 <p class="empty-fiction">
+                    {% if search_query or selected_genre %}
+                    Belum ada cerita yang cocok dengan pencarian atau kategori ini.
+                    {% else %}
                     Belum ada cerita yang tersedia.
+                    {% endif %}
                 </p>
                 {% endfor %}
+
             </div>
         </div>
     </section>
 
 
-    <!-- LANJUTKAN MEMBACA: layout asli dipertahankan -->
+    <!-- ================= LANJUTKAN MEMBACA ================= -->
     {% if request.user.is_authenticated and continue_reading %}
     <section class="fiction-section continue-reading-section">
+
         <div class="fiction-section-header">
             <div>
                 <h2>Lanjutkan Membaca</h2>
-                <p>Lanjutkan cerita yang belum selesai kamu baca.</p>
+                <p>
+                    Lanjutkan cerita yang belum selesai kamu baca.
+                </p>
             </div>
         </div>
 
         <div class="continue-reading-list">
+
             {% for progress in continue_reading|slice:":2" %}
             <article class="continue-reading-card">
+
                 <div class="continue-cover">
                     {% if progress.story.cover %}
                     <img
@@ -216,11 +274,14 @@
                         loading="lazy"
                     >
                     {% else %}
-                    <div class="continue-cover-placeholder">📖</div>
+                    <div class="continue-cover-placeholder">
+                        📖
+                    </div>
                     {% endif %}
                 </div>
 
                 <div class="continue-content">
+
                     <h3>{{ progress.story.title }}</h3>
 
                     <p class="continue-author">
@@ -236,6 +297,7 @@
                             Bab {{ progress.last_chapter.chapter_number }}
                             dari {{ progress.total_chapters }}
                         </span>
+
                         <span>{{ progress.progress_percentage }}%</span>
                     </div>
 
@@ -252,9 +314,11 @@
                     >
                         Lanjut Membaca
                     </a>
+
                 </div>
             </article>
             {% endfor %}
+
         </div>
 
         {% if continue_reading_count > 2 %}
@@ -264,6 +328,7 @@
             </a>
         </div>
         {% endif %}
+
     </section>
     {% endif %}
 
@@ -271,8 +336,10 @@
 
 {% endblock %}
 
+
 {% block extra_js %}
     {{ block.super }}
+
     <script>
     document.addEventListener('DOMContentLoaded', function () {
         const slides = document.querySelectorAll('.fiction-banner-slide');
@@ -281,7 +348,7 @@
         if (!slides.length) return;
 
         let currentIndex = 0;
-        let timer;
+        let timer = null;
 
         function showSlide(index) {
             slides.forEach((slide, i) => {
@@ -299,13 +366,14 @@
             if (slides.length <= 1) return;
 
             clearInterval(timer);
-            timer = setInterval(() => {
+
+            timer = setInterval(function () {
                 showSlide((currentIndex + 1) % slides.length);
             }, 5000);
         }
 
         dots.forEach((dot, index) => {
-            dot.addEventListener('click', () => {
+            dot.addEventListener('click', function () {
                 showSlide(index);
                 startTimer();
             });

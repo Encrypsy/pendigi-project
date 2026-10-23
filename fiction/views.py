@@ -346,42 +346,76 @@ def admin_review_story(request, pk):
     })
 
 def story_list(request):
+    # Hanya cerita yang sudah disetujui
     stories = Stories.objects.filter(
         status=StatusStory.APPROVED
     ).select_related('author')
 
-    # Search: judul cerita atau username penulis
+    # SEARCH: judul, username penulis, atau tag
     search_query = request.GET.get('q', '').strip()
 
     if search_query:
         stories = stories.filter(
             Q(title__icontains=search_query)
             | Q(author__username__icontains=search_query)
+            | Q(tags__icontains=search_query)
         )
 
-    # Ambil pilihan genre langsung dari field model
-    genre_field = Stories._meta.get_field('genre')
-    genre_choices = genre_field.choices
-
+    # FILTER KATEGORI
+    genre_choices = Stories._meta.get_field('genre').choices
     selected_genre = request.GET.get('genre', '').strip()
 
-    # Filter genre hanya jika nilainya valid
-    valid_genres = {str(value) for value, label in genre_choices}
+    valid_genres = {
+        str(value) for value, label in genre_choices
+    }
 
     if selected_genre in valid_genres:
         stories = stories.filter(genre=selected_genre)
     else:
         selected_genre = ''
 
-    # Banner tetap seperti sebelumnya
+    # Banner fiksi tetap seperti sebelumnya
     banners = Banner.objects.filter(
         type=BannerType.FIKSI,
         is_active=True
     ).order_by('order', '-created_at')
 
-    # Rekomendasi mengikuti hasil pencarian/filter
+    # Rekomendasi mengikuti pencarian dan kategori aktif
     recommended_stories = stories[:12]
 
+    # TAG POPULER dari cerita yang telah disetujui
+    all_tags = (
+        Stories.objects
+        .filter(status=StatusStory.APPROVED)
+        .exclude(tags='')
+        .values_list('tags', flat=True)
+    )
+
+    tag_counts = {}
+
+    for tag_string in all_tags:
+        for tag in tag_string.split():
+            normalized_tag = tag.lstrip('#').strip()
+
+            if not normalized_tag:
+                continue
+
+            key = normalized_tag.casefold()
+
+            if key not in tag_counts:
+                tag_counts[key] = {
+                    'name': normalized_tag,
+                    'count': 0,
+                }
+
+            tag_counts[key]['count'] += 1
+
+    popular_tags = sorted(
+        tag_counts.values(),
+        key=lambda item: (-item['count'], item['name'].lower())
+    )[:12]
+
+    # LANJUTKAN MEMBACA: logika lama dipertahankan
     continue_reading = []
 
     if request.user.is_authenticated:
@@ -423,13 +457,16 @@ def story_list(request):
             'continue_reading': continue_reading[:2],
             'continue_reading_count': len(continue_reading),
 
-            # Data untuk fitur pencarian dan kategori
+            # Data search dan kategori
             'search_query': search_query,
             'genres': [
                 {'value': value, 'label': label}
                 for value, label in genre_choices
             ],
             'selected_genre': selected_genre,
+
+            # Data tag
+            'popular_tags': popular_tags,
         }
     )
 

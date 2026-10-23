@@ -572,3 +572,285 @@
     }
 }
 
+
+/* ==========================================
+   FICTION DISCOVERY — PENDIGI BRAND
+   Palette: cream, brown, dark brown
+========================================== */
+
+.fiction-discovery {
+    margin: 28px 0 38px;
+    color: var(--text);
+}
+
+/* Search bar */
+.fiction-discovery__search {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 7px 8px 7px 17px;
+    box-sizing: border-box;
+    background: #FFFFFF;
+    border: 1px solid var(--divider);
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgb(42 36 32 / 3%);
+    transition: border-color .2s, box-shadow .2s;
+}
+
+.fiction-discovery__search:focus-within {
+    border-color: var(--brown);
+    box-shadow: 0 0 0 3px rgb(107 66 38 / 10%);
+}
+
+.fiction-discovery__search-icon {
+    flex-shrink: 0;
+    color: var(--brown);
+}
+
+.fiction-discovery__search input {
+    flex: 1;
+    min-width: 0;
+    padding: 12px 0;
+    border: 0;
+    outline: none;
+    background: transparent;
+    color: var(--text);
+    font: inherit;
+    font-size: 14px;
+}
+
+.fiction-discovery__search input::placeholder {
+    color: #92877D;
+}
+
+.fiction-discovery__search input:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+.fiction-discovery__search button {
+    flex-shrink: 0;
+    padding: 12px 20px;
+    border: 0;
+    border-radius: 8px;
+    background: var(--brown);
+    color: #FFFFFF;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background .2s, transform .2s;
+}
+
+.fiction-discovery__search button:hover {
+    background: var(--brown-dark);
+}
+
+.fiction-discovery__search button:active {
+    transform: scale(.98);
+}
+
+.fiction-discovery__reset {
+    flex-shrink: 0;
+    color: var(--brown);
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.fiction-discovery__reset:hover {
+    color: var(--brown-dark);
+    text-decoration: underline;
+}
+
+/* Discovery sections */
+.fiction-discovery__section {
+    margin-top: 28px;
+}
+
+.fiction-discovery__section-heading {
+    margin-bottom: 15px;
+}
+
+.fiction-discovery__eyebrow {
+    margin-bottom: 5px;
+    color: var(--brown);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.6px;
+}
+
+.fiction-discovery__heading {
+    margin: 0 0 5px;
+    color: var(--text);
+    font-size: 21px;
+    font-weight: 750;
+    line-height: 1.4;
+}
+
+.fiction-discovery__description {
+    margin: 0;
+    color: #817970;
+    font-size: 14px;
+    line-height: 1.65;
+}
+
+/* Category chips */
+.fiction-discovery__chips {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 9px;
+}
+
+.fiction-discovery__chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    max-width: 100%;
+    padding: 9px 15px;
+    border: 1px solid #D8C7B8;
+    border-radius: 999px;
+    background: #FFFFFF;
+    color: var(--brown);
+    font-size: 13px;
+    font-weight: 650;
+    line-height: 1.4;
+    text-decoration: none;
+    overflow-wrap: anywhere;
+    transition:
+        background .2s,
+        color .2s,
+        border-color .2s,
+        box-shadow .2s,
+        transform .2s;
+}
+
+.fiction-discovery__chip:hover {
+    border-color: var(--brown);
+    background: #F4EDE5;
+    color: var(--brown-dark);
+    transform: translateY(-1px);
+}
+
+.fiction-discovery__chip.is-active {
+    border-color: var(--brown);
+    background: var(--brown);
+    color: #FFFFFF;
+    box-shadow: 0 3px 8px rgb(107 66 38 / 14%);
+}
+
+.fiction-discovery__chip:focus-visible,
+.fiction-discovery__search button:focus-visible,
+.fiction-discovery__reset:focus-visible {
+    outline: 2px solid var(--brown);
+    outline-offset: 3px;
+}
+
+/* Story tags */
+.fiction-discovery__tags-section {
+    padding-top: 23px;
+    border-top: 1px solid var(--divider);
+}
+
+.fiction-discovery__chip--tag {
+    padding: 7px 12px;
+    border-color: #E1D5C9;
+    background: #F5EFE7;
+    color: var(--brown);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.fiction-discovery__chip--tag:hover {
+    border-color: var(--brown);
+    background: #EDE0D2;
+    color: var(--brown-dark);
+}
+
+.fiction-tag-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 19px;
+    height: 19px;
+    padding: 0 5px;
+    box-sizing: border-box;
+    border-radius: 999px;
+    background: rgb(107 66 38 / 10%);
+    color: var(--brown-dark);
+    font-size: 10px;
+    font-weight: 700;
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+    .fiction-discovery {
+        margin: 22px 0 30px;
+    }
+
+    .fiction-discovery__search {
+        gap: 8px;
+        padding: 6px 7px 6px 11px;
+    }
+
+    .fiction-discovery__search input {
+        padding: 10px 0;
+        font-size: 12px;
+    }
+
+    .fiction-discovery__search button {
+        padding: 11px 12px;
+        font-size: 12px;
+    }
+
+    .fiction-discovery__reset {
+        font-size: 11px;
+    }
+
+    .fiction-discovery__section {
+        margin-top: 23px;
+    }
+
+    .fiction-discovery__heading {
+        font-size: 19px;
+    }
+
+    .fiction-discovery__description {
+        font-size: 13px;
+    }
+
+    .fiction-discovery__chips {
+        gap: 8px;
+    }
+
+    .fiction-discovery__chip {
+        padding: 8px 12px;
+        font-size: 12px;
+    }
+
+    .fiction-discovery__chip--tag {
+        padding: 7px 10px;
+    }
+}
+
+@media (max-width: 380px) {
+    .fiction-discovery__search {
+        flex-wrap: wrap;
+    }
+
+    .fiction-discovery__search-icon {
+        width: 18px;
+    }
+
+    .fiction-discovery__search input {
+        flex-basis: 60%;
+    }
+
+    .fiction-discovery__search button {
+        margin-left: auto;
+    }
+}
+
