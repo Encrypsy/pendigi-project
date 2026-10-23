@@ -1125,3 +1125,135 @@
     }
 }
 
+
+/* Cerita pilihan: grid dua kolom di sidebar utama */
+.story-horizontal-container {
+    overflow: visible;
+}
+
+.story-horizontal-track {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    align-items: start;
+}
+
+.fiction-story-card {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    padding: 10px;
+    overflow: hidden;
+    background: #FFFFFF;
+    border: 1px solid var(--divider);
+    border-radius: 10px;
+    color: var(--text);
+    text-decoration: none;
+    transition: border-color .2s, box-shadow .2s, transform .2s;
+}
+
+.fiction-story-card:hover {
+    border-color: #C9AC95;
+    box-shadow: 0 4px 14px rgb(42 36 32 / 7%);
+    transform: translateY(-2px);
+}
+
+.fiction-story-cover-wrap {
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    overflow: hidden;
+    border-radius: 6px;
+    background: var(--paper);
+}
+
+.fiction-story-cover {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform .25s;
+}
+
+.fiction-story-card:hover .fiction-story-cover {
+    transform: scale(1.025);
+}
+
+.fiction-story-placeholder {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+    color: var(--brown);
+    font-size: 28px;
+}
+
+.fiction-story-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    padding: 10px 2px 2px;
+    min-width: 0;
+}
+
+.fiction-story-info h3 {
+    display: -webkit-box;
+    width: 100%;
+    margin: 0;
+    overflow: hidden;
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+}
+
+.fiction-story-author {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    max-width: 100%;
+    margin: 0;
+    overflow: hidden;
+    color: #817970;
+    font-size: 12px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.fiction-story-chapters {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--brown);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* Sidebar grid: hindari kartu terlalu kecil */
+@media (max-width: 600px) {
+    .story-horizontal-track {
+        gap: 10px;
+    }
+
+    .fiction-story-card {
+        padding: 7px;
+    }
+
+    .fiction-story-info {
+        gap: 5px;
+        padding-top: 8px;
+    }
+
+    .fiction-story-info h3 {
+        font-size: 12px;
+    }
+
+    .fiction-story-author,
+    .fiction-story-chapters {
+        font-size: 11px;
+    }
+}

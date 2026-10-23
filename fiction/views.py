@@ -347,9 +347,12 @@ def admin_review_story(request, pk):
 
 def story_list(request):
     # Hanya cerita yang sudah disetujui
-    stories = Stories.objects.filter(
-        status=StatusStory.APPROVED
-    ).select_related('author')
+    stories = (
+        Stories.objects
+        .filter(status=StatusStory.APPROVED)
+        .select_related('author')
+        .annotate(chapter_count=Count('chapters'))
+    )
 
     # SEARCH: judul, username penulis, atau tag
     search_query = request.GET.get('q', '').strip()
