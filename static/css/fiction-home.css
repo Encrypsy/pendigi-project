@@ -1257,3 +1257,296 @@
         font-size: 11px;
     }
 }
+
+
+/* ===== Layout utama fiksi ===== */
+
+.fiction-home {
+    width: min(100% - 32px, 1120px);
+    margin: 0 auto;
+}
+
+.fiction-layout-search {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 28px 0;
+    padding: 8px 9px 8px 16px;
+    background: #fff;
+    border: 1px solid var(--divider);
+    border-radius: 12px;
+}
+
+.fiction-layout-search > svg {
+    flex-shrink: 0;
+    color: var(--brown);
+}
+
+.fiction-layout-search input {
+    flex: 1;
+    min-width: 0;
+    padding: 11px 0;
+    border: 0;
+    outline: none;
+    background: transparent;
+    color: var(--text);
+    font: inherit;
+    font-size: 14px;
+}
+
+.fiction-layout-search button {
+    padding: 11px 20px;
+    border: 0;
+    border-radius: 8px;
+    background: var(--brown);
+    color: #fff;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.fiction-layout-search button:hover {
+    background: var(--brown-dark);
+}
+
+/* Kiri: konten cerita. Kanan: sidebar filter. */
+.fiction-content-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.8fr) minmax(230px, 1fr);
+    align-items: start;
+    gap: 28px;
+}
+
+.fiction-main-column,
+.fiction-sidebar {
+    min-width: 0;
+}
+
+.fiction-main-column .fiction-section {
+    margin: 0 0 34px;
+}
+
+.fiction-main-column .fiction-section-header {
+    margin-bottom: 16px;
+}
+
+.fiction-main-column .fiction-section-header h2 {
+    margin: 0;
+    color: var(--text);
+    font-size: 21px;
+}
+
+/* Grid cover 2 kolom seperti referensi */
+.fiction-story-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+    gap: 16px;
+}
+
+.fiction-story-grid .fiction-story-card {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    padding: 9px;
+    overflow: hidden;
+    border: 1px solid var(--divider);
+    border-radius: 10px;
+    background: #fff;
+    color: var(--text);
+    text-decoration: none;
+    transition: border-color .2s, box-shadow .2s, transform .2s;
+}
+
+.fiction-story-grid .fiction-story-card:hover {
+    border-color: #c9ac95;
+    box-shadow: 0 4px 14px rgb(42 36 32 / 7%);
+    transform: translateY(-2px);
+}
+
+.fiction-story-grid .fiction-story-cover-wrap {
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    overflow: hidden;
+    border-radius: 6px;
+    background: var(--paper);
+}
+
+.fiction-story-grid .fiction-story-cover {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.fiction-story-grid .fiction-story-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 7px;
+    padding: 10px 2px 2px;
+}
+
+.fiction-story-grid .fiction-story-info h3 {
+    display: -webkit-box;
+    width: 100%;
+    margin: 0;
+    overflow: hidden;
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+}
+
+.fiction-story-chapters,
+.fiction-story-grid .fiction-story-author {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    max-width: 100%;
+    margin: 0;
+    color: var(--brown);
+    font-size: 12px;
+}
+
+.fiction-story-grid .fiction-story-author {
+    overflow: hidden;
+    color: #817970;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.fiction-story-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    background: var(--paper);
+    color: var(--brown);
+    font-size: 28px;
+}
+
+/* Sidebar kanan */
+.fiction-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.fiction-sidebar-card {
+    padding: 18px;
+    border: 1px solid var(--divider);
+    border-radius: 12px;
+    background: #fff;
+}
+
+.fiction-sidebar-card h2 {
+    margin: 0 0 5px;
+    color: var(--text);
+    font-size: 18px;
+}
+
+.fiction-sidebar-card > p {
+    margin: 0 0 15px;
+    color: #817970;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.fiction-sidebar-categories {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.fiction-sidebar-categories a {
+    display: block;
+    padding: 9px 11px;
+    border-radius: 7px;
+    color: var(--brown);
+    font-size: 13px;
+    text-decoration: none;
+    transition: background .2s, color .2s;
+}
+
+.fiction-sidebar-categories a:hover {
+    background: #f5efe7;
+}
+
+.fiction-sidebar-categories a.is-active {
+    background: var(--brown);
+    color: #fff;
+    font-weight: 600;
+}
+
+/* Tag di bawah kategori */
+.fiction-sidebar-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.fiction-sidebar-tags a {
+    max-width: 100%;
+    padding: 7px 10px;
+    overflow-wrap: anywhere;
+    border: 1px solid #e1d5c9;
+    border-radius: 999px;
+    background: #f5efe7;
+    color: var(--brown);
+    font-size: 12px;
+    text-decoration: none;
+}
+
+.fiction-sidebar-tags a:hover {
+    border-color: var(--brown);
+    background: #ede0d2;
+}
+
+/* Mobile: sidebar turun ke bawah grid cerita */
+@media (max-width: 700px) {
+    .fiction-content-layout {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 28px;
+    }
+
+    .fiction-sidebar {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        align-items: start;
+        gap: 12px;
+    }
+
+    .fiction-sidebar-card {
+        padding: 13px;
+    }
+}
+
+@media (max-width: 420px) {
+    .fiction-home {
+        width: calc(100% - 24px);
+    }
+
+    .fiction-story-grid {
+        gap: 10px;
+    }
+
+    .fiction-story-grid .fiction-story-card {
+        padding: 6px;
+    }
+
+    .fiction-story-grid .fiction-story-info h3 {
+        font-size: 12px;
+    }
+
+    .fiction-story-chapters,
+    .fiction-story-grid .fiction-story-author {
+        font-size: 10px;
+    }
+
+    .fiction-sidebar {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}

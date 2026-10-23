@@ -11,9 +11,10 @@
 
 {% block fiction_content %}
 
+
 <div class="fiction-home">
 
-    <!-- ================= BANNER FIKSI ================= -->
+    <!-- BANNER TETAP DI ATAS -->
     {% if banners %}
     <section class="fiction-banner-section">
         <div class="fiction-banner-slider">
@@ -30,7 +31,6 @@
                 {% if banner.title %}
                 <div class="fiction-banner-overlay">
                     <h2>{{ banner.title }}</h2>
-
                     {% if banner.description %}
                     <p>{{ banner.description }}</p>
                     {% endif %}
@@ -56,77 +56,181 @@
     {% endif %}
 
 
-    <!-- ================= SEARCH & DISCOVERY ================= -->
-    <section class="fiction-discovery">
+    <!-- SEARCH BAR -->
+    <form
+        class="fiction-layout-search"
+        method="get"
+        action="{% url 'fiction:story_list' %}"
+        role="search"
+    >
+        <svg width="20" height="20" viewBox="0 0 24 24"
+             fill="none" stroke="currentColor" stroke-width="2"
+             aria-hidden="true">
+            <circle cx="11" cy="11" r="7"></circle>
+            <path d="m20 20-4-4"></path>
+        </svg>
 
-        <!-- SEARCH BAR -->
-        <form
-            class="fiction-discovery__search"
-            method="get"
-            action="{% url 'fiction:story_list' %}"
-            role="search"
+        <input
+            type="search"
+            name="q"
+            value="{{ search_query|default:'' }}"
+            placeholder="Cari judul cerita, penulis, atau tag..."
+            aria-label="Cari cerita fiksi"
         >
-            {% if selected_genre %}
-            <input
-                type="hidden"
-                name="genre"
-                value="{{ selected_genre }}"
-            >
-            {% endif %}
 
-            <svg
-                class="fiction-discovery__search-icon"
-                width="21"
-                height="21"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                aria-hidden="true"
-            >
-                <circle cx="11" cy="11" r="7"></circle>
-                <path d="m20 20-4-4"></path>
-            </svg>
+        <button type="submit">Cari</button>
+    </form>
 
-            <input
-                type="search"
-                name="q"
-                value="{{ search_query|default:'' }}"
-                placeholder="Cari judul cerita, penulis, atau tag..."
-                aria-label="Cari cerita fiksi"
-            >
 
-            {% if search_query or selected_genre %}
-            <a
-                href="{% url 'fiction:story_list' %}"
-                class="fiction-discovery__reset"
-                aria-label="Hapus pencarian dan filter"
-                title="Reset pencarian"
-            >
-                Reset
-            </a>
-            {% endif %}
+    <!-- LAYOUT DUA KOLOM -->
+    <div class="fiction-content-layout">
 
-            <button type="submit">Cari Cerita</button>
-        </form>
-        
-        <!-- KATEGORI FIKSI -->
-        <div class="fiction-discovery__section fiction-category-section">
+        <!-- KOLOM KIRI -->
+        <main class="fiction-main-column">
 
-            <div class="fiction-discovery__section-heading">
-                <span class="fiction-discovery__eyebrow">JELAJAHI DUNIA CERITA</span>
-                <h2 class="fiction-discovery__heading">Pilih Genre Favoritmu</h2>
-                <p class="fiction-discovery__description">
-                    Temukan cerita sesuai suasana hatimu.
-                </p>
-            </div>
+            <!-- CERITA PILIHAN -->
+            <section class="fiction-section">
+                <div class="fiction-section-header">
+                    <h2>
+                        {% if search_query or selected_genre %}
+                            Hasil Penelusuran
+                        {% else %}
+                            Cerita Pilihan untuk Kamu
+                        {% endif %}
+                    </h2>
+                </div>
 
-            <div class="fiction-category-scroll">
-                <div class="fiction-discovery__chips">
-
+                <div class="fiction-story-grid">
+                    {% for story in recommended_stories %}
                     <a
-                        href="{% url 'fiction:story_list' %}{% if search_query %}?q={{ search_query|urlencode }}{% endif %}"
-                        class="fiction-discovery__chip {% if not selected_genre %}is-active{% endif %}"
+                        href="{% url 'fiction:story_detail' story.pk %}"
+                        class="fiction-story-card"
+                    >
+                        <div class="fiction-story-cover-wrap">
+                            {% if story.cover %}
+                            <img
+                                src="{{ story.cover.url }}"
+                                alt="{{ story.title }}"
+                                class="fiction-story-cover"
+                                loading="lazy"
+                            >
+                            {% else %}
+                            <div class="fiction-story-placeholder">📖</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="fiction-story-info">
+                            <h3>{{ story.title }}</h3>
+
+                            <span class="fiction-story-chapters">
+                                <svg width="14" height="14"
+                                     viewBox="0 0 24 24" fill="none"
+                                     stroke="currentColor" stroke-width="2"
+                                     aria-hidden="true">
+                                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"></path>
+                                </svg>
+                                {{ story.chapter_count }} bab
+                            </span>
+
+                            <p class="fiction-story-author">
+                                <svg width="14" height="14"
+                                     viewBox="0 0 24 24" fill="none"
+                                     stroke="currentColor" stroke-width="2"
+                                     aria-hidden="true">
+                                    <circle cx="12" cy="8" r="4"></circle>
+                                    <path d="M5 21a7 7 0 0 1 14 0"></path>
+                                </svg>
+                                {{ story.author.username }}
+                            </p>
+                        </div>
+                    </a>
+                    {% empty %}
+                    <p class="empty-fiction">
+                        Belum ada cerita yang cocok.
+                    </p>
+                    {% endfor %}
+                </div>
+            </section>
+
+
+            <!-- LANJUTKAN MEMBACA -->
+            {% if request.user.is_authenticated and continue_reading %}
+            <section class="fiction-section continue-reading-section">
+                <div class="fiction-section-header">
+                    <div>
+                        <h2>Lanjutkan Membaca</h2>
+                        <p>Lanjutkan cerita yang belum selesai kamu baca.</p>
+                    </div>
+                </div>
+
+                <div class="continue-reading-list">
+                    {% for progress in continue_reading|slice:":2" %}
+                    <article class="continue-reading-card">
+                        <div class="continue-cover">
+                            {% if progress.story.cover %}
+                            <img
+                                src="{{ progress.story.cover.url }}"
+                                alt="{{ progress.story.title }}"
+                                loading="lazy"
+                            >
+                            {% else %}
+                            <div class="continue-cover-placeholder">📖</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="continue-content">
+                            <h3>{{ progress.story.title }}</h3>
+                            <p class="continue-author">
+                                oleh {{ progress.story.author.username }}
+                            </p>
+                            <p class="continue-description">
+                                {{ progress.story.description|truncatewords:30 }}
+                            </p>
+
+                            <div class="continue-progress-info">
+                                <span>
+                                    Bab {{ progress.last_chapter.chapter_number }}
+                                    dari {{ progress.total_chapters }}
+                                </span>
+                                <span>{{ progress.progress_percentage }}%</span>
+                            </div>
+
+                            <div class="continue-progress">
+                                <div
+                                    class="continue-progress-bar"
+                                    style="width: {{ progress.progress_percentage }}%;"
+                                ></div>
+                            </div>
+
+                            <a
+                                href="{% url 'fiction:read_chapter' progress.story.pk progress.next_chapter_number %}"
+                                class="continue-button"
+                            >
+                                Lanjut Membaca
+                            </a>
+                        </div>
+                    </article>
+                    {% endfor %}
+                </div>
+            </section>
+            {% endif %}
+
+        </main>
+
+
+        <!-- SIDEBAR KANAN -->
+        <aside class="fiction-sidebar">
+
+            <!-- KATEGORI -->
+            <section class="fiction-sidebar-card">
+                <h2>Kategori Fiksi</h2>
+                <p>Jelajahi berdasarkan genre.</p>
+
+                <nav class="fiction-sidebar-categories">
+                    <a
+                        href="{% url 'fiction:story_list' %}"
+                        class="{% if not selected_genre %}is-active{% endif %}"
                     >
                         Semua Cerita
                     </a>
@@ -134,229 +238,34 @@
                     {% for genre in genres %}
                     <a
                         href="?{% if search_query %}q={{ search_query|urlencode }}&amp;{% endif %}genre={{ genre.value|urlencode }}"
-                        class="fiction-discovery__chip {% if selected_genre == genre.value|stringformat:'s' %}is-active{% endif %}"
+                        class="{% if selected_genre == genre.value|stringformat:'s' %}is-active{% endif %}"
                     >
                         {{ genre.label }}
                     </a>
                     {% endfor %}
-
-                </div>
-            </div>
-
-        </div>
-        
-        <!-- TAG CERITA -->
-        {% if popular_tags %}
-        <section class="fiction-discovery__section fiction-discovery__tags-section">
-
-            <div class="fiction-discovery__section-heading">
-                <span class="fiction-discovery__eyebrow">CARI BERDASARKAN TEMA</span>
-                <h2 class="fiction-discovery__heading">Lagi Suka Tema Apa?</h2>
-                <p class="fiction-discovery__description">
-                    Jelajahi cerita dari trope dan topik favorit pembaca.
-                </p>
-            </div>
-
-            <div class="fiction-discovery__chips">
-                {% for tag in popular_tags|slice:":6" %}
-                <a
-                    href="{% url 'fiction:tag_stories' tag.name %}"
-                    class="fiction-discovery__chip fiction-discovery__chip--tag"
-                >
-                    #{{ tag.name }}
-                    {% if tag.count %}
-                    <span class="fiction-tag-count">{{ tag.count }}</span>
-                    {% endif %}
-                </a>
-                {% endfor %}
-            </div>
-
-            <a href="{% url 'fiction:story_list' %}#semua-tag"
-            class="fiction-tags-more">
-                Jelajahi tag lainnya
-                <span aria-hidden="true">→</span>
-            </a>
-
-        </section>
-        {% endif %}
-
-    </section>
+                </nav>
+            </section>
 
 
-    <!-- ================= CERITA PILIHAN ================= -->
-    <section class="fiction-section">
+            <!-- TAG CERITA -->
+            {% if popular_tags %}
+            <section class="fiction-sidebar-card">
+                <h2>Tag Cerita</h2>
+                <p>Temukan cerita berdasarkan tema.</p>
 
-        <div class="fiction-section-header">
-            {% if search_query or selected_genre %}
-                <h2>Hasil Penelusuran</h2>
-            {% else %}
-                <h2>Cerita Pilihan untuk Kamu</h2>
-            {% endif %}
-        </div>
-
-        <div class="story-horizontal-container">
-            <div class="story-horizontal-track">
-
-                {% for story in recommended_stories %}
-                <a
-                    href="{% url 'fiction:story_detail' story.pk %}"
-                    class="fiction-story-card"
-                >
-                    <div class="fiction-story-cover-wrap">
-
-                        {% if story.cover %}
-                        <img
-                            src="{{ story.cover.url }}"
-                            alt="{{ story.title }}"
-                            class="fiction-story-cover"
-                            loading="lazy"
-                        >
-                        {% else %}
-                        <div class="fiction-story-placeholder">
-                            📖
-                        </div>
-                        {% endif %}
-
-                    </div>
-         
-                    <div class="fiction-story-info">
-                        <h3>{{ story.title }}</h3>
-
-                        <div class="fiction-story-chapters">
-                            <svg
-                                width="15"
-                                height="15"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="2"
-                                aria-hidden="true"
-                            >
-                                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"></path>
-                            </svg>
-
-                            <span>{{ story.chapter_count }} bab</span>
-                        </div>
-
-                        <p class="fiction-story-author">
-                            <svg
-                                width="14"
-                                height="14"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="2"
-                                aria-hidden="true"
-                            >
-                                <circle cx="12" cy="8" r="4"></circle>
-                                <path d="M5 21a7 7 0 0 1 14 0"></path>
-                            </svg>
-
-                            {{ story.author.username }}
-                        </p>
-                    </div>
-                </a>
-
-                {% empty %}
-                <p class="empty-fiction">
-                    {% if search_query or selected_genre %}
-                    Belum ada cerita yang cocok dengan pencarian atau kategori ini.
-                    {% else %}
-                    Belum ada cerita yang tersedia.
-                    {% endif %}
-                </p>
-                {% endfor %}
-
-            </div>
-        </div>
-    </section>
-
-
-    <!-- ================= LANJUTKAN MEMBACA ================= -->
-    {% if request.user.is_authenticated and continue_reading %}
-    <section class="fiction-section continue-reading-section">
-
-        <div class="fiction-section-header">
-            <div>
-                <h2>Lanjutkan Membaca</h2>
-                <p>
-                    Lanjutkan cerita yang belum selesai kamu baca.
-                </p>
-            </div>
-        </div>
-
-        <div class="continue-reading-list">
-
-            {% for progress in continue_reading|slice:":2" %}
-            <article class="continue-reading-card">
-
-                <div class="continue-cover">
-                    {% if progress.story.cover %}
-                    <img
-                        src="{{ progress.story.cover.url }}"
-                        alt="{{ progress.story.title }}"
-                        loading="lazy"
-                    >
-                    {% else %}
-                    <div class="continue-cover-placeholder">
-                        📖
-                    </div>
-                    {% endif %}
-                </div>
-
-                <div class="continue-content">
-
-                    <h3>{{ progress.story.title }}</h3>
-
-                    <p class="continue-author">
-                        oleh {{ progress.story.author.username }}
-                    </p>
-
-                    <p class="continue-description">
-                        {{ progress.story.description|truncatewords:30 }}
-                    </p>
-
-                    <div class="continue-progress-info">
-                        <span>
-                            Bab {{ progress.last_chapter.chapter_number }}
-                            dari {{ progress.total_chapters }}
-                        </span>
-
-                        <span>{{ progress.progress_percentage }}%</span>
-                    </div>
-
-                    <div class="continue-progress">
-                        <div
-                            class="continue-progress-bar"
-                            style="width: {{ progress.progress_percentage }}%;"
-                        ></div>
-                    </div>
-
-                    <a
-                        href="{% url 'fiction:read_chapter' progress.story.pk progress.next_chapter_number %}"
-                        class="continue-button"
-                    >
-                        Lanjut Membaca
+                <div class="fiction-sidebar-tags">
+                    {% for tag in popular_tags|slice:":10" %}
+                    <a href="{% url 'fiction:tag_stories' tag.name %}">
+                        #{{ tag.name }}
                     </a>
-
+                    {% endfor %}
                 </div>
-            </article>
-            {% endfor %}
+            </section>
+            {% endif %}
 
-        </div>
+        </aside>
 
-        {% if continue_reading_count > 2 %}
-        <div class="continue-more">
-            <a href="#" class="continue-more-button">
-                Lihat Selengkapnya
-            </a>
-        </div>
-        {% endif %}
-
-    </section>
-    {% endif %}
-
+    </div>
 </div>
 
 {% endblock %}
