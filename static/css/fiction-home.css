@@ -1,396 +1,696 @@
+
+/* =========================================
+   PENDIGI — FICTION HOME
+   Brand: Earthy Green, Cream, Brown
+========================================= */
+
+:root {
+    --paper: #FBF8F2;
+    --ink: #2F5D50;
+    --ink-dark: #234840;
+    --brown: #6B4226;
+    --brown-dark: #54331d;
+    --divider: #DDD6C9;
+    --text: #2A2420;
+}
+
+/* ===== PAGE ===== */
+
+.fiction-page-content {
+    background: var(--paper);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 32px 0 64px;
+}
+
 .fiction-home {
-    width: min(1120px, calc(100% - 48px));
+    width: min(1200px, calc(100% - 48px));
     margin: 0 auto;
-    padding: 32px 0 60px;
 }
 
-
-/* =========================
-   BANNER
-========================= */
-
-.fiction-banner-section {
-    margin-bottom: 42px;
+.fiction-home section {
+    margin-bottom: 52px;
 }
 
-.fiction-banner-slider {
+.fiction-home h1,
+.fiction-home h2,
+.fiction-home h3,
+.fiction-home p {
+    margin-top: 0;
+}
+
+.fiction-home h1,
+.fiction-home h2,
+.fiction-home h3 {
+    color: var(--ink-dark);
+}
+
+.fiction-home p {
+    line-height: 1.7;
+}
+
+/* ===== SECTION HEADING ===== */
+
+.fiction-section-heading {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 22px;
+}
+
+.fiction-section-heading h2 {
+    font-size: clamp(22px, 3vw, 30px);
+    margin-bottom: 6px;
+}
+
+.fiction-section-heading p {
+    color: #71675E;
+    margin-bottom: 0;
+    font-size: 14px;
+}
+
+.fiction-link {
+    color: var(--ink);
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.fiction-link:hover {
+    color: var(--brown);
+    text-decoration: underline;
+}
+
+/* ===== HERO ===== */
+
+.fiction-hero {
     position: relative;
-    width: 100%;
-    aspect-ratio: 3 / 1;
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr;
+    align-items: center;
+    gap: 32px;
+    padding: clamp(28px, 5vw, 60px);
+    background: var(--ink);
+    color: var(--paper);
+    border-radius: 24px;
     overflow: hidden;
+    margin-bottom: 44px;
+}
+
+.fiction-hero::after {
+    content: "";
+    position: absolute;
+    width: 280px;
+    height: 280px;
+    border: 1px solid rgb(255 255 255 / 15%);
+    border-radius: 50%;
+    right: -80px;
+    bottom: -140px;
+    pointer-events: none;
+}
+
+.fiction-hero h1 {
+    color: var(--paper);
+    font-size: clamp(30px, 4vw, 48px);
+    line-height: 1.15;
+    margin-bottom: 16px;
+    max-width: 620px;
+}
+
+.fiction-hero p {
+    color: #E8EEE9;
+    max-width: 540px;
+    margin-bottom: 24px;
+}
+
+.fiction-hero-label {
+    display: inline-block;
+    color: #F1D7B8;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+}
+
+.fiction-hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.fiction-hero-art {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 190px;
+}
+
+.fiction-hero-art img {
+    display: block;
+    width: 100%;
+    max-width: 320px;
+    max-height: 280px;
+    object-fit: contain;
     border-radius: 14px;
 }
 
-.fiction-banner-slide {
-    position: absolute;
-    inset: 0;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.4s ease;
+/* ===== BUTTONS ===== */
+
+.fiction-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 20px;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.2s ease;
 }
 
-.fiction-banner-slide.active {
-    opacity: 1;
-    visibility: visible;
+.fiction-btn:hover {
+    transform: translateY(-2px);
+}
+
+.fiction-btn-primary {
+    background: var(--ink);
+    color: #FFFFFF;
+}
+
+.fiction-btn-primary:hover {
+    background: var(--ink-dark);
+    color: #FFFFFF;
+}
+
+.fiction-hero .fiction-btn-primary {
+    background: var(--paper);
+    color: var(--ink-dark);
+}
+
+.fiction-hero .fiction-btn-primary:hover {
+    background: #EAE4D8;
+}
+
+.fiction-btn-outline {
+    background: transparent;
+    color: var(--ink);
+    border-color: var(--ink);
+}
+
+.fiction-btn-outline:hover {
+    background: var(--ink);
+    color: #FFFFFF;
+}
+
+.fiction-hero .fiction-btn-outline {
+    color: var(--paper);
+    border-color: rgb(255 255 255 / 55%);
+}
+
+.fiction-hero .fiction-btn-outline:hover {
+    background: rgb(255 255 255 / 10%);
+}
+
+/* ===== BANNER CAROUSEL ===== */
+
+.fiction-banner {
+    position: relative;
+    overflow: hidden;
+    border-radius: 18px;
+    background: #EAE4D8;
+    border: 1px solid var(--divider);
+}
+
+.fiction-banner-track {
+    display: flex;
+    transition: transform 0.4s ease;
+}
+
+.fiction-banner-slide {
+    position: relative;
+    flex: 0 0 100%;
+    min-width: 0;
+    min-height: 240px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    overflow: hidden;
+}
+
+.fiction-banner-copy {
+    position: relative;
+    z-index: 1;
+    padding: clamp(24px, 4vw, 44px);
+}
+
+.fiction-banner-copy h3 {
+    font-size: clamp(22px, 3vw, 34px);
+    line-height: 1.25;
+    margin-bottom: 12px;
+}
+
+.fiction-banner-copy p {
+    margin-bottom: 18px;
 }
 
 .fiction-banner-slide img {
     width: 100%;
     height: 100%;
+    min-height: 240px;
+    max-height: 340px;
     object-fit: cover;
-    display: block;
 }
 
-.fiction-banner-overlay {
+.fiction-banner-controls {
     position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    padding: 32px;
-    color: white;
-    background: linear-gradient(
-        transparent,
-        rgba(0, 0, 0, 0.7)
-    );
-}
-
-.fiction-banner-overlay h2 {
-    margin: 0 0 6px;
-}
-
-.fiction-banner-overlay p {
-    margin: 0;
-}
-
-.fiction-banner-dots {
+    z-index: 2;
+    right: 16px;
+    bottom: 16px;
     display: flex;
-    justify-content: center;
-    gap: 7px;
-    margin-top: 12px;
+    gap: 8px;
 }
 
-.fiction-banner-dots button {
-    width: 8px;
-    height: 8px;
-    border: none;
+.fiction-banner-controls button {
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    border: 1px solid var(--divider);
     border-radius: 50%;
-    background: #d5d5d5;
+    background: var(--paper);
+    color: var(--ink);
+    font-size: 20px;
     cursor: pointer;
 }
 
-.fiction-banner-dots button.active {
-    width: 22px;
-    border-radius: 10px;
-    background: #704529;
+.fiction-banner-controls button:hover {
+    background: var(--ink);
+    color: #FFFFFF;
 }
 
+/* ===== GENRES ===== */
 
-/* =========================
-   SECTION
-========================= */
-
-.fiction-section {
-    margin-bottom: 42px;
-}
-
-.fiction-section-header {
-    margin-bottom: 16px;
-}
-
-.fiction-section-header h2 {
-    margin: 0;
-    font-size: 22px;
-}
-
-.fiction-section-header p {
-    margin: 6px 0 0;
-    color: #777;
-    font-size: 14px;
-}
-
-
-/* =========================
-   HORIZONTAL STORY
-========================= */
-
-.story-horizontal-container {
-    overflow-x: auto;
-    scrollbar-width: thin;
-    padding-bottom: 10px;
-}
-
-.story-horizontal-track {
+.fiction-genre-list {
     display: flex;
-    gap: 18px;
-    width: max-content;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.fiction-genre-chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 11px 18px;
+    border: 1px solid var(--divider);
+    border-radius: 999px;
+    background: #FFFFFF;
+    color: var(--ink);
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.fiction-genre-chip:hover,
+.fiction-genre-chip.is-active {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: #FFFFFF;
+}
+
+/* ===== STORY GRID ===== */
+
+.fiction-story-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 24px 20px;
 }
 
 .fiction-story-card {
-    width: 180px;
-    flex-shrink: 0;
-    text-decoration: none;
-    color: inherit;
+    min-width: 0;
+    overflow: hidden;
+    background: #FFFFFF;
+    border: 1px solid var(--divider);
+    border-radius: 14px;
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
 }
 
-.fiction-story-cover-wrap {
-    width: 180px;
-    height: 255px;
-    overflow: hidden;
-    border-radius: 10px;
-    background: #f1eee9;
+.fiction-story-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 28px rgb(47 93 80 / 10%);
 }
 
 .fiction-story-cover {
+    position: relative;
+    display: block;
+    aspect-ratio: 3 / 4;
+    overflow: hidden;
+    background: #EAE4D8;
+}
+
+.fiction-story-cover img {
     width: 100%;
     height: 100%;
+    display: block;
     object-fit: cover;
-    transition: transform 0.25s ease;
+    transition: transform 0.35s ease;
 }
 
-.fiction-story-card:hover .fiction-story-cover {
-    transform: scale(1.03);
+.fiction-story-card:hover .fiction-story-cover img {
+    transform: scale(1.04);
 }
 
-.fiction-story-placeholder {
+.fiction-story-cover-placeholder {
+    display: grid;
+    place-items: center;
+    width: 100%;
     height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 42px;
+    padding: 20px;
+    color: var(--ink);
+    text-align: center;
+    font-size: 18px;
+    font-weight: 800;
 }
 
 .fiction-story-info {
-    padding-top: 9px;
-}
-
-.fiction-story-info h3 {
-    margin: 0;
-    font-size: 15px;
-    line-height: 1.3;
-}
-
-.fiction-story-author {
-    margin: 5px 0;
-    font-size: 13px;
-    color: #777;
+    padding: 16px;
 }
 
 .fiction-story-genre {
     display: inline-block;
+    margin-bottom: 9px;
+    color: var(--brown);
     font-size: 11px;
-    padding: 4px 8px;
-    border-radius: 20px;
-    background: #f2eee9;
-    color: #704529;
+    font-weight: 800;
+    letter-spacing: 0.7px;
+    text-transform: uppercase;
 }
 
+.fiction-story-title {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    margin-bottom: 8px;
+    font-size: 16px;
+    line-height: 1.45;
+}
 
-/* =========================
-   CONTINUE READING
-========================= */
+.fiction-story-title a {
+    color: var(--ink-dark);
+    text-decoration: none;
+}
 
-.continue-reading-list {
-    display: flex;
-    flex-direction: column;
+.fiction-story-title a:hover {
+    color: var(--brown);
+}
+
+.fiction-story-author {
+    color: #71675E;
+    font-size: 12px;
+    margin-bottom: 10px;
+}
+
+.fiction-story-description {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    color: #5F574F;
+    font-size: 13px;
+    line-height: 1.65;
+    margin-bottom: 0;
+}
+
+/* ===== CONTINUE READING ===== */
+
+.fiction-continue-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 18px;
 }
 
-.continue-reading-card {
+.fiction-continue-card {
     display: flex;
-    gap: 24px;
-    padding: 20px;
-    border: 1px solid #e3ddd6;
+    gap: 18px;
+    min-width: 0;
+    padding: 18px;
+    background: #FFFFFF;
+    border: 1px solid var(--divider);
     border-radius: 14px;
-    background: white;
 }
 
-.continue-cover {
-    width: 150px;
-    min-width: 150px;
-    height: 215px;
-    overflow: hidden;
-    border-radius: 9px;
-    background: #f1eee9;
-}
-
-.continue-cover img {
-    width: 100%;
-    height: 100%;
+.fiction-continue-cover {
+    flex: 0 0 100px;
+    width: 100px;
+    aspect-ratio: 3 / 4;
+    border-radius: 8px;
     object-fit: cover;
+    background: #EAE4D8;
 }
 
-.continue-cover-placeholder {
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 40px;
-}
-
-.continue-content {
-    flex: 1;
+.fiction-continue-info {
+    min-width: 0;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
 }
 
-.continue-content h3 {
-    margin: 0;
-    font-size: 21px;
+.fiction-continue-info h3 {
+    font-size: 17px;
+    line-height: 1.4;
+    margin-bottom: 8px;
 }
 
-.continue-author {
-    margin: 6px 0 12px;
-    color: #777;
-    font-size: 14px;
-}
-
-.continue-description {
-    color: #555;
-    line-height: 1.6;
-    margin: 0 0 18px;
-}
-
-.continue-progress-info {
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
+.fiction-continue-info p {
+    color: #71675E;
     font-size: 13px;
-    color: #777;
-    margin-bottom: 6px;
+    margin-bottom: 14px;
 }
 
-.continue-progress {
+.fiction-progress {
     width: 100%;
-    height: 7px;
-    background: #e9e4df;
-    border-radius: 10px;
+    height: 6px;
+    margin: 0 0 14px;
     overflow: hidden;
+    background: #EAE4D8;
+    border-radius: 99px;
 }
 
-.continue-progress-bar {
+.fiction-progress-bar {
     height: 100%;
-    background: #704529;
+    background: var(--ink);
     border-radius: inherit;
 }
 
-.continue-button {
-    margin-top: 18px;
-    display: inline-block;
-    padding: 10px 18px;
-    border-radius: 8px;
-    background: #704529;
-    color: white;
-    text-decoration: none;
-    font-size: 14px;
-    font-weight: 600;
+/* ===== SEARCH & FILTER ===== */
+
+.fiction-catalog-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 24px;
 }
 
-.continue-button:hover {
-    opacity: 0.9;
+.fiction-search {
+    display: flex;
+    width: min(100%, 420px);
+    gap: 8px;
 }
 
-.continue-more {
+.fiction-search input {
+    width: 100%;
+    min-width: 0;
+    padding: 12px 14px;
+    border: 1px solid var(--divider);
+    border-radius: 10px;
+    background: #FFFFFF;
+    color: var(--text);
+    font: inherit;
+    outline: none;
+}
+
+.fiction-search input:focus {
+    border-color: var(--ink);
+    box-shadow: 0 0 0 3px rgb(47 93 80 / 12%);
+}
+
+.fiction-search button {
+    flex-shrink: 0;
+    padding: 0 18px;
+    border: 0;
+    border-radius: 10px;
+    background: var(--ink);
+    color: #FFFFFF;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.fiction-search button:hover {
+    background: var(--ink-dark);
+}
+
+/* ===== EMPTY STATE ===== */
+
+.fiction-empty {
+    padding: 44px 24px;
+    border: 1px dashed var(--divider);
+    border-radius: 16px;
+    background: rgb(255 255 255 / 60%);
     text-align: center;
-    margin-top: 20px;
 }
 
-.continue-more-button {
-    color: #704529;
-    font-weight: 600;
-    text-decoration: none;
+.fiction-empty h3 {
+    margin-bottom: 8px;
 }
 
+.fiction-empty p {
+    color: #71675E;
+    margin-bottom: 20px;
+}
 
-/* =========================
-   MOBILE
-========================= */
+/* ===== RESPONSIVE ===== */
 
-@media (max-width: 768px) {
+@media (max-width: 1000px) {
+    .fiction-story-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .fiction-hero {
+        grid-template-columns: 1fr 0.7fr;
+        gap: 20px;
+    }
+}
+
+@media (max-width: 700px) {
+    .fiction-page-content {
+        padding-top: 22px;
+    }
 
     .fiction-home {
-        width: calc(100% - 28px);
-        padding-top: 20px;
+        width: calc(100% - 32px);
     }
 
-    .fiction-banner-slider {
-        aspect-ratio: 16 / 9;
-        border-radius: 10px;
+    .fiction-home section {
+        margin-bottom: 38px;
     }
 
-    .fiction-banner-overlay {
-        padding: 18px;
+    .fiction-hero {
+        grid-template-columns: 1fr;
+        padding: 28px 24px;
+        border-radius: 18px;
     }
 
-    .fiction-banner-overlay h2 {
-        font-size: 17px;
+    .fiction-hero-art {
+        min-height: 0;
     }
 
-    .fiction-banner-overlay p {
-        font-size: 12px;
+    .fiction-hero-art img {
+        max-height: 200px;
     }
 
-    .fiction-section-header h2 {
-        font-size: 19px;
+    .fiction-banner-slide {
+        grid-template-columns: 1fr;
     }
 
-    .fiction-story-card {
-        width: 140px;
+    .fiction-banner-copy {
+        padding: 24px;
     }
 
-    .fiction-story-cover-wrap {
-        width: 140px;
-        height: 200px;
+    .fiction-banner-slide img {
+        min-height: 170px;
+        max-height: 220px;
     }
 
-    .continue-reading-card {
-        padding: 14px;
+    .fiction-banner-controls {
+        bottom: 12px;
+        right: 12px;
+    }
+
+    .fiction-section-heading {
+        align-items: flex-start;
+    }
+
+    .fiction-story-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px 12px;
+    }
+
+    .fiction-story-info {
+        padding: 12px;
+    }
+
+    .fiction-story-title {
+        font-size: 14px;
+    }
+
+    .fiction-story-author {
+        font-size: 11px;
+    }
+
+    .fiction-continue-list {
+        grid-template-columns: 1fr;
+    }
+
+    .fiction-continue-card {
         gap: 14px;
+        padding: 14px;
     }
 
-    .continue-cover {
-        width: 105px;
-        min-width: 105px;
-        height: 150px;
+    .fiction-continue-cover {
+        flex-basis: 82px;
+        width: 82px;
     }
 
-    .continue-content h3 {
-        font-size: 17px;
-    }
-
-    .continue-description {
-        font-size: 13px;
-        line-height: 1.45;
-    }
-
-    .continue-button {
-        width: 100%;
-        text-align: center;
-        box-sizing: border-box;
-    }
-}
-
-
-@media (max-width: 480px) {
-
-    .continue-reading-card {
+    .fiction-catalog-toolbar {
+        align-items: stretch;
         flex-direction: column;
     }
 
-    .continue-cover {
-        width: 120px;
-        min-width: 120px;
-        height: 170px;
-    }
-
-    .continue-content {
+    .fiction-search {
         width: 100%;
     }
+}
 
-    .continue-description {
-        display: -webkit-box;
-        line-clamp: 4;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
+@media (max-width: 380px) {
+    .fiction-home {
+        width: calc(100% - 24px);
+    }
+
+    .fiction-story-grid {
+        gap: 12px 8px;
+    }
+
+    .fiction-story-info {
+        padding: 10px;
+    }
+
+    .fiction-genre-chip {
+        padding: 9px 14px;
+        font-size: 13px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .fiction-home *,
+    .fiction-home *::before,
+    .fiction-home *::after {
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
     }
 }
