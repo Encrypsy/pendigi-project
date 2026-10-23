@@ -1550,3 +1550,155 @@
         grid-template-columns: minmax(0, 1fr);
     }
 }
+
+
+/* ===== Cerita Pilihan: grid 3 kolom ===== */
+
+.fiction-story-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    align-items: start;
+}
+
+/* Kartu lebih ringkas */
+.fiction-story-grid .fiction-story-card {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    padding: 5px;
+    overflow: hidden;
+    border: 1px solid transparent;
+    border-radius: 9px;
+    background: transparent;
+    color: var(--text);
+    text-decoration: none;
+    transition:
+        background .2s ease,
+        border-color .2s ease,
+        transform .2s ease;
+}
+
+.fiction-story-grid .fiction-story-card:hover {
+    background: #FFFFFF;
+    border-color: var(--divider);
+    transform: translateY(-2px);
+}
+
+/* Cover */
+.fiction-story-grid .fiction-story-cover-wrap {
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    overflow: hidden;
+    border-radius: 6px;
+    background: #F0EAE2;
+}
+
+.fiction-story-grid .fiction-story-cover {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform .25s ease;
+}
+
+.fiction-story-grid .fiction-story-card:hover .fiction-story-cover {
+    transform: scale(1.025);
+}
+
+/* Informasi cerita */
+.fiction-story-grid .fiction-story-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    padding: 7px 2px 3px;
+    min-width: 0;
+}
+
+.fiction-story-grid .fiction-story-info h3 {
+    display: -webkit-box;
+    width: 100%;
+    margin: 0;
+    overflow: hidden;
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+}
+
+.fiction-story-grid .fiction-story-chapters,
+.fiction-story-grid .fiction-story-author {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    max-width: 100%;
+    margin: 0;
+    color: #817970;
+    font-size: 11px;
+    line-height: 1.4;
+}
+
+.fiction-story-grid .fiction-story-chapters svg,
+.fiction-story-grid .fiction-story-author svg {
+    flex-shrink: 0;
+    color: var(--brown);
+}
+
+.fiction-story-grid .fiction-story-author {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Placeholder jika belum ada cover */
+.fiction-story-grid .fiction-story-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    color: var(--brown);
+    font-size: 24px;
+}
+
+/* Jarak judul section dengan grid */
+.fiction-main-column .fiction-section-header {
+    margin-bottom: 10px;
+}
+
+/* Tablet: tetap 3 kolom selama ruang cukup */
+@media (max-width: 900px) {
+    .fiction-content-layout {
+        grid-template-columns: minmax(0, 1.7fr) minmax(200px, 1fr);
+        gap: 18px;
+    }
+
+    .fiction-story-grid {
+        gap: 6px;
+    }
+}
+
+/* Mobile: sidebar turun ke bawah, grid tetap 3 kolom */
+@media (max-width: 700px) {
+    .fiction-content-layout {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 24px;
+    }
+
+    .fiction-story-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px;
+    }
+}
+
+/* HP kecil: dua kolom agar cover dan teks tidak terlalu sempit */
+@media (max-width: 360px) {
+    .fiction-story-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+    }
+}
