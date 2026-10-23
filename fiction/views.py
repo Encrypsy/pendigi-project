@@ -346,22 +346,45 @@ def admin_review_story(request, pk):
     })
 
 def story_list(request):
-
     stories = Stories.objects.filter(
         status=StatusStory.APPROVED
     ).select_related('author')
 
+    # Search: judul cerita atau username penulis
+    search_query = request.GET.get('q', '').strip()
+
+    if search_query:
+        stories = stories.filter(
+            Q(title__icontains=search_query)
+            | Q(author__username__icontains=search_query)
+        )
+
+    # Ambil pilihan genre langsung dari field model
+    genre_field = Stories._meta.get_field('genre')
+    genre_choices = genre_field.choices
+
+    selected_genre = request.GET.get('genre', '').strip()
+
+    # Filter genre hanya jika nilainya valid
+    valid_genres = {str(value) for value, label in genre_choices}
+
+    if selected_genre in valid_genres:
+        stories = stories.filter(genre=selected_genre)
+    else:
+        selected_genre = ''
+
+    # Banner tetap seperti sebelumnya
     banners = Banner.objects.filter(
         type=BannerType.FIKSI,
         is_active=True
     ).order_by('order', '-created_at')
 
+    # Rekomendasi mengikuti hasil pencarian/filter
     recommended_stories = stories[:12]
 
     continue_reading = []
 
     if request.user.is_authenticated:
-
         progress_list = (
             ReadingProgress.objects
             .filter(
@@ -377,10 +400,8 @@ def story_list(request):
         )
 
         for progress in progress_list:
-
             total_chapters = progress.total_chapters
 
-            # Abaikan progress yang sudah sampai bab terakhir
             if total_chapters == 0:
                 continue
 
@@ -389,8 +410,6 @@ def story_list(request):
 
             continue_reading.append(progress)
 
-            # Kita hanya perlu data lebih dari 2 untuk
-            # menentukan apakah tombol "Lihat Selengkapnya" muncul
             if len(continue_reading) >= 3:
                 break
 
@@ -403,6 +422,14 @@ def story_list(request):
             'recommended_stories': recommended_stories,
             'continue_reading': continue_reading[:2],
             'continue_reading_count': len(continue_reading),
+
+            # Data untuk fitur pencarian dan kategori
+            'search_query': search_query,
+            'genres': [
+                {'value': value, 'label': label}
+                for value, label in genre_choices
+            ],
+            'selected_genre': selected_genre,
         }
     )
 
