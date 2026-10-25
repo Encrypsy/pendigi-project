@@ -692,76 +692,60 @@ def my_bookmarks(request):
         Bookmarks.objects
         .filter(user=request.user)
         .select_related('article', 'story')
+        .order_by('-created_at')
     )
 
-    # Statistik koleksi
+    # Statistik seluruh bookmark, tidak terpengaruh pencarian
     total_bookmarks = bookmarks.count()
+    total_articles = bookmarks.filter(article__isnull=False).count()
+    total_stories = bookmarks.filter(story__isnull=False).count()
 
-    article_bookmarks = [
-        item for item in bookmarks if item.article_id is not None
-    ]
-
-    story_bookmarks = [
-        item for item in bookmarks if item.story_id is not None
-    ]
-
-    total_articles = len(article_bookmarks)
-    total_stories = len(story_bookmarks)
-
-    # Tab kategori
+    # Ambil parameter dari URL
     active_tab = request.GET.get('tab', 'semua')
-    if active_tab not in ['semua', 'artikel', 'fiksi']:
+    search_query = request.GET.get('q', '').strip()
+    sort_order = request.GET.get('sort', 'terbaru')
+
+    # Validasi parameter
+    if active_tab not in ('semua', 'artikel', 'fiksi'):
         active_tab = 'semua'
 
-    # Pengurutan
-    sort_order = request.GET.get('sort', 'terbaru')
-    if sort_order not in ['terbaru', 'terlama']:
+    if sort_order not in ('terbaru', 'terlama'):
         sort_order = 'terbaru'
 
-    reverse_order = sort_order == 'terbaru'
-
-    article_bookmarks.sort(
-        key=lambda item: item.created_at,
-        reverse=reverse_order,
-    )
-    story_bookmarks.sort(
-        key=lambda item: item.created_at,
-        reverse=reverse_order,
-    )
-
-    # Pencarian judul
-    search_query = request.GET.get('q', '').strip()
-
+    # Cari berdasarkan judul artikel atau cerita
     if search_query:
-        article_bookmarks = [
-            item for item in article_bookmarks
-            if item.article and search_query.casefold()
-            in item.article.title.casefold()
-        ]
+        bookmarks = bookmarks.filter(
+            Q(article__title__icontains=search_query)
+            | Q(story__title__icontains=search_query)
+        )
 
-        story_bookmarks = [
-            item for item in story_bookmarks
-            if item.story and search_query.casefold()
-            in item.story.title.casefold()
-        ]
-
-    # Tentukan koleksi yang ditampilkan
-    if active_tab == 'artikel':
-        story_bookmarks_display = []
-        article_bookmarks_display = article_bookmarks
-    elif active_tab == 'fiksi':
-        article_bookmarks_display = []
-        story_bookmarks_display = story_bookmarks
+    # Urutkan berdasarkan waktu bookmark disimpan
+    if sort_order == 'terlama':
+        bookmarks = bookmarks.order_by('created_at')
     else:
-        article_bookmarks_display = article_bookmarks
-        story_bookmarks_display = story_bookmarks
+        bookmarks = bookmarks.order_by('-created_at')
+
+    # Pisahkan artikel dan fiksi
+    article_bookmarks = bookmarks.filter(
+        article__isnull=False
+    )
+
+    story_bookmarks = bookmarks.filter(
+        story__isnull=False
+    )
+
+    # Terapkan filter tab
+    if active_tab == 'artikel':
+        story_bookmarks = story_bookmarks.none()
+    elif active_tab == 'fiksi':
+        article_bookmarks = article_bookmarks.none()
 
     return render(
         request,
         'interactions/my_bookmarks.html',
         {
-            'article_bookmarks': article_bookmarks_display,
-            'story_bookmarks': story_bookmarks_display,
+            'article_bookmarks': article_bookmarks,
+            'story_bookmarks': story_bookmarks,
             'total_bookmarks': total_bookmarks,
             'total_articles': total_articles,
             'total_stories': total_stories,

@@ -686,6 +686,15 @@
             transition: none;
         }
     }
+
+    .bm-tabs a.bm-tab {
+        text-decoration: none;
+    }
+
+    .bm-tabs a.bm-tab:focus-visible {
+        outline: 2px solid var(--bm-brown);
+        outline-offset: 3px;
+    }
 </style>
 {% endblock %}
 
@@ -729,7 +738,7 @@
                 <div>
                     <p class="bm-stat-label">Total koleksi</p>
                     <p class="bm-stat-number" id="bm-total-count">
-                        {{ article_bookmarks|length|add:story_bookmarks|length }}
+                        {{ total_bookmarks }}
                     </p>
                 </div>
             </div>
@@ -746,7 +755,7 @@
                 </div>
                 <div>
                     <p class="bm-stat-label">Artikel</p>
-                    <p class="bm-stat-number">{{ article_bookmarks|length }}</p>
+                    <p class="bm-stat-number">{{ total_articles }}</p>
                 </div>
             </div>
 
@@ -762,7 +771,7 @@
                 </div>
                 <div>
                     <p class="bm-stat-label">Cerita fiksi</p>
-                    <p class="bm-stat-number">{{ story_bookmarks|length }}</p>
+                    <p class="bm-stat-number">{{ total_stories }}</p>
                 </div>
             </div>
         </section>
@@ -776,70 +785,88 @@
                 </div>
 
                 <span class="bm-result-count" id="bm-result-count">
-                    {{ article_bookmarks|length|add:story_bookmarks|length }} bacaan
+                    {{ article_bookmarks.count|add:story_bookmarks.count }} bacaan
                 </span>
             </div>
-
+           
             <!-- PENCARIAN DAN PENGURUTAN -->
-            <div class="bm-toolbar">
+            <form method="get" action="{% url 'interactions:my_bookmarks' %}"
+                class="bm-toolbar" id="bm-toolbar">
+
+                <input type="hidden" name="tab" value="{{ active_tab }}">
+
                 <label class="bm-search">
                     <svg viewBox="0 0 24 24" fill="none"
-                         stroke="currentColor" stroke-width="1.8"
-                         stroke-linecap="round">
+                        stroke="currentColor" stroke-width="1.8"
+                        stroke-linecap="round">
                         <circle cx="11" cy="11" r="7"/>
                         <path d="m20 20-4-4"/>
                     </svg>
+
                     <input
                         type="search"
+                        name="q"
                         id="bm-search-input"
+                        value="{{ search_query }}"
                         placeholder="Cari judul, penulis, atau kategori..."
                         aria-label="Cari bookmark"
                     >
                 </label>
 
-                <select id="bm-sort" class="bm-sort" aria-label="Urutkan koleksi">
-                    <option value="newest">Terbaru disimpan</option>
-                    <option value="oldest">Terlama disimpan</option>
-                </select>
-            </div>
+                <select
+                    name="sort"
+                    id="bm-sort"
+                    class="bm-sort"
+                    aria-label="Urutkan koleksi"
+                    onchange="this.form.requestSubmit()"
+                >
+                    <option value="terbaru"
+                        {% if sort_order == 'terbaru' %}selected{% endif %}>
+                        Terbaru disimpan
+                    </option>
 
+                    <option value="terlama"
+                        {% if sort_order == 'terlama' %}selected{% endif %}>
+                        Terlama disimpan
+                    </option>
+                </select>
+
+                <button type="submit" class="bm-explore-btn">
+                    Cari
+                </button>
+            </form>
+            
             <!-- TAB -->
-            <div class="bm-tabs" role="tablist" aria-label="Kategori bookmark">
-                <button
-                    type="button"
-                    class="bm-tab is-active"
-                    data-filter="all"
-                    role="tab"
-                    aria-selected="true"
+            <nav class="bm-tabs" aria-label="Kategori bookmark">
+
+                <a
+                    href="?tab=semua&amp;q={{ search_query|urlencode }}&amp;sort={{ sort_order }}"
+                    class="bm-tab {% if active_tab == 'semua' %}is-active{% endif %}"
+                    {% if active_tab == 'semua' %}aria-current="page"{% endif %}
                 >
                     Semua
-                    <span class="bm-tab-count">
-                        {{ article_bookmarks|length|add:story_bookmarks|length }}
-                    </span>
-                </button>
+                    <span class="bm-tab-count">{{ total_bookmarks }}</span>
+                </a>
 
-                <button
-                    type="button"
-                    class="bm-tab"
-                    data-filter="article"
-                    role="tab"
-                    aria-selected="false"
+                <a
+                    href="?tab=artikel&amp;q={{ search_query|urlencode }}&amp;sort={{ sort_order }}"
+                    class="bm-tab {% if active_tab == 'artikel' %}is-active{% endif %}"
+                    {% if active_tab == 'artikel' %}aria-current="page"{% endif %}
                 >
                     Artikel
-                    <span class="bm-tab-count">{{ article_bookmarks|length }}</span>
-                </button>
+                    <span class="bm-tab-count">{{ total_articles }}</span>
+                </a>
 
-                <button
-                    type="button"
-                    class="bm-tab"
-                    data-filter="story"
-                    role="tab"
-                    aria-selected="false"
+                <a
+                    href="?tab=fiksi&amp;q={{ search_query|urlencode }}&amp;sort={{ sort_order }}"
+                    class="bm-tab {% if active_tab == 'fiksi' %}is-active{% endif %}"
+                    {% if active_tab == 'fiksi' %}aria-current="page"{% endif %}
                 >
                     Fiksi
-                    <span class="bm-tab-count">{{ story_bookmarks|length }}</span>
-                </button>
-            </div>
+                    <span class="bm-tab-count">{{ total_stories }}</span>
+                </a>
+
+            </nav>
 
             <!-- KARTU BOOKMARK -->
             <div class="bm-grid" id="bm-grid">
@@ -1007,7 +1034,7 @@
                 <div
                     class="bm-empty"
                     id="bm-empty-all"
-                    {% if article_bookmarks or story_bookmarks %}hidden{% endif %}
+                    {% if total_bookmarks > 0 %}hidden{% endif %}
                 >
                     <div class="bm-empty-icon" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="none"
@@ -1060,6 +1087,7 @@
 {% block extra_js %}
 {{ block.super }}
 
+
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const grid = document.getElementById('bm-grid');
@@ -1073,82 +1101,126 @@ document.addEventListener('DOMContentLoaded', function () {
     const emptyFilter = document.getElementById('bm-empty-filter');
     const resetButton = document.getElementById('bm-reset');
 
+    if (!searchInput || !sortSelect) return;
+
     let activeFilter = 'all';
 
     function getCards() {
         return [...grid.querySelectorAll('.bm-card')];
     }
 
+    function normalizeText(value) {
+        return (value || '')
+            .toLocaleLowerCase('id-ID')
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .trim();
+    }
+
     function applyFilters() {
-        const query = searchInput.value.trim().toLocaleLowerCase();
+        const query = normalizeText(searchInput.value);
         const cards = getCards();
         let visibleCount = 0;
 
+        // Filter berdasarkan kategori dan kata kunci
         cards.forEach(function (card) {
             const matchesType =
                 activeFilter === 'all' ||
                 card.dataset.kind === activeFilter;
 
-            const searchText = (card.dataset.search || '').toLocaleLowerCase();
+            const searchText = normalizeText(card.dataset.search);
             const matchesSearch = searchText.includes(query);
             const visible = matchesType && matchesSearch;
 
             card.hidden = !visible;
 
-            if (visible) visibleCount++;
+            if (visible) {
+                visibleCount++;
+            }
         });
 
-        /* Urutkan kartu tanpa mengirim request ke server */
+        // Urutkan berdasarkan waktu bookmark disimpan
         const direction = sortSelect.value === 'oldest' ? 1 : -1;
 
         cards.sort(function (a, b) {
             const dateA = Number(a.dataset.saved || 0);
             const dateB = Number(b.dataset.saved || 0);
+
             return (dateA - dateB) * direction;
         });
 
+        // Susun ulang kartu tanpa menghilangkan elemen empty state
         cards.forEach(function (card) {
             grid.insertBefore(card, emptyAll);
         });
 
-        resultCount.textContent =
-            visibleCount + (visibleCount === 1 ? ' bacaan' : ' bacaan');
+        // Perbarui jumlah hasil
+        if (resultCount) {
+            resultCount.textContent =
+                visibleCount + ' bacaan';
+        }
 
-        emptyAll.hidden = cards.length !== 0;
-        emptyFilter.hidden = cards.length === 0 || visibleCount !== 0;
+        // Bedakan koleksi kosong dengan hasil filter kosong
+        const hasNoBookmarks = cards.length === 0;
+        const hasNoResults = cards.length > 0 && visibleCount === 0;
+
+        if (emptyAll) {
+            emptyAll.hidden = !hasNoBookmarks;
+        }
+
+        if (emptyFilter) {
+            emptyFilter.hidden = !hasNoResults;
+        }
     }
 
+    // Navigasi tab Semua, Artikel, dan Fiksi
     tabs.forEach(function (tab) {
         tab.addEventListener('click', function () {
-            activeFilter = tab.dataset.filter;
+            activeFilter = tab.dataset.filter || 'all';
 
             tabs.forEach(function (item) {
                 const isActive = item === tab;
+
                 item.classList.toggle('is-active', isActive);
-                item.setAttribute('aria-selected', String(isActive));
+                item.setAttribute(
+                    'aria-selected',
+                    String(isActive)
+                );
             });
 
             applyFilters();
         });
     });
 
+    // Pencarian langsung saat pengguna mengetik
     searchInput.addEventListener('input', applyFilters);
+
+    // Urutkan ulang ketika dropdown berubah
     sortSelect.addEventListener('change', applyFilters);
 
-    resetButton.addEventListener('click', function () {
-        activeFilter = 'all';
-        searchInput.value = '';
-        sortSelect.value = 'newest';
+    // Reset pencarian dan filter
+    if (resetButton) {
+        resetButton.addEventListener('click', function () {
+            activeFilter = 'all';
+            searchInput.value = '';
+            sortSelect.value = 'newest';
 
-        tabs.forEach(function (tab) {
-            const isActive = tab.dataset.filter === 'all';
-            tab.classList.toggle('is-active', isActive);
-            tab.setAttribute('aria-selected', String(isActive));
+            tabs.forEach(function (tab) {
+                const isActive = tab.dataset.filter === 'all';
+
+                tab.classList.toggle('is-active', isActive);
+                tab.setAttribute(
+                    'aria-selected',
+                    String(isActive)
+                );
+            });
+
+            applyFilters();
+            searchInput.focus();
         });
+    }
 
-        applyFilters();
-    });
-
+    // Terapkan kondisi awal
     applyFilters();
 });
 </script>
