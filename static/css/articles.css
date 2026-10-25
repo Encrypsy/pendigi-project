@@ -628,3 +628,89 @@
     outline: 2px solid #6B4226;
     outline-offset: 2px;
 }
+
+
+.category-latest-card {
+    position: relative;
+}
+
+.category-latest-link {
+    display: flex;
+    gap: 20px;
+    min-width: 0;
+    flex: 1;
+    color: inherit;
+    text-decoration: none;
+}
+
+.category-latest-image-wrap {
+    flex-shrink: 0;
+    overflow: hidden;
+    width: 215px;
+    border-radius: 5px;
+}
+
+.category-latest-image-wrap img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.category-bookmark-form {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 2;
+    margin: 0;
+}
+
+.category-bookmark-btn {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    color: #6B4226;
+    cursor: pointer;
+    transition: color .2s ease, transform .2s ease;
+}
+
+.category-bookmark-btn svg {
+    width: 23px;
+    height: 23px;
+    fill: transparent;
+    stroke: currentColor;
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.category-bookmark-btn:hover {
+    color: #422B1D;
+    transform: translateY(-1px);
+}
+
+.category-bookmark-btn.is-bookmarked svg {
+    fill: #6B4226;
+    color: #6B4226;
+}
+
+@media (max-width: 560px) {
+    .category-latest-link {
+        gap: 12px;
+    }
+
+    .category-latest-image-wrap {
+        width: 120px;
+    }
+
+    .category-bookmark-form {
+        top: 5px;
+        right: 5px;
+    }
+}
+
