@@ -41,31 +41,22 @@
     >
 
         <!-- ================= MENU ================= -->
-
+       
         <nav class="nav-links">
-
             {% for cat in navbar_categories %}
-
-                {% if cat.name|lower == 'fiksi' %}
-
-                    <a href="{% url 'fiction:story_list' %}">
-                        {{ cat.name }}
-                    </a>
-
-                {% else %}
-
-                    <a
-                        href="{% url 'articles:article_list' %}?kategori={{ cat.name|urlencode }}"
-                    >
-                        {{ cat.name }}
-                    </a>
-
+                {% if cat.name|lower != 'non-fiksi' %}
+                    {% if cat.name|lower == 'fiksi' %}
+                        <a href="{% url 'fiction:story_list' %}">
+                            {{ cat.name }}
+                        </a>
+                    {% else %}
+                        <a href="{% url 'articles:article_list' %}?kategori={{ cat.name|urlencode }}">
+                            {{ cat.name }}
+                        </a>
+                    {% endif %}
                 {% endif %}
-
             {% endfor %}
-
         </nav>
-
 
         <!-- ================= RIGHT SIDE ================= -->
 
