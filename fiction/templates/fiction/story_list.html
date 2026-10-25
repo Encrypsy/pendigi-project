@@ -7,14 +7,84 @@
 {% block extra_css %}
     {{ block.super }}
     <link rel="stylesheet" href="{% static 'css/fiction-home.css' %}">
+
+    <style>
+        /* Kartu cerita */
+        .fiction-story-card {
+            position: relative;
+            min-width: 0;
+        }
+
+        .fiction-story-card-link {
+            display: block;
+            height: 100%;
+            color: inherit;
+            text-decoration: none;
+        }
+
+        /* Tombol bookmark tanpa lingkaran */
+        .fiction-bookmark-form {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            z-index: 5;
+            margin: 0;
+        }
+
+        .fiction-bookmark-btn {
+            display: grid;
+            place-items: center;
+            width: 36px;
+            height: 36px;
+            padding: 6px;
+            border: none !important;
+            border-radius: 0 !important;
+            background: transparent !important;
+            box-shadow: none !important;
+            color: #6B4226;
+            cursor: pointer;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+
+        .fiction-bookmark-btn svg {
+            display: block;
+            width: 23px;
+            height: 23px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 1.8;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            transition: fill .15s ease, color .15s ease;
+        }
+
+        .fiction-bookmark-btn.is-bookmarked svg {
+            fill: #6B4226;
+            stroke: #6B4226;
+        }
+
+        .fiction-bookmark-btn:hover {
+            color: #4D2D18;
+        }
+
+        .fiction-bookmark-btn:focus-visible {
+            outline: 2px solid #6B4226;
+            outline-offset: 2px;
+        }
+
+        .fiction-bookmark-btn:disabled {
+            cursor: wait;
+            opacity: .6;
+        }
+    </style>
 {% endblock %}
 
 {% block fiction_content %}
 
-
 <div class="fiction-home">
 
-    <!-- BANNER TETAP DI ATAS -->
+    <!-- BANNER -->
     {% if banners %}
     <section class="fiction-banner-section">
         <div class="fiction-banner-slider">
@@ -55,7 +125,6 @@
     </section>
     {% endif %}
 
-
     <!-- SEARCH BAR -->
     <form
         class="fiction-layout-search"
@@ -63,9 +132,15 @@
         action="{% url 'fiction:story_list' %}"
         role="search"
     >
-        <svg width="20" height="20" viewBox="0 0 24 24"
-             fill="none" stroke="currentColor" stroke-width="2"
-             aria-hidden="true">
+        <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            aria-hidden="true"
+        >
             <circle cx="11" cy="11" r="7"></circle>
             <path d="m20 20-4-4"></path>
         </svg>
@@ -80,7 +155,6 @@
 
         <button type="submit">Cari</button>
     </form>
-
 
     <!-- LAYOUT DUA KOLOM -->
     <div class="fiction-content-layout">
@@ -102,71 +176,87 @@
 
                 <div class="fiction-story-grid">
                     {% for story in recommended_stories %}
-                    <a
-                        href="{% url 'fiction:story_detail' story.pk %}"
-                        class="fiction-story-card"
-                    >
-                        <div class="fiction-story-cover-wrap">
-                            {% if story.cover %}
-                            <img
-                                src="{{ story.cover.url }}"
-                                alt="{{ story.title }}"
-                                class="fiction-story-cover"
-                                loading="lazy"
-                            >
-                            {% else %}
-                            <div class="fiction-story-placeholder">📖</div>
-                            {% endif %}
-                        </div>
 
-                        <div class="fiction-story-info">
-                            <h3>{{ story.title }}</h3>
+                    <article class="fiction-story-card">
 
-                            <span class="fiction-story-chapters">
-                                <svg width="14" height="14"
-                                     viewBox="0 0 24 24" fill="none"
-                                     stroke="currentColor" stroke-width="2"
-                                     aria-hidden="true">
-                                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"></path>
-                                </svg>
-                                {{ story.chapter_count }} bab
-                            </span>
+                        <!-- Link kartu terpisah dari tombol bookmark -->
+                        <a
+                            href="{% url 'fiction:story_detail' story.pk %}"
+                            class="fiction-story-card-link"
+                        >
+                            <div class="fiction-story-cover-wrap">
+                                {% if story.cover %}
+                                <img
+                                    src="{{ story.cover.url }}"
+                                    alt="{{ story.title }}"
+                                    class="fiction-story-cover"
+                                    loading="lazy"
+                                >
+                                {% else %}
+                                <div class="fiction-story-placeholder">📖</div>
+                                {% endif %}
+                            </div>
 
-                            <p class="fiction-story-author">
-                                <svg width="14" height="14"
-                                     viewBox="0 0 24 24" fill="none"
-                                     stroke="currentColor" stroke-width="2"
-                                     aria-hidden="true">
-                                    <circle cx="12" cy="8" r="4"></circle>
-                                    <path d="M5 21a7 7 0 0 1 14 0"></path>
-                                </svg>
-                                {{ story.author.username }}
-                            </p>
-                        </div>
+                            <div class="fiction-story-info">
+                                <h3>{{ story.title }}</h3>
 
-                        <!-- TAMBAHKAN TOMBOL BOOKMARK DI SINI -->
+                                <span class="fiction-story-chapters">
+                                    <svg
+                                        width="14"
+                                        height="14"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                        aria-hidden="true"
+                                    >
+                                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"></path>
+                                    </svg>
+                                    {{ story.chapter_count }} bab
+                                </span>
+
+                                <p class="fiction-story-author">
+                                    <svg
+                                        width="14"
+                                        height="14"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                        aria-hidden="true"
+                                    >
+                                        <circle cx="12" cy="8" r="4"></circle>
+                                        <path d="M5 21a7 7 0 0 1 14 0"></path>
+                                    </svg>
+                                    {{ story.author.username }}
+                                </p>
+                            </div>
+                        </a>
+
+                        <!-- Bookmark di luar link cerita -->
                         <form
                             action="{% url 'interactions:toggle_story_bookmark' story.pk %}"
                             method="post"
                             class="fiction-bookmark-form"
-                            onclick="event.stopPropagation();"
                         >
                             {% csrf_token %}
-                            <input type="hidden" name="next" value="{{ request.get_full_path }}">
 
                             <button
                                 type="submit"
-                                class="fiction-bookmark-btn"
-                                aria-label="Simpan {{ story.title }} ke bookmark"
-                                title="Simpan ke bookmark"
+                                class="fiction-bookmark-btn {% if story.pk in bookmarked_story_ids %}is-bookmarked{% endif %}"
+                                aria-label="{% if story.pk in bookmarked_story_ids %}Hapus {{ story.title }} dari bookmark{% else %}Simpan {{ story.title }} ke bookmark{% endif %}"
+                                title="{% if story.pk in bookmarked_story_ids %}Hapus dari bookmark{% else %}Simpan ke bookmark{% endif %}"
+                                aria-pressed="{% if story.pk in bookmarked_story_ids %}true{% else %}false{% endif %}"
                             >
                                 <svg viewBox="0 0 24 24" aria-hidden="true">
                                     <path d="M6 3.75h12a1 1 0 0 1 1 1V21l-7-4.5L5 21V4.75a1 1 0 0 1 1-1Z"/>
                                 </svg>
                             </button>
                         </form>
-                    </a>
+
+                    </article>
+
                     {% empty %}
                     <p class="empty-fiction">
                         Belum ada cerita yang cocok.
@@ -174,7 +264,6 @@
                     {% endfor %}
                 </div>
             </section>
-
 
             <!-- LANJUTKAN MEMBACA -->
             {% if request.user.is_authenticated and continue_reading %}
@@ -203,9 +292,11 @@
 
                         <div class="continue-content">
                             <h3>{{ progress.story.title }}</h3>
+
                             <p class="continue-author">
                                 oleh {{ progress.story.author.username }}
                             </p>
+
                             <p class="continue-description">
                                 {{ progress.story.description|truncatewords:30 }}
                             </p>
@@ -240,7 +331,6 @@
 
         </main>
 
-
         <!-- SIDEBAR KANAN -->
         <aside class="fiction-sidebar">
 
@@ -267,7 +357,6 @@
                     {% endfor %}
                 </nav>
             </section>
-
 
             <!-- TAG CERITA -->
             {% if popular_tags %}
@@ -331,7 +420,6 @@
 
                         <div class="fiction-popular-info">
                             <h3>{{ story.title }}</h3>
-
                             <p>{{ story.author.username }}</p>
 
                             <span class="fiction-popular-views">
@@ -347,7 +435,6 @@
                                     <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"></path>
                                     <circle cx="12" cy="12" r="3"></circle>
                                 </svg>
-
                                 {{ story.views_count }} kali dibaca
                             </span>
                         </div>
@@ -359,57 +446,119 @@
                     {% endfor %}
                 </div>
             </section>
-        </aside>
 
+        </aside>
     </div>
 </div>
 
 {% endblock %}
-
 
 {% block extra_js %}
     {{ block.super }}
 
     <script>
     document.addEventListener('DOMContentLoaded', function () {
+
+        /* Slideshow banner */
         const slides = document.querySelectorAll('.fiction-banner-slide');
         const dots = document.querySelectorAll('.fiction-banner-dots button');
 
-        if (!slides.length) return;
+        if (slides.length) {
+            let currentIndex = 0;
+            let timer = null;
 
-        let currentIndex = 0;
-        let timer = null;
+            function showSlide(index) {
+                slides.forEach((slide, i) => {
+                    slide.classList.toggle('active', i === index);
+                });
 
-        function showSlide(index) {
-            slides.forEach((slide, i) => {
-                slide.classList.toggle('active', i === index);
+                dots.forEach((dot, i) => {
+                    dot.classList.toggle('active', i === index);
+                });
+
+                currentIndex = index;
+            }
+
+            function startTimer() {
+                if (slides.length <= 1) return;
+
+                clearInterval(timer);
+
+                timer = setInterval(function () {
+                    showSlide((currentIndex + 1) % slides.length);
+                }, 5000);
+            }
+
+            dots.forEach((dot, index) => {
+                dot.addEventListener('click', function () {
+                    showSlide(index);
+                    startTimer();
+                });
             });
 
-            dots.forEach((dot, i) => {
-                dot.classList.toggle('active', i === index);
-            });
-
-            currentIndex = index;
+            startTimer();
         }
 
-        function startTimer() {
-            if (slides.length <= 1) return;
+        /* Bookmark AJAX: tanpa reload halaman */
+        document.addEventListener('submit', async function (event) {
+            const form = event.target.closest('.fiction-bookmark-form');
 
-            clearInterval(timer);
+            if (!form) return;
 
-            timer = setInterval(function () {
-                showSlide((currentIndex + 1) % slides.length);
-            }, 5000);
-        }
+            event.preventDefault();
 
-        dots.forEach((dot, index) => {
-            dot.addEventListener('click', function () {
-                showSlide(index);
-                startTimer();
-            });
+            const button = form.querySelector('.fiction-bookmark-btn');
+
+            if (!button || button.disabled) return;
+
+            button.disabled = true;
+
+            try {
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: new FormData(form),
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    },
+                    credentials: 'same-origin'
+                });
+
+                if (!response.ok) {
+                    throw new Error('Permintaan bookmark gagal.');
+                }
+
+                const data = await response.json();
+
+                if (!data.success) {
+                    throw new Error(data.message || 'Bookmark gagal diperbarui.');
+                }
+
+                button.classList.toggle(
+                    'is-bookmarked',
+                    data.is_bookmarked
+                );
+
+                button.setAttribute(
+                    'aria-pressed',
+                    String(data.is_bookmarked)
+                );
+
+                const label = data.is_bookmarked
+                    ? 'Hapus dari bookmark'
+                    : 'Simpan ke bookmark';
+
+                button.setAttribute('aria-label', label);
+                button.title = label;
+
+            } catch (error) {
+                console.error('Bookmark error:', error);
+                alert('Bookmark gagal diperbarui. Silakan coba lagi.');
+            } finally {
+                button.disabled = false;
+            }
         });
 
-        startTimer();
     });
     </script>
 {% endblock %}

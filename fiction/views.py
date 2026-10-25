@@ -361,6 +361,7 @@ def story_list(request):
         .annotate(chapter_count=Count('chapters'))
         .order_by('-views_count', '-published_at')[:5]
     )
+    
 
     # SEARCH: judul, username penulis, atau tag
     search_query = request.GET.get('q', '').strip()

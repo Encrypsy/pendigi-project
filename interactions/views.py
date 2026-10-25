@@ -614,6 +614,7 @@ def _bookmark_redirect(request, fallback='articles:article_list'):
     return redirect(fallback)
 
 
+
 @login_required
 @require_POST
 def toggle_bookmark(request, pk):
@@ -624,11 +625,26 @@ def toggle_bookmark(request, pk):
         article=article,
     )
 
+    is_bookmarked = created
+
     if not created:
         bookmark.delete()
-        messages.success(request, 'Artikel dihapus dari bookmark.')
-    else:
+
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({
+            'success': True,
+            'is_bookmarked': is_bookmarked,
+            'message': (
+                'Artikel berhasil disimpan.'
+                if is_bookmarked
+                else 'Artikel dihapus dari bookmark.'
+            ),
+        })
+
+    if is_bookmarked:
         messages.success(request, 'Artikel berhasil disimpan.')
+    else:
+        messages.success(request, 'Artikel dihapus dari bookmark.')
 
     return _bookmark_redirect(request)
 
@@ -641,13 +657,29 @@ def toggle_story_bookmark(request, pk):
     bookmark, created = Bookmarks.objects.get_or_create(
         user=request.user,
         story=story,
+        article__isnull=True,
     )
+
+    is_bookmarked = created
 
     if not created:
         bookmark.delete()
-        messages.success(request, 'Cerita dihapus dari bookmark.')
-    else:
+
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({
+            'success': True,
+            'is_bookmarked': is_bookmarked,
+            'message': (
+                'Cerita berhasil disimpan.'
+                if is_bookmarked
+                else 'Cerita dihapus dari bookmark.'
+            ),
+        })
+
+    if is_bookmarked:
         messages.success(request, 'Cerita berhasil disimpan.')
+    else:
+        messages.success(request, 'Cerita dihapus dari bookmark.')
 
     return _bookmark_redirect(request, fallback='fiction:story_list')
 
