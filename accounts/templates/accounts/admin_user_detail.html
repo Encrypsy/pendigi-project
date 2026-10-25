@@ -75,14 +75,14 @@
                     {% if user_obj.is_superuser %}
                         Admin
                     {% elif user_obj.status_kontributor == 'approved' %}
-                        Kontributor
+                        Penulis
                     {% else %}
                         Pembaca
                     {% endif %}
                 </strong>
             </div>
             <div>
-                <span>Status kontributor</span>
+                <span>Status penulis</span>
                 <strong>{{ user_obj.get_status_kontributor_display|default:"Belum mengajukan" }}</strong>
             </div>
             <div>
