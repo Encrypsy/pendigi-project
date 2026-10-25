@@ -767,18 +767,21 @@
             </a>
           </section>
         {% endif %}
-
+        
         <section class="category-sidebar-section">
-          <h2 class="category-section-title">Jelajahi Kategori</h2>
-          <div class="category-links">
-            {% for category in categories %}
-              <a href="{% url 'articles:article_list' %}?kategori={{ category.name|urlencode }}">
-                {{ category.name }}
-              </a>
-            {% empty %}
-              <p>Belum ada kategori.</p>
-            {% endfor %}
-          </div>
+            <h2 class="category-section-title">Jelajahi Kategori</h2>
+
+            <div class="category-links">
+                {% for category in categories %}
+                    {% if category.name|lower != 'fiksi' and category.name|lower != 'non-fiksi' %}
+                        <a href="{% url 'articles:article_list' %}?kategori={{ category.name|urlencode }}">
+                            {{ category.name }}
+                        </a>
+                    {% endif %}
+                {% empty %}
+                    <p>Belum ada kategori.</p>
+                {% endfor %}
+            </div>
         </section>
       </aside>
     </div>
