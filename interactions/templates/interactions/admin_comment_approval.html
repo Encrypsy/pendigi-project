@@ -180,70 +180,51 @@
             <td>
                 {{ comment.created_at|date:"d M Y H:i" }}
             </td>
-
-
+              
             <!-- AKSI -->
-
             <td>
+                <div class="table-actions">
 
-                {% if comment_status == 'pending' %}
-
-                    <div class="table-actions">
-
+                    {% if comment_status == 'pending' %}
                         <form
                             action="{% url 'interactions:admin_approve_comment' comment.pk %}"
                             method="post"
                         >
-
                             {% csrf_token %}
-
-                            <button
-                                type="submit"
-                                class="btn-approve"
-                            >
+                            <button type="submit" class="btn-approve">
                                 Approve
                             </button>
-
                         </form>
-
 
                         <form
                             action="{% url 'interactions:admin_reject_comment' comment.pk %}"
                             method="post"
                         >
-
                             {% csrf_token %}
-
-                            <button
-                                type="submit"
-                                class="btn-reject"
-                            >
+                            <button type="submit" class="btn-reject">
                                 Reject
                             </button>
-
                         </form>
+                    {% endif %}
 
-                    </div>
+                    <form
+                        action="{% url 'interactions:delete_comment' comment.pk %}"
+                        method="post"
+                        onsubmit="return confirm('Yakin ingin menghapus komentar dari {{ comment.user.username|escapejs }}? Jika komentar ini memiliki balasan, balasannya juga akan terhapus.');"
+                    >
+                        {% csrf_token %}
+                        <input
+                            type="hidden"
+                            name="next"
+                            value="{{ request.get_full_path }}"
+                        >
+                        <button type="submit" class="btn-delete-comment">
+                            Hapus
+                        </button>
+                    </form>
 
-
-                {% elif comment_status == 'approved' %}
-
-                    <span class="status-badge status-approved">
-                        Approved
-                    </span>
-
-
-                {% elif comment_status == 'rejected' %}
-
-                    <span class="status-badge status-rejected">
-                        Rejected
-                    </span>
-
-                {% endif %}
-
+                </div>
             </td>
-
-
         </tr>
 
 
