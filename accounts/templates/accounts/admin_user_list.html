@@ -194,15 +194,6 @@
                             >
                                 Detail
                             </a>
-
-                            {% if not item.is_superuser %}
-                                <a
-                                    href="{% url 'admin_user_edit' item.pk %}"
-                                    class="user-detail-link"
-                                >
-                                    Edit
-                                </a>
-                            {% endif %}
                         </div>
                     </td>
                 </tr>
