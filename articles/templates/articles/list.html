@@ -666,79 +666,37 @@
           </h2>
 
           <div class="category-latest-list">
-            
-          {% for article in page_obj %}
-            <div class="category-latest-card">
-
+            {% for article in page_obj %}
               <a href="{% url 'articles:article_detail' article.pk %}"
-                class="category-latest-link">
-
-                <div class="category-latest-image-wrap">
-                  {% if article.thumbnail %}
-                    <img
-                      src="{{ article.thumbnail.url }}"
-                      alt="{{ article.title }}"
-                    >
-                  {% else %}
-                    <div class="category-latest-placeholder">📰</div>
-                  {% endif %}
-                </div>
+                 class="category-latest-card">
+                {% if article.thumbnail %}
+                  <img src="{{ article.thumbnail.url }}" alt="{{ article.title }}">
+                {% else %}
+                  <div class="category-latest-placeholder">📰</div>
+                {% endif %}
 
                 <div class="category-latest-info">
                   <div class="category-latest-meta">
-                    {{ article.category.name }} ·
-                    {{ article.created_at|timesince }} lalu
+                    {{ article.category.name }} · {{ article.created_at|timesince }} lalu
                   </div>
-
                   <h3>{{ article.title }}</h3>
-
                   <div class="category-latest-excerpt">
                     {{ article.content|striptags|truncatewords:28 }}
                   </div>
-
                   <div class="category-latest-meta">
-                    {% if article.contributor %}
-                      Oleh {{ article.contributor.username }}
-                    {% endif %}
+                    {% if article.contributor %}Oleh {{ article.contributor.username }}{% endif %}
                   </div>
                 </div>
               </a>
-
-              <form
-                action="{% url 'interactions:toggle_bookmark' article.pk %}"
-                method="post"
-                class="category-bookmark-form"
-              >
-                {% csrf_token %}
-
-                <input
-                  type="hidden"
-                  name="next"
-                  value="{{ request.get_full_path }}"
-                >
-
-                <button
-                  type="submit"
-                  class="category-bookmark-btn {% if article.pk in bookmarked_article_ids %}is-bookmarked{% endif %}"
-                  aria-label="{% if article.pk in bookmarked_article_ids %}Hapus dari bookmark{% else %}Simpan ke bookmark{% endif %}"
-                  title="{% if article.pk in bookmarked_article_ids %}Hapus dari bookmark{% else %}Simpan ke bookmark{% endif %}"
-                >
-                  <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M6 3.75h12a1 1 0 0 1 1 1V21l-7-4.5L5 21V4.75a1 1 0 0 1 1-1Z"/>
-                  </svg>
-                </button>
-              </form>
-
-            </div>
-          {% empty %}
-            <div class="category-empty">
-              {% if search_query %}
-                Tidak ada artikel yang cocok dengan pencarianmu.
-              {% else %}
-                Belum ada artikel dalam kategori ini.
-              {% endif %}
-            </div>
-          {% endfor %}
+            {% empty %}
+              <div class="category-empty">
+                {% if search_query %}
+                  Tidak ada artikel yang cocok dengan pencarianmu.
+                {% else %}
+                  Belum ada artikel dalam kategori ini.
+                {% endif %}
+              </div>
+            {% endfor %}
           </div>
 
           {% if page_obj.has_other_pages %}
