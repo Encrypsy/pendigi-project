@@ -695,6 +695,23 @@
         outline: 2px solid var(--bm-brown);
         outline-offset: 3px;
     }
+
+    /* Samakan tipografi dengan halaman utama Pena Digital */
+    .bm-page,
+    .bm-page button,
+    .bm-page input,
+    .bm-page select {
+        font-family: inherit;
+    }
+
+    /* Hilangkan font Georgia khusus agar mengikuti font global */
+    .bm-page .bm-hero h1,
+    .bm-page .bm-section-title,
+    .bm-page .bm-stat-number,
+    .bm-page .bm-card-title,
+    .bm-page .bm-empty h3 {
+        font-family: inherit;
+    }
 </style>
 {% endblock %}
 
@@ -1088,6 +1105,7 @@
 {{ block.super }}
 
 
+
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const grid = document.getElementById('bm-grid');
@@ -1101,8 +1119,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const emptyFilter = document.getElementById('bm-empty-filter');
     const resetButton = document.getElementById('bm-reset');
 
-    if (!searchInput || !sortSelect) return;
-
     let activeFilter = 'all';
 
     function getCards() {
@@ -1113,16 +1129,14 @@ document.addEventListener('DOMContentLoaded', function () {
         return (value || '')
             .toLocaleLowerCase('id-ID')
             .normalize('NFD')
-            .replace(/[\u0300-\u036f]/g, '')
-            .trim();
+            .replace(/[\u0300-\u036f]/g, '');
     }
 
     function applyFilters() {
-        const query = normalizeText(searchInput.value);
+        const query = normalizeText(searchInput.value.trim());
         const cards = getCards();
         let visibleCount = 0;
 
-        // Filter berdasarkan kategori dan kata kunci
         cards.forEach(function (card) {
             const matchesType =
                 activeFilter === 'all' ||
@@ -1134,57 +1148,52 @@ document.addEventListener('DOMContentLoaded', function () {
 
             card.hidden = !visible;
 
-            if (visible) {
-                visibleCount++;
-            }
+            if (visible) visibleCount++;
         });
 
-        // Urutkan berdasarkan waktu bookmark disimpan
+        // Urutkan berdasarkan tanggal bookmark disimpan
         const direction = sortSelect.value === 'oldest' ? 1 : -1;
 
         cards.sort(function (a, b) {
-            const dateA = Number(a.dataset.saved || 0);
-            const dateB = Number(b.dataset.saved || 0);
-
-            return (dateA - dateB) * direction;
+            return (
+                (Number(a.dataset.saved || 0) -
+                Number(b.dataset.saved || 0)) * direction
+            );
         });
 
-        // Susun ulang kartu tanpa menghilangkan elemen empty state
+        // Susun ulang kartu tanpa memuat ulang halaman
         cards.forEach(function (card) {
             grid.insertBefore(card, emptyAll);
         });
 
-        // Perbarui jumlah hasil
         if (resultCount) {
-            resultCount.textContent =
-                visibleCount + ' bacaan';
+            resultCount.textContent = visibleCount + ' bacaan';
         }
 
-        // Bedakan koleksi kosong dengan hasil filter kosong
-        const hasNoBookmarks = cards.length === 0;
-        const hasNoResults = cards.length > 0 && visibleCount === 0;
-
         if (emptyAll) {
-            emptyAll.hidden = !hasNoBookmarks;
+            emptyAll.hidden = cards.length !== 0;
         }
 
         if (emptyFilter) {
-            emptyFilter.hidden = !hasNoResults;
+            emptyFilter.hidden =
+                cards.length === 0 || visibleCount !== 0;
         }
     }
 
-    // Navigasi tab Semua, Artikel, dan Fiksi
+    // Tab: Semua, Artikel, Fiksi
     tabs.forEach(function (tab) {
-        tab.addEventListener('click', function () {
+        tab.addEventListener('click', function (event) {
+            event.preventDefault();
+
             activeFilter = tab.dataset.filter || 'all';
 
             tabs.forEach(function (item) {
-                const isActive = item === tab;
+                const selected = item === tab;
 
-                item.classList.toggle('is-active', isActive);
+                item.classList.toggle('is-active', selected);
                 item.setAttribute(
                     'aria-selected',
-                    String(isActive)
+                    String(selected)
                 );
             });
 
@@ -1192,35 +1201,40 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // Pencarian langsung saat pengguna mengetik
-    searchInput.addEventListener('input', applyFilters);
+    // Pencarian langsung
+    if (searchInput) {
+        searchInput.addEventListener('input', applyFilters);
+    }
 
-    // Urutkan ulang ketika dropdown berubah
-    sortSelect.addEventListener('change', applyFilters);
+    // Pengurutan langsung
+    if (sortSelect) {
+        sortSelect.addEventListener('change', applyFilters);
+    }
 
-    // Reset pencarian dan filter
+    // Reset seluruh filter
     if (resetButton) {
-        resetButton.addEventListener('click', function () {
+        resetButton.addEventListener('click', function (event) {
+            event.preventDefault();
+
             activeFilter = 'all';
-            searchInput.value = '';
-            sortSelect.value = 'newest';
+
+            if (searchInput) searchInput.value = '';
+            if (sortSelect) sortSelect.value = 'newest';
 
             tabs.forEach(function (tab) {
-                const isActive = tab.dataset.filter === 'all';
+                const selected = tab.dataset.filter === 'all';
 
-                tab.classList.toggle('is-active', isActive);
+                tab.classList.toggle('is-active', selected);
                 tab.setAttribute(
                     'aria-selected',
-                    String(isActive)
+                    String(selected)
                 );
             });
 
             applyFilters();
-            searchInput.focus();
         });
     }
 
-    // Terapkan kondisi awal
     applyFilters();
 });
 </script>
