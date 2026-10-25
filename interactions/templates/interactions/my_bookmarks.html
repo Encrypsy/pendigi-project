@@ -1,0 +1,190 @@
+
+{% extends 'app_base.html' %}
+{% load static %}
+
+{% block title %}Bookmark Saya{% endblock %}
+
+{% block extra_css %}
+<style>
+    .my-bookmarks-page {
+        max-width: 1100px;
+        margin: 36px auto;
+        padding: 0 20px;
+        color: #2A2420;
+    }
+
+    .my-bookmarks-page h1 {
+        margin-bottom: 8px;
+    }
+
+    .bookmark-section {
+        margin-top: 32px;
+    }
+
+    .bookmark-section h2 {
+        margin-bottom: 16px;
+        font-size: 22px;
+    }
+
+    .bookmark-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 20px;
+    }
+
+    .bookmark-card {
+        position: relative;
+        overflow: hidden;
+        border: 1px solid #DDD6C9;
+        border-radius: 12px;
+        background: #fff;
+    }
+
+    .bookmark-card > a {
+        display: block;
+        color: inherit;
+        text-decoration: none;
+    }
+
+    .bookmark-card img {
+        display: block;
+        width: 100%;
+        height: 190px;
+        object-fit: cover;
+    }
+
+    .bookmark-card-content {
+        padding: 14px;
+    }
+
+    .bookmark-card-content h3 {
+        margin: 0 0 8px;
+        font-size: 16px;
+    }
+
+    .bookmark-card-content p {
+        margin: 0;
+        color: #817970;
+        font-size: 13px;
+    }
+
+    .bookmark-remove {
+        display: flex;
+        justify-content: flex-end;
+        padding: 0 14px 14px;
+    }
+
+    .bookmark-remove button {
+        padding: 7px 10px;
+        border: 1px solid #6B4226;
+        border-radius: 7px;
+        background: #FBF8F2;
+        color: #6B4226;
+        cursor: pointer;
+    }
+
+    .bookmark-empty {
+        padding: 22px;
+        border: 1px dashed #DDD6C9;
+        border-radius: 10px;
+        color: #817970;
+    }
+
+    @media (max-width: 700px) {
+        .bookmark-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @media (max-width: 460px) {
+        .bookmark-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="my-bookmarks-page">
+    <h1>Bookmark Saya</h1>
+    <p>Artikel dan cerita yang kamu simpan untuk dibaca nanti.</p>
+
+    <section class="bookmark-section">
+        <h2>Artikel</h2>
+
+        {% if article_bookmarks %}
+            <div class="bookmark-grid">
+                {% for item in article_bookmarks %}
+                    <article class="bookmark-card">
+                        <a href="{% url 'articles:article_detail' item.article.pk %}">
+                            {% if item.article.image %}
+                                <img
+                                    src="{{ item.article.image.url }}"
+                                    alt="{{ item.article.title }}"
+                                    loading="lazy"
+                                >
+                            {% endif %}
+                            <div class="bookmark-card-content">
+                                <h3>{{ item.article.title }}</h3>
+                                <p>Disimpan {{ item.created_at|date:"d M Y" }}</p>
+                            </div>
+                        </a>
+
+                        <form
+                            class="bookmark-remove"
+                            action="{% url 'interactions:toggle_bookmark' item.article.pk %}"
+                            method="post"
+                            onsubmit="return confirm('Hapus artikel ini dari bookmark?');"
+                        >
+                            {% csrf_token %}
+                            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                            <button type="submit">Hapus bookmark</button>
+                        </form>
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="bookmark-empty">Belum ada artikel yang disimpan.</p>
+        {% endif %}
+    </section>
+
+    <section class="bookmark-section">
+        <h2>Karya Fiksi</h2>
+
+        {% if story_bookmarks %}
+            <div class="bookmark-grid">
+                {% for item in story_bookmarks %}
+                    <article class="bookmark-card">
+                        <a href="{% url 'fiction:story_detail' item.story.pk %}">
+                            {% if item.story.cover %}
+                                <img
+                                    src="{{ item.story.cover.url }}"
+                                    alt="{{ item.story.title }}"
+                                    loading="lazy"
+                                >
+                            {% endif %}
+                            <div class="bookmark-card-content">
+                                <h3>{{ item.story.title }}</h3>
+                                <p>Disimpan {{ item.created_at|date:"d M Y" }}</p>
+                            </div>
+                        </a>
+
+                        <form
+                            class="bookmark-remove"
+                            action="{% url 'interactions:toggle_story_bookmark' item.story.pk %}"
+                            method="post"
+                            onsubmit="return confirm('Hapus cerita ini dari bookmark?');"
+                        >
+                            {% csrf_token %}
+                            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                            <button type="submit">Hapus bookmark</button>
+                        </form>
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="bookmark-empty">Belum ada karya fiksi yang disimpan.</p>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

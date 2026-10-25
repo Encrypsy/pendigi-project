@@ -10,6 +10,7 @@ from django.core.paginator import Paginator
 from django.utils.http import url_has_allowed_host_and_scheme
 
 from articles.models import Articles
+from fiction.models import Stories
 from .models import (
     Activity,
     CommentDislikes,
@@ -599,3 +600,111 @@ def mark_notifications_read(request):
     ).update(is_read=True)
 
     return JsonResponse({"success": True, "ok": True})
+
+def _bookmark_redirect(request, fallback='articles:article_list'):
+    next_url = request.POST.get('next', '')
+
+    if next_url and url_has_allowed_host_and_scheme(
+        next_url,
+        allowed_hosts={request.get_host()},
+        require_https=request.is_secure(),
+    ):
+        return redirect(next_url)
+
+    return redirect(fallback)
+
+
+@login_required
+@require_POST
+def toggle_bookmark(request, pk):
+    article = get_object_or_404(Articles, pk=pk)
+
+    bookmark, created = Bookmarks.objects.get_or_create(
+        user=request.user,
+        article=article,
+    )
+
+    if not created:
+        bookmark.delete()
+        messages.success(request, 'Artikel dihapus dari bookmark.')
+    else:
+        messages.success(request, 'Artikel berhasil disimpan.')
+
+    return _bookmark_redirect(request)
+
+
+@login_required
+@require_POST
+def toggle_story_bookmark(request, pk):
+    story = get_object_or_404(Stories, pk=pk)
+
+    bookmark, created = Bookmarks.objects.get_or_create(
+        user=request.user,
+        story=story,
+    )
+
+    if not created:
+        bookmark.delete()
+        messages.success(request, 'Cerita dihapus dari bookmark.')
+    else:
+        messages.success(request, 'Cerita berhasil disimpan.')
+
+    return _bookmark_redirect(request, fallback='fiction:story_list')
+
+
+@login_required
+def my_bookmarks(request):
+    bookmarks = (
+        Bookmarks.objects
+        .filter(user=request.user)
+        .select_related('article', 'story')
+        .order_by('-created_at')
+    )
+
+    article_bookmarks = [
+        item for item in bookmarks if item.article_id is not None
+    ]
+    story_bookmarks = [
+        item for item in bookmarks if item.story_id is not None
+    ]
+
+    return render(
+        request,
+        'interactions/my_bookmarks.html',
+        {
+            'article_bookmarks': article_bookmarks,
+            'story_bookmarks': story_bookmarks,
+        },
+    )
+    
+@login_required
+@require_POST
+def toggle_story_bookmark(request, pk):
+    story = get_object_or_404(Stories, pk=pk)
+
+    bookmark = Bookmarks.objects.filter(
+        user=request.user,
+        story=story,
+        article__isnull=True,
+    )
+
+    if bookmark.exists():
+        bookmark.delete()
+        messages.success(request, 'Cerita dihapus dari bookmark.')
+    else:
+        Bookmarks.objects.create(
+            user=request.user,
+            story=story,
+        )
+        messages.success(request, 'Cerita berhasil disimpan.')
+
+    next_url = request.POST.get('next', '')
+
+    if next_url and url_has_allowed_host_and_scheme(
+        next_url,
+        allowed_hosts={request.get_host()},
+        require_https=request.is_secure(),
+    ):
+        return redirect(next_url)
+
+    return redirect('articles:article_list')

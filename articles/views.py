@@ -223,6 +223,17 @@ def article_list(request):
         .select_related('category', 'contributor')
         .order_by('-created_at')[:4]
     )
+    
+    # ID artikel yang sudah di-bookmark oleh user
+    bookmarked_article_ids = []
+
+    if request.user.is_authenticated:
+        bookmarked_article_ids = list(
+            Bookmarks.objects.filter(
+                user=request.user,
+                article__isnull=False,
+            ).values_list('article_id', flat=True)
+        )
 
     return render(request, 'articles/list.html', {
         'articles': articles,
@@ -237,6 +248,7 @@ def article_list(request):
         'trending_articles': trending_articles,
         'featured_stories': featured_stories,
         'search_query': query,
+        'bookmarked_article_ids': bookmarked_article_ids,
     })
 
 

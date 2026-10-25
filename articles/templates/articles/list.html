@@ -817,22 +817,48 @@
     <div class="homepage-columns">
       <div class="latest-col">
         <h2 class="section-title">Artikel Terbaru</h2>
-        <div class="article-grid">
+        <div class="article-grid">       
           {% for article in latest_articles %}
-            <a href="{% url 'articles:article_detail' article.pk %}" class="article-card">
-              {% if article.thumbnail %}
-                <img src="{{ article.thumbnail.url }}" class="article-thumb" alt="{{ article.title }}">
-              {% else %}
-                <div class="article-thumb article-thumb-placeholder">📰</div>
-              {% endif %}
-              <div class="article-card-body">
-                <span class="category-tag">{{ article.category.name }}</span>
-                <h3>{{ article.title }}</h3>
-                <p class="author">oleh {{ article.contributor.username }}</p>
-              </div>
-            </a>
+              <article class="article-card">
+                  <a href="{% url 'articles:article_detail' article.pk %}"
+                    class="article-card-link">
+                      {% if article.thumbnail %}
+                          <img src="{{ article.thumbnail.url }}"
+                              class="article-thumb"
+                              alt="{{ article.title }}">
+                      {% else %}
+                          <div class="article-thumb article-thumb-placeholder">📰</div>
+                      {% endif %}
+
+                      <div class="article-card-body">
+                          <span class="category-tag">{{ article.category.name }}</span>
+                          <h3>{{ article.title }}</h3>
+                          <p class="author">
+                              oleh {{ article.contributor.username }}
+                          </p>
+                      </div>
+                  </a>
+
+                  <form
+                      action="{% url 'interactions:toggle_bookmark' article.pk %}"
+                      method="post"
+                      class="article-bookmark-form"
+                  >
+                      {% csrf_token %}
+                      <input type="hidden" name="next" value="{{ request.get_full_path }}">
+
+                      <button type="submit"
+                              class="article-bookmark-btn {% if article.pk in bookmarked_article_ids %}is-bookmarked{% endif %}"
+                              aria-label="Simpan {{ article.title }} ke bookmark"
+                              title="Simpan ke bookmark">
+                          <svg viewBox="0 0 24 24" aria-hidden="true">
+                              <path d="M6 3.75h12a1 1 0 0 1 1 1V21l-7-4.5L5 21V4.75a1 1 0 0 1 1-1Z"/>
+                          </svg>
+                      </button>
+                  </form>
+              </article>
           {% empty %}
-            <p>Belum ada artikel yang tayang.</p>
+              <p>Belum ada artikel yang tayang.</p>
           {% endfor %}
         </div>
       </div>

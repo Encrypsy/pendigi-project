@@ -77,5 +77,10 @@ urlpatterns = [
         'notifikasi/tandai-dibaca/',
         views.mark_notifications_read,
         name='mark_notifications_read',
+    ),   
+    path(
+        'fiksi/<int:pk>/bookmark/',
+        views.toggle_story_bookmark,
+        name='toggle_story_bookmark',
     ),
 ]

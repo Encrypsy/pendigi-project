@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.urls import reverse
 from accounts.models import StatusKontributor, Follow
 from articles.models import Banner, BannerType
-from interactions.models import StatusComment, Activity
+from interactions.models import Bookmarks, StatusComment, Activity
 from interactions.notifications import notify_admins
 from .models import StatusChapter, Stories, Chapters, StatusStory, FavoriteStories, ChapterComments, ChapterCommentLikes, ReadingProgress
 from .forms import StoryForm, ChapterForm, ChapterCommentForm
@@ -425,6 +425,17 @@ def story_list(request):
         tag_counts.values(),
         key=lambda item: (-item['count'], item['name'].lower())
     )[:12]
+    
+    bookmarked_story_ids = []
+
+    if request.user.is_authenticated:
+        bookmarked_story_ids = list(
+            Bookmarks.objects.filter(
+                user=request.user,
+                story__isnull=False,
+                article__isnull=True,
+            ).values_list('story_id', flat=True)
+        )
 
     # LANJUTKAN MEMBACA: logika lama dipertahankan
     continue_reading = []
@@ -479,6 +490,7 @@ def story_list(request):
             # Data tag
             'popular_tags': popular_tags,
             'popular_stories': popular_stories,
+            'bookmarked_story_ids': bookmarked_story_ids,
         }
     )
 

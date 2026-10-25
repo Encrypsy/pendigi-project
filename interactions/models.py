@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Q
 from django.core.validators import MinValueValidator, MaxValueValidator
 from accounts.models import Users
 from articles.models import Articles
@@ -56,19 +57,51 @@ class Ratings(models.Model):
     def __str__(self):
         return f'{self.user.username} -> {self.article.title} : {self.rating_value}'
 
-
 class Bookmarks(models.Model):
-    user = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='bookmarks')
-    article = models.ForeignKey(Articles, on_delete=models.CASCADE, related_name='bookmarks')
+    user = models.ForeignKey(
+        Users,
+        on_delete=models.CASCADE,
+        related_name='bookmarks',
+    )
+    article = models.ForeignKey(
+        Articles,
+        on_delete=models.CASCADE,
+        related_name='bookmarks',
+        null=True,
+        blank=True,
+    )
+    story = models.ForeignKey(
+        'fiction.Stories',
+        on_delete=models.CASCADE,
+        related_name='bookmarks',
+        null=True,
+        blank=True,
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=['user', 'article'], name='unique_user_article_bookmark')
+            models.UniqueConstraint(
+                fields=['user', 'article'],
+                name='unique_user_article_bookmark',
+            ),
+            models.UniqueConstraint(
+                fields=['user', 'story'],
+                name='unique_user_story_bookmark',
+            ),
+            models.CheckConstraint(
+                condition=(
+                    Q(article__isnull=False, story__isnull=True)
+                    | Q(article__isnull=True, story__isnull=False)
+                ),
+                name='bookmark_exactly_one_target',
+            ),
         ]
+        ordering = ['-created_at']
 
     def __str__(self):
-        return f'{self.user.username} bookmarked {self.article.title}'
+        target = self.article or self.story
+        return f'{self.user.username} bookmarked {target}'
 
 class CommentLikes(models.Model):
     user = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='comment_likes')
@@ -182,3 +215,4 @@ class Activity(models.Model):
             f"{self.get_action_type_display()} - "
             f"{self.article.title if self.article else '-'}"
         )
+        

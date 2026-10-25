@@ -144,6 +144,28 @@
                                 {{ story.author.username }}
                             </p>
                         </div>
+
+                        <!-- TAMBAHKAN TOMBOL BOOKMARK DI SINI -->
+                        <form
+                            action="{% url 'interactions:toggle_story_bookmark' story.pk %}"
+                            method="post"
+                            class="fiction-bookmark-form"
+                            onclick="event.stopPropagation();"
+                        >
+                            {% csrf_token %}
+                            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+
+                            <button
+                                type="submit"
+                                class="fiction-bookmark-btn"
+                                aria-label="Simpan {{ story.title }} ke bookmark"
+                                title="Simpan ke bookmark"
+                            >
+                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M6 3.75h12a1 1 0 0 1 1 1V21l-7-4.5L5 21V4.75a1 1 0 0 1 1-1Z"/>
+                                </svg>
+                            </button>
+                        </form>
                     </a>
                     {% empty %}
                     <p class="empty-fiction">
