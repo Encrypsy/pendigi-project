@@ -205,29 +205,36 @@
                                 Reject
                             </button>
                         </form>
-                    {% endif %}
 
-                    <form
-                        action="{% url 'interactions:delete_comment' comment.pk %}"
-                        method="post"
-                        onsubmit="return confirm('Yakin ingin menghapus komentar dari {{ comment.user.username|escapejs }}? Jika komentar ini memiliki balasan, balasannya juga akan terhapus.');"
-                    >
-                        {% csrf_token %}
-                        <input
-                            type="hidden"
-                            name="next"
-                            value="{{ request.get_full_path }}"
+                    {% elif comment_status == 'approved' %}
+                        <form
+                            action="{% url 'interactions:delete_comment' comment.pk %}"
+                            method="post"
+                            onsubmit="return confirm('Yakin ingin menghapus komentar dari {{ comment.user.username|escapejs }}? Jika komentar ini memiliki balasan, balasannya juga akan terhapus.');"
                         >
-                        <button type="submit" class="btn-delete-comment">
-                            Hapus
-                        </button>
-                    </form>
+                            {% csrf_token %}
+
+                            <input
+                                type="hidden"
+                                name="next"
+                                value="{{ request.get_full_path }}"
+                            >
+
+                            <button type="submit" class="btn-delete-comment">
+                                Hapus
+                            </button>
+                        </form>
+
+                    {% elif comment_status == 'rejected' %}
+                        <span class="status-badge status-rejected">
+                            Rejected
+                        </span>
+                    {% endif %}
 
                 </div>
             </td>
         </tr>
-
-
+        
         {% empty %}
 
         <tr>
