@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db import models
 from django.shortcuts import get_object_or_404, render, redirect
-from .forms import RegisterForm, ContributorApplicationForm, ProfileUpdateForm
+from .forms import AdminUserEditForm, RegisterForm, ContributorApplicationForm, ProfileUpdateForm
 from .models import StatusKontributor, ContributorApplication, Users
 from .decorators import admin_required
 from django.db.models import Count, Avg, Q
@@ -822,6 +822,66 @@ def admin_user_detail(request, pk):
     return render(request, 'accounts/admin_user_detail.html', {
         'user_obj': user_obj,
     })
+    
+@admin_required
+def admin_user_edit(request, pk):
+    user_obj = get_object_or_404(Users, pk=pk)
+
+    # Lindungi akun superuser dari perubahan melalui halaman ini.
+    if user_obj.is_superuser:
+        messages.error(
+            request,
+            'Akun superuser tidak dapat diedit melalui halaman ini.'
+        )
+        return redirect('admin_user_detail', pk=user_obj.pk)
+
+    if request.method == 'POST':
+        form = AdminUserEditForm(request.POST, instance=user_obj)
+
+        if form.is_valid():
+            form.save()
+            messages.success(
+                request,
+                f'Akun {user_obj.username} berhasil diperbarui.'
+            )
+            return redirect('admin_user_detail', pk=user_obj.pk)
+    else:
+        form = AdminUserEditForm(instance=user_obj)
+
+    return render(request, 'accounts/admin_user_edit.html', {
+        'form': form,
+        'user_obj': user_obj,
+    })
+
+@admin_required
+@require_POST
+def admin_user_delete(request, pk):
+    user_obj = get_object_or_404(Users, pk=pk)
+
+    # Tidak boleh menghapus akun yang sedang digunakan.
+    if user_obj.pk == request.user.pk:
+        messages.error(
+            request,
+            'Kamu tidak dapat menghapus akunmu sendiri.'
+        )
+        return redirect('admin_user_detail', pk=user_obj.pk)
+
+    # Lindungi akun superuser.
+    if user_obj.is_superuser:
+        messages.error(
+            request,
+            'Akun superuser tidak dapat dihapus melalui halaman ini.'
+        )
+        return redirect('admin_user_detail', pk=user_obj.pk)
+
+    username = user_obj.username
+    user_obj.delete()
+
+    messages.success(
+        request,
+        f'Akun {username} berhasil dihapus.'
+    )
+    return redirect('admin_user_list')
 
 
 def navbar_notifications(request):

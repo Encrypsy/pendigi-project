@@ -1,0 +1,114 @@
+
+{% extends 'admin_base.html' %}
+
+{% block title %}Edit Pengguna{% endblock %}
+
+{% block extra_css %}
+    {{ block.super }}
+    <style>
+        .user-edit-page {
+            max-width: 850px;
+            margin: auto;
+        }
+
+        .user-edit-card {
+            padding: 24px;
+            background: white;
+            border: 1px solid #e6d8c8;
+            border-radius: 14px;
+        }
+
+        .user-edit-page h1 {
+            margin-bottom: 8px;
+        }
+
+        .user-edit-description {
+            margin-bottom: 24px;
+            color: #888;
+        }
+
+        .user-edit-form p {
+            margin-bottom: 18px;
+        }
+
+        .user-edit-form label {
+            display: block;
+            margin-bottom: 7px;
+            font-weight: 600;
+        }
+
+        .user-edit-form input:not([type="checkbox"]),
+        .user-edit-form select,
+        .user-edit-form textarea {
+            box-sizing: border-box;
+            width: 100%;
+            padding: 11px 12px;
+            border: 1px solid #e2d5c7;
+            border-radius: 8px;
+            font: inherit;
+        }
+
+        .user-edit-form input[type="checkbox"] {
+            margin-right: 8px;
+        }
+
+        .user-edit-form ul.errorlist {
+            color: #b42318;
+            font-size: 13px;
+        }
+
+        .user-edit-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 24px;
+        }
+
+        .user-edit-button {
+            display: inline-block;
+            padding: 11px 18px;
+            border: 0;
+            border-radius: 8px;
+            background: #70472f;
+            color: white;
+            text-decoration: none;
+            cursor: pointer;
+            font: inherit;
+        }
+
+        .user-edit-cancel {
+            background: #f0ece7;
+            color: #54331d;
+        }
+    </style>
+{% endblock %}
+
+{% block admin_content %}
+<div class="user-edit-page">
+    <div class="user-edit-card">
+        <h1>Edit Pengguna</h1>
+        <p class="user-edit-description">
+            Ubah informasi akun {{ user_obj.username }}.
+        </p>
+
+        <form method="post" class="user-edit-form">
+            {% csrf_token %}
+
+            {{ form.as_p }}
+
+            <div class="user-edit-actions">
+                <button type="submit" class="user-edit-button">
+                    Simpan Perubahan
+                </button>
+
+                <a
+                    href="{% url 'admin_user_detail' user_obj.pk %}"
+                    class="user-edit-button user-edit-cancel"
+                >
+                    Batal
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

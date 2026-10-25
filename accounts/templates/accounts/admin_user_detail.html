@@ -90,6 +90,32 @@
                 <strong>{% if user_obj.is_staff %}Ya{% else %}Tidak{% endif %}</strong>
             </div>
         </div>
+        <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px;">
+            {% if not user_obj.is_superuser %}
+                <a
+                    href="{% url 'admin_user_edit' user_obj.pk %}"
+                    style="display: inline-block; padding: 10px 16px; border-radius: 8px; background: #70472f; color: white; text-decoration: none;"
+                >
+                    Edit Pengguna
+                </a>
+
+                {% if user_obj.pk != request.user.pk %}
+                    <form
+                        method="post"
+                        action="{% url 'admin_user_delete' user_obj.pk %}"
+                        onsubmit="return confirm('Yakin ingin menghapus akun {{ user_obj.username|escapejs }}? Tindakan ini dapat menghapus data terkait akun tersebut.');"
+                    >
+                        {% csrf_token %}
+                        <button
+                            type="submit"
+                            style="padding: 10px 16px; border: 0; border-radius: 8px; background: #b42318; color: white; cursor: pointer;"
+                        >
+                            Hapus Pengguna
+                        </button>
+                    </form>
+                {% endif %}
+            {% endif %}
+        </div>
     </div>
 </div>
 {% endblock %}

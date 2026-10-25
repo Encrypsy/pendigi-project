@@ -3,6 +3,55 @@ from django.contrib.auth.forms import UserCreationForm
 from .models import Users, ContributorApplication
 from articles.models import Categories
 
+class AdminUserEditForm(forms.ModelForm):
+    class Meta:
+        model = Users
+        fields = [
+            'username',
+            'email',
+            'first_name',
+            'last_name',
+            'bio',
+            'role',
+            'status_kontributor',
+            'is_active',
+        ]
+
+        labels = {
+            'username': 'Username',
+            'email': 'Email',
+            'first_name': 'Nama depan',
+            'last_name': 'Nama belakang',
+            'bio': 'Bio',
+            'role': 'Peran pengguna',
+            'status_kontributor': 'Status kontributor',
+            'is_active': 'Akun aktif',
+        }
+
+        widgets = {
+            'username': forms.TextInput(attrs={
+                'class': 'form-control',
+            }),
+            'email': forms.EmailInput(attrs={
+                'class': 'form-control',
+            }),
+            'first_name': forms.TextInput(attrs={
+                'class': 'form-control',
+            }),
+            'last_name': forms.TextInput(attrs={
+                'class': 'form-control',
+            }),
+            'bio': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+            }),
+            'role': forms.Select(attrs={
+                'class': 'form-control',
+            }),
+            'status_kontributor': forms.Select(attrs={
+                'class': 'form-control',
+            }),
+        }
 
 class RegisterForm(UserCreationForm):
     email = forms.EmailField(required=True)

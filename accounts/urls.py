@@ -1,6 +1,6 @@
 from django.urls import path
 from django.contrib.auth.views import LogoutView
-from .views import CustomLoginView, admin_user_detail, admin_user_list, author_notifications, author_pending_content, author_rejected_content, notifications_list, register_view, apply_contributor, profile_view, dashboard_view, admin_pending_contributors, admin_approve_contributor, admin_reject_contributor, toggle_follow, author_dashboard, author_my_content
+from .views import CustomLoginView, admin_user_delete, admin_user_detail, admin_user_edit, admin_user_list, author_notifications, author_pending_content, author_rejected_content, notifications_list, register_view, apply_contributor, profile_view, dashboard_view, admin_pending_contributors, admin_approve_contributor, admin_reject_contributor, toggle_follow, author_dashboard, author_my_content
 
 urlpatterns = [
     path('login/', CustomLoginView.as_view(), name='login'),
@@ -24,5 +24,15 @@ urlpatterns = [
         'notifikasi/',
         notifications_list,
         name='notifications_list',
+    ), 
+    path(
+        'kelola/user/<int:pk>/edit/',
+        admin_user_edit,
+        name='admin_user_edit',
+    ),
+    path(
+        'kelola/user/<int:pk>/delete/',
+        admin_user_delete,
+        name='admin_user_delete',
     ),
 ]

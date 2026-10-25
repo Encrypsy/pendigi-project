@@ -185,11 +185,25 @@
                         {% else %}
                             <span class="user-badge inactive">Nonaktif</span>
                         {% endif %}
-                    </td>
+                    </td>           
                     <td>
-                        <a href="{% url 'admin_user_detail' item.pk %}" class="user-detail-link">
-                            Detail →
-                        </a>
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <a
+                                href="{% url 'admin_user_detail' item.pk %}"
+                                class="user-detail-link"
+                            >
+                                Detail
+                            </a>
+
+                            {% if not item.is_superuser %}
+                                <a
+                                    href="{% url 'admin_user_edit' item.pk %}"
+                                    class="user-detail-link"
+                                >
+                                    Edit
+                                </a>
+                            {% endif %}
+                        </div>
                     </td>
                 </tr>
                 {% empty %}
