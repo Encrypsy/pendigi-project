@@ -249,7 +249,9 @@ def my_bookmarks(request):
     return render(
         request,
         "interactions/bookmarks.html",
-        {"bookmarks": bookmarks},
+        {
+            "bookmarks": bookmarks,
+        },
     )
 
 
@@ -690,22 +692,82 @@ def my_bookmarks(request):
         Bookmarks.objects
         .filter(user=request.user)
         .select_related('article', 'story')
-        .order_by('-created_at')
     )
+
+    # Statistik koleksi
+    total_bookmarks = bookmarks.count()
 
     article_bookmarks = [
         item for item in bookmarks if item.article_id is not None
     ]
+
     story_bookmarks = [
         item for item in bookmarks if item.story_id is not None
     ]
+
+    total_articles = len(article_bookmarks)
+    total_stories = len(story_bookmarks)
+
+    # Tab kategori
+    active_tab = request.GET.get('tab', 'semua')
+    if active_tab not in ['semua', 'artikel', 'fiksi']:
+        active_tab = 'semua'
+
+    # Pengurutan
+    sort_order = request.GET.get('sort', 'terbaru')
+    if sort_order not in ['terbaru', 'terlama']:
+        sort_order = 'terbaru'
+
+    reverse_order = sort_order == 'terbaru'
+
+    article_bookmarks.sort(
+        key=lambda item: item.created_at,
+        reverse=reverse_order,
+    )
+    story_bookmarks.sort(
+        key=lambda item: item.created_at,
+        reverse=reverse_order,
+    )
+
+    # Pencarian judul
+    search_query = request.GET.get('q', '').strip()
+
+    if search_query:
+        article_bookmarks = [
+            item for item in article_bookmarks
+            if item.article and search_query.casefold()
+            in item.article.title.casefold()
+        ]
+
+        story_bookmarks = [
+            item for item in story_bookmarks
+            if item.story and search_query.casefold()
+            in item.story.title.casefold()
+        ]
+
+    # Tentukan koleksi yang ditampilkan
+    if active_tab == 'artikel':
+        story_bookmarks_display = []
+        article_bookmarks_display = article_bookmarks
+    elif active_tab == 'fiksi':
+        article_bookmarks_display = []
+        story_bookmarks_display = story_bookmarks
+    else:
+        article_bookmarks_display = article_bookmarks
+        story_bookmarks_display = story_bookmarks
 
     return render(
         request,
         'interactions/my_bookmarks.html',
         {
-            'article_bookmarks': article_bookmarks,
-            'story_bookmarks': story_bookmarks,
+            'article_bookmarks': article_bookmarks_display,
+            'story_bookmarks': story_bookmarks_display,
+            'total_bookmarks': total_bookmarks,
+            'total_articles': total_articles,
+            'total_stories': total_stories,
+            'active_tab': active_tab,
+            'sort_order': sort_order,
+            'search_query': search_query,
         },
     )
     

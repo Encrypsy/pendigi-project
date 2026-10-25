@@ -2,189 +2,1154 @@
 {% extends 'app_base.html' %}
 {% load static %}
 
-{% block title %}Bookmark Saya{% endblock %}
+{% block title %}Bookmark Saya — Pena Digital{% endblock %}
 
 {% block extra_css %}
+{{ block.super }}
+
 <style>
-    .my-bookmarks-page {
-        max-width: 1100px;
-        margin: 36px auto;
-        padding: 0 20px;
-        color: #2A2420;
+    .bm-page {
+        --bm-brown: #6B4226;
+        --bm-brown-dark: #422B1D;
+        --bm-brown-soft: #8A6A50;
+        --bm-cream: #FAF7F2;
+        --bm-paper: #FFFFFF;
+        --bm-border: #E8DED1;
+        --bm-muted: #8B8177;
+        min-height: 75vh;
+        padding: 36px 20px 64px;
+        background: var(--bm-cream);
+        color: var(--bm-brown-dark);
     }
 
-    .my-bookmarks-page h1 {
-        margin-bottom: 8px;
+    .bm-container {
+        width: min(1120px, 100%);
+        margin: 0 auto;
     }
 
-    .bookmark-section {
-        margin-top: 32px;
+    /* Hero */
+    .bm-hero {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 28px;
+        overflow: hidden;
+        padding: clamp(26px, 5vw, 48px);
+        border: 1px solid var(--bm-border);
+        border-radius: 18px;
+        background:
+            radial-gradient(circle at 88% 15%, #e5d2b8 0, transparent 32%),
+            linear-gradient(120deg, #F0E5D6, #F8F1E7);
     }
 
-    .bookmark-section h2 {
-        margin-bottom: 16px;
-        font-size: 22px;
+    .bm-hero-copy {
+        position: relative;
+        z-index: 1;
+        max-width: 650px;
     }
 
-    .bookmark-grid {
+    .bm-eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 14px;
+        color: var(--bm-brown);
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+    }
+
+    .bm-eyebrow::before {
+        width: 24px;
+        height: 2px;
+        background: var(--bm-brown);
+        content: "";
+    }
+
+    .bm-hero h1 {
+        margin: 0;
+        color: var(--bm-brown-dark);
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: clamp(32px, 5vw, 48px);
+        font-weight: 500;
+        letter-spacing: -1.4px;
+        line-height: 1.12;
+    }
+
+    .bm-hero-description {
+        max-width: 470px;
+        margin: 14px 0 0;
+        color: #746457;
+        font-size: 14px;
+        line-height: 1.8;
+    }
+
+    .bm-hero-art {
+        display: grid;
+        flex: 0 0 130px;
+        place-items: center;
+        width: 130px;
+        height: 150px;
+        transform: rotate(5deg);
+        border: 1px solid #D9C4AA;
+        border-radius: 8px 15px 15px 8px;
+        background: #6B4226;
+        box-shadow: 9px 9px 0 #D8C3A8, 13px 15px 24px #6B422622;
+        color: #F9EEDF;
+    }
+
+    .bm-hero-art svg {
+        width: 62px;
+        height: 62px;
+    }
+
+    /* Statistics */
+    .bm-stats {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+        margin: 24px 0 34px;
+    }
+
+    .bm-stat {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        min-width: 0;
+        padding: 19px;
+        border: 1px solid var(--bm-border);
+        border-radius: 12px;
+        background: var(--bm-paper);
+    }
+
+    .bm-stat-icon {
+        display: grid;
+        flex: 0 0 44px;
+        place-items: center;
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        background: #F4EBDF;
+        color: var(--bm-brown);
+    }
+
+    .bm-stat-icon svg {
+        width: 22px;
+        height: 22px;
+    }
+
+    .bm-stat-label {
+        margin: 0 0 3px;
+        color: var(--bm-muted);
+        font-size: 12px;
+    }
+
+    .bm-stat-number {
+        margin: 0;
+        color: var(--bm-brown-dark);
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 27px;
+        font-weight: 700;
+        line-height: 1.1;
+    }
+
+    /* Collection section */
+    .bm-collection-header {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 18px;
+        margin-bottom: 20px;
+    }
+
+    .bm-section-kicker {
+        margin: 0 0 6px;
+        color: var(--bm-brown-soft);
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+    }
+
+    .bm-section-title {
+        margin: 0;
+        color: var(--bm-brown-dark);
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: clamp(24px, 4vw, 31px);
+        font-weight: 500;
+    }
+
+    .bm-result-count {
+        flex-shrink: 0;
+        color: var(--bm-muted);
+        font-size: 12px;
+    }
+
+    /* Search and sorting */
+    .bm-toolbar {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 18px;
+    }
+
+    .bm-search {
+        display: flex;
+        flex: 1;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+        padding: 0 15px;
+        border: 1px solid var(--bm-border);
+        border-radius: 10px;
+        background: var(--bm-paper);
+        transition: border-color .2s, box-shadow .2s;
+    }
+
+    .bm-search:focus-within {
+        border-color: var(--bm-brown);
+        box-shadow: 0 0 0 3px #6B422615;
+    }
+
+    .bm-search svg {
+        flex-shrink: 0;
+        width: 19px;
+        height: 19px;
+        color: var(--bm-muted);
+    }
+
+    .bm-search input {
+        width: 100%;
+        min-width: 0;
+        padding: 13px 0;
+        border: 0;
+        outline: none;
+        background: transparent;
+        color: var(--bm-brown-dark);
+        font: inherit;
+        font-size: 13px;
+    }
+
+    .bm-search input::placeholder {
+        color: #A49A90;
+    }
+
+    .bm-sort {
+        max-width: 180px;
+        padding: 13px 34px 13px 12px;
+        border: 1px solid var(--bm-border);
+        border-radius: 10px;
+        outline-color: var(--bm-brown);
+        background: var(--bm-paper);
+        color: var(--bm-brown-dark);
+        font: inherit;
+        font-size: 12px;
+        cursor: pointer;
+    }
+
+    /* Tabs */
+    .bm-tabs {
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+        padding: 0 0 14px;
+        border-bottom: 1px solid var(--bm-border);
+        scrollbar-width: thin;
+    }
+
+    .bm-tab {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        flex-shrink: 0;
+        padding: 10px 16px;
+        border: 1px solid transparent;
+        border-radius: 8px;
+        background: transparent;
+        color: #76685C;
+        font: inherit;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background .2s, color .2s;
+    }
+
+    .bm-tab:hover {
+        background: #F0E7DC;
+        color: var(--bm-brown);
+    }
+
+    .bm-tab.is-active {
+        border-color: var(--bm-brown);
+        background: var(--bm-brown);
+        color: white;
+    }
+
+    .bm-tab-count {
+        display: inline-grid;
+        min-width: 22px;
+        height: 22px;
+        place-items: center;
+        padding: 0 5px;
+        border-radius: 6px;
+        background: #FFFFFF25;
+        font-size: 11px;
+    }
+
+    .bm-tab:not(.is-active) .bm-tab-count {
+        background: #EDE3D7;
+        color: var(--bm-brown);
+    }
+
+    /* Bookmark grid */
+    .bm-grid {
         display: grid;
         grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 20px;
+        padding-top: 22px;
     }
 
-    .bookmark-card {
+    .bm-card {
         position: relative;
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
         overflow: hidden;
-        border: 1px solid #DDD6C9;
+        border: 1px solid var(--bm-border);
         border-radius: 12px;
-        background: #fff;
+        background: var(--bm-paper);
+        transition: transform .2s ease, box-shadow .2s ease;
     }
 
-    .bookmark-card > a {
-        display: block;
+    .bm-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 28px #49331D0D;
+    }
+
+    .bm-card[hidden] {
+        display: none !important;
+    }
+
+    .bm-card-link {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        min-width: 0;
         color: inherit;
         text-decoration: none;
     }
 
-    .bookmark-card img {
+    .bm-card-image-wrap {
+        position: relative;
+        overflow: hidden;
+        aspect-ratio: 16 / 10;
+        background: #EDE4D8;
+    }
+
+    .bm-card-image {
         display: block;
         width: 100%;
-        height: 190px;
+        height: 100%;
         object-fit: cover;
+        transition: transform .35s ease;
     }
 
-    .bookmark-card-content {
-        padding: 14px;
+    .bm-card:hover .bm-card-image {
+        transform: scale(1.04);
     }
 
-    .bookmark-card-content h3 {
-        margin: 0 0 8px;
-        font-size: 16px;
+    .bm-image-placeholder {
+        display: grid;
+        width: 100%;
+        height: 100%;
+        min-height: 150px;
+        place-items: center;
+        color: #A58B71;
     }
 
-    .bookmark-card-content p {
-        margin: 0;
-        color: #817970;
-        font-size: 13px;
+    .bm-image-placeholder svg {
+        width: 44px;
+        height: 44px;
     }
 
-    .bookmark-remove {
+    .bm-type-badge {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        padding: 6px 9px;
+        border: 1px solid #FFFFFF70;
+        border-radius: 5px;
+        background: #FAF7F2E8;
+        color: var(--bm-brown);
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: .6px;
+        text-transform: uppercase;
+    }
+
+    .bm-card-body {
         display: flex;
-        justify-content: flex-end;
-        padding: 0 14px 14px;
+        flex: 1;
+        flex-direction: column;
+        padding: 17px;
     }
 
-    .bookmark-remove button {
-        padding: 7px 10px;
-        border: 1px solid #6B4226;
-        border-radius: 7px;
-        background: #FBF8F2;
-        color: #6B4226;
-        cursor: pointer;
+    .bm-card-category {
+        margin: 0 0 8px;
+        color: var(--bm-brown-soft);
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 1px;
+        text-transform: uppercase;
     }
 
-    .bookmark-empty {
-        padding: 22px;
-        border: 1px dashed #DDD6C9;
-        border-radius: 10px;
-        color: #817970;
+    .bm-card-title {
+        display: -webkit-box;
+        overflow: hidden;
+        margin: 0;
+        color: var(--bm-brown-dark);
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 19px;
+        font-weight: 600;
+        line-height: 1.4;
+        overflow-wrap: anywhere;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
     }
 
-    @media (max-width: 700px) {
-        .bookmark-grid {
+    .bm-card:hover .bm-card-title {
+        color: var(--bm-brown);
+    }
+
+    .bm-card-author {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        margin-top: 10px;
+        color: #786C60;
+        font-size: 12px;
+    }
+
+    .bm-card-author svg {
+        flex-shrink: 0;
+        width: 15px;
+        height: 15px;
+    }
+
+    .bm-card-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        margin-top: auto;
+        padding-top: 17px;
+    }
+
+    .bm-saved-date {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        color: var(--bm-muted);
+        font-size: 10px;
+        line-height: 1.5;
+    }
+
+    .bm-saved-date svg {
+        flex-shrink: 0;
+        width: 13px;
+        height: 13px;
+    }
+
+    .bm-read-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        color: var(--bm-brown);
+        font-size: 11px;
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+    .bm-read-link svg {
+        width: 14px;
+        height: 14px;
+        transition: transform .2s;
+    }
+
+    .bm-card:hover .bm-read-link svg {
+        transform: translateX(3px);
+    }
+
+    /* Empty states */
+    .bm-empty {
+        grid-column: 1 / -1;
+        padding: 56px 20px;
+        border: 1px dashed #D8C8B6;
+        border-radius: 14px;
+        background: #F7F1E9;
+        text-align: center;
+    }
+
+    .bm-empty[hidden] {
+        display: none !important;
+    }
+
+    .bm-empty-icon {
+        display: grid;
+        width: 72px;
+        height: 72px;
+        place-items: center;
+        margin: 0 auto 18px;
+        border-radius: 50%;
+        background: #EDE0CF;
+        color: var(--bm-brown);
+    }
+
+    .bm-empty-icon svg {
+        width: 34px;
+        height: 34px;
+    }
+
+    .bm-empty h3 {
+        margin: 0 0 9px;
+        color: var(--bm-brown-dark);
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 24px;
+        font-weight: 500;
+    }
+
+    .bm-empty p {
+        max-width: 360px;
+        margin: 0 auto 22px;
+        color: #817367;
+        font-size: 13px;
+        line-height: 1.8;
+    }
+
+    .bm-explore-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 12px 18px;
+        border: 1px solid var(--bm-brown);
+        border-radius: 8px;
+        background: var(--bm-brown);
+        color: white;
+        font-size: 12px;
+        font-weight: 700;
+        text-decoration: none;
+        transition: background .2s;
+    }
+
+    .bm-explore-btn:hover {
+        background: var(--bm-brown-dark);
+    }
+
+    .bm-explore-btn svg {
+        width: 16px;
+        height: 16px;
+    }
+
+    /* Responsive */
+    @media (max-width: 850px) {
+        .bm-grid {
             grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .bm-hero-art {
+            flex-basis: 100px;
+            width: 100px;
+            height: 120px;
+        }
+
+        .bm-stat {
+            padding: 14px;
         }
     }
 
-    @media (max-width: 460px) {
-        .bookmark-grid {
-            grid-template-columns: 1fr;
+    @media (max-width: 560px) {
+        .bm-page {
+            padding: 22px 14px 42px;
+        }
+
+        .bm-hero {
+            padding: 25px 21px;
+            border-radius: 14px;
+        }
+
+        .bm-hero-art {
+            flex-basis: 66px;
+            width: 66px;
+            height: 88px;
+            box-shadow: 5px 5px 0 #D8C3A8;
+        }
+
+        .bm-hero-art svg {
+            width: 36px;
+            height: 36px;
+        }
+
+        .bm-hero-description {
+            font-size: 12px;
+        }
+
+        .bm-stats {
+            gap: 8px;
+            margin: 16px 0 28px;
+        }
+
+        .bm-stat {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 9px;
+            padding: 12px 10px;
+        }
+
+        .bm-stat-icon {
+            flex-basis: 35px;
+            width: 35px;
+            height: 35px;
+        }
+
+        .bm-stat-icon svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .bm-stat-number {
+            font-size: 23px;
+        }
+
+        .bm-stat-label {
+            font-size: 10px;
+        }
+
+        .bm-collection-header {
+            align-items: flex-start;
+            flex-direction: column;
+            gap: 7px;
+        }
+
+        .bm-toolbar {
+            align-items: stretch;
+            flex-direction: column;
+        }
+
+        .bm-sort {
+            max-width: none;
+            width: 100%;
+        }
+
+        .bm-grid {
+            gap: 12px;
+            padding-top: 16px;
+        }
+
+        .bm-card-body {
+            padding: 12px;
+        }
+
+        .bm-card-title {
+            font-size: 16px;
+        }
+
+        .bm-card-category {
+            font-size: 9px;
+        }
+
+        .bm-card-author {
+            font-size: 11px;
+        }
+
+        .bm-card-footer {
+            align-items: flex-start;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .bm-type-badge {
+            top: 7px;
+            left: 7px;
+            padding: 5px 7px;
+            font-size: 9px;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .bm-card,
+        .bm-card-image,
+        .bm-read-link svg {
+            transition: none;
         }
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="my-bookmarks-page">
-    <h1>Bookmark Saya</h1>
-    <p>Artikel dan cerita yang kamu simpan untuk dibaca nanti.</p>
+<div class="bm-page">
+    <div class="bm-container">
 
-    <section class="bookmark-section">
-        <h2>Artikel</h2>
+        <!-- HERO -->
+        <header class="bm-hero">
+            <div class="bm-hero-copy">
+                <span class="bm-eyebrow">Perpustakaan Pribadi</span>
+                <h1>Koleksi<br>Bacaanmu.</h1>
+                <p class="bm-hero-description">
+                    Semua cerita yang ingin kamu lanjutkan dan artikel
+                    yang ingin kamu baca lagi, tersimpan rapi di satu tempat.
+                </p>
+            </div>
 
-        {% if article_bookmarks %}
-            <div class="bookmark-grid">
+            <div class="bm-hero-art" aria-hidden="true">
+                <svg viewBox="0 0 64 64" fill="none"
+                     stroke="currentColor" stroke-width="1.5"
+                     stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 12h29a5 5 0 0 1 5 5v35H19a5 5 0 0 1-5-5V12Z"/>
+                    <path d="M14 12v35a5 5 0 0 0 5 5"/>
+                    <path d="M24 22h15M24 29h15M24 36h10"/>
+                    <path d="M43 12v12l-5-3-5 3V12"/>
+                </svg>
+            </div>
+        </header>
+
+        <!-- STATISTIK -->
+        <section class="bm-stats" aria-label="Statistik koleksi">
+            <div class="bm-stat">
+                <div class="bm-stat-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="1.7"
+                         stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6 3.75h12a1 1 0 0 1 1 1V21l-7-4.5L5 21V4.75a1 1 0 0 1 1-1Z"/>
+                    </svg>
+                </div>
+                <div>
+                    <p class="bm-stat-label">Total koleksi</p>
+                    <p class="bm-stat-number" id="bm-total-count">
+                        {{ article_bookmarks|length|add:story_bookmarks|length }}
+                    </p>
+                </div>
+            </div>
+
+            <div class="bm-stat">
+                <div class="bm-stat-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="1.7"
+                         stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v18H6.5A2.5 2.5 0 0 1 4 18.5v-13Z"/>
+                        <path d="M4 5.5v13A2.5 2.5 0 0 0 6.5 21"/>
+                        <path d="M8 7h8M8 11h8"/>
+                    </svg>
+                </div>
+                <div>
+                    <p class="bm-stat-label">Artikel</p>
+                    <p class="bm-stat-number">{{ article_bookmarks|length }}</p>
+                </div>
+            </div>
+
+            <div class="bm-stat">
+                <div class="bm-stat-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="1.7"
+                         stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15Z"/>
+                        <path d="M4 4.5v15A2.5 2.5 0 0 0 6.5 22"/>
+                        <path d="M8 7h8M8 11h8M8 15h5"/>
+                    </svg>
+                </div>
+                <div>
+                    <p class="bm-stat-label">Cerita fiksi</p>
+                    <p class="bm-stat-number">{{ story_bookmarks|length }}</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- KOLEKSI -->
+        <section class="bm-collection">
+            <div class="bm-collection-header">
+                <div>
+                    <p class="bm-section-kicker">Disimpan untuk nanti</p>
+                    <h2 class="bm-section-title">Rak bacaanmu</h2>
+                </div>
+
+                <span class="bm-result-count" id="bm-result-count">
+                    {{ article_bookmarks|length|add:story_bookmarks|length }} bacaan
+                </span>
+            </div>
+
+            <!-- PENCARIAN DAN PENGURUTAN -->
+            <div class="bm-toolbar">
+                <label class="bm-search">
+                    <svg viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="1.8"
+                         stroke-linecap="round">
+                        <circle cx="11" cy="11" r="7"/>
+                        <path d="m20 20-4-4"/>
+                    </svg>
+                    <input
+                        type="search"
+                        id="bm-search-input"
+                        placeholder="Cari judul, penulis, atau kategori..."
+                        aria-label="Cari bookmark"
+                    >
+                </label>
+
+                <select id="bm-sort" class="bm-sort" aria-label="Urutkan koleksi">
+                    <option value="newest">Terbaru disimpan</option>
+                    <option value="oldest">Terlama disimpan</option>
+                </select>
+            </div>
+
+            <!-- TAB -->
+            <div class="bm-tabs" role="tablist" aria-label="Kategori bookmark">
+                <button
+                    type="button"
+                    class="bm-tab is-active"
+                    data-filter="all"
+                    role="tab"
+                    aria-selected="true"
+                >
+                    Semua
+                    <span class="bm-tab-count">
+                        {{ article_bookmarks|length|add:story_bookmarks|length }}
+                    </span>
+                </button>
+
+                <button
+                    type="button"
+                    class="bm-tab"
+                    data-filter="article"
+                    role="tab"
+                    aria-selected="false"
+                >
+                    Artikel
+                    <span class="bm-tab-count">{{ article_bookmarks|length }}</span>
+                </button>
+
+                <button
+                    type="button"
+                    class="bm-tab"
+                    data-filter="story"
+                    role="tab"
+                    aria-selected="false"
+                >
+                    Fiksi
+                    <span class="bm-tab-count">{{ story_bookmarks|length }}</span>
+                </button>
+            </div>
+
+            <!-- KARTU BOOKMARK -->
+            <div class="bm-grid" id="bm-grid">
+
                 {% for item in article_bookmarks %}
-                    <article class="bookmark-card">
-                        <a href="{% url 'articles:article_detail' item.article.pk %}">
-                            {% if item.article.image %}
-                                <img
-                                    src="{{ item.article.image.url }}"
-                                    alt="{{ item.article.title }}"
-                                    loading="lazy"
-                                >
-                            {% endif %}
-                            <div class="bookmark-card-content">
-                                <h3>{{ item.article.title }}</h3>
-                                <p>Disimpan {{ item.created_at|date:"d M Y" }}</p>
+                <article
+                    class="bm-card"
+                    data-kind="article"
+                    data-saved="{{ item.created_at|date:'U' }}"
+                    data-search="{{ item.article.title|default:'' }} {{ item.article.category.name|default:'' }} {{ item.article.contributor.username|default:'' }}"
+                >
+                    <a
+                        class="bm-card-link"
+                        href="{% url 'articles:article_detail' item.article.pk %}"
+                    >
+                        <div class="bm-card-image-wrap">
+                            {% if item.article.thumbnail %}
+                            <img
+                                class="bm-card-image"
+                                src="{{ item.article.thumbnail.url }}"
+                                alt="{{ item.article.title }}"
+                                loading="lazy"
+                            >
+                            {% else %}
+                            <div class="bm-image-placeholder">
+                                <svg viewBox="0 0 24 24" fill="none"
+                                     stroke="currentColor" stroke-width="1.5"
+                                     stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M4 4h16v16H4z"/>
+                                    <circle cx="9" cy="9" r="2"/>
+                                    <path d="m20 15-5-5L5 20"/>
+                                </svg>
                             </div>
-                        </a>
+                            {% endif %}
 
-                        <form
-                            class="bookmark-remove"
-                            action="{% url 'interactions:toggle_bookmark' item.article.pk %}"
-                            method="post"
-                            onsubmit="return confirm('Hapus artikel ini dari bookmark?');"
-                        >
-                            {% csrf_token %}
-                            <input type="hidden" name="next" value="{{ request.get_full_path }}">
-                            <button type="submit">Hapus bookmark</button>
-                        </form>
-                    </article>
+                            <span class="bm-type-badge">Artikel</span>
+                        </div>
+
+                        <div class="bm-card-body">
+                            <p class="bm-card-category">
+                                {{ item.article.category.name|default:"Artikel" }}
+                            </p>
+
+                            <h3 class="bm-card-title">
+                                {{ item.article.title }}
+                            </h3>
+
+                            <div class="bm-card-author">
+                                <svg viewBox="0 0 24 24" fill="none"
+                                     stroke="currentColor" stroke-width="1.7"
+                                     stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="8" r="4"/>
+                                    <path d="M5 21a7 7 0 0 1 14 0"/>
+                                </svg>
+                                <span>
+                                    {% if item.article.contributor %}
+                                        {{ item.article.contributor.username }}
+                                    {% else %}
+                                        Pena Digital
+                                    {% endif %}
+                                </span>
+                            </div>
+
+                            <div class="bm-card-footer">
+                                <span class="bm-saved-date">
+                                    <svg viewBox="0 0 24 24" fill="none"
+                                         stroke="currentColor" stroke-width="1.7"
+                                         stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="12" cy="12" r="9"/>
+                                        <path d="M12 7v5l3 2"/>
+                                    </svg>
+                                    {{ item.created_at|date:"d M Y" }}
+                                </span>
+
+                                <span class="bm-read-link">
+                                    Baca artikel
+                                    <svg viewBox="0 0 24 24" fill="none"
+                                         stroke="currentColor" stroke-width="2"
+                                         stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M5 12h14m-6-6 6 6-6 6"/>
+                                    </svg>
+                                </span>
+                            </div>
+                        </div>
+                    </a>
+                </article>
                 {% endfor %}
-            </div>
-        {% else %}
-            <p class="bookmark-empty">Belum ada artikel yang disimpan.</p>
-        {% endif %}
-    </section>
 
-    <section class="bookmark-section">
-        <h2>Karya Fiksi</h2>
-
-        {% if story_bookmarks %}
-            <div class="bookmark-grid">
                 {% for item in story_bookmarks %}
-                    <article class="bookmark-card">
-                        <a href="{% url 'fiction:story_detail' item.story.pk %}">
+                <article
+                    class="bm-card"
+                    data-kind="story"
+                    data-saved="{{ item.created_at|date:'U' }}"
+                    data-search="{{ item.story.title|default:'' }} {{ item.story.author.username|default:'' }}"
+                >
+                    <a
+                        class="bm-card-link"
+                        href="{% url 'fiction:story_detail' item.story.pk %}"
+                    >
+                        <div class="bm-card-image-wrap">
                             {% if item.story.cover %}
-                                <img
-                                    src="{{ item.story.cover.url }}"
-                                    alt="{{ item.story.title }}"
-                                    loading="lazy"
-                                >
-                            {% endif %}
-                            <div class="bookmark-card-content">
-                                <h3>{{ item.story.title }}</h3>
-                                <p>Disimpan {{ item.created_at|date:"d M Y" }}</p>
+                            <img
+                                class="bm-card-image"
+                                src="{{ item.story.cover.url }}"
+                                alt="{{ item.story.title }}"
+                                loading="lazy"
+                            >
+                            {% else %}
+                            <div class="bm-image-placeholder">
+                                <svg viewBox="0 0 24 24" fill="none"
+                                     stroke="currentColor" stroke-width="1.5"
+                                     stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15Z"/>
+                                    <path d="M8 7h8M8 11h8M8 15h5"/>
+                                </svg>
                             </div>
-                        </a>
+                            {% endif %}
 
-                        <form
-                            class="bookmark-remove"
-                            action="{% url 'interactions:toggle_story_bookmark' item.story.pk %}"
-                            method="post"
-                            onsubmit="return confirm('Hapus cerita ini dari bookmark?');"
-                        >
-                            {% csrf_token %}
-                            <input type="hidden" name="next" value="{{ request.get_full_path }}">
-                            <button type="submit">Hapus bookmark</button>
-                        </form>
-                    </article>
+                            <span class="bm-type-badge">Fiksi</span>
+                        </div>
+
+                        <div class="bm-card-body">
+                            <p class="bm-card-category">Cerita pilihan</p>
+
+                            <h3 class="bm-card-title">
+                                {{ item.story.title }}
+                            </h3>
+
+                            <div class="bm-card-author">
+                                <svg viewBox="0 0 24 24" fill="none"
+                                     stroke="currentColor" stroke-width="1.7"
+                                     stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="8" r="4"/>
+                                    <path d="M5 21a7 7 0 0 1 14 0"/>
+                                </svg>
+                                <span>{{ item.story.author.username }}</span>
+                            </div>
+
+                            <div class="bm-card-footer">
+                                <span class="bm-saved-date">
+                                    <svg viewBox="0 0 24 24" fill="none"
+                                         stroke="currentColor" stroke-width="1.7"
+                                         stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="12" cy="12" r="9"/>
+                                        <path d="M12 7v5l3 2"/>
+                                    </svg>
+                                    {{ item.created_at|date:"d M Y" }}
+                                </span>
+
+                                <span class="bm-read-link">
+                                    Baca cerita
+                                    <svg viewBox="0 0 24 24" fill="none"
+                                         stroke="currentColor" stroke-width="2"
+                                         stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M5 12h14m-6-6 6 6-6 6"/>
+                                    </svg>
+                                </span>
+                            </div>
+                        </div>
+                    </a>
+                </article>
                 {% endfor %}
+
+                <!-- BELUM ADA BOOKMARK SAMA SEKALI -->
+                <div
+                    class="bm-empty"
+                    id="bm-empty-all"
+                    {% if article_bookmarks or story_bookmarks %}hidden{% endif %}
+                >
+                    <div class="bm-empty-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="1.5"
+                             stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M6 3.75h12a1 1 0 0 1 1 1V21l-7-4.5L5 21V4.75a1 1 0 0 1 1-1Z"/>
+                        </svg>
+                    </div>
+                    <h3>Perpustakaanmu masih kosong</h3>
+                    <p>
+                        Temukan artikel dan cerita yang menarik perhatianmu,
+                        lalu simpan di sini agar mudah dibaca kembali.
+                    </p>
+                    <a href="{% url 'articles:article_list' %}" class="bm-explore-btn">
+                        <svg viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="1.8"
+                             stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="7"/>
+                            <path d="m20 20-4-4"/>
+                        </svg>
+                        Jelajahi bacaan
+                    </a>
+                </div>
+
+                <!-- HASIL FILTER KOSONG -->
+                <div class="bm-empty" id="bm-empty-filter" hidden>
+                    <div class="bm-empty-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="1.5"
+                             stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="7"/>
+                            <path d="m20 20-4-4"/>
+                        </svg>
+                    </div>
+                    <h3>Bacaan tidak ditemukan</h3>
+                    <p>
+                        Coba kata kunci lain atau pilih kategori yang berbeda.
+                    </p>
+                    <button type="button" class="bm-explore-btn" id="bm-reset">
+                        Lihat semua koleksi
+                    </button>
+                </div>
+
             </div>
-        {% else %}
-            <p class="bookmark-empty">Belum ada karya fiksi yang disimpan.</p>
-        {% endif %}
-    </section>
+        </section>
+    </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const grid = document.getElementById('bm-grid');
+    if (!grid) return;
+
+    const searchInput = document.getElementById('bm-search-input');
+    const sortSelect = document.getElementById('bm-sort');
+    const tabs = [...document.querySelectorAll('.bm-tab')];
+    const resultCount = document.getElementById('bm-result-count');
+    const emptyAll = document.getElementById('bm-empty-all');
+    const emptyFilter = document.getElementById('bm-empty-filter');
+    const resetButton = document.getElementById('bm-reset');
+
+    let activeFilter = 'all';
+
+    function getCards() {
+        return [...grid.querySelectorAll('.bm-card')];
+    }
+
+    function applyFilters() {
+        const query = searchInput.value.trim().toLocaleLowerCase();
+        const cards = getCards();
+        let visibleCount = 0;
+
+        cards.forEach(function (card) {
+            const matchesType =
+                activeFilter === 'all' ||
+                card.dataset.kind === activeFilter;
+
+            const searchText = (card.dataset.search || '').toLocaleLowerCase();
+            const matchesSearch = searchText.includes(query);
+            const visible = matchesType && matchesSearch;
+
+            card.hidden = !visible;
+
+            if (visible) visibleCount++;
+        });
+
+        /* Urutkan kartu tanpa mengirim request ke server */
+        const direction = sortSelect.value === 'oldest' ? 1 : -1;
+
+        cards.sort(function (a, b) {
+            const dateA = Number(a.dataset.saved || 0);
+            const dateB = Number(b.dataset.saved || 0);
+            return (dateA - dateB) * direction;
+        });
+
+        cards.forEach(function (card) {
+            grid.insertBefore(card, emptyAll);
+        });
+
+        resultCount.textContent =
+            visibleCount + (visibleCount === 1 ? ' bacaan' : ' bacaan');
+
+        emptyAll.hidden = cards.length !== 0;
+        emptyFilter.hidden = cards.length === 0 || visibleCount !== 0;
+    }
+
+    tabs.forEach(function (tab) {
+        tab.addEventListener('click', function () {
+            activeFilter = tab.dataset.filter;
+
+            tabs.forEach(function (item) {
+                const isActive = item === tab;
+                item.classList.toggle('is-active', isActive);
+                item.setAttribute('aria-selected', String(isActive));
+            });
+
+            applyFilters();
+        });
+    });
+
+    searchInput.addEventListener('input', applyFilters);
+    sortSelect.addEventListener('change', applyFilters);
+
+    resetButton.addEventListener('click', function () {
+        activeFilter = 'all';
+        searchInput.value = '';
+        sortSelect.value = 'newest';
+
+        tabs.forEach(function (tab) {
+            const isActive = tab.dataset.filter === 'all';
+            tab.classList.toggle('is-active', isActive);
+            tab.setAttribute('aria-selected', String(isActive));
+        });
+
+        applyFilters();
+    });
+
+    applyFilters();
+});
+</script>
 {% endblock %}
