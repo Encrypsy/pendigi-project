@@ -113,7 +113,7 @@
                                         Fiksi
                                     {% endif %}
                                 </small>
-
+                    
                                 {% if content.type == 'fiksi' %}
                                     <div class="story-chapter-list">
                                         {% for chapter in content.chapters %}
@@ -131,25 +131,23 @@
                                                         Kelola Bab
                                                     </a>
 
-                                                    {% if chapter.status == 'APPROVED' %}
-                                                        <form
-                                                            method="post"
-                                                            action="{% url 'fiction:delete_approved_chapter' content.id chapter.pk %}"
-                                                            onsubmit="return confirm('Yakin ingin menghapus bab ini? Tindakan ini tidak dapat dibatalkan.');"
+                                                    <form
+                                                        method="post"
+                                                        action="{% url 'fiction:delete_approved_chapter' content.id chapter.pk %}"
+                                                        onsubmit="return confirm('Yakin ingin menghapus bab ini?');"
+                                                    >
+                                                        {% csrf_token %}
+                                                        <button
+                                                            type="submit"
+                                                            class="content-action-btn delete-btn"
                                                         >
-                                                            {% csrf_token %}
-                                                            <button
-                                                                type="submit"
-                                                                class="content-action-btn delete-btn"
-                                                            >
-                                                                Hapus Bab
-                                                            </button>
-                                                        </form>
-                                                    {% endif %}
+                                                            Hapus Bab
+                                                        </button>
+                                                    </form>
                                                 </div>
                                             </div>
                                         {% empty %}
-                                            <small>Belum ada bab.</small>
+                                            <small>Belum ada bab yang disetujui.</small>
                                         {% endfor %}
                                     </div>
                                 {% endif %}
@@ -193,14 +191,14 @@
                                     </button>
                                 </form>
                             </div>
-
+                
                         {% elif content.type == 'fiksi' %}
                             <div class="my-content-actions">
                                 {% if content.status == 'APPROVED' %}
                                     <form
                                         method="post"
                                         action="{% url 'fiction:delete_approved_story' content.id %}"
-                                        onsubmit="return confirm('Yakin ingin menghapus seluruh cerita ini beserta bab-babnya? Tindakan ini tidak dapat dibatalkan.');"
+                                        onsubmit="return confirm('Yakin ingin menghapus seluruh cerita beserta semua babnya?');"
                                     >
                                         {% csrf_token %}
                                         <button
@@ -214,10 +212,6 @@
                                     <span>—</span>
                                 {% endif %}
                             </div>
-
-                        {% else %}
-                            <span>—</span>
-                        {% endif %}
                     </td>
                 </tr>
 
