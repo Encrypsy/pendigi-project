@@ -27,4 +27,14 @@ urlpatterns = [
     path('<int:pk>/baca/<int:chapter_number>/komentar-partial/', views.chapter_comments_partial, name='chapter_comments_partial'),
     path('kelola/<int:story_id>/bab/<int:chapter_id>/approve/', views.admin_approve_chapter, name='admin_approve_chapter'),
     path('kelola/<int:story_id>/bab/<int:chapter_id>/reject/', views.admin_reject_chapter, name='admin_reject_chapter'),
+    path(
+        '<int:pk>/hapus/',
+        views.delete_approved_story,
+        name='delete_approved_story',
+    ),
+    path(
+        '<int:story_id>/bab/<int:chapter_id>/hapus/',
+        views.delete_approved_chapter,
+        name='delete_approved_chapter',
+    ),
 ]

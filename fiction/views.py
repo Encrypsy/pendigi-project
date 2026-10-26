@@ -1,3 +1,4 @@
+from django.db import transaction
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -730,3 +731,53 @@ def chapter_comments_partial(request, pk, chapter_number):
         'post_url': post_url,
         'refresh_url': reverse('fiction:chapter_comments_partial', kwargs={'pk': pk, 'chapter_number': chapter_number}),
     })
+    
+@login_required
+@require_POST
+def delete_approved_story(request, pk):
+    story = get_object_or_404(
+        Stories,
+        pk=pk,
+        author=request.user,
+        status=StatusStory.APPROVED,
+    )
+
+    story_title = story.title
+
+    with transaction.atomic():
+        story.delete()
+
+    messages.success(
+        request,
+        f'Cerita "{story_title}" berhasil dihapus.'
+    )
+    return redirect('fiction:my_stories')
+
+
+@login_required
+@require_POST
+def delete_approved_chapter(request, story_id, chapter_id):
+    story = get_object_or_404(
+        Stories,
+        pk=story_id,
+        author=request.user,
+        status=StatusStory.APPROVED,
+    )
+
+    chapter = get_object_or_404(
+        Chapters,
+        pk=chapter_id,
+        story=story,
+        status=StatusChapter.APPROVED,
+    )
+
+    chapter_title = chapter.title
+
+    with transaction.atomic():
+        chapter.delete()
+
+    messages.success(
+        request,
+        f'Bab "{chapter_title}" berhasil dihapus.'
+    )
+    return redirect('fiction:chapter_list', story_id=story.pk)

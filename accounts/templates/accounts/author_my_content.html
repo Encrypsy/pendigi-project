@@ -1,3 +1,4 @@
+
 {% extends 'author_base.html' %}
 
 {% block title %}Konten Saya{% endblock %}
@@ -80,6 +81,7 @@
                     <th>Aksi</th>
                 </tr>
             </thead>
+
             <tbody>
                 {% for content in page_obj %}
                 <tr>
@@ -121,13 +123,33 @@
                                                     {{ chapter.title }}
                                                 </span>
 
-                                                <a
-                                                    href="{% url 'fiction:edit_chapter' content.id chapter.pk %}"
-                                                    class="content-action-btn chapter-btn"
-                                                >
-                                                    Kelola Bab
-                                                </a>
+                                                <div class="chapter-actions">
+                                                    <a
+                                                        href="{% url 'fiction:edit_chapter' content.id chapter.pk %}"
+                                                        class="content-action-btn chapter-btn"
+                                                    >
+                                                        Kelola Bab
+                                                    </a>
+
+                                                    {% if chapter.status == 'APPROVED' %}
+                                                        <form
+                                                            method="post"
+                                                            action="{% url 'fiction:delete_approved_chapter' content.id chapter.pk %}"
+                                                            onsubmit="return confirm('Yakin ingin menghapus bab ini? Tindakan ini tidak dapat dibatalkan.');"
+                                                        >
+                                                            {% csrf_token %}
+                                                            <button
+                                                                type="submit"
+                                                                class="content-action-btn delete-btn"
+                                                            >
+                                                                Hapus Bab
+                                                            </button>
+                                                        </form>
+                                                    {% endif %}
+                                                </div>
                                             </div>
+                                        {% empty %}
+                                            <small>Belum ada bab.</small>
                                         {% endfor %}
                                     </div>
                                 {% endif %}
@@ -135,9 +157,7 @@
                         </div>
                     </td>
 
-                    <td>
-                        {{ content.created_at|date:"d M Y" }}
-                    </td>
+                    <td>{{ content.created_at|date:"d M Y" }}</td>
 
                     <td>{{ content.views }}</td>
 
@@ -173,6 +193,28 @@
                                     </button>
                                 </form>
                             </div>
+
+                        {% elif content.type == 'fiksi' %}
+                            <div class="my-content-actions">
+                                {% if content.status == 'APPROVED' %}
+                                    <form
+                                        method="post"
+                                        action="{% url 'fiction:delete_approved_story' content.id %}"
+                                        onsubmit="return confirm('Yakin ingin menghapus seluruh cerita ini beserta bab-babnya? Tindakan ini tidak dapat dibatalkan.');"
+                                    >
+                                        {% csrf_token %}
+                                        <button
+                                            type="submit"
+                                            class="content-action-btn delete-btn"
+                                        >
+                                            Hapus Cerita
+                                        </button>
+                                    </form>
+                                {% else %}
+                                    <span>—</span>
+                                {% endif %}
+                            </div>
+
                         {% else %}
                             <span>—</span>
                         {% endif %}
@@ -215,4 +257,36 @@
     {% endif %}
 
 </section>
+
+<style>
+    .chapter-actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .chapter-actions form,
+    .my-content-actions form {
+        margin: 0;
+    }
+
+    .my-content-actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .my-content-table .delete-btn {
+        border: 1px solid #e3b7b1;
+        background: #fff5f3;
+        color: #a3332b;
+        cursor: pointer;
+    }
+
+    .my-content-table .delete-btn:hover {
+        background: #fce5e1;
+    }
+</style>
 {% endblock %}
