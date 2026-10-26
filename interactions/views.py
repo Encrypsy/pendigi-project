@@ -615,8 +615,6 @@ def _bookmark_redirect(request, fallback='articles:article_list'):
 
     return redirect(fallback)
 
-
-
 @login_required
 @require_POST
 def toggle_bookmark(request, pk):
@@ -627,26 +625,31 @@ def toggle_bookmark(request, pk):
         article=article,
     )
 
-    is_bookmarked = created
+    bookmarked = created
 
     if not created:
         bookmark.delete()
+        bookmarked = False
 
+    # Jika request berasal dari AJAX, jangan redirect halaman
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return JsonResponse({
             'success': True,
-            'is_bookmarked': is_bookmarked,
+            'bookmarked': bookmarked,
             'message': (
                 'Artikel berhasil disimpan.'
-                if is_bookmarked
+                if bookmarked
                 else 'Artikel dihapus dari bookmark.'
             ),
         })
 
-    if is_bookmarked:
-        messages.success(request, 'Artikel berhasil disimpan.')
-    else:
-        messages.success(request, 'Artikel dihapus dari bookmark.')
+    # Tetap mendukung form biasa
+    messages.success(
+        request,
+        'Artikel berhasil disimpan.'
+        if bookmarked
+        else 'Artikel dihapus dari bookmark.'
+    )
 
     return _bookmark_redirect(request)
 

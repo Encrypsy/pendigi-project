@@ -1354,4 +1354,67 @@
     })();
   </script>
 
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.category-bookmark-form').forEach(function (form) {
+        form.addEventListener('submit', async function (event) {
+            event.preventDefault();
+
+            const button = form.querySelector('.category-bookmark-btn');
+
+            if (!button || button.disabled) return;
+
+            const wasBookmarked = button.classList.contains('is-bookmarked');
+
+            // Cegah klik berulang selama request berlangsung
+            button.disabled = true;
+            button.style.opacity = '0.6';
+
+            try {
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRFToken': form.querySelector(
+                            '[name="csrfmiddlewaretoken"]'
+                        ).value
+                    },
+                    body: new FormData(form),
+                    credentials: 'same-origin'
+                });
+
+                if (!response.ok) {
+                    throw new Error('Gagal menyimpan bookmark.');
+                }
+
+                const data = await response.json();
+
+                if (!data.success) {
+                    throw new Error(data.message || 'Bookmark gagal diperbarui.');
+                }
+
+                // Perbarui ikon tanpa reload halaman
+                button.classList.toggle(
+                    'is-bookmarked',
+                    data.bookmarked
+                );
+
+                const label = data.bookmarked
+                    ? 'Hapus dari bookmark'
+                    : 'Simpan artikel ke bookmark';
+
+                button.setAttribute('aria-label', label);
+                button.setAttribute('title', label);
+
+            } catch (error) {
+                console.error(error);
+                alert('Bookmark gagal diperbarui. Silakan coba lagi.');
+            } finally {
+                button.disabled = false;
+                button.style.opacity = '';
+            }
+        });
+    });
+});
+</script>
 {% endblock %}
