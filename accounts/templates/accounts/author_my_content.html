@@ -114,43 +114,44 @@
                                     {% endif %}
                                 </small>
                     
-                                {% if content.type == 'fiksi' %}
-                                    <div class="story-chapter-list">
-                                        {% for chapter in content.chapters %}
-                                            <div class="story-chapter-item">
-                                                <span>
-                                                    Bab {{ chapter.chapter_number }}:
-                                                    {{ chapter.title }}
-                                                </span>
+                                
+{% if content.type == 'fiksi' %}
+    <div class="story-chapter-list">
+        {% for chapter in content.chapters %}
+            <div class="story-chapter-item">
+                <span>
+                    Bab {{ chapter.chapter_number }}:
+                    {{ chapter.title }}
+                </span>
 
-                                                <div class="chapter-actions">
-                                                    <a
-                                                        href="{% url 'fiction:edit_chapter' content.id chapter.pk %}"
-                                                        class="content-action-btn chapter-btn"
-                                                    >
-                                                        Kelola Bab
-                                                    </a>
+                <div class="chapter-actions">
+                    <a
+                        href="{% url 'fiction:edit_chapter' content.id chapter.pk %}"
+                        class="content-action-btn chapter-btn"
+                    >
+                        Kelola Bab
+                    </a>
 
-                                                    <form
-                                                        method="post"
-                                                        action="{% url 'fiction:delete_approved_chapter' content.id chapter.pk %}"
-                                                        onsubmit="return confirm('Yakin ingin menghapus bab ini?');"
-                                                    >
-                                                        {% csrf_token %}
-                                                        <button
-                                                            type="submit"
-                                                            class="content-action-btn delete-btn"
-                                                        >
-                                                            Hapus Bab
-                                                        </button>
-                                                    </form>
-                                                </div>
-                                            </div>
-                                        {% empty %}
-                                            <small>Belum ada bab yang disetujui.</small>
-                                        {% endfor %}
-                                    </div>
-                                {% endif %}
+                    <form
+                        method="post"
+                        action="{% url 'fiction:delete_approved_chapter' content.id chapter.pk %}"
+                        onsubmit="return confirm('Yakin ingin menghapus bab ini?');"
+                    >
+                        {% csrf_token %}
+                        <button
+                            type="submit"
+                            class="content-action-btn delete-btn"
+                        >
+                            Hapus Bab
+                        </button>
+                    </form>
+                </div>
+            </div>
+        {% empty %}
+            <p class="chapter-empty">Belum ada bab yang disetujui.</p>
+        {% endfor %}
+    </div>
+{% endif %}
                             </div>
                         </div>
                     </td>
