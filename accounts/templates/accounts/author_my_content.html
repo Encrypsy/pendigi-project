@@ -113,50 +113,53 @@
                                         Fiksi
                                     {% endif %}
                                 </small>
-                    
-                                
-{% if content.type == 'fiksi' %}
-    <div class="story-chapter-list">
-        {% for chapter in content.chapters %}
-            <div class="story-chapter-item">
-                <span>
-                    Bab {{ chapter.chapter_number }}:
-                    {{ chapter.title }}
-                </span>
 
-                <div class="chapter-actions">
-                    <a
-                        href="{% url 'fiction:edit_chapter' content.id chapter.pk %}"
-                        class="content-action-btn chapter-btn"
-                    >
-                        Kelola Bab
-                    </a>
+                                {% if content.type == 'fiksi' %}
+                                    <div class="story-chapter-list">
+                                        {% for chapter in content.chapters %}
+                                            <div class="story-chapter-item">
+                                                <span>
+                                                    Bab {{ chapter.chapter_number }}:
+                                                    {{ chapter.title }}
+                                                </span>
 
-                    <form
-                        method="post"
-                        action="{% url 'fiction:delete_approved_chapter' content.id chapter.pk %}"
-                        onsubmit="return confirm('Yakin ingin menghapus bab ini?');"
-                    >
-                        {% csrf_token %}
-                        <button
-                            type="submit"
-                            class="content-action-btn delete-btn"
-                        >
-                            Hapus Bab
-                        </button>
-                    </form>
-                </div>
-            </div>
-        {% empty %}
-            <p class="chapter-empty">Belum ada bab yang disetujui.</p>
-        {% endfor %}
-    </div>
-{% endif %}
+                                                <div class="chapter-actions">
+                                                    <a
+                                                        href="{% url 'fiction:edit_chapter' content.id chapter.pk %}"
+                                                        class="content-action-btn chapter-btn"
+                                                    >
+                                                        Kelola Bab
+                                                    </a>
+
+                                                    <form
+                                                        method="post"
+                                                        action="{% url 'fiction:delete_approved_chapter' content.id chapter.pk %}"
+                                                        onsubmit="return confirm('Yakin ingin menghapus bab ini?');"
+                                                    >
+                                                        {% csrf_token %}
+                                                        <button
+                                                            type="submit"
+                                                            class="content-action-btn delete-btn"
+                                                        >
+                                                            Hapus Bab
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        {% empty %}
+                                            <p class="chapter-empty">
+                                                Belum ada bab yang disetujui.
+                                            </p>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
                             </div>
                         </div>
                     </td>
 
-                    <td>{{ content.created_at|date:"d M Y" }}</td>
+                    <td>
+                        {{ content.created_at|date:"d M Y" }}
+                    </td>
 
                     <td>{{ content.views }}</td>
 
@@ -192,14 +195,14 @@
                                     </button>
                                 </form>
                             </div>
-                
+
                         {% elif content.type == 'fiksi' %}
                             <div class="my-content-actions">
                                 {% if content.status == 'APPROVED' %}
                                     <form
                                         method="post"
                                         action="{% url 'fiction:delete_approved_story' content.id %}"
-                                        onsubmit="return confirm('Yakin ingin menghapus seluruh cerita beserta semua babnya?');"
+                                        onsubmit="return confirm('Yakin ingin menghapus seluruh cerita beserta semua babnya? Tindakan ini tidak dapat dibatalkan.');"
                                     >
                                         {% csrf_token %}
                                         <button
@@ -213,6 +216,7 @@
                                     <span>—</span>
                                 {% endif %}
                             </div>
+                        {% endif %}
                     </td>
                 </tr>
 
@@ -229,32 +233,33 @@
     </div>
 
     {% if page_obj.paginator.num_pages > 1 %}
-    <nav class="my-content-pagination">
+        <nav class="my-content-pagination">
 
-        {% if page_obj.has_previous %}
-            <a href="?jenis={{ content_type }}&amp;q={{ search_query|urlencode }}&amp;sort={{ sort_by }}&amp;page={{ page_obj.previous_page_number }}">
-                Sebelumnya
-            </a>
-        {% endif %}
+            {% if page_obj.has_previous %}
+                <a href="?jenis={{ content_type }}&amp;q={{ search_query|urlencode }}&amp;sort={{ sort_by }}&amp;page={{ page_obj.previous_page_number }}">
+                    Sebelumnya
+                </a>
+            {% endif %}
 
-        <span>
-            Halaman {{ page_obj.number }}
-            dari {{ page_obj.paginator.num_pages }}
-        </span>
+            <span>
+                Halaman {{ page_obj.number }}
+                dari {{ page_obj.paginator.num_pages }}
+            </span>
 
-        {% if page_obj.has_next %}
-            <a href="?jenis={{ content_type }}&amp;q={{ search_query|urlencode }}&amp;sort={{ sort_by }}&amp;page={{ page_obj.next_page_number }}">
-                Berikutnya
-            </a>
-        {% endif %}
+            {% if page_obj.has_next %}
+                <a href="?jenis={{ content_type }}&amp;q={{ search_query|urlencode }}&amp;sort={{ sort_by }}&amp;page={{ page_obj.next_page_number }}">
+                    Berikutnya
+                </a>
+            {% endif %}
 
-    </nav>
+        </nav>
     {% endif %}
 
 </section>
 
 <style>
-    .chapter-actions {
+    .chapter-actions,
+    .my-content-actions {
         display: flex;
         flex-wrap: wrap;
         align-items: center;
@@ -266,22 +271,33 @@
         margin: 0;
     }
 
-    .my-content-actions {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        gap: 8px;
+    .chapter-empty {
+        color: #8b8177;
+        font-size: 13px;
     }
 
     .my-content-table .delete-btn {
         border: 1px solid #e3b7b1;
+        border-radius: 7px;
         background: #fff5f3;
         color: #a3332b;
         cursor: pointer;
+        transition: background .2s ease;
     }
 
     .my-content-table .delete-btn:hover {
         background: #fce5e1;
+    }
+
+    .chapter-actions .content-action-btn {
+        white-space: nowrap;
+    }
+
+    @media (max-width: 768px) {
+        .chapter-actions,
+        .my-content-actions {
+            align-items: flex-start;
+        }
     }
 </style>
 {% endblock %}
