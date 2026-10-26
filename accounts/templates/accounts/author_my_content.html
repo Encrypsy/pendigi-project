@@ -174,7 +174,7 @@
                                                             {{ chapter.title }}
                                                         </span>
                                                     </div>
-
+                                                    
                                                     <div class="chapter-row-actions">
                                                         <a
                                                             href="{% url 'fiction:edit_chapter' content.id chapter.pk %}"
@@ -183,22 +183,16 @@
                                                             Kelola
                                                         </a>
 
-                                                        {% if content.status == 'APPROVED' %}
-                                                            <form
-                                                                method="post"
-                                                                action="{% url 'fiction:delete_approved_chapter' content.id chapter.pk %}"
-                                                                onsubmit="return confirm('Yakin ingin menghapus Bab {{ chapter.chapter_number }}: {{ chapter.title|escapejs }}? Tindakan ini tidak dapat dibatalkan.');"
-                                                            >
-                                                                {% csrf_token %}
-
-                                                                <button
-                                                                    type="submit"
-                                                                    class="content-action-btn delete-btn chapter-delete-btn"
-                                                                >
-                                                                    Hapus Bab
-                                                                </button>
-                                                            </form>
-                                                        {% endif %}
+                                                        <form
+                                                            method="post"
+                                                            action="{% url 'fiction:delete_approved_chapter' content.id chapter.pk %}"
+                                                            onsubmit="return confirm('Yakin ingin menghapus bab ini?');"
+                                                        >
+                                                            {% csrf_token %}
+                                                            <button type="submit" class="content-action-btn delete-btn">
+                                                                Hapus Bab
+                                                            </button>
+                                                        </form>
                                                     </div>
                                                 </div>
                                             {% empty %}
@@ -257,15 +251,15 @@
                                     </button>
                                 </form>
 
+                            
                             {% elif content.type == 'fiksi' %}
-                                {% if content.status == 'APPROVED' %}
+                                <div class="my-content-actions">
                                     <form
                                         method="post"
                                         action="{% url 'fiction:delete_approved_story' content.id %}"
-                                        onsubmit="return confirm('Yakin ingin menghapus seluruh cerita beserta semua babnya? Tindakan ini tidak dapat dibatalkan.');"
+                                        onsubmit="return confirm('Yakin ingin menghapus seluruh cerita beserta semua babnya?');"
                                     >
                                         {% csrf_token %}
-
                                         <button
                                             type="submit"
                                             class="content-action-btn delete-story-btn"
@@ -273,11 +267,7 @@
                                             Hapus Cerita
                                         </button>
                                     </form>
-                                {% else %}
-                                    <span class="action-unavailable">
-                                        —
-                                    </span>
-                                {% endif %}
+                                </div>
                             {% endif %}
 
                         </div>
@@ -648,5 +638,37 @@
             transition: none;
         }
     }
+
+    .my-content-table td:last-child {
+        min-width: 145px;
+        overflow: visible;
+    }
+
+    .my-content-actions {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .chapter-row-actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .chapter-row-actions form,
+    .my-content-actions form {
+        margin: 0;
+    }
+
+    .chapter-delete-btn,
+    .delete-story-btn {
+        display: inline-flex;
+        visibility: visible;
+        opacity: 1;
+    }
 </style>
+
 {% endblock %}
