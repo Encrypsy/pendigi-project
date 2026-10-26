@@ -565,6 +565,71 @@
         );
     }
 
+
+    /* Bookmark di pojok kanan atas kartu */
+    .category-latest-card {
+        position: relative;
+    }
+
+    .category-bookmark-form {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        z-index: 3;
+        margin: 0;
+    }
+
+    .category-bookmark-btn {
+        display: grid;
+        place-items: center;
+        width: 42px;
+        height: 42px;
+        padding: 0;
+        border: none;
+        border-radius: 0;
+        background: transparent;
+        color: #302A25;
+        cursor: pointer;
+        transition: color .2s ease, transform .2s ease;
+    }
+
+    .category-bookmark-btn svg {
+        width: 25px;
+        height: 25px;
+        fill: transparent;
+        stroke: currentColor;
+        stroke-width: 1.8;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+    }
+
+    .category-bookmark-btn:hover {
+        color: #6B4226;
+        transform: translateY(-2px);
+    }
+
+    .category-bookmark-btn.is-bookmarked svg {
+        fill: #6B4226;
+        color: #6B4226;
+    }
+
+    @media (max-width: 560px) {
+        .category-bookmark-form {
+            top: 8px;
+            right: 8px;
+        }
+
+        .category-bookmark-btn {
+            width: 36px;
+            height: 36px;
+        }
+
+        .category-bookmark-btn svg {
+            width: 22px;
+            height: 22px;
+        }
+    }
+
   </style>
 {% endblock %}
 
