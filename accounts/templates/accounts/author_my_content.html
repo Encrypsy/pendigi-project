@@ -6,7 +6,6 @@
 {% block author_content %}
 <section class="my-content-page">
 
-    <!-- Header -->
     <div class="my-content-header">
         <div>
             <h1>Konten Saya</h1>
@@ -14,7 +13,7 @@
         </div>
     </div>
 
-    <!-- Tabs -->
+    <!-- TAB KATEGORI -->
     <nav class="my-content-tabs">
         <a href="?jenis=semua"
            class="{% if content_type == 'semua' %}active{% endif %}">
@@ -36,7 +35,7 @@
         </span>
     </nav>
 
-    <!-- Search and sorting -->
+    <!-- PENCARIAN DAN PENGURUTAN -->
     <form method="get" class="my-content-toolbar">
         <input type="hidden" name="jenis" value="{{ content_type }}">
 
@@ -72,7 +71,7 @@
         <button type="submit">Cari</button>
     </form>
 
-    <!-- Content table -->
+    <!-- TABEL KONTEN -->
     <div class="my-content-table-wrapper">
         <table class="my-content-table">
             <thead>
@@ -93,9 +92,10 @@
                         {{ page_obj.start_index|add:forloop.counter0 }}
                     </td>
 
-                    <!-- Content information -->
+                    <!-- INFORMASI KONTEN -->
                     <td>
                         <div class="my-content-info">
+
                             {% if content.thumbnail %}
                                 <img
                                     src="{{ content.thumbnail.url }}"
@@ -119,115 +119,91 @@
                                     {% endif %}
                                 </small>
 
-                                <!-- Fiction chapter accordion -->
+                                <!-- ACCORDION PENGELOLAAN BAB -->
                                 {% if content.type == 'fiksi' %}
                                     <details class="chapter-accordion">
                                         <summary class="chapter-accordion-summary">
-                                            <span class="chapter-summary-left">
-                                                <span class="chapter-summary-icon">
-                                                    <svg viewBox="0 0 24 24"
-                                                         fill="none"
-                                                         stroke="currentColor"
-                                                         stroke-width="1.8"
-                                                         stroke-linecap="round"
-                                                         stroke-linejoin="round"
-                                                         aria-hidden="true">
-                                                        <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21z"/>
-                                                        <path d="M4 5.5v15"/>
-                                                    </svg>
-                                                </span>
-
-                                                <span>
-                                                    <strong>Kelola Bab</strong>
-                                                    <small>
-                                                        {{ content.chapters|length }} bab
-                                                    </small>
-                                                </span>
+                                            <span class="chapter-summary-icon">
+                                                <svg
+                                                    viewBox="0 0 24 24"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    stroke-width="1.8"
+                                                    aria-hidden="true"
+                                                >
+                                                    <rect
+                                                        x="5"
+                                                        y="3"
+                                                        width="14"
+                                                        height="18"
+                                                        rx="2"
+                                                    />
+                                                    <path d="M9 8h6M9 12h6M9 16h4"/>
+                                                </svg>
                                             </span>
 
-                                            <svg class="chapter-chevron"
-                                                 viewBox="0 0 24 24"
-                                                 fill="none"
-                                                 stroke="currentColor"
-                                                 stroke-width="2"
-                                                 stroke-linecap="round"
-                                                 stroke-linejoin="round"
-                                                 aria-hidden="true">
+                                            <span class="chapter-summary-text">
+                                                <strong>Kelola Bab</strong>
+                                                <small>
+                                                    {{ content.chapters|length }}
+                                                    bab
+                                                </small>
+                                            </span>
+
+                                            <svg
+                                                class="chapter-chevron"
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                stroke-width="2"
+                                                aria-hidden="true"
+                                            >
                                                 <path d="m6 9 6 6 6-6"/>
                                             </svg>
                                         </summary>
 
                                         <div class="chapter-accordion-body">
                                             {% for chapter in content.chapters %}
-                                                <div class="chapter-item">
-                                                    <div class="chapter-item-info">
+                                                <div class="chapter-row">
+                                                    <div class="chapter-row-info">
                                                         <span class="chapter-number">
                                                             Bab {{ chapter.chapter_number }}
                                                         </span>
+
                                                         <span class="chapter-title">
                                                             {{ chapter.title }}
                                                         </span>
                                                     </div>
 
-                                                    <div class="chapter-item-actions">
+                                                    <div class="chapter-row-actions">
                                                         <a
                                                             href="{% url 'fiction:edit_chapter' content.id chapter.pk %}"
-                                                            class="chapter-manage-btn"
+                                                            class="content-action-btn chapter-edit-btn"
                                                         >
                                                             Kelola
                                                         </a>
 
                                                         {% if content.status == 'APPROVED' %}
-                                                            <details class="chapter-action-menu">
-                                                                <summary
-                                                                    class="chapter-menu-trigger"
-                                                                    aria-label="Aksi bab {{ chapter.chapter_number }}"
-                                                                    title="Aksi lainnya"
-                                                                >
-                                                                    <svg viewBox="0 0 24 24"
-                                                                         fill="currentColor"
-                                                                         aria-hidden="true">
-                                                                        <circle cx="5" cy="12" r="1.7"/>
-                                                                        <circle cx="12" cy="12" r="1.7"/>
-                                                                        <circle cx="19" cy="12" r="1.7"/>
-                                                                    </svg>
-                                                                </summary>
+                                                            <form
+                                                                method="post"
+                                                                action="{% url 'fiction:delete_approved_chapter' content.id chapter.pk %}"
+                                                                onsubmit="return confirm('Yakin ingin menghapus Bab {{ chapter.chapter_number }}: {{ chapter.title|escapejs }}? Tindakan ini tidak dapat dibatalkan.');"
+                                                            >
+                                                                {% csrf_token %}
 
-                                                                <div class="chapter-menu-panel">
-                                                                    <form
-                                                                        method="post"
-                                                                        action="{% url 'fiction:delete_approved_chapter' content.id chapter.pk %}"
-                                                                        onsubmit="return confirm('Yakin ingin menghapus Bab {{ chapter.chapter_number|escapejs }}? Tindakan ini tidak dapat dibatalkan.');"
-                                                                    >
-                                                                        {% csrf_token %}
-                                                                        <button
-                                                                            type="submit"
-                                                                            class="chapter-delete-option"
-                                                                        >
-                                                                            <svg viewBox="0 0 24 24"
-                                                                                 fill="none"
-                                                                                 stroke="currentColor"
-                                                                                 stroke-width="1.8"
-                                                                                 stroke-linecap="round"
-                                                                                 stroke-linejoin="round"
-                                                                                 aria-hidden="true">
-                                                                                <path d="M3 6h18"/>
-                                                                                <path d="M8 6V4h8v2"/>
-                                                                                <path d="m19 6-1 14H6L5 6"/>
-                                                                                <path d="M10 11v5M14 11v5"/>
-                                                                            </svg>
-                                                                            Hapus Bab
-                                                                        </button>
-                                                                    </form>
-                                                                </div>
-                                                            </details>
+                                                                <button
+                                                                    type="submit"
+                                                                    class="content-action-btn delete-btn chapter-delete-btn"
+                                                                >
+                                                                    Hapus Bab
+                                                                </button>
+                                                            </form>
                                                         {% endif %}
                                                     </div>
                                                 </div>
                                             {% empty %}
                                                 <div class="chapter-empty">
-                                                    <span class="chapter-empty-icon">📚</span>
-                                                    <p>Belum ada bab dalam cerita ini.</p>
+                                                    Belum ada bab dalam cerita ini.
                                                 </div>
                                             {% endfor %}
                                         </div>
@@ -237,10 +213,15 @@
                         </div>
                     </td>
 
-                    <td>{{ content.created_at|date:"d M Y" }}</td>
+                    <!-- TANGGAL -->
+                    <td>
+                        {{ content.created_at|date:"d M Y" }}
+                    </td>
 
+                    <!-- VIEWS -->
                     <td>{{ content.views }}</td>
 
+                    <!-- RATING -->
                     <td>
                         {% if content.rating != None %}
                             {{ content.rating|floatformat:1 }} / 5
@@ -249,10 +230,11 @@
                         {% endif %}
                     </td>
 
-                    <!-- Main actions -->
+                    <!-- AKSI KONTEN -->
                     <td>
-                        {% if content.type == 'artikel' %}
-                            <div class="my-content-actions">
+                        <div class="my-content-actions">
+
+                            {% if content.type == 'artikel' %}
                                 <a
                                     href="{% url 'articles:edit_article' content.id %}"
                                     class="content-action-btn edit-btn"
@@ -263,9 +245,10 @@
                                 <form
                                     method="post"
                                     action="{% url 'articles:delete_article' content.id %}"
-                                    onsubmit="return confirm('Yakin ingin menghapus artikel ini? Tindakan ini tidak dapat dibatalkan.');"
+                                    onsubmit="return confirm('Yakin ingin menghapus artikel ini?');"
                                 >
                                     {% csrf_token %}
+
                                     <button
                                         type="submit"
                                         class="content-action-btn delete-btn"
@@ -273,59 +256,50 @@
                                         Hapus
                                     </button>
                                 </form>
-                            </div>
 
-                        {% elif content.type == 'fiksi' %}
-                            <div class="my-content-actions">
+                            {% elif content.type == 'fiksi' %}
                                 {% if content.status == 'APPROVED' %}
                                     <form
                                         method="post"
                                         action="{% url 'fiction:delete_approved_story' content.id %}"
-                                        onsubmit="return confirm('PERINGATAN: Seluruh cerita dan semua babnya akan dihapus. Tindakan ini tidak dapat dibatalkan. Yakin ingin melanjutkan?');"
+                                        onsubmit="return confirm('Yakin ingin menghapus seluruh cerita beserta semua babnya? Tindakan ini tidak dapat dibatalkan.');"
                                     >
                                         {% csrf_token %}
+
                                         <button
                                             type="submit"
-                                            class="content-action-btn delete-btn delete-story-btn"
+                                            class="content-action-btn delete-story-btn"
                                         >
-                                            <svg viewBox="0 0 24 24"
-                                                 fill="none"
-                                                 stroke="currentColor"
-                                                 stroke-width="1.8"
-                                                 stroke-linecap="round"
-                                                 stroke-linejoin="round"
-                                                 aria-hidden="true">
-                                                <path d="M3 6h18"/>
-                                                <path d="M8 6V4h8v2"/>
-                                                <path d="m19 6-1 14H6L5 6"/>
-                                                <path d="M10 11v5M14 11v5"/>
-                                            </svg>
                                             Hapus Cerita
                                         </button>
                                     </form>
                                 {% else %}
-                                    <span>—</span>
+                                    <span class="action-unavailable">
+                                        —
+                                    </span>
                                 {% endif %}
-                            </div>
-                        {% endif %}
+                            {% endif %}
+
+                        </div>
                     </td>
                 </tr>
 
                 {% empty %}
-                <tr>
-                    <td colspan="6" class="my-content-empty">
-                        Belum ada konten yang disetujui atau hasil pencarian
-                        tidak ditemukan.
-                    </td>
-                </tr>
+                    <tr>
+                        <td colspan="6" class="my-content-empty">
+                            Belum ada konten yang disetujui atau hasil
+                            pencarian tidak ditemukan.
+                        </td>
+                    </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
 
-    <!-- Pagination -->
+    <!-- PAGINATION -->
     {% if page_obj.paginator.num_pages > 1 %}
         <nav class="my-content-pagination">
+
             {% if page_obj.has_previous %}
                 <a href="?jenis={{ content_type }}&amp;q={{ search_query|urlencode }}&amp;sort={{ sort_by }}&amp;page={{ page_obj.previous_page_number }}">
                     Sebelumnya
@@ -342,44 +316,275 @@
                     Berikutnya
                 </a>
             {% endif %}
+
         </nav>
     {% endif %}
 
 </section>
 
 <style>
+    /* AREA KONTEN */
     .my-content-page {
         min-width: 0;
-        color: #4e3b30;
+        color: #4b392e;
     }
 
+    .my-content-page,
+    .my-content-page button,
+    .my-content-page input,
+    .my-content-page select {
+        font-family: inherit;
+    }
+
+    .my-content-header {
+        margin-bottom: 24px;
+    }
+
+    .my-content-header h1 {
+        margin: 0 0 8px;
+    }
+
+    .my-content-header p {
+        margin: 0;
+        color: #8c796b;
+    }
+
+    /* AKSI */
+    .my-content-actions,
+    .chapter-row-actions {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .my-content-actions form,
+    .chapter-row-actions form {
+        margin: 0;
+    }
+
+    .content-action-btn {
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        gap: 6px;
+        padding: 9px 12px;
+        border-radius: 9px;
+        border: 1px solid transparent;
+        font: inherit;
+        font-size: 12px;
+        font-weight: 600;
+        line-height: 1.3;
+        text-decoration: none;
+        white-space: nowrap;
+        cursor: pointer;
+        transition:
+            background-color .18s ease,
+            border-color .18s ease,
+            color .18s ease;
+    }
+
+    .edit-btn,
+    .chapter-edit-btn {
+        background: #e8f1ed;
+        border-color: #d5e5dd;
+        color: #355d50;
+    }
+
+    .edit-btn:hover,
+    .chapter-edit-btn:hover {
+        background: #d8e9e1;
+    }
+
+    .delete-btn,
+    .delete-story-btn {
+        background: #fff5f3;
+        border-color: #edbcb5;
+        color: #a3332b;
+    }
+
+    .delete-btn:hover,
+    .delete-story-btn:hover {
+        background: #fce5e1;
+        border-color: #df9990;
+    }
+
+    .action-unavailable {
+        color: #a99a8f;
+    }
+
+    /* ACCORDION BAB */
+    .chapter-accordion {
+        width: min(100%, 540px);
+        margin-top: 14px;
+        border: 1px solid #e8d3c1;
+        border-radius: 12px;
+        background: #fffdf9;
+        overflow: hidden;
+    }
+
+    .chapter-accordion-summary {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 14px;
+        cursor: pointer;
+        list-style: none;
+        user-select: none;
+        transition: background-color .18s ease;
+    }
+
+    .chapter-accordion-summary::-webkit-details-marker {
+        display: none;
+    }
+
+    .chapter-accordion-summary:hover {
+        background: #faf1e8;
+    }
+
+    .chapter-summary-icon {
+        width: 36px;
+        height: 36px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        border-radius: 9px;
+        background: #f4e8dc;
+        color: #805d46;
+    }
+
+    .chapter-summary-icon svg {
+        width: 19px;
+        height: 19px;
+    }
+
+    .chapter-summary-text {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        min-width: 0;
+    }
+
+    .chapter-summary-text strong {
+        font-size: 13px;
+        color: #4b392e;
+    }
+
+    .chapter-summary-text small {
+        font-size: 12px;
+        font-weight: 400;
+        color: #927b68;
+    }
+
+    .chapter-chevron {
+        width: 17px;
+        height: 17px;
+        margin-left: auto;
+        flex-shrink: 0;
+        color: #8a6a53;
+        transition: transform .2s ease;
+    }
+
+    .chapter-accordion[open] .chapter-chevron {
+        transform: rotate(180deg);
+    }
+
+    .chapter-accordion-body {
+        max-height: 320px;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        border-top: 1px solid #efdfd1;
+        padding: 0 10px;
+        scrollbar-width: thin;
+        scrollbar-color: #d4bba5 #fbf5ef;
+    }
+
+    .chapter-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 12px 4px;
+        border-bottom: 1px solid #f0e5db;
+    }
+
+    .chapter-row:last-child {
+        border-bottom: 0;
+    }
+
+    .chapter-row-info {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        min-width: 0;
+        flex: 1;
+    }
+
+    .chapter-number {
+        color: #a08a77;
+        font-size: 11px;
+    }
+
+    .chapter-title {
+        color: #5c4637;
+        font-size: 13px;
+        line-height: 1.5;
+        overflow-wrap: anywhere;
+    }
+
+    .chapter-row-actions {
+        flex-shrink: 0;
+    }
+
+    .chapter-empty {
+        padding: 18px 8px;
+        color: #927b68;
+        font-size: 13px;
+    }
+
+    /* KOLOM AKSI */
+    .my-content-table td:last-child {
+        min-width: 125px;
+    }
+
+    /* TABEL */
     .my-content-table-wrapper {
-        width: 100%;
+        max-width: 100%;
         overflow-x: auto;
+    }
+
+    .my-content-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .my-content-table th,
+    .my-content-table td {
+        vertical-align: middle;
     }
 
     .my-content-info {
         display: flex;
         align-items: flex-start;
         gap: 14px;
-        min-width: 0;
+        min-width: 250px;
     }
 
     .my-content-thumbnail {
         width: 64px;
-        height: 80px;
-        flex: 0 0 64px;
+        height: 84px;
+        flex-shrink: 0;
         object-fit: cover;
-        border-radius: 8px;
+        border-radius: 9px;
     }
 
     .my-content-thumbnail.placeholder {
         display: flex;
-        align-items: center;
         justify-content: center;
-        padding: 4px;
-        background: #f1e8dd;
-        color: #8b796b;
+        align-items: center;
+        background: #f4e8dc;
+        color: #8a6a53;
         font-size: 11px;
         text-align: center;
     }
@@ -391,394 +596,57 @@
 
     .my-content-title > strong {
         display: block;
-        margin-bottom: 5px;
+        margin: 2px 0 6px;
         overflow-wrap: anywhere;
     }
 
     .my-content-title > small {
         display: block;
-        margin-bottom: 12px;
-        color: #968273;
+        color: #927b68;
     }
 
-    .my-content-actions,
-    .chapter-item-actions {
-        display: flex;
-        align-items: center;
-        gap: 8px;
+    .my-content-empty {
+        padding: 28px 16px;
+        text-align: center;
+        color: #927b68;
     }
 
-    .my-content-actions form,
-    .chapter-menu-panel form {
-        margin: 0;
-    }
-
-    /* Accordion */
-    .chapter-accordion {
-        width: 100%;
-        max-width: 540px;
-        margin-top: 10px;
-        border: 1px solid #e7d9ca;
-        border-radius: 10px;
-        background: #fffdf9;
-        overflow: visible;
-    }
-
-    .chapter-accordion-summary {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-        padding: 12px 14px;
-        cursor: pointer;
-        list-style: none;
-        user-select: none;
-        border-radius: 10px;
-        transition: background .2s ease;
-    }
-
-    .chapter-accordion-summary::-webkit-details-marker {
-        display: none;
-    }
-
-    .chapter-accordion-summary:hover {
-        background: #f8f0e7;
-    }
-
-    .chapter-summary-left {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        min-width: 0;
-    }
-
-    .chapter-summary-icon {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 36px;
-        height: 36px;
-        flex: 0 0 36px;
-        border-radius: 9px;
-        background: #f3e9dd;
-        color: #805b43;
-    }
-
-    .chapter-summary-icon svg {
-        width: 19px;
-        height: 19px;
-    }
-
-    .chapter-summary-left strong {
-        display: block;
-        font-size: 13px;
-        font-weight: 700;
-    }
-
-    .chapter-summary-left small {
-        display: block;
-        margin-top: 3px;
-        color: #968273;
-        font-size: 12px;
-    }
-
-    .chapter-chevron {
-        width: 18px;
-        height: 18px;
-        flex: 0 0 18px;
-        color: #896c58;
-        transition: transform .2s ease;
-    }
-
-    .chapter-accordion[open] .chapter-chevron {
-        transform: rotate(180deg);
-    }
-
-    .chapter-accordion-body {
-        padding: 4px 10px 10px;
-        border-top: 1px solid #eee3d7;
-    }
-
-    .chapter-item {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 10px;
-        padding: 10px 4px;
-        border-bottom: 1px solid #f0e8df;
-    }
-
-    .chapter-item:last-child {
-        border-bottom: 0;
-    }
-
-    .chapter-item-info {
-        display: flex;
-        flex-direction: column;
-        gap: 3px;
-        min-width: 0;
-    }
-
-    .chapter-number {
-        color: #9a8676;
-        font-size: 11px;
-    }
-
-    .chapter-title {
-        color: #554438;
-        font-size: 13px;
-        line-height: 1.5;
-        overflow-wrap: anywhere;
-    }
-
-    .chapter-item-actions {
-        flex: 0 0 auto;
-    }
-
-    .chapter-manage-btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        padding: 8px 11px;
-        border: 1px solid #d9e7e2;
-        border-radius: 8px;
-        background: #eaf2ef;
-        color: #355e53;
-        font-size: 12px;
-        font-weight: 600;
-        text-decoration: none;
-        transition: background .2s ease;
-    }
-
-    .chapter-manage-btn:hover {
-        background: #dcebe5;
-    }
-
-    /* Chapter action menu */
-    .chapter-action-menu {
-        position: relative;
-    }
-
-    .chapter-menu-trigger {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 34px;
-        height: 34px;
-        border: 1px solid #e7d9ca;
-        border-radius: 8px;
-        background: #fffdf9;
-        color: #806a59;
-        cursor: pointer;
-        list-style: none;
-    }
-
-    .chapter-menu-trigger::-webkit-details-marker {
-        display: none;
-    }
-
-    .chapter-menu-trigger svg {
-        width: 18px;
-        height: 18px;
-    }
-
-    .chapter-menu-trigger:hover,
-    .chapter-action-menu[open] .chapter-menu-trigger {
-        background: #f3e9dd;
-    }
-
-    .chapter-menu-panel {
-        position: absolute;
-        z-index: 20;
-        top: calc(100% + 5px);
-        right: 0;
-        min-width: 145px;
-        padding: 5px;
-        border: 1px solid #e7d9ca;
-        border-radius: 9px;
-        background: #fffdf9;
-        box-shadow: 0 8px 24px rgba(74, 48, 29, .12);
-    }
-
-    .chapter-delete-option {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        width: 100%;
-        padding: 9px 10px;
-        border: 0;
-        border-radius: 6px;
-        background: transparent;
-        color: #a3332b;
-        font: inherit;
-        font-size: 12px;
-        text-align: left;
-        cursor: pointer;
-    }
-
-    .chapter-delete-option svg {
-        width: 16px;
-        height: 16px;
-        flex: 0 0 16px;
-    }
-
-    .chapter-delete-option:hover {
-        background: #fff0ed;
-    }
-
-    .chapter-empty {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 15px 8px;
-        color: #8b8177;
-        font-size: 13px;
-    }
-
-    .chapter-empty p {
-        margin: 0;
-    }
-
-    .chapter-empty-icon {
-        font-size: 20px;
-    }
-
-    /* Delete story and article buttons */
-    .my-content-table .delete-btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 6px;
-        padding: 8px 11px;
-        border: 1px solid #e3b7b1;
-        border-radius: 8px;
-        background: #fff5f3;
-        color: #a3332b;
-        font: inherit;
-        font-size: 12px;
-        cursor: pointer;
-        transition: background .2s ease;
-    }
-
-    .my-content-table .delete-btn:hover {
-        background: #fce5e1;
-    }
-
-    .delete-story-btn svg {
-        width: 15px;
-        height: 15px;
-    }
-
-    .my-content-table .edit-btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        padding: 8px 11px;
-        border-radius: 8px;
-        font-size: 12px;
-        text-decoration: none;
-    }
-
-    .my-content-pagination {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 16px;
-        margin-top: 20px;
-    }
-
+    /* MOBILE */
     @media (max-width: 768px) {
-        .my-content-table {
-            min-width: 760px;
-        }
-
         .chapter-accordion {
-            max-width: 100%;
-        }
-
-        .chapter-item {
-            align-items: flex-start;
-        }
-
-        .chapter-item-actions {
-            gap: 5px;
-        }
-
-        .chapter-manage-btn {
-            padding: 7px 9px;
-        }
-
-        .chapter-menu-trigger {
-            width: 32px;
-            height: 32px;
-        }
-    }
-
-    @media (max-width: 480px) {
-        .chapter-item {
-            flex-wrap: wrap;
-        }
-
-        .chapter-item-info {
             width: 100%;
         }
 
-        .chapter-item-actions {
-            margin-left: auto;
+        .chapter-row {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .chapter-row-actions {
+            width: 100%;
+        }
+
+        .my-content-actions {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .my-content-actions > *,
+        .my-content-actions form,
+        .my-content-actions form button {
+            width: 100%;
+        }
+
+        .content-action-btn {
+            white-space: normal;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .chapter-chevron,
+        .content-action-btn {
+            transition: none;
         }
     }
 </style>
-
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    const accordions = document.querySelectorAll('.chapter-accordion');
-
-    /*
-     * Tutup accordion cerita lain ketika pengguna membuka cerita baru.
-     * Ini menjaga halaman tetap ringkas meskipun ada banyak cerita.
-     */
-    accordions.forEach(function (accordion) {
-        accordion.addEventListener('toggle', function () {
-            if (!accordion.open) return;
-
-            accordions.forEach(function (otherAccordion) {
-                if (otherAccordion !== accordion) {
-                    otherAccordion.open = false;
-                }
-            });
-        });
-    });
-
-    /*
-     * Tutup menu aksi saat pengguna mengklik area di luar menu.
-     */
-    document.addEventListener('click', function (event) {
-        document.querySelectorAll('.chapter-action-menu[open]').forEach(
-            function (menu) {
-                if (!menu.contains(event.target)) {
-                    menu.open = false;
-                }
-            }
-        );
-    });
-
-    /*
-     * Hindari form hapus bab dan hapus cerita ikut memicu
-     * event klik pada elemen lain.
-     */
-    document.querySelectorAll(
-        '.chapter-menu-panel form, .my-content-actions form'
-    ).forEach(function (form) {
-        form.addEventListener('submit', function () {
-            const button = form.querySelector('button[type="submit"]');
-
-            if (button) {
-                button.disabled = true;
-                button.style.opacity = '0.65';
-                button.style.cursor = 'wait';
-            }
-        });
-    });
-});
-</script>
 {% endblock %}
