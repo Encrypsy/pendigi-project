@@ -29,23 +29,6 @@
     <div class="article-body">{{ article.content|linebreaks }}</div>
 
     {% if user.is_authenticated %}
-    <div class="article-actions">
-        <form action="{% url 'interactions:toggle_bookmark' article.pk %}" method="post">
-            {% csrf_token %}
-            <button type="submit" class="btn-secondary">
-                {% if is_bookmarked %}★ Tersimpan{% else %}☆ Simpan Artikel{% endif %}
-            </button>
-        </form>
-
-        <form action="{% url 'reading_journal:toggle_favorite' article.pk %}" method="post">
-            {% csrf_token %}
-            <button type="submit" class="btn-secondary">
-                Tambah ke Top 4 Favorit
-            </button>
-        </form>
-
-        <a href="{% url 'articles:mark_as_finished' article.pk %}" class="btn-primary-outline">Tandai Selesai Dibaca</a>
-    </div>
    
         <div class="rating-box">
             <div class="rating-heading">
