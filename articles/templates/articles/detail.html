@@ -100,11 +100,45 @@
 
 {% include 'partials/comment_section.html' %}
 
+
 <script>
-    document.querySelectorAll(".star-rating input").forEach((radio) => {
-        radio.addEventListener("change", () => {
-            document.getElementById("ratingForm").submit();
+document.addEventListener("DOMContentLoaded", function () {
+    const ratingContainer = document.querySelector(".star-rating");
+    const ratingForm = document.getElementById("ratingForm");
+
+    if (!ratingContainer || !ratingForm) return;
+
+    const radios = Array.from(
+        ratingContainer.querySelectorAll('input[type="radio"]')
+    );
+
+    function updateStars() {
+        const selectedRadio = radios.find(radio => radio.checked);
+        const selectedValue = selectedRadio
+            ? Number(selectedRadio.value)
+            : 0;
+
+        radios.forEach(radio => {
+            const label = ratingContainer.querySelector(
+                `label[for="${radio.id}"]`
+            );
+
+            if (!label) return;
+
+            const starValue = Number(radio.value);
+
+            label.classList.toggle(
+                "is-active",
+                starValue <= selectedValue
+            );
         });
+    }
+
+    radios.forEach(radio => {
+        radio.addEventListener("change", updateStars);
     });
+
+    updateStars();
+});
 </script>
 {% endblock %}
