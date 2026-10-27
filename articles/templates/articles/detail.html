@@ -100,7 +100,6 @@
 
 {% include 'partials/comment_section.html' %}
 
-
 <script>
 document.addEventListener("DOMContentLoaded", function () {
     const ratingContainer = document.querySelector(".star-rating");
@@ -118,7 +117,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     let previousValue =
         Number(radios.find(radio => radio.checked)?.value) || 0;
-
     let isSubmitting = false;
 
     function updateStars(value) {
@@ -131,12 +129,23 @@ document.addEventListener("DOMContentLoaded", function () {
 
             label.style.setProperty(
                 "color",
-                Number(radio.value) <= value
-                    ? "#e4a63c"
-                    : "#d8c9b8",
+                Number(radio.value) <= value ? "#e4a63c" : "#d8c9b8",
                 "important"
             );
         });
+    }
+
+    function showStatus(message) {
+        let status = document.getElementById("ratingStatus");
+
+        if (!status) {
+            status = document.createElement("p");
+            status.id = "ratingStatus";
+            status.setAttribute("role", "status");
+            ratingForm.insertAdjacentElement("afterend", status);
+        }
+
+        status.textContent = message;
     }
 
     radios.forEach(radio => {
@@ -149,9 +158,16 @@ document.addEventListener("DOMContentLoaded", function () {
             )?.value;
 
             if (!csrfToken) {
+                showStatus("Token keamanan tidak ditemukan. Muat ulang halaman.");
                 updateStars(previousValue);
                 return;
             }
+
+            // Buat FormData saat radio masih aktif.
+            const formData = new FormData(ratingForm);
+
+            // Pastikan nilai rating yang dipilih ikut terkirim.
+            formData.set("rating_value", String(selectedValue));
 
             isSubmitting = true;
             radios.forEach(item => item.disabled = true);
@@ -164,7 +180,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         "X-Requested-With": "XMLHttpRequest",
                         "X-CSRFToken": csrfToken,
                     },
-                    body: new FormData(ratingForm),
+                    body: formData,
                     credentials: "same-origin",
                 });
 
@@ -191,31 +207,13 @@ document.addEventListener("DOMContentLoaded", function () {
                         `${data.total_ratings} penilaian`;
                 }
 
-                let status = document.getElementById("ratingStatus");
-
-                if (!status) {
-                    status = document.createElement("p");
-                    status.id = "ratingStatus";
-                    status.setAttribute("role", "status");
-                    ratingForm.insertAdjacentElement("afterend", status);
-                }
-
-                status.textContent = "Rating berhasil disimpan.";
+                showStatus("Rating berhasil disimpan.");
 
             } catch (error) {
                 updateStars(previousValue);
-
-                let status = document.getElementById("ratingStatus");
-
-                if (!status) {
-                    status = document.createElement("p");
-                    status.id = "ratingStatus";
-                    status.setAttribute("role", "status");
-                    ratingForm.insertAdjacentElement("afterend", status);
-                }
-
-                status.textContent =
-                    error.message || "Terjadi kesalahan saat menyimpan rating.";
+                showStatus(
+                    error.message || "Terjadi kesalahan saat menyimpan rating."
+                );
 
             } finally {
                 isSubmitting = false;
