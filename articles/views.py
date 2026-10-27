@@ -295,7 +295,7 @@ def article_detail(request, pk):
         total=Count('id'),
     )
 
-    avg_rating = rating_stats['avg']
+    avg_rating = rating_stats['average']
     total_ratings = rating_stats['total']
 
     user_rating = None
