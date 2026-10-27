@@ -111,7 +111,6 @@ document.addEventListener("DOMContentLoaded", function () {
         ratingContainer.querySelectorAll('input[type="radio"]')
     );
 
-    
     function updateStars() {
         const selectedRadio = radios.find(radio => radio.checked);
         const selectedValue = selectedRadio
@@ -126,19 +125,25 @@ document.addEventListener("DOMContentLoaded", function () {
             if (!label) return;
 
             const starValue = Number(radio.value);
-            const isActive = starValue <= selectedValue;
 
             label.style.setProperty(
                 "color",
-                isActive ? "#e4a63c" : "#d8c9b8",
+                starValue <= selectedValue
+                    ? "#e4a63c"
+                    : "#d8c9b8",
                 "important"
             );
         });
     }
 
-
     radios.forEach(radio => {
-        radio.addEventListener("change", updateStars);
+        radio.addEventListener("change", function () {
+            updateStars();
+
+            if (ratingForm.reportValidity()) {
+                ratingForm.requestSubmit();
+            }
+        });
     });
 
     updateStars();
