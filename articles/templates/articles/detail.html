@@ -81,13 +81,13 @@
                         {% endfor %}
                     </div>
 
-                    <button type="submit" class="rating-submit-btn">
+                    {% comment %} <button type="submit" class="rating-submit-btn">
                         {% if user_rating != None %}
                             Perbarui Rating
                         {% else %}
                             Kirim Rating
                         {% endif %}
-                    </button>
+                    </button> {% endcomment %}
                 </form>
             {% else %}
                 <p class="rating-login-message">
