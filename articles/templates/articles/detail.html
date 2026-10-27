@@ -100,6 +100,7 @@
 
 {% include 'partials/comment_section.html' %}
 
+
 <script>
 document.addEventListener("DOMContentLoaded", function () {
     const ratingContainer = document.querySelector(".star-rating");
@@ -111,12 +112,16 @@ document.addEventListener("DOMContentLoaded", function () {
         ratingContainer.querySelectorAll('input[type="radio"]')
     );
 
-    function updateStars() {
-        const selectedRadio = radios.find(radio => radio.checked);
-        const selectedValue = selectedRadio
-            ? Number(selectedRadio.value)
-            : 0;
+    const summary = document.querySelector(".rating-summary");
+    const averageElement = summary?.querySelector("strong");
+    const totalElement = summary?.querySelector("small");
 
+    let previousValue =
+        Number(radios.find(radio => radio.checked)?.value) || 0;
+
+    let isSubmitting = false;
+
+    function updateStars(value) {
         radios.forEach(radio => {
             const label = ratingContainer.querySelector(
                 `label[for="${radio.id}"]`
@@ -124,11 +129,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
             if (!label) return;
 
-            const starValue = Number(radio.value);
-
             label.style.setProperty(
                 "color",
-                starValue <= selectedValue
+                Number(radio.value) <= value
                     ? "#e4a63c"
                     : "#d8c9b8",
                 "important"
@@ -137,16 +140,91 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     radios.forEach(radio => {
-        radio.addEventListener("change", function () {
-            updateStars();
+        radio.addEventListener("change", async function () {
+            if (isSubmitting) return;
 
-            if (ratingForm.reportValidity()) {
-                ratingForm.requestSubmit();
+            const selectedValue = Number(radio.value);
+            const csrfToken = ratingForm.querySelector(
+                '[name="csrfmiddlewaretoken"]'
+            )?.value;
+
+            if (!csrfToken) {
+                updateStars(previousValue);
+                return;
+            }
+
+            isSubmitting = true;
+            radios.forEach(item => item.disabled = true);
+            updateStars(selectedValue);
+
+            try {
+                const response = await fetch(ratingForm.action, {
+                    method: "POST",
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest",
+                        "X-CSRFToken": csrfToken,
+                    },
+                    body: new FormData(ratingForm),
+                    credentials: "same-origin",
+                });
+
+                const data = await response.json();
+
+                if (!response.ok || !data.success) {
+                    throw new Error(
+                        data.message || "Rating gagal disimpan."
+                    );
+                }
+
+                previousValue = Number(data.user_rating);
+                updateStars(previousValue);
+
+                if (averageElement) {
+                    averageElement.textContent =
+                        data.avg_rating == null
+                            ? "—"
+                            : Number(data.avg_rating).toFixed(1);
+                }
+
+                if (totalElement) {
+                    totalElement.textContent =
+                        `${data.total_ratings} penilaian`;
+                }
+
+                let status = document.getElementById("ratingStatus");
+
+                if (!status) {
+                    status = document.createElement("p");
+                    status.id = "ratingStatus";
+                    status.setAttribute("role", "status");
+                    ratingForm.insertAdjacentElement("afterend", status);
+                }
+
+                status.textContent = "Rating berhasil disimpan.";
+
+            } catch (error) {
+                updateStars(previousValue);
+
+                let status = document.getElementById("ratingStatus");
+
+                if (!status) {
+                    status = document.createElement("p");
+                    status.id = "ratingStatus";
+                    status.setAttribute("role", "status");
+                    ratingForm.insertAdjacentElement("afterend", status);
+                }
+
+                status.textContent =
+                    error.message || "Terjadi kesalahan saat menyimpan rating.";
+
+            } finally {
+                isSubmitting = false;
+                radios.forEach(item => item.disabled = false);
             }
         });
     });
 
-    updateStars();
+    updateStars(previousValue);
 });
 </script>
 {% endblock %}

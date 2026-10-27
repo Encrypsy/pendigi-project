@@ -174,7 +174,6 @@ def submit_comment(request, pk):
         status=comment.status,
     )
 
-
 @login_required
 @require_POST
 def submit_rating(request, pk):
@@ -183,7 +182,15 @@ def submit_rating(request, pk):
     form = RatingForm(request.POST)
 
     if not form.is_valid():
-        messages.error(request, "Rating tidak valid.")
+        error_message = "Rating tidak valid."
+
+        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+            return JsonResponse(
+                {"success": False, "message": error_message},
+                status=400,
+            )
+
+        messages.error(request, error_message)
         return redirect('articles:article_detail', pk=pk)
 
     rating_value = form.cleaned_data['rating_value']
@@ -191,9 +198,7 @@ def submit_rating(request, pk):
     rating, created = Ratings.objects.update_or_create(
         user=request.user,
         article=article,
-        defaults={
-            'rating_value': rating_value,
-        },
+        defaults={'rating_value': rating_value},
     )
 
     if created and article.contributor_id != request.user.id:
@@ -208,14 +213,27 @@ def submit_rating(request, pk):
             )[:255],
         )
 
-    ReadingActivity.objects.create(
+    ReadingActivity.objects.get_or_create(
         user=request.user,
         article=article,
         action_type=ActionType.RATED,
     )
 
-    messages.success(request, "Rating berhasil disimpan.")
+    rating_stats = article.ratings.aggregate(
+        average=Avg('rating_value'),
+        total=Count('id'),
+    )
 
+    if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+        return JsonResponse({
+            "success": True,
+            "message": "Rating berhasil disimpan.",
+            "user_rating": rating_value,
+            "avg_rating": rating_stats["average"],
+            "total_ratings": rating_stats["total"],
+        })
+
+    messages.success(request, "Rating berhasil disimpan.")
     return redirect('articles:article_detail', pk=pk)
 
 @login_required
