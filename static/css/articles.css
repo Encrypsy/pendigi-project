@@ -799,11 +799,6 @@
 }
 
 /* Warna bintang saat dipilih atau disorot */
-.star-rating label:hover,
-.star-rating label:hover ~ label,
-.star-rating input:checked ~ label {
-    color: #e4a63c;
-}
 
 .star-rating label:hover {
     transform: scale(1.1);
