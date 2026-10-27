@@ -174,27 +174,28 @@ def submit_comment(request, pk):
         status=comment.status,
     )
 
+
 @login_required
 @require_POST
 def submit_rating(request, pk):
     article = get_object_or_404(
         Articles,
         pk=pk,
-        status='APPROVED',
+        status=StatusArticle.APPROVED,
     )
 
     form = RatingForm(request.POST)
 
     if not form.is_valid():
-        messages.error(request, 'Rating tidak valid.')
-        return redirect('articles:article_detail', pk=pk)
+        messages.error(request, "Rating tidak valid.")
+        return redirect("articles:article_detail", pk=pk)
 
-    rating_value = form.cleaned_data['rating_value']
+    rating_value = form.cleaned_data["rating_value"]
 
     rating, created = Ratings.objects.update_or_create(
         user=request.user,
         article=article,
-        defaults={'rating_value': rating_value},
+        defaults={"rating_value": rating_value},
     )
 
     if created and article.contributor_id != request.user.id:
@@ -204,8 +205,8 @@ def submit_rating(request, pk):
             article=article,
             action_type=Activity.ActionType.RATING,
             message=(
-                f'Memberikan rating {rating_value}/5 '
-                f'pada konten Anda'
+                f"Memberikan rating {rating_value}/5 "
+                f"pada konten Anda"
             )[:255],
         )
 
@@ -217,12 +218,13 @@ def submit_rating(request, pk):
 
     messages.success(
         request,
-        'Rating berhasil disimpan!'
+        "Rating berhasil disimpan!"
         if created
-        else 'Rating berhasil diperbarui!',
+        else "Rating berhasil diperbarui!",
     )
 
-    return redirect('articles:article_detail', pk=pk)
+    return redirect("articles:article_detail", pk=pk)
+
 
 
 @login_required
