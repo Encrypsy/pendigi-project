@@ -252,6 +252,7 @@ def article_list(request):
     })
 
 
+
 def article_detail(request, pk):
     article = get_object_or_404(
         Articles,
@@ -307,17 +308,14 @@ def article_detail(request, pk):
             article=article,
         ).exists()
 
-        user_rating_obj = Ratings.objects.filter(
+        # Ambil nilai rating langsung sebagai angka atau None
+        user_rating = Ratings.objects.filter(
             user=request.user,
             article=article,
         ).values_list(
             'rating_value',
             flat=True,
         ).first()
-
-
-        if user_rating_obj:
-            user_rating = user_rating_obj.rating_value
 
         ReadingActivity.objects.get_or_create(
             user=request.user,
