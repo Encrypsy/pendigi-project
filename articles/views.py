@@ -295,12 +295,11 @@ def article_detail(request, pk):
         total=Count('id'),
     )
 
-    avg_rating = rating_stats['average']
+    avg_rating = rating_stats['avg']
     total_ratings = rating_stats['total']
 
-    # Rating pengguna yang sedang login
-    is_bookmarked = False
     user_rating = None
+    is_bookmarked = False
 
     if request.user.is_authenticated:
         is_bookmarked = Bookmarks.objects.filter(
@@ -311,7 +310,11 @@ def article_detail(request, pk):
         user_rating_obj = Ratings.objects.filter(
             user=request.user,
             article=article,
+        ).values_list(
+            'rating_value',
+            flat=True,
         ).first()
+
 
         if user_rating_obj:
             user_rating = user_rating_obj.rating_value

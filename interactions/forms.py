@@ -12,8 +12,15 @@ class CommentForm(forms.ModelForm):
 
 
 class RatingForm(forms.ModelForm):
-    rating_value = forms.ChoiceField(
-        choices=[(i, i) for i in range(1, 6)],
+    rating_value = forms.TypedChoiceField(
+        choices=[
+            (1, '1 bintang'),
+            (2, '2 bintang'),
+            (3, '3 bintang'),
+            (4, '4 bintang'),
+            (5, '5 bintang'),
+        ],
+        coerce=float,
         widget=forms.RadioSelect(),
     )
 
