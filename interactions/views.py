@@ -9,7 +9,7 @@ from django.db.models import Q
 from django.core.paginator import Paginator
 from django.utils.http import url_has_allowed_host_and_scheme
 
-from articles.models import Articles
+from articles.models import Articles, StatusArticle
 from fiction.models import Stories
 from .models import (
     Activity,
