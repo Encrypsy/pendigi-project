@@ -991,5 +991,46 @@
 }
 
 
+.star-rating {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 5px;
+    width: fit-content;
+    margin: 8px 0 18px;
+}
+
+.star-rating input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+.star-rating label {
+    color: #d8c9b8;
+    font-size: 34px;
+    line-height: 1;
+    cursor: pointer;
+    transition: color 0.15s ease, transform 0.15s ease;
+}
+
+.star-rating label.is-active {
+    color: #e4a63c;
+}
+
+.star-rating label:hover {
+    transform: scale(1.1);
+}
+
+.star-rating input:focus-visible + label {
+    outline: 2px solid #9a6b32;
+    outline-offset: 4px;
+    border-radius: 3px;
+}
+
+
 
 
