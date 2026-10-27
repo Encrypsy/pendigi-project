@@ -12,12 +12,17 @@
     <h1>{{ article.title }}</h1>
     <p class="author">
         oleh {{ article.contributor.username }}
-        &middot;
-        {{ article.published_at|date:"d M Y" }}
-
-        {% if avg_rating %}
-        &middot;
-        ⭐ {{ avg_rating|floatformat:1 }}/10
+        {% if avg_rating != None %}
+            &middot;
+            <span class="article-average-rating">
+                ★ {{ avg_rating|floatformat:1 }}/5
+                ({{ total_ratings }} rating)
+            </span>
+        {% else %}
+            &middot;
+            <span class="article-average-rating">
+                Belum ada rating
+            </span>
         {% endif %}
     </p>
 
@@ -41,22 +46,72 @@
 
         <a href="{% url 'articles:mark_as_finished' article.pk %}" class="btn-primary-outline">Tandai Selesai Dibaca</a>
     </div>
+   
+        <div class="rating-box">
+            <div class="rating-heading">
+                <div>
+                    <h3>Rating Artikel</h3>
+                    <p>Bantu pembaca lain menemukan bacaan berkualitas.</p>
+                </div>
 
-    <div class="rating-box">
-        <h3>Beri Rating</h3>
-        <form action="{% url 'interactions:submit_rating' article.pk %}" method="post" class="star-form"
-            id="ratingForm">
-            {% csrf_token %}
-            <div class="star-rating">
-                {% for radio in rating_form.rating_value %} {{ radio.tag }}
-                <label for="{{ radio.id_for_label }}" title="{{ radio.choice_label }} bintang">★</label>
-                {% endfor %}
+                <div class="rating-summary">
+                    <strong>
+                        {% if avg_rating != None %}
+                            {{ avg_rating|floatformat:1 }}
+                        {% else %}
+                            —
+                        {% endif %}
+                    </strong>
+                    <span> dari 5</span>
+                    <small>{{ total_ratings }} penilaian</small>
+                </div>
             </div>
-        </form>
-        {% if user_rating %}
-        <p class="hint-text">Rating kamu saat ini: {{ user_rating }} ★</p>
-        {% endif %}
-    </div>
+
+            {% if user.is_authenticated %}
+                <form
+                    action="{% url 'interactions:submit_rating' article.pk %}"
+                    method="post"
+                    class="star-form"
+                    id="ratingForm"
+                >
+                    {% csrf_token %}
+
+                    <p class="rating-prompt">
+                        {% if user_rating != None %}
+                            Rating kamu: {{ user_rating|floatformat:"-1" }} dari 5
+                            <br>
+                            <span>Kamu bisa mengubah rating kapan saja.</span>
+                        {% else %}
+                            Bagaimana pendapatmu tentang artikel ini?
+                        {% endif %}
+                    </p>
+
+                    <div class="star-rating" role="radiogroup"
+                        aria-label="Pilih rating dari 1 sampai 5">
+                        {% for radio in rating_form.rating_value %}
+                            {{ radio.tag }}
+                            <label
+                                for="{{ radio.id_for_label }}"
+                                title="{{ radio.choice_label }} dari 5 bintang"
+                                aria-label="{{ radio.choice_label }} dari 5 bintang"
+                            >★</label>
+                        {% endfor %}
+                    </div>
+
+                    <button type="submit" class="rating-submit-btn">
+                        {% if user_rating != None %}
+                            Perbarui Rating
+                        {% else %}
+                            Kirim Rating
+                        {% endif %}
+                    </button>
+                </form>
+            {% else %}
+                <p class="rating-login-message">
+                    Silakan login untuk memberikan rating pada artikel ini.
+                </p>
+            {% endif %}
+        </div>
     {% endif %}
 </article>
 

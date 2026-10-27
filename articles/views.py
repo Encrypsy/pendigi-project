@@ -253,51 +253,98 @@ def article_list(request):
 
 
 def article_detail(request, pk):
-    article = get_object_or_404(Articles, pk=pk, status=StatusArticle.APPROVED)
-
-    Articles.objects.filter(pk=pk).update(views_count=F('views_count') + 1)
-    article.refresh_from_db(fields=['views_count'])
-    
-    ArticleViewHistory.objects.create(
-    article=article
-)
-
-    sort = request.GET.get('sort', 'recent')
-    comments_qs = article.comments.filter(status=StatusComment.APPROVED, parent__isnull=True).select_related('user')
-    comments_qs = _sort_comments(comments_qs, sort)
-    post_url = reverse('interactions:submit_comment', kwargs={'pk': pk})
-    comments = _attach_comment_meta(
-        comments_qs, request,
-        'interactions:toggle_comment_like', 'interactions:toggle_comment_dislike',
-        url_kwargs={}, post_url=post_url
+    article = get_object_or_404(
+        Articles,
+        pk=pk,
+        status=StatusArticle.APPROVED,
     )
 
-    avg_rating = article.ratings.aggregate(avg=Avg('rating_value'))['avg']
+    Articles.objects.filter(pk=pk).update(
+        views_count=F('views_count') + 1
+    )
+    article.refresh_from_db(fields=['views_count'])
 
+    ArticleViewHistory.objects.create(article=article)
+
+    sort = request.GET.get('sort', 'recent')
+
+    comments_qs = article.comments.filter(
+        status=StatusComment.APPROVED,
+        parent__isnull=True,
+    ).select_related('user')
+
+    comments_qs = _sort_comments(comments_qs, sort)
+
+    post_url = reverse(
+        'interactions:submit_comment',
+        kwargs={'pk': pk},
+    )
+
+    comments = _attach_comment_meta(
+        comments_qs,
+        request,
+        'interactions:toggle_comment_like',
+        'interactions:toggle_comment_dislike',
+        url_kwargs={},
+        post_url=post_url,
+    )
+
+    # Statistik rating artikel
+    rating_stats = article.ratings.aggregate(
+        average=Avg('rating_value'),
+        total=Count('id'),
+    )
+
+    avg_rating = rating_stats['average']
+    total_ratings = rating_stats['total']
+
+    # Rating pengguna yang sedang login
     is_bookmarked = False
     user_rating = None
+
     if request.user.is_authenticated:
-        is_bookmarked = Bookmarks.objects.filter(user=request.user, article=article).exists()
-        user_rating_obj = Ratings.objects.filter(user=request.user, article=article).first()
-        user_rating = user_rating_obj.rating_value if user_rating_obj else None
+        is_bookmarked = Bookmarks.objects.filter(
+            user=request.user,
+            article=article,
+        ).exists()
+
+        user_rating_obj = Ratings.objects.filter(
+            user=request.user,
+            article=article,
+        ).first()
+
+        if user_rating_obj:
+            user_rating = user_rating_obj.rating_value
 
         ReadingActivity.objects.get_or_create(
-            user=request.user, article=article, action_type=ActionType.STARTED_READING
+            user=request.user,
+            article=article,
+            action_type=ActionType.STARTED_READING,
         )
 
-    return render(request, 'articles/detail.html', {
-        'article': article,
-        'comments': comments,
-        'avg_rating': avg_rating,
-        'is_bookmarked': is_bookmarked,
-        'user_rating': user_rating,
-        'comment_form': CommentForm(),
-        'rating_form': RatingForm(),
-        'total_count': article.comments.filter(status=StatusComment.APPROVED).count(),
-        'current_sort': sort,
-        'post_url': reverse('interactions:submit_comment', kwargs={'pk': pk}),
-        'refresh_url': reverse('articles:article_comments_partial', kwargs={'pk': pk}),
-    })
+    return render(
+        request,
+        'articles/detail.html',
+        {
+            'article': article,
+            'comments': comments,
+            'avg_rating': avg_rating,
+            'total_ratings': total_ratings,
+            'is_bookmarked': is_bookmarked,
+            'user_rating': user_rating,
+            'comment_form': CommentForm(),
+            'rating_form': RatingForm(),
+            'total_count': article.comments.filter(
+                status=StatusComment.APPROVED
+            ).count(),
+            'current_sort': sort,
+            'post_url': post_url,
+            'refresh_url': reverse(
+                'articles:article_comments_partial',
+                kwargs={'pk': pk},
+            ),
+        },
+    )
 
 
 @login_required

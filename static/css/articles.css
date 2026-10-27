@@ -714,3 +714,157 @@
     }
 }
 
+
+/* Rating artikel */
+.rating-box {
+    margin: 32px 0;
+    padding: 24px;
+    border: 1px solid #eadbcb;
+    border-radius: 16px;
+    background: #fffaf4;
+    color: #574438;
+}
+
+.rating-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 22px;
+}
+
+.rating-heading h3 {
+    margin: 0 0 6px;
+    font-size: 20px;
+}
+
+.rating-heading p,
+.rating-prompt span {
+    margin: 0;
+    color: #927d6b;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.rating-summary {
+    min-width: 105px;
+    text-align: right;
+}
+
+.rating-summary strong {
+    font-size: 30px;
+    color: #9a6b32;
+}
+
+.rating-summary > span {
+    color: #927d6b;
+    font-size: 13px;
+}
+
+.rating-summary small {
+    display: block;
+    margin-top: 4px;
+    color: #927d6b;
+}
+
+.rating-prompt {
+    margin: 0 0 12px;
+    line-height: 1.6;
+}
+
+.star-rating {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+    gap: 5px;
+    width: fit-content;
+    margin: 8px 0 18px;
+}
+
+.star-rating input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+.star-rating label {
+    color: #d8c9b8;
+    font-size: 34px;
+    line-height: 1;
+    cursor: pointer;
+    transition: color 0.15s ease, transform 0.15s ease;
+}
+
+/* Warna bintang saat dipilih atau disorot */
+.star-rating label:hover,
+.star-rating label:hover ~ label,
+.star-rating input:checked ~ label {
+    color: #e4a63c;
+}
+
+.star-rating label:hover {
+    transform: scale(1.1);
+}
+
+.star-rating input:focus-visible + label {
+    outline: 2px solid #9a6b32;
+    outline-offset: 4px;
+    border-radius: 3px;
+}
+
+.rating-submit-btn {
+    padding: 10px 18px;
+    border: 1px solid #d8c1a8;
+    border-radius: 9px;
+    background: #eadbcb;
+    color: #574438;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.rating-submit-btn:hover {
+    background: #dfc8b0;
+}
+
+.rating-login-message {
+    margin: 0;
+    color: #927d6b;
+    line-height: 1.6;
+}
+
+.article-average-rating {
+    color: #9a6b32;
+}
+
+@media (max-width: 480px) {
+    .rating-box {
+        padding: 18px;
+    }
+
+    .rating-heading {
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .rating-heading h3 {
+        font-size: 17px;
+    }
+
+    .rating-summary {
+        min-width: 80px;
+    }
+
+    .rating-summary strong {
+        font-size: 25px;
+    }
+
+    .star-rating label {
+        font-size: 30px;
+    }
+}
+
