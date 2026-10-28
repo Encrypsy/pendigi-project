@@ -6,105 +6,120 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/profile.css' %}">
+<link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css"
+>
 {% endblock %}
 
 {% block content %}
 <div class="edit-profile-page">
-
     <header class="edit-profile-intro">
-        <a href="{% url 'profile' %}" class="edit-back-link">
-            <span aria-hidden="true">←</span> Kembali ke profil
-        </a>
-
-        <div class="edit-intro-content">
-            <div>
-                <span class="edit-eyebrow">PERSONALISASI AKUN</span>
-                <h1>Ruang pribadimu.</h1>
-                <p>Perbarui identitasmu dan tunjukkan siapa dirimu kepada komunitas Pena Digital.</p>
-            </div>
-            <div class="edit-intro-icon" aria-hidden="true">✳</div>
-        </div>
+        <a href="{% url 'profile' %}" class="edit-back-link">← Kembali ke profil</a>
+        <span class="edit-eyebrow">PERSONALISASI AKUN</span>
+        <h1>Edit profilmu</h1>
+        <p>Atur foto, banner, dan bio agar profilmu terasa lebih personal.</p>
     </header>
 
-    <form method="post" enctype="multipart/form-data" class="edit-profile-layout">
+    <form
+        method="post"
+        enctype="multipart/form-data"
+        class="edit-profile-layout"
+        id="editProfileForm"
+    >
         {% csrf_token %}
 
         <main class="edit-profile-main">
             <section class="edit-panel">
                 <div class="edit-section-heading">
-                    <div class="edit-section-number">01</div>
+                    <span class="edit-section-number">01</span>
                     <div>
                         <h2>Foto profil</h2>
-                        <p>Gunakan foto yang mewakili dirimu.</p>
+                        <p>Gunakan gambar persegi dengan rasio 1:1.</p>
                     </div>
                 </div>
 
-                <div class="avatar-comparison">
-                    <div class="avatar-preview-card">
-                        <span class="preview-label">SAAT INI</span>
-                        <div class="avatar-preview-frame">
-                            {% if user.profile_picture %}
-                                <img
-                                    src="{{ user.profile_picture.url }}"
-                                    id="oldAvatarPreview"
-                                    alt="Foto profil saat ini"
-                                >
-                            {% else %}
-                                <div class="avatar-initial" id="oldAvatarPreview">
-                                    {{ user.username|first|upper }}
-                                </div>
-                            {% endif %}
-                        </div>
-                        <strong>Foto lama</strong>
-                        <small>Foto yang sedang digunakan</small>
-                    </div>
-
-                    <div class="avatar-change-indicator" aria-hidden="true">→</div>
-
-                    <div class="avatar-preview-card avatar-new-card">
-                        <span class="preview-label">PRATINJAU</span>
-                        <div class="avatar-preview-frame">
-                            {% if user.profile_picture %}
-                                <img
-                                    src="{{ user.profile_picture.url }}"
-                                    id="newAvatarPreview"
-                                    alt="Pratinjau foto profil baru"
-                                >
-                            {% else %}
-                                <div class="avatar-initial" id="newAvatarPreview">
-                                    {{ user.username|first|upper }}
-                                </div>
-                            {% endif %}
-                        </div>
-                        <strong>Foto baru</strong>
-                        <small id="avatarPreviewHint">Pilih foto untuk melihat hasilnya</small>
-                    </div>
-                </div>
-
-                <div class="edit-field">
-                    <label for="id_profile_picture">Unggah foto baru</label>
-                    <div class="file-input-wrap">
-                        <input
-                            type="file"
-                            name="profile_picture"
-                            id="id_profile_picture"
-                            accept="image/*"
+                <div class="crop-avatar-preview">
+                    {% if user.profile_picture %}
+                        <img
+                            src="{{ user.profile_picture.url }}"
+                            id="profilePreview"
+                            alt="Foto profil"
                         >
-                    </div>
-                    <small class="edit-field-hint">Pilih gambar dari perangkatmu. Pratinjau akan muncul sebelum disimpan.</small>
-
-                    {% for error in form.profile_picture.errors %}
-                        <p class="edit-field-error">{{ error }}</p>
-                    {% endfor %}
+                    {% else %}
+                        <div class="avatar-initial" id="profileInitial">
+                            {{ user.username|first|upper }}
+                        </div>
+                        <img id="profilePreview" class="hidden-preview" alt="Pratinjau foto profil">
+                    {% endif %}
                 </div>
+
+                <label class="edit-upload-button" for="id_profile_picture">
+                    Pilih foto profil
+                </label>
+                <input
+                    type="file"
+                    name="profile_picture"
+                    id="id_profile_picture"
+                    accept="image/*"
+                    class="visually-hidden-input"
+                >
+                <p class="edit-field-hint">Foto akan dipangkas menjadi persegi sebelum disimpan.</p>
+
+                {% for error in form.profile_picture.errors %}
+                    <p class="edit-field-error">{{ error }}</p>
+                {% endfor %}
             </section>
 
             <section class="edit-panel">
                 <div class="edit-section-heading">
-                    <div class="edit-section-number">02</div>
+                    <span class="edit-section-number">02</span>
                     <div>
-                        <h2>Tentang dirimu</h2>
-                        <p>Tulis bio singkat yang ingin dilihat orang lain.</p>
+                        <h2>Banner profil</h2>
+                        <p>Tambahkan gambar lebar dengan rasio 16:9.</p>
+                    </div>
+                </div>
+
+                <div class="crop-banner-preview">
+                    {% if user.banner_picture %}
+                        <img
+                            src="{{ user.banner_picture.url }}"
+                            id="bannerPreview"
+                            alt="Banner profil"
+                        >
+                    {% else %}
+                        <div id="bannerPlaceholder">
+                            <span>✦</span>
+                            <strong>Banner profilmu</strong>
+                            <small>Unggah gambar untuk mempersonalisasi halamanmu</small>
+                        </div>
+                        <img id="bannerPreview" class="hidden-preview" alt="Pratinjau banner">
+                    {% endif %}
+                </div>
+
+                <label class="edit-upload-button" for="id_banner_picture">
+                    Pilih banner
+                </label>
+                <input
+                    type="file"
+                    name="banner_picture"
+                    id="id_banner_picture"
+                    accept="image/*"
+                    class="visually-hidden-input"
+                >
+                <p class="edit-field-hint">Area gambar bisa digeser dan diperbesar saat crop.</p>
+
+                {% for error in form.banner_picture.errors %}
+                    <p class="edit-field-error">{{ error }}</p>
+                {% endfor %}
+            </section>
+
+            <section class="edit-panel">
+                <div class="edit-section-heading">
+                    <span class="edit-section-number">03</span>
+                    <div>
+                        <h2>Bio singkat</h2>
+                        <p>Ceritakan sedikit tentang dirimu.</p>
                     </div>
                 </div>
 
@@ -112,10 +127,9 @@
                     <label for="{{ form.bio.id_for_label }}">Bio profil</label>
                     {{ form.bio }}
                     <div class="bio-field-footer">
-                        <small>Singkat, personal, dan tetap menjadi dirimu.</small>
-                        <span id="bioCharCount">0 karakter</span>
+                        <small>Bio akan diperbarui di profil setelah disimpan.</small>
+                        <span id="bioCharCount">0/150</span>
                     </div>
-
                     {% for error in form.bio.errors %}
                         <p class="edit-field-error">{{ error }}</p>
                     {% endfor %}
@@ -124,144 +138,327 @@
 
             {% if form.non_field_errors %}
                 <div class="edit-form-errors">
-                    {% for error in form.non_field_errors %}
-                        <p>{{ error }}</p>
-                    {% endfor %}
+                    {{ form.non_field_errors }}
                 </div>
             {% endif %}
 
             <div class="edit-form-actions">
                 <a href="{% url 'profile' %}" class="edit-cancel-button">Batal</a>
-                <button type="submit" class="edit-save-button">
-                    Simpan perubahan <span aria-hidden="true">↗</span>
+                <button type="submit" class="edit-save-button" id="saveProfileButton">
+                    Simpan perubahan →
                 </button>
             </div>
         </main>
 
         <aside class="edit-profile-sidebar">
             <section class="profile-live-card">
-                <span class="live-card-label">LIVE PREVIEW</span>
+                <span class="live-card-label">PRATINJAU PROFIL</span>
+
+                <div class="live-banner-preview">
+                    {% if user.banner_picture %}
+                        <img src="{{ user.banner_picture.url }}" id="liveBannerPreview" alt="Banner">
+                    {% else %}
+                        <div id="liveBannerPlaceholder">PENA DIGITAL</div>
+                        <img id="liveBannerPreview" class="hidden-preview" alt="Pratinjau banner">
+                    {% endif %}
+                </div>
+
                 <div class="live-profile-avatar">
                     {% if user.profile_picture %}
-                        <img
-                            src="{{ user.profile_picture.url }}"
-                            id="liveAvatarPreview"
-                            alt="Pratinjau avatar"
-                        >
+                        <img src="{{ user.profile_picture.url }}" id="liveProfilePreview" alt="Avatar">
                     {% else %}
-                        <div class="avatar-initial" id="liveAvatarPreview">
+                        <div class="avatar-initial" id="liveProfileInitial">
                             {{ user.username|first|upper }}
                         </div>
+                        <img id="liveProfilePreview" class="hidden-preview" alt="Pratinjau avatar">
                     {% endif %}
                 </div>
-
-                <span class="live-role">
-                    {% if user.status_kontributor == 'approved' %}
-                        KONTRIBUTOR
-                    {% else %}
-                        ANGGOTA PENA DIGITAL
-                    {% endif %}
-                </span>
 
                 <h3>{{ user.username }}</h3>
-                <p id="liveBioPreview">{% if user.bio %}{{ user.bio }}{% else %}Bio kamu akan tampil di sini...{% endif %}</p>
-
-                <div class="live-card-divider"></div>
-                <div class="live-card-note">
-                    <span aria-hidden="true">✦</span>
-                    <p>Profil yang lengkap membantu orang lain mengenalmu lebih dekat.</p>
-                </div>
+                <p id="liveBioPreview">{% if user.bio %}{{ user.bio }}{% else %}Bio kamu akan tampil di sini.{% endif %}</p>
             </section>
 
             <section class="edit-tips-card">
-                <span class="tips-icon" aria-hidden="true">✎</span>
-                <h3>Tips profil</h3>
+                <h3>✦ Tips profil</h3>
                 <ul>
-                    <li>Gunakan foto yang jelas dan mudah dikenali.</li>
-                    <li>Tulis bio yang menggambarkan minatmu.</li>
-                    <li>Perubahan baru terlihat di profil setelah disimpan.</li>
+                    <li>Pilih foto yang jelas dan mudah dikenali.</li>
+                    <li>Atur posisi gambar sampai hasil crop sesuai keinginanmu.</li>
+                    <li>Pastikan kamu menekan Simpan perubahan setelah selesai.</li>
                 </ul>
             </section>
         </aside>
     </form>
 </div>
 
+<div
+    class="crop-modal"
+    id="cropModal"
+    aria-hidden="true"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="cropModalTitle"
+>
+    <div class="crop-modal-card">
+        <div class="crop-modal-heading">
+            <div>
+                <span class="edit-eyebrow">PENGATURAN GAMBAR</span>
+                <h2 id="cropModalTitle">Pangkas gambar</h2>
+                <p id="cropModalDescription">Geser atau perbesar gambar sesuai keinginanmu.</p>
+            </div>
+            <button type="button" class="crop-close-button" id="closeCropModal" aria-label="Tutup">×</button>
+        </div>
+
+        <div class="crop-workspace">
+            <img id="cropSourceImage" alt="Gambar yang akan dipangkas">
+        </div>
+
+        <div class="crop-modal-actions">
+            <button type="button" class="edit-cancel-button" id="cancelCrop">Batal</button>
+            <button type="button" class="edit-save-button" id="applyCrop">Gunakan foto</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-    const fileInput = document.getElementById("id_profile_picture");
-    const bioInput = document.getElementById("{{ form.bio.id_for_label }}");
-    const bioPreview = document.getElementById("liveBioPreview");
-    const charCount = document.getElementById("bioCharCount");
-    const previewHint = document.getElementById("avatarPreviewHint");
+    const form = document.getElementById("editProfileForm");
+    const modal = document.getElementById("cropModal");
+    const cropImage = document.getElementById("cropSourceImage");
+    const cropTitle = document.getElementById("cropModalTitle");
+    const cropDescription = document.getElementById("cropModalDescription");
+    const applyButton = document.getElementById("applyCrop");
+    const cancelButton = document.getElementById("cancelCrop");
+    const closeButton = document.getElementById("closeCropModal");
 
-    const avatarPreviews = [
-        document.getElementById("newAvatarPreview"),
-        document.getElementById("liveAvatarPreview"),
+    const profileInput = document.getElementById("id_profile_picture");
+    const bannerInput = document.getElementById("id_banner_picture");
+
+    let cropper = null;
+    let activeInput = null;
+    let activeKind = null;
+    let previousFile = null;
+    let temporaryUrl = null;
+    let cropConfirmed = false;
+
+    const profileTargets = [
+        document.getElementById("profilePreview"),
+        document.getElementById("liveProfilePreview"),
     ];
 
-    let previewUrl = null;
+    const bannerTargets = [
+        document.getElementById("bannerPreview"),
+        document.getElementById("liveBannerPreview"),
+    ];
 
-    if (fileInput) {
-        fileInput.addEventListener("change", function () {
-            const file = this.files && this.files[0];
+    function updateImageTargets(targets, url) {
+        targets.forEach(function (img) {
+            if (!img) return;
 
-            if (!file) return;
+            img.src = url;
+            img.classList.remove("hidden-preview");
 
-            if (!file.type.startsWith("image/")) {
-                this.value = "";
-                alert("Silakan pilih file gambar.");
-                return;
-            }
+            const initial = img.id === "profilePreview"
+                ? document.getElementById("profileInitial")
+                : img.id === "liveProfilePreview"
+                    ? document.getElementById("liveProfileInitial")
+                    : null;
 
-            if (previewUrl) {
-                URL.revokeObjectURL(previewUrl);
-            }
+            if (initial) initial.classList.add("hidden-preview");
 
-            previewUrl = URL.createObjectURL(file);
+            const placeholder = img.id === "bannerPreview"
+                ? document.getElementById("bannerPlaceholder")
+                : img.id === "liveBannerPreview"
+                    ? document.getElementById("liveBannerPlaceholder")
+                    : null;
 
-            avatarPreviews.forEach(function (preview) {
-                if (!preview) return;
-
-                if (preview.tagName === "IMG") {
-                    preview.src = previewUrl;
-                } else {
-                    const image = document.createElement("img");
-                    image.src = previewUrl;
-                    image.alt = "Pratinjau foto profil baru";
-                    preview.replaceWith(image);
-                    if (preview.id) image.id = preview.id;
-                    if (preview === avatarPreviews[0]) {
-                        avatarPreviews[0] = image;
-                    } else {
-                        avatarPreviews[1] = image;
-                    }
-                }
-            });
-
-            if (previewHint) {
-                previewHint.textContent = "Foto baru siap dipratinjau";
-            }
+            if (placeholder) placeholder.classList.add("hidden-preview");
         });
     }
 
-    function updateBioPreview() {
+    function openCropper(input, kind) {
+        if (!window.Cropper) {
+            alert("Fitur crop belum berhasil dimuat. Periksa koneksi internet, lalu coba lagi.");
+            input.value = "";
+            return;
+        }
+
+        const file = input.files && input.files[0];
+        if (!file) return;
+
+        if (!file.type.startsWith("image/")) {
+            alert("Pilih file gambar yang valid.");
+            input.value = "";
+            return;
+        }
+
+        activeInput = input;
+        activeKind = kind;
+        previousFile = file;
+        cropConfirmed = false;
+
+        if (temporaryUrl) URL.revokeObjectURL(temporaryUrl);
+        temporaryUrl = URL.createObjectURL(file);
+
+        cropTitle.textContent = kind === "profile"
+            ? "Pangkas foto profil"
+            : "Pangkas banner";
+
+        cropDescription.textContent = kind === "profile"
+            ? "Atur foto menjadi persegi (1:1)."
+            : "Atur banner dengan rasio lebar (16:9).";
+
+        cropImage.src = temporaryUrl;
+        modal.classList.add("is-open");
+        modal.setAttribute("aria-hidden", "false");
+        document.body.classList.add("crop-modal-open");
+
+        cropImage.onload = function () {
+            if (cropper) cropper.destroy();
+
+            cropper = new Cropper(cropImage, {
+                aspectRatio: kind === "profile" ? 1 : 16 / 9,
+                viewMode: 1,
+                dragMode: "move",
+                autoCropArea: 0.9,
+                responsive: true,
+                background: false,
+                guides: true,
+                center: true,
+                movable: true,
+                zoomable: true,
+                rotatable: false,
+                scalable: false,
+                cropBoxMovable: true,
+                cropBoxResizable: true,
+                toggleDragModeOnDblclick: false,
+            });
+        };
+    }
+
+    function closeCropper() {
+        modal.classList.remove("is-open");
+        modal.setAttribute("aria-hidden", "true");
+        document.body.classList.remove("crop-modal-open");
+
+        if (cropper) {
+            cropper.destroy();
+            cropper = null;
+        }
+
+        if (temporaryUrl) {
+            URL.revokeObjectURL(temporaryUrl);
+            temporaryUrl = null;
+        }
+
+        cropImage.onload = null;
+        activeInput = null;
+        activeKind = null;
+    }
+
+    function cancelCrop() {
+        if (activeInput && !cropConfirmed) {
+            activeInput.value = "";
+        }
+        closeCropper();
+    }
+
+    profileInput?.addEventListener("change", function () {
+        openCropper(profileInput, "profile");
+    });
+
+    bannerInput?.addEventListener("change", function () {
+        openCropper(bannerInput, "banner");
+    });
+
+    applyButton.addEventListener("click", function () {
+        if (!cropper || !activeInput || !activeKind) return;
+
+        applyButton.disabled = true;
+        applyButton.textContent = "Memproses...";
+
+        const isProfile = activeKind === "profile";
+        const canvas = cropper.getCroppedCanvas(
+            isProfile
+                ? { width: 600, height: 600, imageSmoothingQuality: "high" }
+                : { width: 1600, height: 900, imageSmoothingQuality: "high" }
+        );
+
+        if (!canvas) {
+            alert("Gambar gagal diproses. Silakan pilih gambar lain.");
+            applyButton.disabled = false;
+            applyButton.textContent = "Gunakan foto";
+            return;
+        }
+
+        canvas.toBlob(function (blob) {
+            if (!blob) {
+                alert("Gambar gagal diproses. Silakan coba lagi.");
+                applyButton.disabled = false;
+                applyButton.textContent = "Gunakan foto";
+                return;
+            }
+
+            const filename = isProfile ? "profile-cropped.jpg" : "banner-cropped.jpg";
+            const croppedFile = new File([blob], filename, { type: "image/jpeg" });
+            const transfer = new DataTransfer();
+            transfer.items.add(croppedFile);
+            activeInput.files = transfer.files;
+
+            const previewUrl = URL.createObjectURL(blob);
+
+            if (isProfile) {
+                updateImageTargets(profileTargets, previewUrl);
+            } else {
+                updateImageTargets(bannerTargets, previewUrl);
+            }
+
+            cropConfirmed = true;
+            closeCropper();
+
+            applyButton.disabled = false;
+            applyButton.textContent = "Gunakan foto";
+        }, "image/jpeg", 0.92);
+    });
+
+    cancelButton.addEventListener("click", cancelCrop);
+    closeButton.addEventListener("click", cancelCrop);
+
+    modal.addEventListener("click", function (event) {
+        if (event.target === modal) cancelCrop();
+    });
+
+    document.addEventListener("keydown", function (event) {
+        if (event.key === "Escape" && modal.classList.contains("is-open")) {
+            cancelCrop();
+        }
+    });
+
+    const bioInput = document.getElementById("{{ form.bio.id_for_label }}");
+    const bioPreview = document.getElementById("liveBioPreview");
+    const charCount = document.getElementById("bioCharCount");
+
+    function updateBio() {
         if (!bioInput) return;
 
-        const value = bioInput.value.trim();
-
         if (bioPreview) {
-            bioPreview.textContent = value || "Bio kamu akan tampil di sini...";
+            bioPreview.textContent = bioInput.value.trim() || "Bio kamu akan tampil di sini.";
         }
 
         if (charCount) {
-            charCount.textContent = `${bioInput.value.length} karakter`;
+            charCount.textContent = `${bioInput.value.length}/150`;
         }
     }
 
-    if (bioInput) {
-        bioInput.addEventListener("input", updateBioPreview);
-        updateBioPreview();
-    }
+    bioInput?.addEventListener("input", updateBio);
+    updateBio();
+
+    form.addEventListener("submit", function (event) {
+        if (modal.classList.contains("is-open")) {
+            event.preventDefault();
+            alert("Selesaikan atau batalkan proses crop sebelum menyimpan profil.");
+        }
+    });
 });
 </script>
 {% endblock %}

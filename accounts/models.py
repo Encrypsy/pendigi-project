@@ -28,6 +28,11 @@ class Users(AbstractUser):
     )
     profile_picture = models.ImageField(upload_to='profile_pictures/', null=True, blank=True)
     bio = models.CharField(max_length=150, blank=True)
+    banner_picture = models.ImageField(
+        upload_to='profile_banners/',
+        blank=True,
+        null=True,
+    )
 
     def __str__(self):
         return self.username

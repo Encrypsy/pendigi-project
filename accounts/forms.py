@@ -84,7 +84,7 @@ class ContributorApplicationForm(forms.ModelForm):
 class ProfileUpdateForm(forms.ModelForm):
     class Meta:
         model = Users
-        fields = ['profile_picture', 'bio']
+        fields = ['profile_picture', 'bio', 'banner_picture']
         widgets = {
             'bio': forms.TextInput(attrs={'placeholder': 'Ceritakan dirimu dalam satu kalimat...'}),
         }
