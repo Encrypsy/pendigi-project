@@ -397,3 +397,262 @@
         aspect-ratio: 16 / 9;
     }
 }
+
+
+/* Profile hero: komposisi lebih padat dan seimbang */
+.profile-hero {
+    padding: 0;
+    overflow: hidden;
+    background: #fffaf4;
+    border: 1px solid #eadbca;
+    border-radius: 22px;
+    margin-bottom: 34px;
+}
+
+.profile-banner {
+    min-height: 145px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: flex-start;
+    padding: 28px 34px;
+    box-sizing: border-box;
+    background:
+        radial-gradient(
+            circle at 82% 30%,
+            #e9c9a5 0,
+            #e9c9a5 9%,
+            transparent 9.5%
+        ),
+        linear-gradient(115deg, #efe0cf, #f7ebdd 55%, #e8d0b5);
+}
+
+.profile-banner-label {
+    position: relative;
+    z-index: 1;
+    color: #80552f;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 2px;
+}
+
+.banner-decoration {
+    position: absolute;
+    display: block;
+    border: 1px solid #bd9167;
+    border-radius: 50%;
+    opacity: 0.45;
+}
+
+.banner-decoration-one {
+    width: 180px;
+    height: 180px;
+    right: 13%;
+    top: -85px;
+}
+
+.banner-decoration-two {
+    width: 125px;
+    height: 125px;
+    right: 5%;
+    top: 38px;
+}
+
+.profile-hero-content {
+    padding: 0 34px 26px;
+}
+
+.profile-identity {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+    margin-top: -43px;
+    position: relative;
+    z-index: 2;
+}
+
+.profile-avatar-wrap {
+    flex: 0 0 auto;
+}
+
+.profile-avatar {
+    width: 104px;
+    height: 104px;
+    box-sizing: border-box;
+    border: 4px solid #fffaf4;
+    box-shadow: 0 0 0 1px #e4d2bf;
+}
+
+.profile-identity-info {
+    flex: 1;
+    min-width: 0;
+    padding-top: 45px;
+}
+
+.profile-identity-info h1 {
+    margin: 0;
+    font-size: clamp(25px, 3vw, 32px);
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+}
+
+.profile-bio {
+    margin: 9px 0 0;
+    max-width: 560px;
+    line-height: 1.7;
+    overflow-wrap: anywhere;
+}
+
+.profile-action {
+    align-self: flex-end;
+    padding-bottom: 5px;
+    flex: 0 0 auto;
+}
+
+.profile-edit-link,
+.follow-button {
+    gap: 8px;
+    white-space: nowrap;
+}
+
+.profile-stats {
+    display: flex;
+    gap: 0;
+    margin-top: 27px;
+    padding-top: 20px;
+    border-top: 1px solid #eadbca;
+}
+
+.profile-stat {
+    min-width: 130px;
+    padding: 0 26px;
+    border-right: 1px solid #eadbca;
+}
+
+.profile-stat:first-child {
+    padding-left: 0;
+}
+
+.profile-stat:last-child {
+    border-right: 0;
+}
+
+.profile-stat strong {
+    font-size: 24px;
+    line-height: 1.3;
+}
+
+.profile-stat span {
+    margin-top: 4px;
+}
+
+@media (max-width: 680px) {
+    .profile-banner {
+        min-height: 110px;
+        padding: 22px;
+    }
+
+    .profile-hero-content {
+        padding: 0 20px 22px;
+    }
+
+    .profile-identity {
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 12px 16px;
+        margin-top: -35px;
+    }
+
+    .profile-avatar {
+        width: 82px;
+        height: 82px;
+    }
+
+    .profile-identity-info {
+        padding-top: 40px;
+        flex-basis: calc(100% - 100px);
+    }
+
+    .profile-action {
+        width: 100%;
+        padding: 5px 0 0;
+    }
+
+    .profile-stats {
+        justify-content: space-between;
+        gap: 8px;
+        margin-top: 22px;
+        padding-top: 18px;
+    }
+
+    .profile-stat {
+        min-width: 0;
+        padding: 0 12px;
+    }
+
+    .profile-stat:first-child {
+        padding-left: 0;
+    }
+
+    .profile-stat strong {
+        font-size: 21px;
+    }
+
+    .profile-stat span {
+        font-size: 11px;
+    }
+}
+
+
+.edit-profile-header {
+    padding: 20px 0 4px;
+}
+
+.edit-profile-header h1 {
+    font-size: clamp(28px, 4vw, 36px);
+    margin: 14px 0 8px;
+}
+
+.edit-profile-header p {
+    color: #8c7969;
+    line-height: 1.7;
+}
+
+.edit-profile-field {
+    display: grid;
+    gap: 8px;
+}
+
+.edit-profile-field label {
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.edit-profile-field input,
+.edit-profile-field textarea,
+.edit-profile-field select {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.edit-profile-field small {
+    color: #8c7969;
+    font-size: 12px;
+}
+
+.edit-profile-field .edit-profile-error {
+    color: #a33c32;
+}
+
+.edit-profile-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding-top: 8px;
+}
+
+.profile-cancel-link {
+    color: #80552f;
+    font-size: 13px;
+    text-decoration: none;
+}

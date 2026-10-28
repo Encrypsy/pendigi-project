@@ -13,82 +13,103 @@
 <div class="profile-page">
 
     <section class="profile-hero">
-        <div class="profile-identity">
-            <div class="profile-avatar-wrap">
-                {% if profile_user.profile_picture %}
-                    <img
-                        src="{{ profile_user.profile_picture.url }}"
-                        class="profile-avatar"
-                        alt="Foto profil {{ profile_user.username }}"
-                    >
+        <div class="profile-banner">
+            <span class="banner-decoration banner-decoration-one"></span>
+            <span class="banner-decoration banner-decoration-two"></span>
+
+            <span class="profile-banner-label">
+                {% if profile_user.status_kontributor == 'approved' %}
+                    PENULIS PENA DIGITAL
                 {% else %}
-                    <div class="profile-avatar profile-avatar-placeholder">
-                        {{ profile_user.username|first|upper }}
+                    PEMBACA PENA DIGITAL
+                {% endif %}
+            </span>
+        </div>
+
+        <div class="profile-hero-content">
+            <div class="profile-identity">
+                <div class="profile-avatar-wrap">
+                    {% if profile_user.profile_picture %}
+                        <img
+                            src="{{ profile_user.profile_picture.url }}"
+                            class="profile-avatar"
+                            alt="Foto profil {{ profile_user.username }}"
+                        >
+                    {% else %}
+                        <div class="profile-avatar profile-avatar-placeholder">
+                            {{ profile_user.username|first|upper }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="profile-identity-info">
+                    <span class="profile-eyebrow">
+                        {% if profile_user.status_kontributor == 'approved' %}
+                            KONTRIBUTOR
+                        {% else %}
+                            ANGGOTA
+                        {% endif %}
+                    </span>
+
+                    <h1>{{ profile_user.username }}</h1>
+
+                    <p class="profile-bio">
+                        {% if profile_user.bio %}
+                            {{ profile_user.bio }}
+                        {% else %}
+                            Belum ada bio.
+                        {% endif %}
+                    </p>
+                </div>
+
+                <div class="profile-action">
+                    {% if is_own_profile %}
+                        <a
+                            href="{% url 'edit_profile' %}"
+                            class="profile-edit-link"
+                        >
+                            <span aria-hidden="true">✎</span>
+                            Edit profil
+                        </a>
+                    {% else %}
+                        <form
+                            method="post"
+                            action="{% url 'toggle_follow' profile_user.username %}"
+                        >
+                            {% csrf_token %}
+                            <button
+                                type="submit"
+                                class="follow-button {% if is_following %}is-following{% endif %}"
+                            >
+                                {% if is_following %}
+                                    Mengikuti
+                                {% else %}
+                                    + Ikuti
+                                {% endif %}
+                            </button>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="profile-stats">
+                <div class="profile-stat">
+                    <strong>{{ followers_count }}</strong>
+                    <span>Pengikut</span>
+                </div>
+
+                <div class="profile-stat">
+                    <strong>{{ following_count }}</strong>
+                    <span>Mengikuti</span>
+                </div>
+
+                {% if profile_user.status_kontributor == 'approved' %}
+                    <div class="profile-stat">
+                        <strong>{{ published_count }}</strong>
+                        <span>Karya diterbitkan</span>
                     </div>
                 {% endif %}
             </div>
-
-            <div class="profile-identity-info">
-                <span class="profile-eyebrow">
-                    {% if profile_user.status_kontributor == 'approved' %}
-                        PENULIS
-                    {% else %}
-                        PEMBACA
-                    {% endif %}
-                </span>
-
-                <h1>{{ profile_user.username }}</h1>
-
-                <p class="profile-bio">
-                    {% if profile_user.bio %}
-                        {{ profile_user.bio }}
-                    {% else %}
-                        Belum ada bio.
-                    {% endif %}
-                </p>
-
-                {% if not is_own_profile %}
-                    <form
-                        method="post"
-                        action="{% url 'toggle_follow' profile_user.username %}"
-                    >
-                        {% csrf_token %}
-                        <button
-                            type="submit"
-                            class="follow-button {% if is_following %}is-following{% endif %}"
-                        >
-                            {% if is_following %}
-                                Mengikuti
-                            {% else %}
-                                + Ikuti
-                            {% endif %}
-                        </button>
-                    </form>
-                {% else %}
-                    <a href="#edit-profile" class="profile-edit-link">
-                        Edit profil
-                    </a>
-                {% endif %}
-            </div>
-        </div>
-
-        <div class="profile-stats">
-            <div class="profile-stat">
-                <strong>{{ followers_count }}</strong>
-                <span>Pengikut</span>
-            </div>
-
-            <div class="profile-stat">
-                <strong>{{ following_count }}</strong>
-                <span>Mengikuti</span>
-            </div>
-
-            {% if profile_user.status_kontributor == 'approved' %}
-                <div class="profile-stat">
-                    <strong>{{ published_count }}</strong>
-                    <span>Karya</span>
-                </div>
-            {% endif %}
         </div>
     </section>
 

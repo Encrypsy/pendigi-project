@@ -204,6 +204,29 @@ def profile_view(request, username=None):
             'form': form,
         },
     )
+    
+
+@login_required
+def edit_profile_view(request):
+    if request.method == 'POST':
+        form = ProfileUpdateForm(
+            request.POST,
+            request.FILES,
+            instance=request.user,
+        )
+
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Profil berhasil diperbarui!')
+            return redirect('profile')
+    else:
+        form = ProfileUpdateForm(instance=request.user)
+
+    return render(
+        request,
+        'accounts/edit_profile.html',
+        {'form': form},
+    )
 
 @admin_required
 def dashboard_view(request):

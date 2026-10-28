@@ -1,6 +1,6 @@
 from django.urls import path
 from django.contrib.auth.views import LogoutView
-from .views import CustomLoginView, admin_user_delete, admin_user_detail, admin_user_edit, admin_user_list, author_notifications, author_pending_content, author_rejected_content, notifications_list, register_view, apply_contributor, profile_view, dashboard_view, admin_pending_contributors, admin_approve_contributor, admin_reject_contributor, toggle_follow, author_dashboard, author_my_content
+from .views import CustomLoginView, admin_user_delete, admin_user_detail, admin_user_edit, admin_user_list, author_notifications, author_pending_content, author_rejected_content, edit_profile_view, notifications_list, register_view, apply_contributor, profile_view, dashboard_view, admin_pending_contributors, admin_approve_contributor, admin_reject_contributor, toggle_follow, author_dashboard, author_my_content
 
 urlpatterns = [
     path('login/', CustomLoginView.as_view(), name='login'),
@@ -8,11 +8,8 @@ urlpatterns = [
     path('register/', register_view, name='register'),
     path('apply-kontributor/', apply_contributor, name='apply_contributor'),
     path('profile/', profile_view, name='profile'),
-    path(
-        'profile/<str:username>/',
-        profile_view,
-        name='public_profile',
-    ),
+    path('profile/<str:username>/', profile_view, name='public_profile'),
+    path('profile/edit/', edit_profile_view, name='edit_profile'),
     path('dashboard/', dashboard_view, name='dashboard'),
     path('dashboard/penulis/', author_dashboard, name='author_dashboard'),
     path('kelola/kontributor/', admin_pending_contributors, name='admin_pending_contributors'),
