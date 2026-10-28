@@ -286,3 +286,110 @@
 
 .like-btn-inline { flex-direction: row; gap: 4px; margin-top: 4px; }
 .like-btn-inline svg { width: 15px; height: 15px; }
+
+
+/* Area author pada halaman baca bab */
+.reader-author-sticky {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+/* Tautan foto profil */
+.reader-author-profile-link {
+    display: inline-flex;
+    text-decoration: none;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.reader-author-profile-link:focus-visible,
+.reader-author-name-link:focus-visible {
+    outline: 2px solid #a66b37;
+    outline-offset: 3px;
+}
+
+/* Foto profil */
+.reader-author-avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+}
+
+/* Avatar tanpa foto */
+.reader-avatar-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #ead8c3;
+    color: #68432b;
+    font-size: 22px;
+    font-weight: 700;
+}
+
+/* Username author */
+.reader-author-name-link {
+    color: #8b8175;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.reader-author-name-link:hover {
+    color: #a66b37;
+    text-decoration: underline;
+}
+
+/* Form follow */
+.reader-follow-form {
+    width: 100%;
+    margin: 0;
+}
+
+/* Tombol follow */
+.reader-follow-btn {
+    width: 100%;
+    min-height: 38px;
+    padding: 9px 16px;
+    border: 1px solid #a66b37;
+    border-radius: 8px;
+    background: #a66b37;
+    color: #fff;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        border-color 0.2s ease;
+}
+
+.reader-follow-btn:hover {
+    background: #89572f;
+    border-color: #89572f;
+}
+
+/* Status sudah mengikuti */
+.reader-follow-btn.is-following {
+    background: #fffaf4;
+    color: #805333;
+    border-color: #dfc9b1;
+}
+
+.reader-follow-btn.is-following:hover {
+    background: #f3e6d8;
+}
+
+/* Fokus keyboard */
+.reader-follow-btn:focus-visible {
+    outline: 2px solid #68432b;
+    outline-offset: 3px;
+}

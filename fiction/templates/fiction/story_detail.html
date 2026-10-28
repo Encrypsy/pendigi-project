@@ -18,7 +18,14 @@
 
     <div class="story-hero-info">
         <h1>{{ story.title }}</h1>
-        <p class="story-hero-author">{{ story.author.username }}</p>
+        
+        <a
+            href="{% url 'public_profile' story.author.username %}"
+            class="story-hero-author story-hero-author-link"
+        >
+            {{ story.author.username }}
+        </a>
+
 
         <div class="story-hero-stats">
             <span>👁 {{ story.views_count }}</span>

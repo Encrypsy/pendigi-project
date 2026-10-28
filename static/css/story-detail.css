@@ -191,3 +191,16 @@ a {
 @media (max-width: 600px) {
     .similar-grid { grid-template-columns: 1fr; }
 }
+
+
+.story-hero-author-link {
+    display: inline-block;
+    text-decoration: none;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.story-hero-author-link:hover {
+    color: #a66b37;
+    text-decoration: underline;
+}
