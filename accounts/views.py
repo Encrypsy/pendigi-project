@@ -25,24 +25,66 @@ from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth import get_user_model
 from interactions.notifications import notify_admins
 
+
 @login_required
 @require_POST
 def toggle_follow(request, username):
-    target_user = get_object_or_404(Users, username=username)
+    target_user = get_object_or_404(
+        Users,
+        username=username,
+    )
 
+    # Mencegah pengguna mengikuti dirinya sendiri
     if target_user == request.user:
-        messages.error(request, 'Tidak bisa follow diri sendiri.')
-        return redirect(request.META.get('HTTP_REFERER', 'articles:article_list'))
+        messages.error(
+            request,
+            'Tidak bisa follow diri sendiri.',
+        )
+        return redirect(
+            request.META.get(
+                'HTTP_REFERER',
+                'articles:article_list',
+            )
+        )
 
-    follow, created = Follow.objects.get_or_create(follower=request.user, following=target_user)
+    # Membuat atau menghapus hubungan follow
+    follow, created = Follow.objects.get_or_create(
+        follower=request.user,
+        following=target_user,
+    )
 
     if not created:
+        # Unfollow tidak membuat notifikasi baru
         follow.delete()
-        messages.info(request, f'Berhenti mengikuti {target_user.username}.')
-    else:
-        messages.success(request, f'Mengikuti {target_user.username}.')
 
-    return redirect(request.META.get('HTTP_REFERER', 'articles:article_list'))
+        messages.info(
+            request,
+            f'Berhenti mengikuti {target_user.username}.',
+        )
+
+    else:
+        # Buat notifikasi untuk pengguna yang diikuti
+        from interactions.models import Activity
+
+        Activity.objects.create(
+            recipient=target_user,
+            actor=request.user,
+            action_type=Activity.ActionType.FOLLOW,
+            message=f'{request.user.username} mulai mengikuti kamu.',
+        )
+
+        messages.success(
+            request,
+            f'Mengikuti {target_user.username}.',
+        )
+
+    return redirect(
+        request.META.get(
+            'HTTP_REFERER',
+            'articles:article_list',
+        )
+    )
+
 
 
 class CustomLoginView(LoginView):
