@@ -1027,6 +1027,44 @@
 }
 
 
+/* Tautan foto profil */
+.comment-profile-link {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-self: flex-start;
+    color: inherit;
+    text-decoration: none;
+    border-radius: 50%;
+}
+
+.comment-profile-link .comment-avatar-img,
+.comment-profile-link .comment-avatar {
+    cursor: pointer;
+}
+
+/* Tautan username */
+.comment-username-link {
+    color: inherit;
+    text-decoration: none;
+}
+
+.comment-username-link strong {
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.comment-username-link:hover strong {
+    color: #8b5e3c;
+}
+
+/* Aksesibilitas keyboard */
+.comment-profile-link:focus-visible,
+.comment-username-link:focus-visible {
+    outline: 2px solid #8b5e3c;
+    outline-offset: 3px;
+}
+
+
 
 
 
