@@ -1,122 +1,303 @@
+
 {% extends 'app_base.html' %}
 {% load static %}
-{% block title %}Profil Saya{% endblock %}
+
+{% block title %}Profil {{ profile_user.username }}{% endblock %}
+
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/forms.css' %}">
 <link rel="stylesheet" href="{% static 'css/profile.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="profile-card">
-    <div class="profile-top">
-        <div class="profile-avatar-wrap">
-            {% if user.profile_picture %}
-            <img src="{{ user.profile_picture.url }}" class="profile-avatar" alt="{{ user.username }}">
-            {% else %}
-            <div class="profile-avatar profile-avatar-placeholder">{{ user.username|first|upper }}</div>
-            {% endif %}
-            <label for="photo-upload" class="avatar-edit-btn" title="Ganti foto">✎</label>
-        </div>
+<div class="profile-page">
 
+    <section class="profile-hero">
         <div class="profile-identity">
-            <h1>{{ user.username }}</h1>
-            <p class="profile-role">
-                {% if user.status_kontributor == 'approved' %}Kontributor{% else %}Pembaca{% endif %}
-            </p>
+            <div class="profile-avatar-wrap">
+                {% if profile_user.profile_picture %}
+                    <img
+                        src="{{ profile_user.profile_picture.url }}"
+                        class="profile-avatar"
+                        alt="Foto profil {{ profile_user.username }}"
+                    >
+                {% else %}
+                    <div class="profile-avatar profile-avatar-placeholder">
+                        {{ profile_user.username|first|upper }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="profile-identity-info">
+                <span class="profile-eyebrow">
+                    {% if profile_user.status_kontributor == 'approved' %}
+                        PENULIS
+                    {% else %}
+                        PEMBACA
+                    {% endif %}
+                </span>
+
+                <h1>{{ profile_user.username }}</h1>
+
+                <p class="profile-bio">
+                    {% if profile_user.bio %}
+                        {{ profile_user.bio }}
+                    {% else %}
+                        Belum ada bio.
+                    {% endif %}
+                </p>
+
+                {% if not is_own_profile %}
+                    <form
+                        method="post"
+                        action="{% url 'toggle_follow' profile_user.username %}"
+                    >
+                        {% csrf_token %}
+                        <button
+                            type="submit"
+                            class="follow-button {% if is_following %}is-following{% endif %}"
+                        >
+                            {% if is_following %}
+                                Mengikuti
+                            {% else %}
+                                + Ikuti
+                            {% endif %}
+                        </button>
+                    </form>
+                {% else %}
+                    <a href="#edit-profile" class="profile-edit-link">
+                        Edit profil
+                    </a>
+                {% endif %}
+            </div>
         </div>
 
         <div class="profile-stats">
-            <div class="stat-item"><strong>{{ favorites|length }}</strong><span>Favorit</span></div>
-            <div class="stat-item"><strong>{{ notes|length }}</strong><span>Catatan</span></div>
-            {% if published_count is not None %}
-            <div class="stat-item"><strong>{{ published_count }}</strong><span>Artikel</span></div>
+            <div class="profile-stat">
+                <strong>{{ followers_count }}</strong>
+                <span>Pengikut</span>
+            </div>
+
+            <div class="profile-stat">
+                <strong>{{ following_count }}</strong>
+                <span>Mengikuti</span>
+            </div>
+
+            {% if profile_user.status_kontributor == 'approved' %}
+                <div class="profile-stat">
+                    <strong>{{ published_count }}</strong>
+                    <span>Karya</span>
+                </div>
             {% endif %}
         </div>
-    </div>
+    </section>
 
-    <form method="post" enctype="multipart/form-data" id="photoForm" style="display:none;">
-        {% csrf_token %}
-        <input type="file" name="profile_picture" id="photo-upload" accept="image/*"
-            onchange="document.getElementById('photoForm').submit()">
-    </form>
-</div>
-
-<div class="card">
-    <h3>Bio Singkat</h3>
-    <form method="post" class="bio-form">
-        {% csrf_token %}
-        {{ form.bio }}
-        <button type="submit" class="btn-small">Simpan</button>
-    </form>
-</div>
-
-{% if stories %}
-<div class="card">
-    <div class="card-header-row">
-        <h3>Cerita Saya</h3>
-        <a href="{% url 'fiction:my_stories' %}" class="see-all-link">Lihat Semua</a>
-    </div>
-    <div class="story-mini-grid">
-        {% for story in stories %}
-        <a href="{% url 'fiction:chapter_list' story.pk %}" class="story-mini-card">
-            <div class="story-cover-wrap">
-                {% if story.cover %}
-                <img src="{{ story.cover.url }}" class="story-mini-cover" alt="{{ story.title }}">
-                {% else %}
-                <div class="story-mini-cover story-mini-placeholder">📖</div>
-                {% endif %}
-
-                {% if story.status == 'approved' and story.target_pembaca == 'dewasa' %}
-                <span class="age-badge">18+</span>
-                {% endif %}
+    {% if profile_user.status_kontributor == 'approved' %}
+    <section class="profile-section">
+        <div class="profile-section-heading">
+            <div>
+                <span class="profile-eyebrow">DARI MEJA PENULIS</span>
+                <h2>Karya terbaru</h2>
+                <p>Artikel yang telah diterbitkan oleh {{ profile_user.username }}.</p>
             </div>
-            <div class="story-mini-info">
-                <strong>{{ story.title }}</strong>
-                <span class="status-badge status-{{ story.status }}">{{ story.get_status_display }}</span>
-                <span class="story-mini-chapters">{{ story.total_chapters }} bab</span>
+
+            <a
+                href="{% url 'public_profile' profile_user.username %}#karya"
+                class="profile-see-all"
+            >
+                Lihat selengkapnya →
+            </a>
+        </div>
+
+        <div class="showcase-grid" id="karya">
+            {% for article in showcase_articles %}
+                <a
+                    href="{% url 'articles:article_detail' article.pk %}"
+                    class="showcase-card"
+                >
+                    {% if article.thumbnail %}
+                        <img
+                            src="{{ article.thumbnail.url }}"
+                            alt="{{ article.title }}"
+                            class="showcase-cover"
+                            loading="lazy"
+                        >
+                    {% else %}
+                        <div class="showcase-cover showcase-placeholder">
+                            <span>PD</span>
+                        </div>
+                    {% endif %}
+
+                    <div class="showcase-info">
+                        <span class="showcase-label">ARTIKEL</span>
+                        <h3>{{ article.title }}</h3>
+                        {% if article.category %}
+                            <span class="showcase-category">
+                                {{ article.category.name }}
+                            </span>
+                        {% endif %}
+                    </div>
+                </a>
+            {% empty %}
+                <p class="profile-empty">
+                    Belum ada karya yang diterbitkan.
+                </p>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    {% if is_own_profile %}
+        <section class="profile-section" id="edit-profile">
+            <div class="profile-section-heading">
+                <div>
+                    <span class="profile-eyebrow">PERSONAL</span>
+                    <h2>Pengaturan profil</h2>
+                </div>
             </div>
-        </a>
-        {% endfor %}
-    </div>
-</div>
-{% endif %}
 
-<div class="card">
-    <h3>Top 4 Artikel Favorit</h3>
-    <div class="favorite-grid">
-        {% for fav in favorites %}
-        <a href="{% url 'articles:article_detail' fav.article.pk %}" class="favorite-item">
-            <span class="rank-badge">#{{ fav.rank_order }}</span>
-            {{ fav.article.title }}
-        </a>
-        {% empty %}
-        <p class="hint-text">Belum ada artikel favorit.</p>
-        {% endfor %}
-    </div>
-</div>
+            <div class="profile-settings-grid">
+                <div class="profile-panel">
+                    <h3>Foto profil</h3>
+                    <form
+                        method="post"
+                        enctype="multipart/form-data"
+                        class="profile-form"
+                    >
+                        {% csrf_token %}
+                        <input
+                            type="file"
+                            name="profile_picture"
+                            accept="image/*"
+                            required
+                        >
+                        <button type="submit" class="profile-primary-button">
+                            Simpan foto
+                        </button>
+                    </form>
+                </div>
 
-<div class="card">
-    <h3>Aktivitas Terbaru</h3>
-    <ul class="activity-list">
-        {% for activity in activities %}
-        <li>{{ activity.get_action_type_display }} — <strong>{{ activity.article.title }}</strong>
-            <span class="activity-date">{{ activity.created_at|timesince }} lalu</span>
-        </li>
-        {% empty %}
-        <li class="hint-text">Belum ada aktivitas.</li>
-        {% endfor %}
-    </ul>
-</div>
+                <div class="profile-panel">
+                    <h3>Bio singkat</h3>
+                    <form method="post" class="profile-form">
+                        {% csrf_token %}
+                        {{ form.bio }}
+                        <button type="submit" class="profile-primary-button">
+                            Simpan bio
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </section>
 
-<div class="card">
-    <h3>Catatan Pribadi</h3>
-    {% for note in notes %}
-    <div class="comment-item">
-        <strong>{{ note.article.title }}</strong>
-        <p>{{ note.note_content }}</p>
-    </div>
-    {% empty %}
-    <p class="hint-text">Belum ada catatan.</p>
-    {% endfor %}
+        {% if stories %}
+        <section class="profile-section">
+            <div class="profile-section-heading">
+                <div>
+                    <span class="profile-eyebrow">KARYA FIKSI</span>
+                    <h2>Cerita saya</h2>
+                </div>
+                <a href="{% url 'fiction:my_stories' %}" class="profile-see-all">
+                    Lihat semua →
+                </a>
+            </div>
+
+            <div class="profile-list">
+                {% for story in stories %}
+                    <a
+                        href="{% url 'fiction:chapter_list' story.pk %}"
+                        class="profile-list-item"
+                    >
+                        <div>
+                            <strong>{{ story.title }}</strong>
+                            <span>{{ story.total_chapters }} bab</span>
+                        </div>
+                        <span class="profile-list-arrow">→</span>
+                    </a>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+        <section class="profile-section">
+            <div class="profile-section-heading">
+                <div>
+                    <span class="profile-eyebrow">KOLEKSI PRIBADI</span>
+                    <h2>Artikel favorit</h2>
+                </div>
+            </div>
+
+            <div class="profile-list">
+                {% for fav in favorites %}
+                    <a
+                        href="{% url 'articles:article_detail' fav.article.pk %}"
+                        class="profile-list-item"
+                    >
+                        <div>
+                            <strong>{{ fav.article.title }}</strong>
+                            <span>Favorit #{{ fav.rank_order }}</span>
+                        </div>
+                        <span class="profile-list-arrow">→</span>
+                    </a>
+                {% empty %}
+                    <p class="profile-empty">
+                        Belum ada artikel favorit.
+                    </p>
+                {% endfor %}
+            </div>
+        </section>
+
+        <section class="profile-section">
+            <div class="profile-section-heading">
+                <div>
+                    <span class="profile-eyebrow">RIWAYAT</span>
+                    <h2>Aktivitas terbaru</h2>
+                </div>
+            </div>
+
+            <div class="profile-list">
+                {% for activity in activities %}
+                    <div class="profile-list-item">
+                        <div>
+                            <strong>
+                                {{ activity.get_action_type_display }}
+                            </strong>
+                            {% if activity.article %}
+                                <span>{{ activity.article.title }}</span>
+                            {% endif %}
+                        </div>
+                        <span class="profile-muted">
+                            {{ activity.created_at|timesince }} lalu
+                        </span>
+                    </div>
+                {% empty %}
+                    <p class="profile-empty">
+                        Belum ada aktivitas.
+                    </p>
+                {% endfor %}
+            </div>
+        </section>
+
+        <section class="profile-section">
+            <div class="profile-section-heading">
+                <div>
+                    <span class="profile-eyebrow">CATATAN</span>
+                    <h2>Catatan pribadi</h2>
+                </div>
+            </div>
+
+            {% for note in notes %}
+                <div class="profile-note">
+                    <strong>{{ note.article.title }}</strong>
+                    <p>{{ note.note_content }}</p>
+                </div>
+            {% empty %}
+                <p class="profile-empty">
+                    Belum ada catatan pribadi.
+                </p>
+            {% endfor %}
+        </section>
+    {% endif %}
+
 </div>
 {% endblock %}

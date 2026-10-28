@@ -112,32 +112,98 @@ def apply_contributor(request):
     return render(request, 'accounts/apply_contributor.html', {'form': form})
 
 @login_required
-@login_required
-def profile_view(request):
-    favorites = request.user.favorite_articles.select_related('article').all()
-    notes = request.user.personal_notes.select_related('article').all()[:10]
-    activities = request.user.activities.select_related('article').all()[:15]
-    stories = request.user.stories.all()[:5]
-
-    if request.method == 'POST':
-        form = ProfileUpdateForm(request.POST, request.FILES, instance=request.user)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Profil berhasil diperbarui!')
-            return redirect('profile')
+def profile_view(request, username=None):
+    # Profil sendiri jika username tidak diberikan,
+    # atau profil publik pengguna lain.
+    if username:
+        profile_user = get_object_or_404(Users, username=username)
     else:
-        form = ProfileUpdateForm(instance=request.user)
+        profile_user = request.user
 
-    published_count = request.user.articles.filter(status='approved').count() if request.user.status_kontributor == 'approved' else None
+    is_own_profile = profile_user.pk == request.user.pk
 
-    return render(request, 'accounts/profile.html', {
-        'favorites': favorites,
-        'notes': notes,
-        'activities': activities,
-        'stories': stories,
-        'form': form,
-        'published_count': published_count,
-    })
+    # Statistik follow
+    followers_count = Follow.objects.filter(
+        following=profile_user
+    ).count()
+
+    following_count = Follow.objects.filter(
+        follower=profile_user
+    ).count()
+
+    is_following = (
+        not is_own_profile
+        and Follow.objects.filter(
+            follower=request.user,
+            following=profile_user,
+        ).exists()
+    )
+
+    # Karya penulis yang sudah disetujui
+    published_articles = profile_user.articles.filter(
+        status='approved'
+    ).order_by('-pk')
+
+    showcase_articles = published_articles[:3]
+    published_count = published_articles.count()
+
+    # Data khusus profil sendiri
+    favorites = []
+    notes = []
+    activities = []
+    stories = []
+    form = None
+
+    if is_own_profile:
+        favorites = request.user.favorite_articles.select_related(
+            'article'
+        ).all()
+
+        notes = request.user.personal_notes.select_related(
+            'article'
+        ).all()[:10]
+
+        activities = request.user.activities.select_related(
+            'article'
+        ).all()[:15]
+
+        stories = request.user.stories.all()[:5]
+
+        if request.method == 'POST':
+            form = ProfileUpdateForm(
+                request.POST,
+                request.FILES,
+                instance=request.user,
+            )
+
+            if form.is_valid():
+                form.save()
+                messages.success(
+                    request,
+                    'Profil berhasil diperbarui!',
+                )
+                return redirect('profile')
+        else:
+            form = ProfileUpdateForm(instance=request.user)
+
+    return render(
+        request,
+        'accounts/profile.html',
+        {
+            'profile_user': profile_user,
+            'is_own_profile': is_own_profile,
+            'is_following': is_following,
+            'followers_count': followers_count,
+            'following_count': following_count,
+            'showcase_articles': showcase_articles,
+            'published_count': published_count,
+            'favorites': favorites,
+            'notes': notes,
+            'activities': activities,
+            'stories': stories,
+            'form': form,
+        },
+    )
 
 @admin_required
 def dashboard_view(request):
