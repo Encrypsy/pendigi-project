@@ -54,10 +54,10 @@
   </div>
 
   <div class="reader-body">
-    <aside class="reader-author-sidebar">      
+    <aside class="reader-author-sidebar">        
       <div class="reader-author-sticky">
 
-          <!-- Foto profil author yang bisa diklik -->
+          <!-- Foto profil author -->
           <a
               href="{% url 'public_profile' story.author.username %}"
               class="reader-author-profile-link"
@@ -76,7 +76,7 @@
               {% endif %}
           </a>
 
-          <!-- Username author yang bisa diklik -->
+          <!-- Username author -->
           <a
               href="{% url 'public_profile' story.author.username %}"
               class="reader-author-name reader-author-name-link"
@@ -85,27 +85,28 @@
           </a>
 
           <!-- Tombol follow -->
-          {% if user.is_authenticated and user.pk != story.author.pk %}
-              <form
-                  action="{% url 'toggle_follow' story.author.username %}"
-                  method="post"
-                  class="reader-follow-form"
-              >
-                  {% csrf_token %}
-
-                  <button
-                      type="submit"
-                      class="reader-follow-btn{% if is_following_author %} is-following{% endif %}"
+          {% if user.is_authenticated %}
+              {% if user.pk != story.author.pk %}
+                  <form
+                      action="{% url 'toggle_follow' story.author.username %}"
+                      method="post"
+                      class="reader-follow-form"
                   >
-                      {% if is_following_author %}
-                          ✓ Mengikuti
-                      {% else %}
-                          + Ikuti
-                      {% endif %}
-                  </button>
-              </form>
+                      {% csrf_token %}
 
-          {% elif not user.is_authenticated %}
+                      <button
+                          type="submit"
+                          class="reader-follow-btn{% if is_following_author %} is-following{% endif %}"
+                      >
+                          {% if is_following_author %}
+                              ✓ Mengikuti
+                          {% else %}
+                              + Ikuti
+                          {% endif %}
+                      </button>
+                  </form>
+              {% endif %}
+          {% else %}
               <a
                   href="{% url 'login' %}"
                   class="reader-follow-btn reader-follow-login"

@@ -195,82 +195,11 @@
     flex-shrink: 0;
 }
 
-.reader-author-sticky {
-    position: sticky;
-    top: 88px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-    text-align: center;
-}
-
-.reader-author-avatar {
-    width: 64px;
-    height: 64px;
-    border-radius: 50%;
-    object-fit: cover;
-}
-.reader-avatar-placeholder {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--brown);
-    color: #fff;
-    font-weight: 700;
-    font-size: 1.2rem;
-}
-.reader-author-name { font-size: 0.8rem; color: #8a8880; }
-
-.reader-follow-btn {
-    background: var(--brown);
-    color: #fff;
-    border: none;
-    border-radius: 20px;
-    padding: 8px 18px;
-    font-size: 0.8rem;
-    font-weight: 700;
-    cursor: pointer;
-    width: 100%;
-}
-.reader-follow-btn:hover { background: var(--brown-dark); }
-
-.reader-share-block {
-    margin-top: 8px;
-    padding-top: 12px;
-    border-top: 1px solid var(--divider);
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-}
-.reader-share-label { font-size: 0.75rem; color: #a09c92; text-transform: uppercase; letter-spacing: 0.04em; }
-
-.reader-share-icons { display: flex; gap: 8px; }
-.share-icon {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background: var(--paper);
-    border: 1px solid var(--divider);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--brown);
-    transition: all .15s ease;
-}
-.share-icon:hover { background: var(--brown); color: #fff; }
 
 @media (max-width: 700px) {
     .reader-body { flex-direction: column; }
     .reader-author-sidebar { width: 100%; }
     .reader-author-sticky { position: static; flex-direction: row; justify-content: center; flex-wrap: wrap; }
-}
-
-.reader-follow-btn.is-following {
-    background: #E8F0EE;
-    color: var(--ink-dark);
 }
 
 .like-btn {
@@ -288,35 +217,34 @@
 .like-btn-inline svg { width: 15px; height: 15px; }
 
 
-/* Area author pada halaman baca bab */
+/* Container author: semua elemen rata tengah */
 .reader-author-sticky {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 12px;
+    width: 100%;
+    text-align: center;
+    box-sizing: border-box;
 }
 
-/* Tautan foto profil */
+/* Link foto profil */
 .reader-author-profile-link {
-    display: inline-flex;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     text-decoration: none;
-    border-radius: 50%;
     flex-shrink: 0;
-}
-
-.reader-author-profile-link:focus-visible,
-.reader-author-name-link:focus-visible {
-    outline: 2px solid #a66b37;
-    outline-offset: 3px;
 }
 
 /* Foto profil */
 .reader-author-avatar {
+    display: block;
     width: 64px;
     height: 64px;
     border-radius: 50%;
     object-fit: cover;
-    display: block;
 }
 
 /* Avatar tanpa foto */
@@ -332,7 +260,10 @@
 
 /* Username author */
 .reader-author-name-link {
+    display: block;
+    width: 100%;
     color: #8b8175;
+    text-align: center;
     text-decoration: none;
     transition: color 0.2s ease;
 }
@@ -342,42 +273,41 @@
     text-decoration: underline;
 }
 
-/* Form follow */
+/* Form tombol follow */
 .reader-follow-form {
+    display: block;
     width: 100%;
-    margin: 0;
+    max-width: 160px;
+    margin: 4px auto 0;
 }
 
 /* Tombol follow */
 .reader-follow-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     width: 100%;
     min-height: 38px;
     padding: 9px 16px;
+    box-sizing: border-box;
     border: 1px solid #a66b37;
     border-radius: 8px;
     background: #a66b37;
     color: #fff;
-    font: inherit;
     font-size: 14px;
     font-weight: 600;
     text-align: center;
     text-decoration: none;
     cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    transition:
-        background 0.2s ease,
-        color 0.2s ease,
-        border-color 0.2s ease;
+    transition: background 0.2s ease, color 0.2s ease;
 }
 
 .reader-follow-btn:hover {
     background: #89572f;
-    border-color: #89572f;
+    color: #fff;
 }
 
-/* Status sudah mengikuti */
+/* Jika sudah mengikuti */
 .reader-follow-btn.is-following {
     background: #fffaf4;
     color: #805333;
@@ -386,9 +316,12 @@
 
 .reader-follow-btn.is-following:hover {
     background: #f3e6d8;
+    color: #805333;
 }
 
 /* Fokus keyboard */
+.reader-author-profile-link:focus-visible,
+.reader-author-name-link:focus-visible,
 .reader-follow-btn:focus-visible {
     outline: 2px solid #68432b;
     outline-offset: 3px;
