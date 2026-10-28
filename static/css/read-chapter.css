@@ -120,30 +120,6 @@
     padding: 0 16px;
 }
 
-.reader-author-sidebar {
-    width: 100px;
-    flex-shrink: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    text-align: center;
-}
-.reader-author-avatar {
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    object-fit: cover;
-}
-.reader-avatar-placeholder {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--brown);
-    color: #fff;
-    font-weight: 700;
-}
-.reader-author-name { font-size: 0.78rem; color: #8a8880; }
 
 .reader-main { flex: 1; min-width: 0; }
 
@@ -190,11 +166,6 @@
     .reader-author-sidebar { flex-direction: row; width: 100%; justify-content: center; }
 }
 
-.reader-author-sidebar {
-    width: 120px;
-    flex-shrink: 0;
-}
-
 
 @media (max-width: 700px) {
     .reader-body { flex-direction: column; }
@@ -217,14 +188,29 @@
 .like-btn-inline svg { width: 15px; height: 15px; }
 
 
-/* Container author: semua elemen rata tengah */
+/* =========================================
+   AUTHOR SIDEBAR — STICKY & CENTERED
+   ========================================= */
+
+.reader-author-sidebar {
+    width: 120px;
+    flex: 0 0 120px;
+    align-self: stretch;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    text-align: center;
+}
+
 .reader-author-sticky {
+    position: sticky;
+    top: 100px;
+    width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
     gap: 12px;
-    width: 100%;
     text-align: center;
     box-sizing: border-box;
 }
@@ -234,95 +220,151 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    text-decoration: none;
+    width: 64px;
+    height: 64px;
     flex-shrink: 0;
+    text-decoration: none;
 }
 
 /* Foto profil */
 .reader-author-avatar {
-    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     width: 64px;
     height: 64px;
     border-radius: 50%;
     object-fit: cover;
+    box-sizing: border-box;
 }
 
-/* Avatar tanpa foto */
+/* Placeholder ketika belum ada foto */
 .reader-avatar-placeholder {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #ead8c3;
-    color: #68432b;
+    background: var(--brown);
+    color: #fff;
     font-size: 22px;
     font-weight: 700;
 }
 
-/* Username author */
+/* Nama author */
 .reader-author-name-link {
     display: block;
     width: 100%;
-    color: #8b8175;
+    color: #8a8880;
+    font-size: 0.78rem;
     text-align: center;
     text-decoration: none;
-    transition: color 0.2s ease;
+    overflow-wrap: anywhere;
 }
 
 .reader-author-name-link:hover {
-    color: #a66b37;
+    color: var(--brown);
     text-decoration: underline;
 }
 
-/* Form tombol follow */
+/* Form follow */
 .reader-follow-form {
     display: block;
     width: 100%;
-    max-width: 160px;
-    margin: 4px auto 0;
+    margin: 0;
 }
 
-/* Tombol follow */
+/* Tombol follow dan login */
 .reader-follow-btn {
     display: flex;
     align-items: center;
     justify-content: center;
     width: 100%;
-    min-height: 38px;
-    padding: 9px 16px;
-    box-sizing: border-box;
-    border: 1px solid #a66b37;
-    border-radius: 8px;
-    background: #a66b37;
+    min-height: 36px;
+    padding: 8px 10px;
+    border: 1px solid var(--brown);
+    border-radius: 20px;
+    background: var(--brown);
     color: #fff;
-    font-size: 14px;
+    font-family: inherit;
+    font-size: 0.78rem;
     font-weight: 600;
+    line-height: 1.3;
     text-align: center;
     text-decoration: none;
     cursor: pointer;
+    box-sizing: border-box;
     transition: background 0.2s ease, color 0.2s ease;
 }
 
 .reader-follow-btn:hover {
-    background: #89572f;
+    background: var(--brown-dark);
     color: #fff;
 }
 
-/* Jika sudah mengikuti */
+/* Status sudah mengikuti */
 .reader-follow-btn.is-following {
-    background: #fffaf4;
-    color: #805333;
-    border-color: #dfc9b1;
+    background: #fff;
+    border-color: var(--divider);
+    color: var(--brown);
 }
 
 .reader-follow-btn.is-following:hover {
-    background: #f3e6d8;
-    color: #805333;
+    background: var(--paper);
+    color: var(--brown);
+}
+
+/* Label ketika membaca cerita sendiri */
+.reader-author-own-label {
+    display: block;
+    width: 100%;
+    color: #8a8880;
+    font-size: 0.72rem;
+    text-align: center;
 }
 
 /* Fokus keyboard */
 .reader-author-profile-link:focus-visible,
 .reader-author-name-link:focus-visible,
 .reader-follow-btn:focus-visible {
-    outline: 2px solid #68432b;
+    outline: 2px solid var(--brown);
     outline-offset: 3px;
+}
+
+/* =========================================
+   MOBILE
+   ========================================= */
+
+@media (max-width: 700px) {
+    .reader-body {
+        flex-direction: column;
+        gap: 24px;
+    }
+
+    .reader-author-sidebar {
+        width: 100%;
+        flex: 0 0 auto;
+        align-self: auto;
+        justify-content: center;
+    }
+
+    .reader-author-sticky {
+        position: static;
+        width: 100%;
+        max-width: 220px;
+        margin: 0 auto;
+        align-items: center;
+        text-align: center;
+    }
+
+    .reader-author-name-link {
+        text-align: center;
+    }
+
+    .reader-follow-form {
+        width: 100%;
+    }
+
+    .reader-follow-btn {
+        width: 100%;
+    }
+
+    .reader-main {
+        width: 100%;
+    }
 }

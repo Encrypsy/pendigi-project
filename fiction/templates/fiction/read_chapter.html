@@ -53,69 +53,70 @@
     </div>
   </div>
 
-  <div class="reader-body">
-    <aside class="reader-author-sidebar">        
-      <div class="reader-author-sticky">
+  <div class="reader-body"> 
+    <aside class="reader-author-sidebar">
+        <div class="reader-author-sticky">
 
-          <!-- Foto profil author -->
-          <a
-              href="{% url 'public_profile' story.author.username %}"
-              class="reader-author-profile-link"
-              aria-label="Lihat profil {{ story.author.username }}"
-          >
-              {% if story.author.profile_picture %}
-                  <img
-                      src="{{ story.author.profile_picture.url }}"
-                      class="reader-author-avatar"
-                      alt="Foto profil {{ story.author.username }}"
-                  >
-              {% else %}
-                  <div class="reader-author-avatar reader-avatar-placeholder">
-                      {{ story.author.username|first|upper }}
-                  </div>
-              {% endif %}
-          </a>
+            <!-- Foto profil menuju profil author -->
+            <a
+                href="{% url 'public_profile' story.author.username %}"
+                class="reader-author-profile-link"
+                aria-label="Lihat profil {{ story.author.username }}"
+            >
+                {% if story.author.profile_picture %}
+                    <img
+                        src="{{ story.author.profile_picture.url }}"
+                        class="reader-author-avatar"
+                        alt="Foto profil {{ story.author.username }}"
+                    >
+                {% else %}
+                    <div class="reader-author-avatar reader-avatar-placeholder">
+                        {{ story.author.username|first|upper }}
+                    </div>
+                {% endif %}
+            </a>
 
-          <!-- Username author -->
-          <a
-              href="{% url 'public_profile' story.author.username %}"
-              class="reader-author-name reader-author-name-link"
-          >
-              oleh {{ story.author.username }}
-          </a>
+            <!-- Username menuju profil author -->
+            <a
+                href="{% url 'public_profile' story.author.username %}"
+                class="reader-author-name reader-author-name-link"
+            >
+                oleh {{ story.author.username }}
+            </a>
 
-          <!-- Tombol follow -->
-          {% if user.is_authenticated %}
-              {% if user.pk != story.author.pk %}
-                  <form
-                      action="{% url 'toggle_follow' story.author.username %}"
-                      method="post"
-                      class="reader-follow-form"
-                  >
-                      {% csrf_token %}
+            <!-- Tombol follow -->
+            {% if user.is_authenticated %}
+                {% if user.pk != story.author.pk %}
+                    <form
+                        action="{% url 'toggle_follow' story.author.username %}"
+                        method="post"
+                        class="reader-follow-form"
+                    >
+                        {% csrf_token %}
+                        <button
+                            type="submit"
+                            class="reader-follow-btn{% if is_following_author %} is-following{% endif %}"
+                        >
+                            {% if is_following_author %}
+                                ✓ Mengikuti
+                            {% else %}
+                                + Ikuti
+                            {% endif %}
+                        </button>
+                    </form>
+                {% else %}
+                    <span class="reader-author-own-label">Penulis cerita</span>
+                {% endif %}
+            {% else %}
+                <a
+                    href="{% url 'login' %}"
+                    class="reader-follow-btn reader-follow-login"
+                >
+                    + Ikuti
+                </a>
+            {% endif %}
 
-                      <button
-                          type="submit"
-                          class="reader-follow-btn{% if is_following_author %} is-following{% endif %}"
-                      >
-                          {% if is_following_author %}
-                              ✓ Mengikuti
-                          {% else %}
-                              + Ikuti
-                          {% endif %}
-                      </button>
-                  </form>
-              {% endif %}
-          {% else %}
-              <a
-                  href="{% url 'login' %}"
-                  class="reader-follow-btn reader-follow-login"
-              >
-                  + Ikuti
-              </a>
-          {% endif %}
-
-      </div>
+        </div>
     </aside>
 
     <main class="reader-main">
