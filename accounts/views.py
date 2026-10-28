@@ -111,12 +111,15 @@ def apply_contributor(request):
 
     return render(request, 'accounts/apply_contributor.html', {'form': form})
 
+
 @login_required
 def profile_view(request, username=None):
-    # Profil sendiri jika username tidak diberikan,
-    # atau profil publik pengguna lain.
+    # Profil sendiri atau profil publik
     if username:
-        profile_user = get_object_or_404(Users, username=username)
+        profile_user = get_object_or_404(
+            Users,
+            username=username,
+        )
     else:
         profile_user = request.user
 
@@ -124,30 +127,30 @@ def profile_view(request, username=None):
 
     # Statistik follow
     followers_count = Follow.objects.filter(
-        following=profile_user
+        following=profile_user,
     ).count()
 
     following_count = Follow.objects.filter(
-        follower=profile_user
+        follower=profile_user,
     ).count()
 
-    is_following = (
-        not is_own_profile
-        and Follow.objects.filter(
+    is_following = False
+
+    if not is_own_profile:
+        is_following = Follow.objects.filter(
             follower=request.user,
             following=profile_user,
         ).exists()
-    )
 
-    # Karya penulis yang sudah disetujui
+    # Artikel yang sudah disetujui
     published_articles = profile_user.articles.filter(
-        status='approved'
+        status='approved',
     ).order_by('-pk')
 
     showcase_articles = published_articles[:3]
     published_count = published_articles.count()
 
-    # Data khusus profil sendiri
+    # Data profil sendiri
     favorites = []
     notes = []
     activities = []
@@ -156,15 +159,15 @@ def profile_view(request, username=None):
 
     if is_own_profile:
         favorites = request.user.favorite_articles.select_related(
-            'article'
+            'article',
         ).all()
 
         notes = request.user.personal_notes.select_related(
-            'article'
+            'article',
         ).all()[:10]
 
         activities = request.user.activities.select_related(
-            'article'
+            'article',
         ).all()[:15]
 
         stories = request.user.stories.all()[:5]
@@ -183,8 +186,11 @@ def profile_view(request, username=None):
                     'Profil berhasil diperbarui!',
                 )
                 return redirect('profile')
+
         else:
-            form = ProfileUpdateForm(instance=request.user)
+            form = ProfileUpdateForm(
+                instance=request.user,
+            )
 
     return render(
         request,
@@ -204,6 +210,7 @@ def profile_view(request, username=None):
             'form': form,
         },
     )
+
     
 
 @login_required
