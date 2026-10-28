@@ -1,0 +1,59 @@
+
+{% extends 'app_base.html' %}
+{% load static %}
+
+{% block title %}Edit Profil{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/forms.css' %}">
+<link rel="stylesheet" href="{% static 'css/profile.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="profile-page">
+    <div class="edit-profile-header">
+        <a href="{% url 'profile' %}" class="profile-see-all">
+            ← Kembali ke profil
+        </a>
+        <span class="profile-eyebrow">PENGATURAN AKUN</span>
+        <h1>Edit profil</h1>
+        <p>Perbarui foto dan informasi yang ingin kamu tampilkan.</p>
+    </div>
+
+    <section class="profile-section profile-panel">
+        <form
+            method="post"
+            enctype="multipart/form-data"
+            class="profile-form"
+        >
+            {% csrf_token %}
+
+            {% for field in form %}
+                <div class="edit-profile-field">
+                    <label for="{{ field.id_for_label }}">
+                        {{ field.label }}
+                    </label>
+                    {{ field }}
+
+                    {% if field.help_text %}
+                        <small>{{ field.help_text }}</small>
+                    {% endif %}
+
+                    {% for error in field.errors %}
+                        <small class="edit-profile-error">{{ error }}</small>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+
+            <div class="edit-profile-actions">
+                <a href="{% url 'profile' %}" class="profile-cancel-link">
+                    Batal
+                </a>
+                <button type="submit" class="profile-primary-button">
+                    Simpan perubahan
+                </button>
+            </div>
+        </form>
+    </section>
+</div>
+{% endblock %}
