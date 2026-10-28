@@ -1816,3 +1816,33 @@ body.crop-modal-open {
         padding: 0 10px;
     }
 }
+
+.profile-banner {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    border-radius: 22px 22px 0 0;
+    background: #f1e2d0;
+}
+
+.profile-banner-image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profile-banner-placeholder {
+    display: flex;
+    align-items: flex-start;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    padding: 30px 35px;
+    background: linear-gradient(135deg, #f2e3d1, #ead1b5);
+    color: #80552f;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 2px;
+}

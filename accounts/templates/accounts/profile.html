@@ -14,16 +14,17 @@
 
     <section class="profile-hero">
         <div class="profile-banner">
-            <span class="banner-decoration banner-decoration-one"></span>
-            <span class="banner-decoration banner-decoration-two"></span>
-
-            <span class="profile-banner-label">
-                {% if profile_user.status_kontributor == 'approved' %}
-                    PENULIS PENA DIGITAL
-                {% else %}
-                    PEMBACA PENA DIGITAL
-                {% endif %}
-            </span>
+            {% if user.banner_picture %}
+                <img
+                    src="{{ user.banner_picture.url }}"
+                    alt="Banner profil {{ user.username }}"
+                    class="profile-banner-image"
+                >
+            {% else %}
+                <div class="profile-banner-placeholder">
+                    <span>PENULIS PENA DIGITAL</span>
+                </div>
+            {% endif %}
         </div>
 
         <div class="profile-hero-content">
