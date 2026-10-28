@@ -217,7 +217,10 @@ def edit_profile_view(request):
 
         if form.is_valid():
             form.save()
-            messages.success(request, 'Profil berhasil diperbarui!')
+            messages.success(
+                request,
+                'Profil berhasil diperbarui!',
+            )
             return redirect('profile')
     else:
         form = ProfileUpdateForm(instance=request.user)
