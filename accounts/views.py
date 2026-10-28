@@ -143,17 +143,47 @@ def profile_view(request, username=None):
         ).exists()
 
     # Artikel yang sudah disetujui
-    published_articles = profile_user.articles.filter(
-        status='approved',
-    ).order_by('-pk')
+    published_articles = list(
+        profile_user.articles.filter(
+            status='approved',
+        ).select_related(
+            'category',
+        ).order_by('-pk')
+    )
 
-    showcase_articles = published_articles[:3]
-    published_count = published_articles.count()
+    # Cerita fiksi yang sudah disetujui
+    published_stories = list(
+        profile_user.stories.filter(
+            status='approved',
+        ).order_by('-pk')
+    )
 
-    # Data profil sendiri
+    # Tambahkan tipe karya agar template dapat membedakan
+    for article in published_articles:
+        article.work_type = 'article'
+        article.work_date = getattr(article, 'created_at', None)
+
+    for story in published_stories:
+        story.work_type = 'story'
+        story.work_date = getattr(story, 'created_at', None)
+
+    # Gabungkan karya, urutkan dari yang terbaru
+    all_works = published_articles + published_stories
+
+    all_works.sort(
+        key=lambda work: (
+            work.work_date is not None,
+            work.work_date if work.work_date is not None else work.pk,
+            work.pk,
+        ),
+        reverse=True,
+    )
+
+    showcase_works = all_works[:3]
+    published_count = len(all_works)
+
+    # Data yang hanya diperlukan di profil sendiri
     favorites = []
-    notes = []
-    activities = []
     stories = []
     form = None
 
@@ -161,16 +191,6 @@ def profile_view(request, username=None):
         favorites = request.user.favorite_articles.select_related(
             'article',
         ).all()
-
-        notes = request.user.personal_notes.select_related(
-            'article',
-        ).all()[:10]
-
-        activities = request.user.activities.select_related(
-            'article',
-        ).all()[:15]
-
-        stories = request.user.stories.all()[:5]
 
         if request.method == 'POST':
             form = ProfileUpdateForm(
@@ -186,7 +206,6 @@ def profile_view(request, username=None):
                     'Profil berhasil diperbarui!',
                 )
                 return redirect('profile')
-
         else:
             form = ProfileUpdateForm(
                 instance=request.user,
@@ -201,12 +220,9 @@ def profile_view(request, username=None):
             'is_following': is_following,
             'followers_count': followers_count,
             'following_count': following_count,
-            'showcase_articles': showcase_articles,
+            'showcase_works': showcase_works,
             'published_count': published_count,
             'favorites': favorites,
-            'notes': notes,
-            'activities': activities,
-            'stories': stories,
             'form': form,
         },
     )
