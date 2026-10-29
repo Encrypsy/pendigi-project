@@ -77,7 +77,6 @@ class ContributorApplicationForm(forms.ModelForm):
             'full_name',
             'address',
             'occupation',
-            'gender',
             'bio',
             'portfolio_link',
         ]

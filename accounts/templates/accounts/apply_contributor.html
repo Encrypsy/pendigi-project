@@ -92,7 +92,7 @@
                 <h3>Identitas pribadi</h3>
 
                 {% for field in form %}
-                    {% if field.name == 'nik' or field.name == 'full_name' or field.name == 'address' or field.name == 'occupation' or field.name == 'gender' %}
+                    {% if field.name == 'nik' or field.name == 'full_name' or field.name == 'address' or field.name == 'occupation' %}
                         <div class="form-field {% if field.errors %}has-error{% endif %}">
 
                             <label for="{{ field.id_for_label }}">
