@@ -33,6 +33,13 @@ class Users(AbstractUser):
         blank=True,
         null=True,
     )
+    publisher_id = models.CharField(
+        max_length=20,
+        unique=True,
+        null=True,
+        blank=True,
+        verbose_name='ID Publisher',
+    )
 
     def __str__(self):
         return self.username

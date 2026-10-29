@@ -151,6 +151,9 @@ class Activity(models.Model):
         LIKE = "like", "Konten disukai"
         COMMENT_REPLY = "comment_reply", "Balasan komentar"
         NEW_CHAPTER = "new_chapter", "Bab baru"
+        
+        CONTRIBUTOR_APPROVED = "contributor_approved", "Kontributor disetujui"
+        CONTRIBUTOR_REJECTED = "contributor_rejected", "Pengajuan kontributor ditolak"
 
 
     # User yang menerima notifikasi

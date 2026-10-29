@@ -1,24 +1,24 @@
 from django.contrib import admin
+
+from accounts.services import approve_contributor_application, reject_contributor_application
 from .models import Users, ContributorApplication, StatusKontributor
 
 @admin.action(description='Setujui pengajuan terpilih')
 def approve_applications(modeladmin, request, queryset):
     for application in queryset:
-        application.status = StatusKontributor.APPROVED
-        application.save(update_fields=['status'])
-
-        application.user.status_kontributor = StatusKontributor.APPROVED
-        application.user.save(update_fields=['status_kontributor'])
+        approve_contributor_application(
+            application_id=application.pk,
+            actor=request.user,
+        )
 
 
 @admin.action(description='Tolak pengajuan terpilih')
 def reject_applications(modeladmin, request, queryset):
     for application in queryset:
-        application.status = StatusKontributor.REJECTED
-        application.save(update_fields=['status'])
-
-        application.user.status_kontributor = StatusKontributor.REJECTED
-        application.user.save(update_fields=['status_kontributor'])
+        reject_contributor_application(
+            application_id=application.pk,
+            actor=request.user,
+        )
 
 
 @admin.register(ContributorApplication)

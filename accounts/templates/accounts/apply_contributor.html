@@ -1,50 +1,138 @@
+
 {% extends 'app_base.html' %}
 {% load static %}
+
 {% block title %}Jadi Kontributor{% endblock %}
+
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/forms.css' %}">
-    <link rel="stylesheet" href="{% static 'css/contributor.css' %}">
+<link rel="stylesheet" href="{% static 'css/forms.css' %}">
+<link rel="stylesheet" href="{% static 'css/contributor.css' %}">
 {% endblock %}
 
 {% block content %}
 <div class="contributor-wrap">
-    <div class="info-panel">
-        <span class="eyebrow">Bergabung sebagai Penulis</span>
-        <h1>Bagikan tulisanmu ke ribuan pembaca</h1>
-        <p class="lead">Jadi author Pena Digital dan mulai publikasikan artikel, ulasan, atau cerita kamu.</p>
+    <section class="info-panel">
+        <span class="eyebrow">BERGABUNG SEBAGAI PENULIS</span>
+
+        <h1>Bagikan tulisanmu kepada lebih banyak pembaca.</h1>
+
+        <p class="lead">
+            Bergabunglah dengan Pena Digital dan mulai bangun
+            identitasmu sebagai penulis.
+        </p>
 
         <div class="benefit">
             <div class="benefit-icon">✓</div>
             <div class="benefit-text">
-                <strong>Jangkauan luas</strong>
-                Artikel kamu tampil di kategori Hot News, Fiksi, dan lainnya
+                <strong>Jangkauan lebih luas</strong>
+                <p>Publikasikan artikel, ulasan, dan cerita melalui Pena Digital.</p>
             </div>
         </div>
+
         <div class="benefit">
             <div class="benefit-icon">✓</div>
             <div class="benefit-text">
-                <strong>Proses simpel</strong>
-                Cukup isi bio dan link portofolio, kami tinjau cepat
+                <strong>Proses transparan</strong>
+                <p>Pantau status pengajuan setelah tim admin melakukan peninjauan.</p>
             </div>
         </div>
+
         <div class="benefit">
             <div class="benefit-icon">✓</div>
             <div class="benefit-text">
-                <strong>Statistik pribadi</strong>
-                Pantau rating dan komentar dari tiap artikelmu
+                <strong>Profil penulis</strong>
+                <p>Bangun profil dan tunjukkan karya terbaikmu kepada pembaca.</p>
             </div>
         </div>
-    </div>
+    </section>
 
-    <div class="form-panel">
-        <h2>Daftar Sebagai Penulis</h2>
-        <p class="auth-subtitle">Isi data di bawah, tim kami akan meninjau pengajuanmu</p>
+    <section class="form-panel">
+        <span class="eyebrow">FORMULIR PENDAFTARAN</span>
+        <h2>Daftar sebagai kontributor</h2>
 
-        <form method="post" class="auth-form">
+        <p class="auth-subtitle">
+            Lengkapi data berikut dengan benar. Pengajuanmu akan ditinjau admin.
+        </p>
+
+        {% if messages %}
+            <div class="form-messages">
+                {% for message in messages %}
+                    <div class="form-message {{ message.tags }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <form method="post" class="auth-form" novalidate>
             {% csrf_token %}
-            {{ form.as_p }}
-            <button type="submit">Kirim Pengajuan</button>
+
+            {% if form.non_field_errors %}
+                <div class="form-error">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            <div class="form-section">
+                <h3>Identitas pribadi</h3>
+
+                {% for field in form %}
+                    {% if field.name == 'nik' or field.name == 'full_name' or field.name == 'address' or field.name == 'occupation' or field.name == 'gender' or field.name == 'email' %}
+                        <div class="form-field {% if field.errors %}has-error{% endif %}">
+                            <label for="{{ field.id_for_label }}">
+                                {{ field.label }}
+                                <span aria-hidden="true">*</span>
+                            </label>
+
+                            {{ field }}
+
+                            {% if field.help_text %}
+                                <small>{{ field.help_text }}</small>
+                            {% endif %}
+
+                            {% for error in field.errors %}
+                                <small class="field-error">{{ error }}</small>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+
+            <div class="form-section">
+                <h3>Profil penulis</h3>
+
+                {% for field in form %}
+                    {% if field.name == 'bio' or field.name == 'portfolio_link' %}
+                        <div class="form-field {% if field.errors %}has-error{% endif %}">
+                            <label for="{{ field.id_for_label }}">
+                                {{ field.label }}
+                                {% if field.field.required %}
+                                    <span aria-hidden="true">*</span>
+                                {% endif %}
+                            </label>
+
+                            {{ field }}
+
+                            {% if field.help_text %}
+                                <small>{{ field.help_text }}</small>
+                            {% endif %}
+
+                            {% for error in field.errors %}
+                                <small class="field-error">{{ error }}</small>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+
+            <p class="form-disclaimer">
+                Pastikan data yang kamu masukkan benar sebelum mengirim pengajuan.
+            </p>
+
+            <button type="submit" class="submit-btn">
+                Kirim pengajuan
+            </button>
         </form>
-    </div>
+    </section>
 </div>
 {% endblock %}

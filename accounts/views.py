@@ -4,6 +4,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db import models
 from django.shortcuts import get_object_or_404, render, redirect
+
+from accounts.services import approve_contributor_application, reject_contributor_application
 from .forms import AdminUserEditForm, RegisterForm, ContributorApplicationForm, ProfileUpdateForm
 from .models import StatusKontributor, ContributorApplication, Users
 from .decorators import admin_required
@@ -599,28 +601,42 @@ def admin_pending_contributors(request):
 @admin_required
 @require_POST
 def admin_approve_contributor(request, pk):
-    application = get_object_or_404(ContributorApplication, pk=pk)
-    application.status = StatusKontributor.APPROVED
-    application.save()
+    application = get_object_or_404(
+        ContributorApplication,
+        pk=pk,
+    )
 
-    application.user.status_kontributor = StatusKontributor.APPROVED
-    application.user.save()
+    approve_contributor_application(
+        application_id=application.pk,
+        actor=request.user,
+    )
 
-    messages.success(request, f'{application.user.username} disetujui sebagai kontributor.')
+    messages.success(
+        request,
+        f'{application.user.username} disetujui sebagai kontributor.',
+    )
+
     return redirect('admin_pending_contributors')
 
 
 @admin_required
 @require_POST
 def admin_reject_contributor(request, pk):
-    application = get_object_or_404(ContributorApplication, pk=pk)
-    application.status = StatusKontributor.REJECTED
-    application.save()
+    application = get_object_or_404(
+        ContributorApplication,
+        pk=pk,
+    )
 
-    application.user.status_kontributor = StatusKontributor.REJECTED
-    application.user.save()
+    reject_contributor_application(
+        application_id=application.pk,
+        actor=request.user,
+    )
 
-    messages.success(request, f'Pengajuan {application.user.username} ditolak.')
+    messages.success(
+        request,
+        f'Pengajuan {application.user.username} ditolak.',
+    )
+
     return redirect('admin_pending_contributors')
 
 
