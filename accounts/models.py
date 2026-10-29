@@ -36,29 +36,92 @@ class Users(AbstractUser):
 
     def __str__(self):
         return self.username
-
-
+    
 class ContributorApplication(models.Model):
+    class Gender(models.TextChoices):
+        MALE = 'male', 'Laki-laki'
+        FEMALE = 'female', 'Perempuan'
+
     user = models.ForeignKey(
-        Users, 
-        on_delete=models.CASCADE, 
-        related_name='contributor_applications'
+        Users,
+        on_delete=models.CASCADE,
+        related_name='contributor_applications',
     )
-    bio = models.TextField(null=True, blank=True)
-    portfolio_link = models.URLField()
+
+    # Data identitas
+    nik = models.CharField(
+        max_length=16,
+        verbose_name='NIK',
+        blank=True,
+        default='',
+    )
+
+    full_name = models.CharField(
+        max_length=150,
+        verbose_name='Nama lengkap',
+        blank=True,
+        default='',
+    )
+
+    address = models.TextField(
+        verbose_name='Alamat',
+        blank=True,
+        default='',
+    )
+
+    occupation = models.CharField(
+        max_length=100,
+        verbose_name='Pekerjaan',
+        blank=True,
+        default='',
+    )
+
+    gender = models.CharField(
+        max_length=10,
+        choices=Gender.choices,
+        verbose_name='Jenis kelamin',
+        blank=True,
+        default='',
+    )
+
+    email = models.EmailField(
+        verbose_name='Email',
+        blank=True,
+        default='',
+    )
+
+    # Data profil penulis
+    bio = models.TextField(
+        verbose_name='Bio',
+        null=True,
+        blank=True,
+        default='',
+    )
+    portfolio_link = models.URLField(
+        verbose_name='Link portofolio',
+    )
+
+    # Moderasi pengajuan
     status = models.CharField(
-        max_length=20, 
-        choices=StatusKontributor.choices, 
-        default=StatusKontributor.PENDING
+        max_length=20,
+        choices=StatusKontributor.choices,
+        default=StatusKontributor.PENDING,
     )
-    admin_notes = models.TextField(null=True, blank=True)
-    submitted_at = models.DateTimeField(auto_now_add=True)
+    admin_notes = models.TextField(
+        null=True,
+        blank=True,
+    )
+    submitted_at = models.DateTimeField(
+        auto_now_add=True,
+    )
 
     class Meta:
         ordering = ['-submitted_at']
+        verbose_name = 'Pengajuan Kontributor'
+        verbose_name_plural = 'Pengajuan Kontributor'
 
     def __str__(self):
-        return f'{self.user.username} - {self.status}'
+        return f'{self.full_name} - {self.status}'
 
 class Follow(models.Model):
     follower = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='following')

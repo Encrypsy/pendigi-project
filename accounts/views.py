@@ -103,7 +103,6 @@ def register_view(request):
         form = RegisterForm()
     return render(request, 'accounts/register.html', {'form': form})
 
-
 @login_required
 def apply_contributor(request):
     if request.user.status_kontributor == StatusKontributor.APPROVED:
@@ -111,47 +110,47 @@ def apply_contributor(request):
         return redirect('articles:article_list')
 
     if request.user.status_kontributor == StatusKontributor.PENDING:
-        messages.info(request, 'Pengajuan kamu masih menunggu verifikasi admin.')
+        messages.info(
+            request,
+            'Pengajuan kamu masih menunggu verifikasi admin.',
+        )
         return redirect('articles:article_list')
 
     if request.method == 'POST':
         form = ContributorApplicationForm(request.POST)
+
         if form.is_valid():
             application = form.save(commit=False)
             application.user = request.user
             application.status = StatusKontributor.PENDING
             application.save()
-            
+
             notify_admins(
                 actor=request.user,
-                message=f"{request.user.username} mengajukan diri sebagai kontributor.",
+                message=(
+                    f'{application.full_name} mengajukan diri '
+                    'sebagai kontributor.'
+                ),
                 action_type=Activity.ActionType.CONTRIBUTOR_APPLICATION,
             )
-            
-            admin_users = get_user_model().objects.filter(
-                is_superuser=True
-            )
-
-            for admin in admin_users:
-                Activity.objects.create(
-                    recipient=admin,
-                    actor=request.user,
-                    action_type=Activity.ActionType.CONTRIBUTOR_APPLICATION,
-                    message=(
-                        f'{request.user.username} mengajukan diri '
-                        'sebagai kontributor.'
-                    ),
-                )
 
             request.user.status_kontributor = StatusKontributor.PENDING
-            request.user.save()
+            request.user.save(update_fields=['status_kontributor'])
 
-            messages.success(request, 'Pengajuan terkirim! Menunggu verifikasi admin.')
+            messages.success(
+                request,
+                'Pengajuan berhasil dikirim! '
+                'Silakan tunggu verifikasi admin.',
+            )
             return redirect('articles:article_list')
     else:
         form = ContributorApplicationForm()
 
-    return render(request, 'accounts/apply_contributor.html', {'form': form})
+    return render(
+        request,
+        'accounts/apply_contributor.html',
+        {'form': form},
+    )
 
 
 @login_required
