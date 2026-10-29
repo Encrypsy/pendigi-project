@@ -11,6 +11,8 @@
 
 {% block content %}
 <div class="contributor-wrap">
+
+    <!-- Panel informasi -->
     <section class="info-panel">
         <span class="eyebrow">BERGABUNG SEBAGAI PENULIS</span>
 
@@ -25,7 +27,10 @@
             <div class="benefit-icon">✓</div>
             <div class="benefit-text">
                 <strong>Jangkauan lebih luas</strong>
-                <p>Publikasikan artikel, ulasan, dan cerita melalui Pena Digital.</p>
+                <p>
+                    Publikasikan artikel, ulasan, dan cerita
+                    melalui Pena Digital.
+                </p>
             </div>
         </div>
 
@@ -33,7 +38,10 @@
             <div class="benefit-icon">✓</div>
             <div class="benefit-text">
                 <strong>Proses transparan</strong>
-                <p>Pantau status pengajuan setelah tim admin melakukan peninjauan.</p>
+                <p>
+                    Pantau status pengajuan setelah admin
+                    melakukan peninjauan.
+                </p>
             </div>
         </div>
 
@@ -41,17 +49,23 @@
             <div class="benefit-icon">✓</div>
             <div class="benefit-text">
                 <strong>Profil penulis</strong>
-                <p>Bangun profil dan tunjukkan karya terbaikmu kepada pembaca.</p>
+                <p>
+                    Bangun profil dan tunjukkan karya terbaikmu
+                    kepada pembaca.
+                </p>
             </div>
         </div>
     </section>
 
+    <!-- Panel formulir -->
     <section class="form-panel">
         <span class="eyebrow">FORMULIR PENDAFTARAN</span>
+
         <h2>Daftar sebagai penulis</h2>
 
         <p class="auth-subtitle">
-            Lengkapi data berikut dengan benar. Pengajuanmu akan ditinjau admin.
+            Lengkapi data berikut dengan benar.
+            Pengajuanmu akan ditinjau oleh admin.
         </p>
 
         {% if messages %}
@@ -73,41 +87,20 @@
                 </div>
             {% endif %}
 
+            <!-- Identitas pribadi -->
             <div class="form-section">
                 <h3>Identitas pribadi</h3>
 
                 {% for field in form %}
-                    {% if field.name == 'nik' or field.name == 'full_name' or field.name == 'address' or field.name == 'occupation' or field.name == 'gender' or field.name == 'email' %}
+                    {% if field.name == 'nik' or field.name == 'full_name' or field.name == 'address' or field.name == 'occupation' or field.name == 'gender' %}
                         <div class="form-field {% if field.errors %}has-error{% endif %}">
-                            <label for="{{ field.id_for_label }}">
-                                {{ field.label }}
-                                <span aria-hidden="true">*</span>
-                            </label>
 
-                            {{ field }}
-
-                            {% if field.help_text %}
-                                <small>{{ field.help_text }}</small>
-                            {% endif %}
-
-                            {% for error in field.errors %}
-                                <small class="field-error">{{ error }}</small>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-                {% endfor %}
-            </div>
-
-            <div class="form-section">
-                <h3>Profil penulis</h3>
-
-                {% for field in form %}
-                    {% if field.name == 'bio' or field.name == 'portfolio_link' %}
-                        <div class="form-field {% if field.errors %}has-error{% endif %}">
                             <label for="{{ field.id_for_label }}">
                                 {{ field.label }}
                                 {% if field.field.required %}
                                     <span aria-hidden="true">*</span>
+                                {% else %}
+                                    <span class="optional-label">(Opsional)</span>
                                 {% endif %}
                             </label>
 
@@ -118,15 +111,69 @@
                             {% endif %}
 
                             {% for error in field.errors %}
-                                <small class="field-error">{{ error }}</small>
+                                <small class="field-error">
+                                    {{ error }}
+                                </small>
                             {% endfor %}
+
+                        </div>
+                    {% endif %}
+                {% endfor %}
+
+                <!-- Email dari akun terdaftar -->
+                <div class="form-field">
+                    <label for="account-email">
+                        Email akun
+                    </label>
+
+                    <input
+                        id="account-email"
+                        type="email"
+                        value="{{ request.user.email }}"
+                        readonly
+                        aria-describedby="email-help"
+                    >
+
+                    <small id="email-help">
+                        Email diambil otomatis dari akun yang sedang login.
+                    </small>
+                </div>
+            </div>
+
+            <!-- Profil penulis -->
+            <div class="form-section">
+                <h3>Profil penulis</h3>
+
+                {% for field in form %}
+                    {% if field.name == 'bio' or field.name == 'portfolio_link' %}
+                        <div class="form-field {% if field.errors %}has-error{% endif %}">
+
+                            <label for="{{ field.id_for_label }}">
+                                {{ field.label }}
+                                <span class="optional-label">(Opsional)</span>
+                            </label>
+
+                            {{ field }}
+
+                            {% if field.help_text %}
+                                <small>{{ field.help_text }}</small>
+                            {% endif %}
+
+                            {% for error in field.errors %}
+                                <small class="field-error">
+                                    {{ error }}
+                                </small>
+                            {% endfor %}
+
                         </div>
                     {% endif %}
                 {% endfor %}
             </div>
 
             <p class="form-disclaimer">
-                Pastikan data yang kamu masukkan benar sebelum mengirim pengajuan.
+                Kolom bertanda <span aria-hidden="true">*</span> wajib diisi.
+                Pastikan data identitas yang kamu masukkan benar sebelum
+                mengirim pengajuan.
             </p>
 
             <button type="submit" class="submit-btn">
@@ -134,5 +181,6 @@
             </button>
         </form>
     </section>
+
 </div>
 {% endblock %}

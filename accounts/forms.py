@@ -68,6 +68,7 @@ class RegisterForm(UserCreationForm):
             field.help_text = ''
         self.fields['profile_picture'].required = False
 
+
 class ContributorApplicationForm(forms.ModelForm):
     class Meta:
         model = ContributorApplication
@@ -77,7 +78,6 @@ class ContributorApplicationForm(forms.ModelForm):
             'address',
             'occupation',
             'gender',
-            'email',
             'bio',
             'portfolio_link',
         ]
@@ -85,12 +85,11 @@ class ContributorApplicationForm(forms.ModelForm):
         labels = {
             'nik': 'NIK',
             'full_name': 'Nama lengkap',
-            'address': 'Alamat lengkap',
-            'occupation': 'Pekerjaan',
-            'gender': 'Jenis kelamin',
-            'email': 'Email aktif',
-            'bio': 'Bio penulis',
-            'portfolio_link': 'Link portofolio',
+            'address': 'Alamat lengkap (opsional)',
+            'occupation': 'Pekerjaan (opsional)',
+            'gender': 'Jenis kelamin (opsional)',
+            'bio': 'Bio penulis (opsional)',
+            'portfolio_link': 'Link portofolio (opsional)',
         }
 
         widgets = {
@@ -99,34 +98,35 @@ class ContributorApplicationForm(forms.ModelForm):
                 'inputmode': 'numeric',
                 'maxlength': '16',
                 'autocomplete': 'off',
+                'required': True,
             }),
             'full_name': forms.TextInput(attrs={
                 'placeholder': 'Masukkan nama lengkap',
                 'autocomplete': 'name',
+                'required': True,
             }),
             'address': forms.Textarea(attrs={
                 'rows': 3,
-                'placeholder': 'Masukkan alamat lengkap',
+                'placeholder': 'Masukkan alamat lengkap (opsional)',
             }),
             'occupation': forms.TextInput(attrs={
                 'placeholder': 'Contoh: Pelajar, Mahasiswa, Karyawan',
             }),
             'gender': forms.Select(),
-            'email': forms.EmailInput(attrs={
-                'placeholder': 'nama@email.com',
-                'autocomplete': 'email',
-            }),
             'bio': forms.Textarea(attrs={
                 'rows': 4,
-                'placeholder': 'Ceritakan latar belakang dan minat menulismu...',
+                'placeholder': 'Ceritakan minat menulismu (opsional)',
             }),
             'portfolio_link': forms.URLInput(attrs={
-                'placeholder': 'https://contoh.com/karya',
+                'placeholder': 'https://contoh.com/karya (opsional)',
             }),
         }
 
     def clean_nik(self):
-        nik = self.cleaned_data['nik'].strip()
+        nik = self.cleaned_data.get('nik', '').strip()
+
+        if not nik:
+            raise forms.ValidationError('NIK wajib diisi.')
 
         if not re.fullmatch(r'\d{16}', nik):
             raise forms.ValidationError(
@@ -135,8 +135,19 @@ class ContributorApplicationForm(forms.ModelForm):
 
         return nik
 
+    def clean_full_name(self):
+        full_name = self.cleaned_data.get('full_name', '').strip()
+
+        if not full_name:
+            raise forms.ValidationError('Nama lengkap wajib diisi.')
+
+        return full_name
+
     def clean_portfolio_link(self):
-        link = self.cleaned_data['portfolio_link'].strip()
+        link = (self.cleaned_data.get('portfolio_link') or '').strip()
+
+        if not link:
+            return ''
 
         if not link.startswith(('http://', 'https://')):
             raise forms.ValidationError(
@@ -144,6 +155,7 @@ class ContributorApplicationForm(forms.ModelForm):
             )
 
         return link
+
 
 class ProfileUpdateForm(forms.ModelForm):
     class Meta:

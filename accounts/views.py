@@ -124,6 +124,7 @@ def apply_contributor(request):
         if form.is_valid():
             application = form.save(commit=False)
             application.user = request.user
+            application.email = request.user.email
             application.status = StatusKontributor.PENDING
             application.save()
 

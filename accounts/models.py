@@ -59,15 +59,11 @@ class ContributorApplication(models.Model):
     nik = models.CharField(
         max_length=16,
         verbose_name='NIK',
-        blank=True,
-        default='',
     )
 
     full_name = models.CharField(
         max_length=150,
         verbose_name='Nama lengkap',
-        blank=True,
-        default='',
     )
 
     address = models.TextField(
@@ -97,15 +93,16 @@ class ContributorApplication(models.Model):
         default='',
     )
 
-    # Data profil penulis
     bio = models.TextField(
         verbose_name='Bio',
-        null=True,
         blank=True,
         default='',
     )
+
     portfolio_link = models.URLField(
         verbose_name='Link portofolio',
+        blank=True,
+        default='',
     )
 
     # Moderasi pengajuan
