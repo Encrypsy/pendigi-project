@@ -255,17 +255,60 @@
                         </span>
                     </div>
                 </header>
-
+    
                 <div class="contributor-applicant-body">
                     <section class="contributor-field">
-                        <h2 class="contributor-field-label">Bio</h2>
+                        <h2 class="contributor-field-label">Nama lengkap</h2>
+                        <p class="contributor-bio">
+                            {{ application.full_name|default:"Tidak diisi" }}
+                        </p>
+                    </section>
+
+                    <section class="contributor-field">
+                        <h2 class="contributor-field-label">NIK</h2>
+                        <p class="contributor-bio">
+                            {{ application.nik|default:"Tidak diisi" }}
+                        </p>
+                    </section>
+
+                    <section class="contributor-field">
+                        <h2 class="contributor-field-label">Alamat</h2>
+                        <p class="contributor-bio">
+                            {{ application.address|default:"Tidak diisi" }}
+                        </p>
+                    </section>
+
+                    <section class="contributor-field">
+                        <h2 class="contributor-field-label">Pekerjaan</h2>
+                        <p class="contributor-bio">
+                            {{ application.occupation|default:"Tidak diisi" }}
+                        </p>
+                    </section>
+
+                    <section class="contributor-field">
+                        <h2 class="contributor-field-label">Jenis kelamin</h2>
+                        <p class="contributor-bio">
+                            {{ application.get_gender_display|default:"Tidak diisi" }}
+                        </p>
+                    </section>
+
+                    <section class="contributor-field">
+                        <h2 class="contributor-field-label">Email</h2>
+                        <p class="contributor-bio">
+                            {{ application.email|default:"Tidak diisi" }}
+                        </p>
+                    </section>
+
+                    <section class="contributor-field">
+                        <h2 class="contributor-field-label">Bio penulis</h2>
                         <p class="contributor-bio">
                             {{ application.bio|default:"Tidak diisi" }}
                         </p>
                     </section>
 
                     <section class="contributor-field">
-                        <h2 class="contributor-field-label">Link Portofolio</h2>
+                        <h2 class="contributor-field-label">Link portofolio</h2>
+
                         {% if application.portfolio_link %}
                             <a
                                 href="{{ application.portfolio_link }}"
@@ -273,7 +316,7 @@
                                 rel="noopener noreferrer"
                                 class="contributor-portfolio-link"
                             >
-                                {{ application.portfolio_link }}
+                                Lihat portofolio
                             </a>
                         {% else %}
                             <p class="contributor-bio">Tidak disertakan</p>
@@ -287,7 +330,11 @@
                         method="post"
                     >
                         {% csrf_token %}
-                        <button type="submit" class="contributor-btn-approve">
+                        <button
+                            type="submit"
+                            class="contributor-btn-approve"
+                            onclick="return confirm('Yakin ingin menyetujui pengajuan ini?')"
+                        >
                             Approve
                         </button>
                     </form>
@@ -297,7 +344,11 @@
                         method="post"
                     >
                         {% csrf_token %}
-                        <button type="submit" class="contributor-btn-reject">
+                        <button
+                            type="submit"
+                            class="contributor-btn-reject"
+                            onclick="return confirm('Yakin ingin menolak pengajuan ini?')"
+                        >
                             Reject
                         </button>
                     </form>
