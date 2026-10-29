@@ -472,3 +472,75 @@
         border-radius: 14px;
     }
 }
+
+
+/* Fix layout halaman pengajuan kontributor */
+
+.contributor-wrap {
+    box-sizing: border-box;
+    width: min(1120px, calc(100% - 40px));
+    margin: 48px auto;
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    align-items: stretch;
+    gap: 32px;
+}
+
+.contributor-wrap *,
+.contributor-wrap *::before,
+.contributor-wrap *::after {
+    box-sizing: border-box;
+}
+
+.contributor-wrap .info-panel,
+.contributor-wrap .form-panel {
+    min-width: 0;
+    width: 100%;
+}
+
+.contributor-wrap .info-panel {
+    align-self: stretch;
+    padding: 32px;
+    border-radius: 16px;
+    overflow-wrap: anywhere;
+}
+
+.contributor-wrap .form-panel {
+    padding: 32px;
+    overflow: hidden;
+}
+
+.contributor-wrap .form-field input,
+.contributor-wrap .form-field textarea,
+.contributor-wrap .form-field select {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+}
+
+@media (max-width: 800px) {
+    .contributor-wrap {
+        width: calc(100% - 32px);
+        grid-template-columns: minmax(0, 1fr);
+        gap: 24px;
+        margin: 24px auto;
+    }
+
+    .contributor-wrap .info-panel,
+    .contributor-wrap .form-panel {
+        width: 100%;
+        padding: 24px;
+    }
+}
+
+@media (max-width: 480px) {
+    .contributor-wrap {
+        width: calc(100% - 24px);
+    }
+
+    .contributor-wrap .info-panel,
+    .contributor-wrap .form-panel {
+        padding: 18px;
+    }
+}
