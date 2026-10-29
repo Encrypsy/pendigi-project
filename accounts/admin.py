@@ -31,7 +31,7 @@ class ContributorApplicationAdmin(admin.ModelAdmin):
         'submitted_at',
     )
 
-    list_filter = ('status', 'gender', 'submitted_at')
+    list_filter = ('status', 'submitted_at')
     search_fields = (
         'full_name',
         'nik',
@@ -51,7 +51,6 @@ class ContributorApplicationAdmin(admin.ModelAdmin):
                 'full_name',
                 'address',
                 'occupation',
-                'gender',
                 'email',
             ),
         }),

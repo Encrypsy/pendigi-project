@@ -45,9 +45,6 @@ class Users(AbstractUser):
         return self.username
     
 class ContributorApplication(models.Model):
-    class Gender(models.TextChoices):
-        MALE = 'male', 'Laki-laki'
-        FEMALE = 'female', 'Perempuan'
 
     user = models.ForeignKey(
         Users,
@@ -75,14 +72,6 @@ class ContributorApplication(models.Model):
     occupation = models.CharField(
         max_length=100,
         verbose_name='Pekerjaan',
-        blank=True,
-        default='',
-    )
-
-    gender = models.CharField(
-        max_length=10,
-        choices=Gender.choices,
-        verbose_name='Jenis kelamin',
         blank=True,
         default='',
     )

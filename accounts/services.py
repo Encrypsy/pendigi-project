@@ -2,9 +2,8 @@
 from django.db import transaction
 from django.utils import timezone
 
-from .models import ContributorApplication, StatusKontributor, Users
+from .models import ContributorApplication, Role, StatusKontributor, Users
 from interactions.models import Activity
-
 
 @transaction.atomic
 def approve_contributor_application(application_id, actor=None):
@@ -18,36 +17,43 @@ def approve_contributor_application(application_id, actor=None):
         pk=application.user_id
     )
 
-    newly_approved = (
-        application.status != StatusKontributor.APPROVED
-    )
+    # Jika sudah disetujui, jangan membuat notifikasi duplikat.
+    if application.status == StatusKontributor.APPROVED:
+        return application
 
-    # Buat ID hanya jika user belum memilikinya.
+    # Buat ID Publisher jika belum ada.
     if not user.publisher_id:
         user.publisher_id = (
             f"PBL-{timezone.localdate().year}-{application.pk:06d}"
         )
 
+    # Perbarui status pengajuan.
     application.status = StatusKontributor.APPROVED
     application.save(update_fields=["status"])
 
+    # Perbarui role dan status kontributor.
+    user.role = Role.KONTRIBUTOR
     user.status_kontributor = StatusKontributor.APPROVED
-    user.save(update_fields=["status_kontributor", "publisher_id"])
+    user.save(
+        update_fields=[
+            "role",
+            "status_kontributor",
+            "publisher_id",
+        ]
+    )
 
-    # Kirim notifikasi hanya saat status baru berubah menjadi approved.
-    if newly_approved:
-        Activity.objects.create(
-            recipient=user,
-            actor=actor,
-            action_type=Activity.ActionType.CONTRIBUTOR_APPROVED,
-            message=(
-                f"Pengajuan disetujui! "
-                f"ID Publisher kamu: {user.publisher_id}"
-            ),
-        )
+    # Kirim notifikasi persetujuan beserta ID Publisher.
+    Activity.objects.create(
+        recipient=user,
+        actor=actor,
+        action_type=Activity.ActionType.CONTRIBUTOR_APPROVED,
+        message=(
+            "Pengajuan kontributor kamu disetujui! "
+            f"ID Publisher kamu: {user.publisher_id}"
+        ),
+    )
 
     return application
-
 
 @transaction.atomic
 def reject_contributor_application(application_id, actor=None):
@@ -61,13 +67,13 @@ def reject_contributor_application(application_id, actor=None):
         pk=application.user_id
     )
 
-    # Jangan mengubah pengajuan yang sudah disetujui.
+    # Pengajuan yang sudah disetujui tidak boleh ditolak.
     if application.status == StatusKontributor.APPROVED:
         return application
 
-    newly_rejected = (
-        application.status != StatusKontributor.REJECTED
-    )
+    # Hindari notifikasi penolakan berulang.
+    if application.status == StatusKontributor.REJECTED:
+        return application
 
     application.status = StatusKontributor.REJECTED
     application.save(update_fields=["status"])
@@ -75,15 +81,14 @@ def reject_contributor_application(application_id, actor=None):
     user.status_kontributor = StatusKontributor.REJECTED
     user.save(update_fields=["status_kontributor"])
 
-    if newly_rejected:
-        Activity.objects.create(
-            recipient=user,
-            actor=actor,
-            action_type=Activity.ActionType.CONTRIBUTOR_REJECTED,
-            message=(
-                "Pengajuan kontributor kamu ditolak. "
-                "Silakan periksa catatan admin jika tersedia."
-            ),
-        )
+    Activity.objects.create(
+        recipient=user,
+        actor=actor,
+        action_type=Activity.ActionType.CONTRIBUTOR_REJECTED,
+        message=(
+            "Pengajuan kontributor kamu ditolak. "
+            "Silakan periksa catatan admin jika tersedia."
+        ),
+    )
 
     return application
