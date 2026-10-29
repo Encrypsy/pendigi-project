@@ -234,8 +234,10 @@
 
     <div class="contributor-applicant-list">
         {% for application in applications %}
-            <article class="contributor-applicant-card">
-                <header class="contributor-applicant-header">
+            
+        <article class="contributor-applicant-card">
+            <header class="contributor-applicant-header">
+                <div class="contributor-applicant-profile">
                     {% if application.user.profile_picture %}
                         <img
                             src="{{ application.user.profile_picture.url }}"
@@ -251,12 +253,25 @@
                     <div class="contributor-applicant-identity">
                         <strong>{{ application.user.username }}</strong>
                         <span class="contributor-applicant-date">
-                            Mengajukan {{ application.submitted_at|timesince }} lalu
+                            <span class="contributor-status-dot"></span>
+                            Pengajuan baru · {{ application.submitted_at|timesince }} lalu
                         </span>
                     </div>
-                </header>
-    
-                <div class="contributor-applicant-body">
+                </div>
+
+                <span class="contributor-status-badge">Menunggu</span>
+            </header>
+
+            <div class="contributor-applicant-body">
+                <div class="contributor-section-heading">
+                    <span class="contributor-section-icon">01</span>
+                    <div>
+                        <h3>Informasi pribadi</h3>
+                        <p>Identitas dan informasi kontak pendaftar</p>
+                    </div>
+                </div>
+
+                <div class="contributor-info-grid">
                     <section class="contributor-field">
                         <h2 class="contributor-field-label">Nama lengkap</h2>
                         <p class="contributor-bio">
@@ -266,72 +281,83 @@
 
                     <section class="contributor-field">
                         <h2 class="contributor-field-label">NIK</h2>
-                        <p class="contributor-bio">
+                        <p class="contributor-bio contributor-nik">
                             {{ application.nik|default:"Tidak diisi" }}
                         </p>
                     </section>
 
-                    <section class="contributor-field">
+                    <section class="contributor-field contributor-field-full">
                         <h2 class="contributor-field-label">Alamat</h2>
                         <p class="contributor-bio">
-                            {{ application.address|default:"Tidak diisi" }}
+                            {{ application.address|default:"Belum disertakan" }}
                         </p>
                     </section>
 
                     <section class="contributor-field">
                         <h2 class="contributor-field-label">Pekerjaan</h2>
                         <p class="contributor-bio">
-                            {{ application.occupation|default:"Tidak diisi" }}
+                            {{ application.occupation|default:"Belum disertakan" }}
                         </p>
                     </section>
 
                     <section class="contributor-field">
                         <h2 class="contributor-field-label">Email</h2>
-                        <p class="contributor-bio">
+                        <p class="contributor-bio contributor-email">
                             {{ application.email|default:"Tidak diisi" }}
                         </p>
                     </section>
-
-                    <section class="contributor-field">
-                        <h2 class="contributor-field-label">Bio penulis</h2>
-                        <p class="contributor-bio">
-                            {{ application.bio|default:"Tidak diisi" }}
-                        </p>
-                    </section>
-
-                    <section class="contributor-field">
-                        <h2 class="contributor-field-label">Link portofolio</h2>
-
-                        {% if application.portfolio_link %}
-                            <a
-                                href="{{ application.portfolio_link }}"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                class="contributor-portfolio-link"
-                            >
-                                Lihat portofolio
-                            </a>
-                        {% else %}
-                            <p class="contributor-bio">Tidak disertakan</p>
-                        {% endif %}
-                    </section>
                 </div>
 
-                <div class="contributor-applicant-actions">
-                    <form
-                        action="{% url 'admin_approve_contributor' application.pk %}"
-                        method="post"
-                    >
-                        {% csrf_token %}
-                        <button
-                            type="submit"
-                            class="contributor-btn-approve"
-                            onclick="return confirm('Yakin ingin menyetujui pengajuan ini?')"
-                        >
-                            Approve
-                        </button>
-                    </form>
+                <div class="contributor-section-divider"></div>
 
+                <div class="contributor-section-heading">
+                    <span class="contributor-section-icon">02</span>
+                    <div>
+                        <h3>Profil penulis</h3>
+                        <p>Bio dan karya yang disertakan pendaftar</p>
+                    </div>
+                </div>
+
+                <section class="contributor-field contributor-bio-panel">
+                    <h2 class="contributor-field-label">Tentang penulis</h2>
+                    <p class="contributor-bio">
+                        {{ application.bio|default:"Pendaftar belum menambahkan bio." }}
+                    </p>
+                </section>
+
+                <section class="contributor-field contributor-portfolio-panel">
+                    <div>
+                        <h2 class="contributor-field-label">Portofolio</h2>
+                        <p class="contributor-portfolio-description">
+                            {% if application.portfolio_link %}
+                                Lihat karya yang disertakan pendaftar.
+                            {% else %}
+                                Pendaftar tidak menyertakan tautan portofolio.
+                            {% endif %}
+                        </p>
+                    </div>
+
+                    {% if application.portfolio_link %}
+                        <a
+                            href="{{ application.portfolio_link }}"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="contributor-portfolio-link"
+                        >
+                            Lihat karya <span aria-hidden="true">↗</span>
+                        </a>
+                    {% else %}
+                        <span class="contributor-portfolio-empty">Tidak tersedia</span>
+                    {% endif %}
+                </section>
+            </div>
+
+            <footer class="contributor-applicant-actions">
+                <span class="contributor-action-caption">
+                    Tinjau pengajuan ini
+                </span>
+
+                <div class="contributor-action-buttons">
                     <form
                         action="{% url 'admin_reject_contributor' application.pk %}"
                         method="post"
@@ -342,11 +368,27 @@
                             class="contributor-btn-reject"
                             onclick="return confirm('Yakin ingin menolak pengajuan ini?')"
                         >
-                            Reject
+                            Tolak
+                        </button>
+                    </form>
+
+                    <form
+                        action="{% url 'admin_approve_contributor' application.pk %}"
+                        method="post"
+                    >
+                        {% csrf_token %}
+                        <button
+                            type="submit"
+                            class="contributor-btn-approve"
+                            onclick="return confirm('Yakin ingin menyetujui pengajuan ini?')"
+                        >
+                            Setujui pengajuan <span aria-hidden="true">→</span>
                         </button>
                     </form>
                 </div>
-            </article>
+            </footer>
+        </article>
+
         {% empty %}
             <div class="contributor-empty-state">
                 <h2>Semua pengajuan sudah diperiksa 🎉</h2>
