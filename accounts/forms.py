@@ -85,11 +85,11 @@ class ContributorApplicationForm(forms.ModelForm):
         labels = {
             'nik': 'NIK',
             'full_name': 'Nama lengkap',
-            'address': 'Alamat lengkap (opsional)',
-            'occupation': 'Pekerjaan (opsional)',
-            'gender': 'Jenis kelamin (opsional)',
-            'bio': 'Bio penulis (opsional)',
-            'portfolio_link': 'Link portofolio (opsional)',
+            'address': 'Alamat lengkap',
+            'occupation': 'Pekerjaan',
+            'gender': 'Jenis kelamin',
+            'bio': 'Bio penulis',
+            'portfolio_link': 'Link portofolio',
         }
 
         widgets = {
