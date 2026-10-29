@@ -2,7 +2,9 @@
 {% extends 'app_base.html' %}
 {% load static %}
 
-{% block title %}Profil {{ profile_user.username }} | Pena Digital{% endblock %}
+{% block title %}
+    Profil {{ profile_user.username }} | Pena Digital
+{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/profile.css' %}">
@@ -11,261 +13,195 @@
 {% block content %}
 <main class="public-profile-page">
 
-    <!-- HERO PROFIL -->
-    <section class="profile-hero">
+    <!-- ==================== KARTU PROFIL ==================== -->
+    <section class="public-profile-card">
 
-        <div class="profile-hero-banner">
+        <div class="public-profile-banner">
             {% if profile_user.banner_picture %}
-                <img src="{{ profile_user.banner_picture.url }}"
-                     alt="Banner {{ profile_user.username }}">
+                <img
+                    src="{{ profile_user.banner_picture.url }}"
+                    alt="Banner {{ profile_user.username }}"
+                >
             {% else %}
-                <div class="profile-banner-art">
-                    <span class="banner-word banner-word-one">STORIES</span>
-                    <span class="banner-word banner-word-two">MATTER.</span>
-                    <span class="banner-decoration-circle"></span>
-                    <span class="banner-decoration-line"></span>
+                <div class="public-banner-placeholder">
+                    <span>PENA DIGITAL</span>
+                    <span class="banner-decoration"></span>
                 </div>
             {% endif %}
-            <span class="profile-banner-label">PENA DIGITAL · CREATOR SPACE</span>
         </div>
 
-        <div class="profile-hero-body">
+        <div class="public-profile-content">
 
-            <div class="profile-identity-row">
+            <!-- Foto profil -->
+            <div class="public-profile-avatar">
+                {% if profile_user.profile_picture %}
+                    <img
+                        src="{{ profile_user.profile_picture.url }}"
+                        alt="Foto profil {{ profile_user.username }}"
+                    >
+                {% else %}
+                    <span>{{ profile_user.username|first|upper }}</span>
+                {% endif %}
+            </div>
 
-                <div class="profile-avatar-wrap">
-                    {% if profile_user.profile_picture %}
-                        <img
-                            src="{{ profile_user.profile_picture.url }}"
-                            class="profile-avatar"
-                            alt="Foto {{ profile_user.username }}"
+            <!-- Identitas pengguna -->
+            <div class="public-profile-identity">
+                {% if profile_user.status_kontributor == 'approved' %}
+                    <span class="public-profile-role">KONTRIBUTOR</span>
+                {% else %}
+                    <span class="public-profile-role">PEMBACA</span>
+                {% endif %}
+
+                <h1>{{ profile_user.username }}</h1>
+
+                <p class="public-profile-bio">
+                    {{ profile_user.bio|default:"Belum ada bio." }}
+                </p>
+            </div>
+
+            <!-- Statistik -->
+            <div class="public-profile-stats">
+                <div class="public-profile-stat">
+                    <strong>{{ followers_count|default:0 }}</strong>
+                    <span>Pengikut</span>
+                </div>
+
+                <div class="public-profile-stat">
+                    <strong>{{ following_count|default:0 }}</strong>
+                    <span>Mengikuti</span>
+                </div>
+
+                <div class="public-profile-stat">
+                    <strong>{{ published_count|default:0 }}</strong>
+                    <span>Karya tulis</span>
+                </div>
+            </div>
+
+            <!-- Tombol aksi profil -->
+            <div class="public-profile-actions">
+                {% if is_own_profile %}
+                    <a
+                        href="{% url 'edit_profile' %}"
+                        class="public-edit-profile-button"
+                    >
+                        <span aria-hidden="true">✎</span>
+                        Edit profil
+                    </a>
+
+                {% elif user.is_authenticated %}
+                    <form
+                        method="post"
+                        action="{% url 'toggle_follow' profile_user.username %}"
+                        class="public-follow-form"
+                    >
+                        {% csrf_token %}
+
+                        <button
+                            type="submit"
+                            class="public-follow-button{% if is_following %} is-following{% endif %}"
                         >
-                    {% else %}
-                        <div class="profile-avatar profile-avatar-placeholder">
-                            {{ profile_user.username|first|upper }}
-                        </div>
-                    {% endif %}
+                            {% if is_following %}
+                                Mengikuti
+                            {% else %}
+                                + Ikuti
+                            {% endif %}
+                        </button>
+                    </form>
 
-                    {% if profile_user.status_kontributor == 'approved' %}
-                        <span class="profile-avatar-badge" title="Kontributor terverifikasi">✦</span>
-                    {% endif %}
-                </div>
-
-                <div class="profile-identity">
-                    <div class="profile-role-row">
-                        {% if profile_user.status_kontributor == 'approved' %}
-                            <span class="profile-role-badge">
-                                <span>✦</span> KONTRIBUTOR
-                            </span>
-                        {% else %}
-                            <span class="profile-role-badge reader-role">
-                                PEMBACA
-                            </span>
-                        {% endif %}
-
-                        {% if is_own_profile %}
-                            <span class="profile-owner-label">PROFIL SAYA</span>
-                        {% endif %}
-                    </div>
-
-                    <h1>{{ profile_user.username }}</h1>
-
-                    <p class="profile-bio">
-                        {{ profile_user.bio|default:"Belum ada bio. Setiap orang punya cerita untuk dibagikan." }}
-                    </p>
-                </div>
-
-                <div class="profile-actions">
-                    {% if is_own_profile %}
-                        <a href="{% url 'edit_profile' %}" class="profile-primary-btn">
-                            <span>✎</span> Edit profil
-                        </a>
-                    {% elif user.is_authenticated %}
-                        <form method="post"
-                              action="{% url 'toggle_follow' profile_user.username %}">
-                            {% csrf_token %}
-                            <button type="submit"
-                                    class="profile-primary-btn{% if is_following %} following{% endif %}">
-                                {% if is_following %}
-                                    ✓ Mengikuti
-                                {% else %}
-                                    + Ikuti
-                                {% endif %}
-                            </button>
-                        </form>
-                    {% else %}
-                        <a href="{% url 'login' %}" class="profile-primary-btn">
-                            + Ikuti
-                        </a>
-                    {% endif %}
-                </div>
-
-            </div>
-
-            <div class="profile-divider"></div>
-
-            <div class="profile-stats-grid">
-
-                <div class="profile-stat-card">
-                    <span class="profile-stat-icon">♧</span>
-                    <div>
-                        <strong>{{ followers_count|default:0 }}</strong>
-                        <span>Pengikut</span>
-                    </div>
-                </div>
-
-                <div class="profile-stat-card">
-                    <span class="profile-stat-icon">↗</span>
-                    <div>
-                        <strong>{{ following_count|default:0 }}</strong>
-                        <span>Mengikuti</span>
-                    </div>
-                </div>
-
-                <div class="profile-stat-card">
-                    <span class="profile-stat-icon">✎</span>
-                    <div>
-                        <strong>{{ published_count|default:0 }}</strong>
-                        <span>Karya diterbitkan</span>
-                    </div>
-                </div>
-
-                <div class="profile-stat-card profile-stat-message">
-                    <span class="profile-stat-icon">❝</span>
-                    <div>
-                        <strong>Berbagi cerita,</strong>
-                        <span>menemukan perspektif.</span>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </section>
-
-
-    <!-- KARYA PENULIS -->
-    {% if profile_user.status_kontributor == 'approved' %}
-        <section class="profile-section">
-
-            <div class="profile-section-heading">
-                <div>
-                    <span class="profile-eyebrow">DARI MEJA PENULIS</span>
-                    <h2>Karya Penulis<span class="heading-period">.</span></h2>
-                    <p>
-                        Jelajahi artikel dan cerita dari
-                        <strong>{{ profile_user.username }}</strong>.
-                    </p>
-                </div>
-
-                {% if published_count > 3 %}
-                    <a href="{% url 'author_my_content' %}"
-                       class="profile-view-all">
-                        Lihat semua <span>→</span>
+                {% else %}
+                    <a
+                        href="{% url 'login' %}"
+                        class="public-follow-button"
+                    >
+                        Login untuk mengikuti
                     </a>
                 {% endif %}
             </div>
 
-            <div class="profile-works-grid">
+        </div>
+    </section>
+
+
+    <!-- ==================== KARYA PENULIS ==================== -->
+    {% if profile_user.status_kontributor == 'approved' %}
+        <section class="public-profile-works">
+
+            <div class="public-works-heading">
+                <div>
+                    <span class="public-works-eyebrow">
+                        PORTOFOLIO PENULIS
+                    </span>
+
+                    <h2>Karya Penulis</h2>
+
+                    <p>
+                        Artikel dan cerita yang telah diterbitkan oleh
+                        {{ profile_user.username }}.
+                    </p>
+                </div>
+
+                {% if published_count > 3 %}
+                    <a
+                        href="{% url 'author_my_content' %}"
+                        class="public-works-link"
+                    >
+                        Lihat selengkapnya →
+                    </a>
+                {% endif %}
+            </div>
+
+            <div class="public-works-grid">
                 {% for work in showcase_works %}
-                    <article class="profile-work-card">
-
-                        <a href="{% if work.work_type == 'article' %}{% url 'articles:article_detail' work.pk %}{% else %}{% url 'fiction:chapter_list' work.pk %}{% endif %}"
-                           class="profile-work-cover">
-
+                    <a
+                        href="{% if work.work_type == 'article' %}{% url 'articles:article_detail' work.pk %}{% else %}{% url 'fiction:chapter_list' work.pk %}{% endif %}"
+                        class="public-work-card"
+                    >
+                        <!-- Sampul karya -->
+                        <div class="public-work-cover">
                             {% if work.thumbnail %}
-                                <img src="{{ work.thumbnail.url }}"
-                                     alt="{{ work.title }}"
-                                     loading="lazy">
+                                <img
+                                    src="{{ work.thumbnail.url }}"
+                                    alt="{{ work.title }}"
+                                    loading="lazy"
+                                >
                             {% elif work.cover %}
-                                <img src="{{ work.cover.url }}"
-                                     alt="{{ work.title }}"
-                                     loading="lazy">
+                                <img
+                                    src="{{ work.cover.url }}"
+                                    alt="{{ work.title }}"
+                                    loading="lazy"
+                                >
                             {% else %}
-                                <div class="profile-work-placeholder">
-                                    <span class="placeholder-mark">P.</span>
+                                <div class="public-work-placeholder">
                                     <span>PENA DIGITAL</span>
                                 </div>
                             {% endif %}
+                        </div>
 
-                            <span class="profile-work-arrow">↗</span>
-                        </a>
-
-                        <div class="profile-work-info">
-                            <span class="profile-work-type">
+                        <!-- Informasi karya -->
+                        <div class="public-work-info">
+                            <span class="public-work-category">
                                 {% if work.work_type == 'article' %}
-                                    <span>▤</span> ARTIKEL
+                                    Artikel
                                 {% else %}
-                                    <span>✧</span> CERITA FIKSI
+                                    Cerita fiksi
                                 {% endif %}
                             </span>
 
-                            <h3>
-                                <a href="{% if work.work_type == 'article' %}{% url 'articles:article_detail' work.pk %}{% else %}{% url 'fiction:chapter_list' work.pk %}{% endif %}">
-                                    {{ work.title }}
-                                </a>
-                            </h3>
+                            <h3>{{ work.title }}</h3>
 
-                            <a href="{% if work.work_type == 'article' %}{% url 'articles:article_detail' work.pk %}{% else %}{% url 'fiction:chapter_list' work.pk %}{% endif %}"
-                               class="profile-work-read">
-                                Baca karya <span>→</span>
-                            </a>
+                            <span class="public-work-read">
+                                Baca karya →
+                            </span>
                         </div>
-
-                    </article>
-                {% empty %}
-                    <div class="profile-empty-state">
-                        <span class="profile-empty-icon">✎</span>
-                        <h3>Halaman baru, cerita baru.</h3>
-                        <p>Karya yang sudah diterbitkan akan muncul di sini.</p>
-                    </div>
-                {% endfor %}
-            </div>
-
-            <div class="profile-section-footer">
-                <span>✦</span>
-                Setiap karya punya cerita di baliknya.
-            </div>
-
-        </section>
-    {% endif %}
-
-
-    <!-- ARTIKEL FAVORIT: HANYA UNTUK PEMILIK PROFIL -->
-    {% if is_own_profile %}
-        <section class="profile-section profile-favorites-section">
-
-            <div class="profile-section-heading">
-                <div>
-                    <span class="profile-eyebrow">KOLEKSI PRIBADI</span>
-                    <h2>Artikel Favorit<span class="heading-period">.</span></h2>
-                    <p>Artikel yang kamu simpan untuk dibaca kembali.</p>
-                </div>
-
-                <span class="profile-favorites-symbol">♡</span>
-            </div>
-
-            <div class="profile-favorites-list">
-                {% for fav in favorites %}
-                    <a href="{% url 'articles:article_detail' fav.article.pk %}"
-                       class="profile-favorite-item">
-
-                        <span class="profile-favorite-number">
-                            {% if forloop.counter < 10 %}0{% endif %}{{ forloop.counter }}
-                        </span>
-
-                        <span class="profile-favorite-title">
-                            {{ fav.article.title }}
-                        </span>
-
-                        <span class="profile-favorite-arrow">↗</span>
                     </a>
+
                 {% empty %}
-                    <div class="profile-favorites-empty">
-                        <span>♡</span>
-                        <div>
-                            <strong>Belum ada artikel favorit</strong>
-                            <p>Simpan artikel yang kamu sukai dan temukan lagi di sini.</p>
-                        </div>
+                    <div class="public-works-empty">
+                        <span class="public-works-empty-icon">✎</span>
+                        <h3>Belum ada karya yang diterbitkan</h3>
+                        <p>
+                            Karya yang telah disetujui akan muncul di sini.
+                        </p>
                     </div>
                 {% endfor %}
             </div>
@@ -274,12 +210,45 @@
     {% endif %}
 
 
-    <!-- PENUTUP -->
-    <footer class="profile-footer">
-        <span class="profile-footer-mark">P.</span>
-        <p>Setiap orang punya cerita. Setiap cerita layak dibaca.</p>
-        <span class="profile-footer-line"></span>
-    </footer>
+    <!-- ==================== ARTIKEL FAVORIT ==================== -->
+    {% if is_own_profile %}
+        <section class="public-profile-works">
+
+            <div class="public-works-heading">
+                <div>
+                    <span class="public-works-eyebrow">
+                        KOLEKSI PRIBADI
+                    </span>
+
+                    <h2>Artikel Favorit</h2>
+                    <p>Kumpulan artikel yang kamu simpan.</p>
+                </div>
+            </div>
+
+            <div class="public-favorite-list">
+                {% for fav in favorites %}
+                    <a
+                        href="{% url 'articles:article_detail' fav.article.pk %}"
+                        class="public-favorite-item"
+                    >
+                        <span class="public-favorite-rank">
+                            #{{ forloop.counter }}
+                        </span>
+
+                        <span>{{ fav.article.title }}</span>
+
+                        <span aria-hidden="true">→</span>
+                    </a>
+
+                {% empty %}
+                    <p class="public-profile-muted">
+                        Kamu belum memiliki artikel favorit.
+                    </p>
+                {% endfor %}
+            </div>
+
+        </section>
+    {% endif %}
 
 </main>
 {% endblock %}
