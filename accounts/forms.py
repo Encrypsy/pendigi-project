@@ -86,7 +86,6 @@ class ContributorApplicationForm(forms.ModelForm):
             'full_name': 'Nama lengkap',
             'address': 'Alamat lengkap',
             'occupation': 'Pekerjaan',
-            'gender': 'Jenis kelamin',
             'bio': 'Bio penulis',
             'portfolio_link': 'Link portofolio',
         }
@@ -100,7 +99,7 @@ class ContributorApplicationForm(forms.ModelForm):
                 'required': True,
             }),
             'full_name': forms.TextInput(attrs={
-                'placeholder': 'Masukkan nama lengkap',
+                'placeholder': 'Masukkan nama lengkap sesuai KTP',
                 'autocomplete': 'name',
                 'required': True,
             }),
@@ -111,7 +110,6 @@ class ContributorApplicationForm(forms.ModelForm):
             'occupation': forms.TextInput(attrs={
                 'placeholder': 'Contoh: Pelajar, Mahasiswa, Karyawan',
             }),
-            'gender': forms.Select(),
             'bio': forms.Textarea(attrs={
                 'rows': 4,
                 'placeholder': 'Ceritakan minat menulismu (opsional)',

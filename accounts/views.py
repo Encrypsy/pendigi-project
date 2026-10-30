@@ -2,7 +2,7 @@ from django.contrib.auth import login
 from django.contrib.auth.views import LoginView
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.db import models
+from django.db import models, transaction
 from django.shortcuts import get_object_or_404, render, redirect
 
 from accounts.services import approve_contributor_application, reject_contributor_application
@@ -107,46 +107,93 @@ def register_view(request):
 
 @login_required
 def apply_contributor(request):
-    if request.user.status_kontributor == StatusKontributor.APPROVED:
-        messages.info(request, 'Anda sudah menjadi kontributor.')
-        return redirect('articles:article_list')
-
-    if request.user.status_kontributor == StatusKontributor.PENDING:
-        messages.info(
-            request,
-            'Pengajuan kamu masih menunggu verifikasi admin.',
-        )
-        return redirect('articles:article_list')
-
+    # Kunci baris user agar dua pengajuan bersamaan
+    # tidak lolos pemeriksaan status.
     if request.method == 'POST':
-        form = ContributorApplicationForm(request.POST)
-
-        if form.is_valid():
-            application = form.save(commit=False)
-            application.user = request.user
-            application.email = request.user.email
-            application.status = StatusKontributor.PENDING
-            application.save()
-
-            notify_admins(
-                actor=request.user,
-                message=(
-                    f'{application.full_name} mengajukan diri '
-                    'sebagai kontributor.'
-                ),
-                action_type=Activity.ActionType.CONTRIBUTOR_APPLICATION,
+        with transaction.atomic():
+            user = Users.objects.select_for_update().get(
+                pk=request.user.pk
             )
 
-            request.user.status_kontributor = StatusKontributor.PENDING
-            request.user.save(update_fields=['status_kontributor'])
+            # Pengguna yang sudah menjadi kontributor tidak bisa mendaftar lagi.
+            if user.status_kontributor == StatusKontributor.APPROVED:
+                messages.info(
+                    request,
+                    'Anda sudah menjadi kontributor.',
+                )
+                return redirect('articles:article_list')
 
-            messages.success(
+            # Cegah pengajuan pending ganda, termasuk jika status user
+            # tidak sengaja tidak sinkron dengan data pengajuan.
+            has_pending_application = (
+                ContributorApplication.objects.filter(
+                    user=user,
+                    status=StatusKontributor.PENDING,
+                ).exists()
+            )
+
+            if (
+                user.status_kontributor == StatusKontributor.PENDING
+                or has_pending_application
+            ):
+                messages.info(
+                    request,
+                    'Pengajuan kamu masih menunggu verifikasi admin.',
+                )
+                return redirect('articles:article_list')
+
+            form = ContributorApplicationForm(request.POST)
+
+            if form.is_valid():
+                application = form.save(commit=False)
+                application.user = user
+                application.email = user.email
+                application.status = StatusKontributor.PENDING
+                application.save()
+
+                user.status_kontributor = StatusKontributor.PENDING
+                user.save(update_fields=['status_kontributor'])
+
+                notify_admins(
+                    actor=user,
+                    message=(
+                        f'{application.full_name} mengajukan diri '
+                        'sebagai kontributor.'
+                    ),
+                    action_type=Activity.ActionType.CONTRIBUTOR_APPLICATION,
+                )
+
+                messages.success(
+                    request,
+                    'Pengajuan berhasil dikirim! '
+                    'Silakan tunggu verifikasi admin.',
+                )
+                return redirect('articles:article_list')
+
+    else:
+        # Pemeriksaan status juga dilakukan saat halaman dibuka.
+        if request.user.status_kontributor == StatusKontributor.APPROVED:
+            messages.info(
                 request,
-                'Pengajuan berhasil dikirim! '
-                'Silakan tunggu verifikasi admin.',
+                'Anda sudah menjadi kontributor.',
             )
             return redirect('articles:article_list')
-    else:
+
+        has_pending_application = ContributorApplication.objects.filter(
+            user=request.user,
+            status=StatusKontributor.PENDING,
+        ).exists()
+
+        if (
+            request.user.status_kontributor == StatusKontributor.PENDING
+            or has_pending_application
+        ):
+            messages.info(
+                request,
+                'Pengajuan kamu masih menunggu verifikasi admin.',
+            )
+            return redirect('articles:article_list')
+
         form = ContributorApplicationForm()
 
     return render(
@@ -154,6 +201,7 @@ def apply_contributor(request):
         'accounts/apply_contributor.html',
         {'form': form},
     )
+
 
 
 @login_required
