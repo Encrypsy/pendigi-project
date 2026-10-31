@@ -1,25 +1,99 @@
 {% extends 'auth_base.html' %}
 {% load static %}
+
 {% block title %}Login - Pena Digital{% endblock %}
+
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'css/forms.css' %}">
     <link rel="stylesheet" href="{% static 'css/auth.css' %}">
+    <link rel="stylesheet" href="{% static 'css/login.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="auth-card">
-    <img src="{% static 'images/pendigi-logo-tulisan.svg' %}" alt="Pena Digital" class="logo">
-    <h2>Masuk ke Akun</h2>
-    <p class="auth-subtitle">Selamat datang kembali di Pena Digital</p>
+<div class="reader-login-page">
 
-    <form method="post" class="auth-form">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Masuk</button>
-    </form>
+    <div class="reader-login-card">
 
-    <div class="auth-form-footer">
-        Belum punya akun? <a href="{% url 'register' %}">Daftar di sini</a>
+        <!-- DECORATIVE HEADER -->
+        <div class="reader-login-banner">
+            <div class="login-banner-top">
+                <span class="banner-brand">PENA DIGITAL</span>
+                <span class="banner-label">A PLACE FOR STORIES</span>
+            </div>
+
+            <div class="banner-decoration">✳</div>
+
+            <div class="banner-heading">
+                <span class="banner-eyebrow">WELCOME TO OUR COMMUNITY</span>
+                <h1>Every story<br>begins <em>somewhere.</em></h1>
+                <p>Temukan kembali cerita dan pengalaman membaca yang menantimu.</p>
+            </div>
+
+            <div class="banner-bottom">
+                <span>READ · DISCOVER · CONNECT</span>
+                <span>EST. PENA DIGITAL</span>
+            </div>
+        </div>
+
+        <!-- LOGIN FORM -->
+        <div class="reader-login-content">
+
+            <div class="reader-login-heading">
+                <span class="login-section-label">YOUR ACCOUNT / 01</span>
+                <h2>Selamat <em>datang kembali.</em></h2>
+                <p>Masuk ke akunmu dan lanjutkan perjalanan membaca.</p>
+            </div>
+
+            <form method="post" class="auth-form reader-login-form">
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                    <div class="reader-login-errors">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
+
+                {% for field in form %}
+                    <div class="reader-form-field">
+                        <label for="{{ field.id_for_label }}">
+                            {{ field.label }}
+                        </label>
+
+                        {{ field }}
+
+                        {% for error in field.errors %}
+                            <small class="reader-field-error">{{ error }}</small>
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+
+                <button type="submit" class="reader-login-submit">
+                    <span>Masuk ke Akun</span>
+                    <span class="submit-arrow">→</span>
+                </button>
+            </form>
+
+            <div class="reader-login-footer">
+                <div class="footer-divider"></div>
+
+                <p>
+                    Belum punya akun?
+                    <a href="{% url 'register' %}">Daftar di sini <span>↗</span></a>
+                </p>
+
+                <div class="reader-login-note">
+                    <span>✳</span>
+                    EVERY STORY DESERVES TO BE READ.
+                </div>
+            </div>
+
+        </div>
     </div>
+
+    <div class="reader-login-caption">
+        <span>PENA DIGITAL © 2026</span>
+        <span>A HOME FOR EVERY STORY</span>
+    </div>
+
 </div>
 {% endblock %}
