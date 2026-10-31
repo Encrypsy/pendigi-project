@@ -612,3 +612,204 @@
         transition-duration: .01ms !important;
     }
 }
+
+
+/* ==========================================
+   PENA DIGITAL — ALL BROWN COLOR OVERRIDE
+========================================== */
+
+:root {
+    --paper: #FBF8F2;
+    --ink: #6B4226;
+    --ink-dark: #54331D;
+    --brown: #6B4226;
+    --brown-dark: #54331D;
+    --divider: #DDD2C3;
+    --text: #342820;
+    --muted: #898178;
+    --white: #FFFFFF;
+}
+
+/* Main heading */
+
+.status-heading {
+    background: linear-gradient(120deg, #54331D, #80583A);
+}
+
+.status-heading::after {
+    border-color: rgba(255, 239, 218, .17);
+    box-shadow:
+        0 0 0 24px rgba(255, 239, 218, .035),
+        0 0 0 48px rgba(255, 239, 218, .025);
+}
+
+.status-eyebrow {
+    color: #E8CFAD;
+}
+
+/* Header decorations */
+
+.status-heading-decoration {
+    color: #E8CFAD;
+}
+
+.status-back-link {
+    color: #6B4226;
+}
+
+.status-back-link:hover {
+    color: #54331D;
+}
+
+/* Card */
+
+.status-card-topline {
+    background: #F5EFE6;
+    color: #6B4226;
+    border-color: #DDD2C3;
+}
+
+.status-section-label {
+    color: #6B4226;
+}
+
+.status-section-dot {
+    background: #987354;
+}
+
+/* Pending */
+
+.status-pending {
+    background: #F7F0E3;
+    border-color: #E9DCC5;
+    color: #79552F;
+}
+
+.status-pending .status-symbol {
+    background: #EDE0C9;
+    color: #79552F;
+}
+
+/* Approved */
+
+.status-approved {
+    background: #F1E8DC;
+    border-color: #E3D2BE;
+    color: #65452E;
+}
+
+.status-approved .status-symbol {
+    background: #E5D3BC;
+    color: #65452E;
+}
+
+/* Rejected */
+
+.status-rejected {
+    background: #F5E9E2;
+    border-color: #E8D1C3;
+    color: #81513C;
+}
+
+.status-rejected .status-symbol {
+    background: #EBD6C8;
+    color: #81513C;
+}
+
+/* Publisher ID */
+
+.publisher-id-card {
+    background: linear-gradient(120deg, #54331D, #80583A);
+}
+
+.publisher-id-top,
+.publisher-id-bottom {
+    color: #E8D7C3;
+}
+
+.publisher-id-label {
+    color: #DCC3A6;
+}
+
+/* Admin notes */
+
+.admin-notes {
+    background: #FAF5ED;
+    border-color: #E8DCCB;
+}
+
+.admin-notes-icon {
+    background: #EDE1D1;
+    color: #6B4226;
+}
+
+.admin-notes h3 {
+    color: #54331D;
+}
+
+.admin-notes p {
+    color: #746254;
+}
+
+/* Primary button */
+
+.status-primary-button {
+    background: #6B4226;
+}
+
+.status-primary-button:hover {
+    background: #54331D;
+}
+
+/* Side card */
+
+.status-side-card {
+    background: #F5EFE6;
+    border-color: #E3D5C3;
+}
+
+.side-card-decoration {
+    color: #987354;
+}
+
+.side-card-eyebrow {
+    color: #80583A;
+}
+
+.status-side-card h2 {
+    color: #54331D;
+}
+
+.side-card-divider {
+    background: #987354;
+}
+
+.status-side-card p {
+    color: #786858;
+}
+
+.side-card-signature {
+    color: #6B4226;
+}
+
+/* Footer */
+
+.status-page-footer > span {
+    color: #987354;
+}
+
+.status-page-footer a {
+    color: #6B4226;
+}
+
+.status-page-footer a:hover {
+    color: #54331D;
+}
+
+/* Mobile: keep the same brown identity */
+
+@media (max-width: 760px) {
+    .status-side-card {
+        background: #F5EFE6;
+    }
+}
