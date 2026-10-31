@@ -2,8 +2,11 @@ import re
 
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
-from .models import Users, ContributorApplication
+from .models import StatusKontributor, Users, ContributorApplication
 from articles.models import Categories
+from django.contrib.auth.forms import AuthenticationForm
+from django.core.exceptions import ValidationError
+from django.contrib.auth import get_user_model
 
 class AdminUserEditForm(forms.ModelForm):
     class Meta:
@@ -191,3 +194,37 @@ class CategoryForm(forms.ModelForm):
         widgets = {
             'name': forms.TextInput(attrs={'placeholder': 'Nama kategori, misal: Hot News'})
         }
+        
+class PublisherLoginForm(AuthenticationForm):
+    username = forms.CharField(
+        label='Publisher ID',
+        widget=forms.TextInput(attrs={
+            'placeholder': 'Masukkan Publisher ID',
+            'autofocus': True,
+        })
+    )
+
+    def clean(self):
+        publisher_id = self.cleaned_data.get('username')
+
+        if publisher_id:
+            User = get_user_model()
+
+            try:
+                user = User.objects.get(publisher_id=publisher_id)
+                self.cleaned_data['username'] = user.get_username()
+            except User.DoesNotExist:
+                pass
+
+        cleaned_data = super().clean()
+
+        if cleaned_data:
+            user = self.get_user()
+
+            if user.status_kontributor != StatusKontributor.APPROVED:
+                raise ValidationError(
+                    'Akun ini belum memiliki akses sebagai penulis.',
+                    code='not_approved',
+                )
+
+        return cleaned_data

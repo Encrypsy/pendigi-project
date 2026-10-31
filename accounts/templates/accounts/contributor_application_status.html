@@ -94,6 +94,27 @@
                                 <span>EST. PENA DIGITAL</span>
                             </div>
                         </div>
+                        {% if application.status == 'approved' %}
+                            <div class="publisher-actions">
+                                <button
+                                    type="button"
+                                    class="publisher-copy-btn"
+                                    id="copyPublisherId"
+                                    data-publisher-id="{{ application.user.publisher_id }}"
+                                >
+                                    <i class="fas fa-copy"></i>
+                                    <span>Copy Member ID</span>
+                                </button>
+
+                                <a
+                                    href="{% url 'publisher_login' %}"
+                                    class="publisher-login-btn"
+                                >
+                                    <i class="fas fa-pen-nib"></i>
+                                    Masuk sebagai Penulis
+                                </a>
+                            </div>
+                        {% endif %}
                     {% endif %}
 
                 {% elif application.status == 'rejected' %}
@@ -171,4 +192,33 @@
     </footer>
 
 </div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const copyButton = document.getElementById('copyPublisherId');
+
+        if (!copyButton) return;
+
+        copyButton.addEventListener('click', async function () {
+            const publisherId = this.dataset.publisherId;
+            const buttonText = this.querySelector('span');
+
+            try {
+                await navigator.clipboard.writeText(publisherId);
+
+                buttonText.textContent = 'Berhasil disalin!';
+
+                setTimeout(() => {
+                    buttonText.textContent = 'Copy Member ID';
+                }, 2000);
+
+            } catch (error) {
+                buttonText.textContent = 'Gagal menyalin';
+
+                setTimeout(() => {
+                    buttonText.textContent = 'Copy Member ID';
+                }, 2000);
+            }
+        });
+    });
+</script>
 {% endblock %}

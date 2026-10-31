@@ -1,9 +1,14 @@
 from django.urls import path
 from django.contrib.auth.views import LogoutView
-from .views import CustomLoginView, admin_user_delete, admin_user_detail, admin_user_edit, admin_user_list, author_notifications, author_pending_content, author_rejected_content, contributor_application_status, edit_profile_view, notifications_list, register_view, apply_contributor, profile_view, dashboard_view, admin_pending_contributors, admin_approve_contributor, admin_reject_contributor, toggle_follow, author_dashboard, author_my_content
+from .views import CustomLoginView, PublisherLoginView, admin_user_delete, admin_user_detail, admin_user_edit, admin_user_list, author_notifications, author_pending_content, author_rejected_content, contributor_application_status, edit_profile_view, notifications_list, register_view, apply_contributor, profile_view, dashboard_view, admin_pending_contributors, admin_approve_contributor, admin_reject_contributor, toggle_follow, author_dashboard, author_my_content
 
 urlpatterns = [
     path('login/', CustomLoginView.as_view(), name='login'),
+    path(
+        'login/penulis/',
+        PublisherLoginView.as_view(),
+        name='publisher_login',
+    ),
     path('logout/', LogoutView.as_view(next_page='articles:article_list'), name='logout'),
     path('register/', register_view, name='register'),
     path('apply-kontributor/', apply_contributor, name='apply_contributor'),

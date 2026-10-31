@@ -4,9 +4,10 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db import models, transaction
 from django.shortcuts import get_object_or_404, render, redirect
+from django.urls import reverse_lazy
 
 from accounts.services import approve_contributor_application, reject_contributor_application
-from .forms import AdminUserEditForm, RegisterForm, ContributorApplicationForm, ProfileUpdateForm
+from .forms import AdminUserEditForm, PublisherLoginForm, RegisterForm, ContributorApplicationForm, ProfileUpdateForm
 from .models import StatusKontributor, ContributorApplication, Users
 from .decorators import admin_required
 from django.db.models import Count, Avg, Q
@@ -87,11 +88,16 @@ def toggle_follow(request, username):
         )
     )
 
-
-
 class CustomLoginView(LoginView):
     template_name = 'accounts/login.html'
 
+class PublisherLoginView(LoginView):
+    template_name = 'accounts/publisher_login.html'
+    authentication_form = PublisherLoginForm
+    redirect_authenticated_user = True
+
+    def get_success_url(self):
+        return reverse_lazy('author_dashboard')
 
 def register_view(request):
     if request.method == 'POST':
