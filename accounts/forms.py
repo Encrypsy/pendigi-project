@@ -67,9 +67,21 @@ class RegisterForm(UserCreationForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
         for field in self.fields.values():
             field.help_text = ''
+
         self.fields['profile_picture'].required = False
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+
+        if Users.objects.filter(email__iexact=email).exists():
+            raise forms.ValidationError(
+                'Email sudah terdaftar. Silakan gunakan email lain.'
+            )
+
+        return email
 
 
 class ContributorApplicationForm(forms.ModelForm):
