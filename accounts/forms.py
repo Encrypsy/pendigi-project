@@ -88,6 +88,16 @@ class RegisterForm(UserCreationForm):
             )
 
         return email
+    
+    def clean_profile_picture(self):
+        image = self.cleaned_data.get('profile_picture')
+
+        if image and image.size > 2 * 1024 * 1024:
+            raise forms.ValidationError(
+                'Ukuran foto profil maksimal 2 MB.'
+            )
+
+        return image
 
 
 class ContributorApplicationForm(forms.ModelForm):
