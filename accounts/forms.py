@@ -279,3 +279,53 @@ class PublisherLoginForm(forms.Form):
 
     def get_user(self):
         return self.user_cache
+    
+class ReaderLoginForm(AuthenticationForm):
+
+    def clean(self):
+        username = self.cleaned_data.get('username')
+        password = self.cleaned_data.get('password')
+
+        if not username:
+            self.add_error('username', 'Username atau email wajib diisi.')
+            return self.cleaned_data
+
+        if not password:
+            self.add_error('password', 'Password wajib diisi.')
+            return self.cleaned_data
+
+        user_exists = Users.objects.filter(
+            username=username
+        ).exists()
+
+        if not user_exists:
+            email_exists = Users.objects.filter(
+                email__iexact=username
+            ).exists()
+
+            if email_exists:
+                raise ValidationError(
+                    'Email terdaftar, tetapi silakan periksa kembali kredensial login.'
+                )
+
+            raise ValidationError(
+                'Username atau email tidak ditemukan.'
+            )
+
+        user = Users.objects.filter(username=username).first()
+
+        if user is None:
+            user = Users.objects.filter(email__iexact=username).first()
+
+        if user is None:
+            raise ValidationError('Akun tidak ditemukan.')
+
+        if not user.check_password(password):
+            raise ValidationError('Password yang kamu masukkan salah.')
+
+        if not user.is_active:
+            raise ValidationError(
+                'Akun kamu sedang tidak aktif. Silakan hubungi administrator.'
+            )
+
+        return super().clean()

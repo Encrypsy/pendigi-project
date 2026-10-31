@@ -7,7 +7,7 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse_lazy
 
 from accounts.services import approve_contributor_application, reject_contributor_application
-from .forms import AdminUserEditForm, PublisherLoginForm, RegisterForm, ContributorApplicationForm, ProfileUpdateForm
+from .forms import AdminUserEditForm, PublisherLoginForm, ReaderLoginForm, RegisterForm, ContributorApplicationForm, ProfileUpdateForm, Read
 from .models import StatusKontributor, ContributorApplication, Users
 from .decorators import admin_required
 from django.db.models import Count, Avg, Q
@@ -90,6 +90,7 @@ def toggle_follow(request, username):
 
 class CustomLoginView(LoginView):
     template_name = 'accounts/login.html'
+    authentication_form = ReaderLoginForm
 
     def form_valid(self, form):
         self.request.session.pop('login_mode', None)
