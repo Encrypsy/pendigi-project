@@ -225,29 +225,38 @@ class PublisherLoginForm(forms.Form):
     def clean(self):
         cleaned_data = super().clean()
 
-        publisher_id = cleaned_data.get('publisher_id')
+        publisher_id = cleaned_data.get('publisher_id', '').strip()
         password = cleaned_data.get('password')
 
         if not publisher_id or not password:
             return cleaned_data
 
-        # WAJIB mencari berdasarkan Publisher ID.
-        user = Users.objects.filter(
-            publisher_id=publisher_id
-        ).first()
+        user = Users.objects.filter(publisher_id=publisher_id).first()
 
+        # Publisher ID tidak ditemukan
         if user is None:
+            # Periksa apakah input merupakan username
+            username_exists = Users.objects.filter(
+                username=publisher_id
+            ).exists()
+
+            if username_exists:
+                raise ValidationError(
+                    'Kamu memasukkan username. Silakan gunakan Publisher ID '
+                    'untuk login sebagai penulis.'
+                )
+
             raise ValidationError(
-                'Publisher ID atau password yang kamu masukkan salah.'
+                'Publisher ID tidak ditemukan. Periksa kembali Publisher ID kamu.'
             )
 
-        # Hanya kontributor yang sudah disetujui.
+        # Akun belum disetujui sebagai kontributor
         if user.status_kontributor != 'approved':
             raise ValidationError(
-                'Akun ini belum memiliki akses sebagai penulis.'
+                'Akun kamu belum memiliki akses sebagai penulis.'
             )
 
-        # Verifikasi password akun yang ditemukan.
+        # Periksa password
         authenticated_user = authenticate(
             self.request,
             username=user.get_username(),
@@ -256,16 +265,16 @@ class PublisherLoginForm(forms.Form):
 
         if authenticated_user is None:
             raise ValidationError(
-                'Publisher ID atau password yang kamu masukkan salah.'
+                'Password yang kamu masukkan salah.'
             )
 
+        # Periksa status akun
         if not authenticated_user.is_active:
             raise ValidationError(
-                'Akun ini sedang tidak aktif.'
+                'Akun kamu sedang tidak aktif. Silakan hubungi administrator.'
             )
 
         self.user_cache = authenticated_user
-
         return cleaned_data
 
     def get_user(self):
