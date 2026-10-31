@@ -302,7 +302,7 @@
                                     class="user-revoke-button"
                                     onclick="openRevokeModal(
                                         '{{ item.pk }}',
-                                        '{{ item.username|escapejs }}'
+                                        '{{ item.username|escapejs }}',
                                         '{% url 'admin_revoke_contributor' item.pk %}'
                                     )"
                                 >
@@ -376,6 +376,12 @@
     function closeRevokeModal() {
         document.getElementById('revokeModal').classList.remove('active');
     }
+
+    document.getElementById('revokeModal').addEventListener('click', function(event) {
+        if (event.target === this) {
+            closeRevokeModal();
+        }
+    });
 
     document.getElementById('revokeModal').addEventListener('click', function(event) {
         if (event.target === this) {
