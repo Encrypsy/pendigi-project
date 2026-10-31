@@ -35,12 +35,9 @@
     --muted: #968577;
 
     min-height: 80vh;
-    padding: 65px 24px 30px;
+    padding: 30px 24px;
     box-sizing: border-box;
-    background:
-        radial-gradient(circle at 10% 15%, #EDE0D0 0, transparent 25%),
-        radial-gradient(circle at 90% 85%, #EDE0D0 0, transparent 25%),
-        var(--cream);
+    background: #FFFFFF;
     color: var(--text);
     font-family: inherit;
     position: relative;
