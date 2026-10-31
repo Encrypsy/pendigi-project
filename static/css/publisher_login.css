@@ -37,7 +37,7 @@
     min-height: 80vh;
     padding: 30px 24px;
     box-sizing: border-box;
-    background: #FFFFFF;
+    /* background: #FFFFFF; */
     color: var(--text);
     font-family: inherit;
     position: relative;
