@@ -3,6 +3,26 @@
    PENA DIGITAL — WARM EDITORIAL THEME
 ========================================= */
 
+/* =========================================
+   GLOBAL FONT
+========================================= */
+
+.publisher-login-page,
+.publisher-login-page * {
+    font-family: inherit;
+}
+
+.publisher-login-page h1,
+.publisher-login-page h2,
+.publisher-login-page p,
+.publisher-login-page a,
+.publisher-login-page button,
+.publisher-login-page input,
+.publisher-login-page label,
+.publisher-login-page span {
+    font-family: inherit;
+}
+
 .publisher-login-page {
     --brown-dark: #432B1F;
     --brown: #6B4226;
@@ -533,4 +553,61 @@
         padding: 0 5px;
         font-size: 8px;
     }
+}
+
+.intro-content h1 {
+    margin: 22px 0;
+    color: #FFF9F1;
+    font-size: clamp(38px, 4vw, 53px);
+    line-height: 1.2;
+    font-weight: 700;
+    letter-spacing: -1px;
+}
+
+.intro-content h1 em {
+    color: #E7C9A7;
+    font-style: italic;
+    font-weight: 500;
+}
+
+.intro-quote p {
+    margin: 4px 0 0;
+    color: #F2E6D9;
+    font-size: 13px;
+    font-style: italic;
+}
+
+.form-heading h2 {
+    margin: 17px 0 9px;
+    color: var(--brown-dark);
+    font-size: clamp(32px, 3vw, 42px);
+    font-weight: 700;
+    letter-spacing: -1px;
+}
+
+.form-heading h2 em {
+    color: var(--brown-medium);
+    font-style: italic;
+    font-weight: 500;
+}
+
+.publisher-login-wrapper {
+    width: 100%;
+    max-width: 1050px;
+    min-height: 590px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 0.95fr 1.05fr;
+    background: #FFFFFF;
+    border: 1px solid var(--beige-dark);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: none;
+    position: relative;
+}
+
+.publisher-submit-btn:hover {
+    background: var(--brown-dark);
+    box-shadow: none;
+    transform: translateY(-1px);
 }
