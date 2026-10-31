@@ -1,82 +1,174 @@
 
-{% extends "base.html" %}
+{% extends 'app_base.html' %}
 {% load static %}
 
 {% block title %}Status Pengajuan Kontributor | Pena Digital{% endblock %}
 
 {% block extra_css %}
-<link
-    rel="stylesheet"
-    href="{% static 'css/contributor_application_status.css' %}"
->
+<link rel="stylesheet" href="{% static 'css/contributor_application_status.css' %}">
 {% endblock %}
 
-{% block body %}
-<div class="application-status-page">
-    <div class="application-status-card">
+{% block content %}
+<div class="contributor-status-page">
 
-        <div class="application-status-header">
-            <h1>Status Pengajuan Kontributor</h1>
-            <p>Pantau perkembangan pengajuan kontributor kamu.</p>
+    <header class="status-page-header">
+        <a href="{% url 'articles:article_list' %}" class="status-back-link">
+            <span aria-hidden="true">←</span>
+            Kembali ke Beranda
+        </a>
+
+        <div class="status-heading">
+            <div>
+                <span class="status-eyebrow">PENA DIGITAL · CONTRIBUTOR CENTER</span>
+                <h1>Perjalanan menulismu.</h1>
+                <p>
+                    Setiap cerita punya awal. Pantau perjalananmu menjadi
+                    bagian dari komunitas kontributor Pena Digital.
+                </p>
+            </div>
+
+            <div class="status-heading-decoration" aria-hidden="true">
+                ✳
+            </div>
         </div>
+    </header>
 
-        {% if application.status == 'pending' %}
-            <div class="status-indicator status-pending">
-                <h2>Pengajuan Sedang Ditinjau</h2>
-                <p>
-                    Pengajuan kamu sudah diterima dan sedang menunggu
-                    verifikasi dari admin.
-                </p>
+    <main class="status-layout">
+
+        <section class="status-main-card">
+
+            <div class="status-card-topline">
+                <span>APPLICATION OVERVIEW</span>
+                <span>#{{ application.pk|stringformat:"04d" }}</span>
             </div>
 
-        {% elif application.status == 'approved' %}
-            <div class="status-indicator status-approved">
-                <h2>Pengajuan Disetujui!</h2>
-                <p>
-                    Selamat! Kamu sekarang sudah menjadi kontributor
-                    Pena Digital.
-                </p>
-            </div>
+            <div class="status-card-content">
 
-            {% if publisher_id %}
-                <div class="publisher-id-card">
-                    <span>ID Publisher</span>
-                    <strong>{{ publisher_id }}</strong>
+                <div class="status-section-label">
+                    <span class="status-section-dot"></span>
+                    STATUS PENGAJUAN
                 </div>
-            {% endif %}
 
-        {% elif application.status == 'rejected' %}
-            <div class="status-indicator status-rejected">
-                <h2>Pengajuan Belum Disetujui</h2>
-                <p>
-                    Mohon maaf, pengajuan kontributor kamu belum
-                    dapat disetujui.
-                </p>
-            </div>
+                {% if application.status == 'pending' %}
 
-            <div class="admin-notes">
-                <h3>Catatan dari Admin</h3>
+                    <div class="status-indicator status-pending">
+                        <div class="status-symbol">◷</div>
+                        <div>
+                            <span class="status-caption">SEDANG DIPROSES</span>
+                            <h2>Pengajuan sedang ditinjau.</h2>
+                            <p>
+                                Pengajuanmu sudah diterima. Admin sedang
+                                meninjau informasi yang kamu kirimkan.
+                                Mohon tunggu hasil verifikasi.
+                            </p>
+                        </div>
+                    </div>
 
-                {% if application.admin_notes %}
-                    <p>{{ application.admin_notes }}</p>
-                {% else %}
-                    <p>Admin belum memberikan catatan penolakan.</p>
+                {% elif application.status == 'approved' %}
+
+                    <div class="status-indicator status-approved">
+                        <div class="status-symbol">✓</div>
+                        <div>
+                            <span class="status-caption">VERIFIKASI BERHASIL</span>
+                            <h2>Selamat datang, kontributor!</h2>
+                            <p>
+                                Pengajuanmu telah disetujui. Sekarang kamu
+                                resmi menjadi bagian dari komunitas
+                                kontributor Pena Digital.
+                            </p>
+                        </div>
+                    </div>
+
+                    {% if publisher_id %}
+                        <div class="publisher-id-card">
+                            <div class="publisher-id-top">
+                                <span>PENA DIGITAL</span>
+                                <span>✳ MEMBER ID</span>
+                            </div>
+
+                            <div class="publisher-id-label">PUBLISHER IDENTIFICATION</div>
+                            <strong>{{ publisher_id }}</strong>
+
+                            <div class="publisher-id-bottom">
+                                <span>OFFICIAL CONTRIBUTOR</span>
+                                <span>EST. PENA DIGITAL</span>
+                            </div>
+                        </div>
+                    {% endif %}
+
+                {% elif application.status == 'rejected' %}
+
+                    <div class="status-indicator status-rejected">
+                        <div class="status-symbol">!</div>
+                        <div>
+                            <span class="status-caption">PERLU PERBAIKAN</span>
+                            <h2>Pengajuan belum disetujui.</h2>
+                            <p>
+                                Terima kasih sudah tertarik menjadi
+                                kontributor. Silakan perhatikan catatan
+                                admin sebelum mengajukan kembali.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="admin-notes">
+                        <div class="admin-notes-heading">
+                            <span class="admin-notes-icon">✎</span>
+                            <h3>Catatan dari Admin</h3>
+                        </div>
+
+                        {% if application.admin_notes %}
+                            <p>{{ application.admin_notes }}</p>
+                        {% else %}
+                            <p>Admin belum memberikan catatan penolakan.</p>
+                        {% endif %}
+                    </div>
+
+                    <a href="{% url 'apply_contributor' %}" class="status-primary-button">
+                        Ajukan Kembali <span>→</span>
+                    </a>
+
                 {% endif %}
+
+                <div class="status-submission-info">
+                    <div>
+                        <span class="info-label">NAMA PENGAJU</span>
+                        <strong>{{ application.full_name }}</strong>
+                    </div>
+
+                    <div>
+                        <span class="info-label">TANGGAL PENGAJUAN</span>
+                        <strong>{{ application.submitted_at|date:"d F Y, H:i" }}</strong>
+                    </div>
+                </div>
+
             </div>
+        </section>
 
-            <a
-                href="{% url 'apply_contributor' %}"
-                class="application-action"
-            >
-                Ajukan Kembali
-            </a>
-        {% endif %}
+        <aside class="status-side-card">
+            <span class="side-card-decoration">✳</span>
+            <span class="side-card-eyebrow">A LITTLE REMINDER</span>
 
-        <div class="application-meta">
-            Tanggal pengajuan:
-            {{ application.submitted_at|date:"d F Y, H:i" }}
-        </div>
+            <h2>Setiap penulis punya cerita untuk dibagikan.</h2>
 
-    </div>
+            <div class="side-card-divider"></div>
+
+            <p>
+                Pena Digital adalah ruang untuk membaca, menulis,
+                dan bertumbuh bersama. Terima kasih telah menjadi
+                bagian dari perjalanan ini.
+            </p>
+
+            <span class="side-card-signature">— Pena Digital</span>
+        </aside>
+
+    </main>
+
+    <footer class="status-page-footer">
+        <span>✳</span>
+        <p>Ruang untuk setiap cerita.</p>
+        <a href="{% url 'articles:article_list' %}">Kembali ke Beranda</a>
+    </footer>
+
 </div>
 {% endblock %}
