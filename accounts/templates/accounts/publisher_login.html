@@ -67,16 +67,16 @@
                 {% endif %}
 
                 <div class="form-field">
-                    <label for="{{ form.username.id_for_label }}">
+                    <label for="{{ form.publisher_id.id_for_label }}">
                         PUBLISHER ID
                     </label>
 
                     <div class="input-wrapper">
                         <span class="input-icon">✳</span>
-                        {{ form.username }}
+                        {{ form.publisher_id }}
                     </div>
 
-                    {% for error in form.username.errors %}
+                    {% for error in form.publisher_id.errors %}
                         <small class="field-error">{{ error }}</small>
                     {% endfor %}
                 </div>
