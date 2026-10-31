@@ -293,9 +293,11 @@
 
                         {% elif user.status_kontributor == 'pending' %}
 
-                            <div class="navbar-dropdown-disabled">
-                                Menunggu Verifikasi
-                            </div>
+                            {% if user.status_kontributor == 'pending' %}
+                                <a href="{% url 'contributor_application_status' %}">
+                                    Lihat Status
+                                </a>
+                            {% endif %}
 
                         {% else %}
 
