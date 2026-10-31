@@ -7,7 +7,7 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse_lazy
 
 from accounts.services import approve_contributor_application, reject_contributor_application
-from .forms import AdminUserEditForm, PublisherLoginForm, ReaderLoginForm, RegisterForm, ContributorApplicationForm, ProfileUpdateForm, Read
+from .forms import AdminUserEditForm, PublisherLoginForm, ReaderLoginForm, RegisterForm, ContributorApplicationForm, ProfileUpdateForm
 from .models import StatusKontributor, ContributorApplication, Users
 from .decorators import admin_required
 from django.db.models import Count, Avg, Q
