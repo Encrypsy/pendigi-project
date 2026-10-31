@@ -542,3 +542,247 @@
         font-size: 8px;
     }
 }
+
+/* =========================================
+   CIRCULAR PROFILE UPLOAD
+========================================= */
+
+.register-avatar-upload {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.register-dropzone {
+    width: 120px;
+    height: 120px;
+    min-height: 120px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    border: 2px dashed #CDB69E;
+    background: #FBF8F3;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    position: relative;
+}
+
+.register-dropzone:hover {
+    background: #F5EEE5;
+    border-color: var(--register-medium);
+}
+
+.register-dz-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    padding: 8px;
+    text-align: center;
+    pointer-events: none;
+}
+
+.register-dz-placeholder strong {
+    font-size: 9px;
+}
+
+.register-dz-placeholder small {
+    font-size: 8px;
+}
+
+.register-dz-placeholder .camera-symbol {
+    font-size: 22px;
+}
+
+.register-dropzone input[type="file"] {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+    z-index: 2;
+}
+
+.register-dropzone .preview {
+    display: none;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    object-fit: cover;
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.avatar-upload-info {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.avatar-upload-info strong {
+    color: var(--register-brown);
+    font-size: 12px;
+}
+
+.avatar-upload-info span {
+    color: var(--register-muted);
+    font-size: 10px;
+    line-height: 1.5;
+}
+
+/* =========================================
+   CROP MODAL
+========================================= */
+
+.crop-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    padding: 20px;
+    box-sizing: border-box;
+    align-items: center;
+    justify-content: center;
+    background: rgba(48, 31, 21, .72);
+}
+
+.crop-modal.active {
+    display: flex;
+}
+
+.crop-modal-content {
+    width: 100%;
+    max-width: 460px;
+    padding: 25px;
+    border: 1px solid var(--register-border);
+    border-radius: 15px;
+    background: #FFFEFC;
+}
+
+.crop-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+}
+
+.crop-modal-eyebrow {
+    color: var(--register-light);
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+}
+
+.crop-modal-header h3 {
+    margin: 8px 0 5px;
+    color: var(--register-dark);
+    font-size: 22px;
+}
+
+.crop-modal-header p {
+    margin: 0;
+    color: var(--register-muted);
+    font-size: 11px;
+}
+
+.crop-close {
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 50%;
+    background: var(--register-beige);
+    color: var(--register-brown);
+    font-size: 23px;
+    cursor: pointer;
+}
+
+.crop-image-container {
+    width: 100%;
+    height: 300px;
+    overflow: hidden;
+    background: #F1E7DA;
+    border-radius: 10px;
+}
+
+.crop-image-container img {
+    display: block;
+    max-width: 100%;
+}
+
+.crop-controls {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 17px 0;
+}
+
+.crop-controls button {
+    width: 39px;
+    height: 39px;
+    border: 1px solid var(--register-border);
+    border-radius: 8px;
+    background: var(--register-cream);
+    color: var(--register-brown);
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.crop-controls button:hover {
+    background: var(--register-beige);
+}
+
+.crop-modal-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.crop-modal-actions button {
+    flex: 1;
+    min-height: 44px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.crop-cancel {
+    border: 1px solid var(--register-border);
+    background: #FFFFFF;
+    color: var(--register-brown);
+}
+
+.crop-apply {
+    border: 1px solid var(--register-brown);
+    background: var(--register-brown);
+    color: #FFFFFF;
+}
+
+.crop-apply:hover {
+    background: var(--register-dark);
+}
+
+@media (max-width: 480px) {
+    .register-avatar-upload {
+        gap: 13px;
+    }
+
+    .register-dropzone {
+        width: 105px;
+        height: 105px;
+        min-height: 105px;
+    }
+
+    .crop-modal-content {
+        padding: 18px;
+    }
+
+    .crop-image-container {
+        height: 260px;
+    }
+}

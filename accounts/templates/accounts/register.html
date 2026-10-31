@@ -8,6 +8,7 @@
 <link rel="stylesheet" href="{% static 'css/auth.css' %}">
 <link rel="stylesheet" href="{% static 'css/upload.css' %}">
 <link rel="stylesheet" href="{% static 'css/register.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css">
 {% endblock %}
 
 {% block content %}
@@ -79,29 +80,47 @@
 
                 <!-- PROFILE PICTURE -->
                 <div class="register-avatar-section">
+
                     <div class="register-avatar-heading">
                         <span class="register-field-label">PROFILE PICTURE</span>
                         <span class="register-optional">OPTIONAL</span>
                     </div>
 
-                    <label class="dropzone register-dropzone" id="dropzone">
+                    <div class="register-avatar-upload">
 
-                        <img class="preview" id="preview" alt="Preview foto profil">
+                        <label class="register-dropzone" id="dropzone">
 
-                        <div id="dz-placeholder" class="register-dz-placeholder">
-                            <span class="camera-symbol">✧</span>
-                            <strong>Upload foto profil</strong>
-                            <small>Klik untuk memilih gambar</small>
+                            <img
+                                class="preview"
+                                id="preview"
+                                src=""
+                                alt="Preview foto profil"
+                            >
+
+                            <div id="dz-placeholder" class="register-dz-placeholder">
+                                <span class="camera-symbol">✧</span>
+                                <strong>Upload foto profil</strong>
+                                <small>Klik untuk memilih gambar</small>
+                            </div>
+
+                            {{ form.profile_picture }}
+
+                        </label>
+
+                        <div class="avatar-upload-info">
+                            <strong>Foto profil kamu</strong>
+                            <span>Format JPG, PNG, atau WEBP.</span>
+                            <span>Sesuaikan foto sebelum menyimpan.</span>
                         </div>
 
-                        {{ form.profile_picture }}
-                    </label>
+                    </div>
 
                     {% if form.profile_picture.errors %}
                         <small class="register-field-error">
                             {{ form.profile_picture.errors.0 }}
                         </small>
                     {% endif %}
+
                 </div>
 
                 <!-- USERNAME -->
@@ -158,6 +177,48 @@
                 </button>
 
             </form>
+
+            <!-- IMAGE CROP MODAL -->
+            <div class="crop-modal" id="cropModal">
+
+                <div class="crop-modal-content">
+
+                    <div class="crop-modal-header">
+                        <div>
+                            <span class="crop-modal-eyebrow">PROFILE EDITOR</span>
+                            <h3>Sesuaikan foto</h3>
+                            <p>Atur posisi foto agar terlihat sempurna.</p>
+                        </div>
+
+                        <button type="button" id="closeCropModal" class="crop-close">
+                            &times;
+                        </button>
+                    </div>
+
+                    <div class="crop-image-container">
+                        <img id="cropImage" src="" alt="Foto yang akan dipotong">
+                    </div>
+
+                    <div class="crop-controls">
+                        <button type="button" id="zoomOut">−</button>
+                        <button type="button" id="zoomIn">+</button>
+                        <button type="button" id="rotateLeft">↶</button>
+                        <button type="button" id="rotateRight">↷</button>
+                    </div>
+
+                    <div class="crop-modal-actions">
+                        <button type="button" id="cancelCrop" class="crop-cancel">
+                            Batal
+                        </button>
+
+                        <button type="button" id="applyCrop" class="crop-apply">
+                            Gunakan Foto
+                        </button>
+                    </div>
+
+                </div>
+
+            </div>
 
             <div class="register-footer">
                 <div class="register-divider"></div>
