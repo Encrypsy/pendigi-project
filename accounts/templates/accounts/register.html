@@ -116,11 +116,25 @@
 
                     </label>
 
-                    <div class="avatar-upload-info">
-                        <strong>Foto profil</strong>
+                    <div class="form-group">
+                        <label for="{{ form.profile_picture.id_for_label }}">
+                            Foto Profil
+                        </label>
+
+                        {{ form.profile_picture }}
+
                         <small class="form-text text-muted">
-                            Format: JPG, JPEG, PNG, WEBP. Ukuran maksimal 2 MB.
+                            Format: JPG, JPEG, atau PNG. Ukuran maksimal 2 MB.
                         </small>
+
+                        <small id="profile-picture-error"
+                            class="field-error"
+                            style="display: none;">
+                        </small>
+
+                        {% for error in form.profile_picture.errors %}
+                            <small class="field-error">{{ error }}</small>
+                        {% endfor %}
                     </div>
                 </div>
 
@@ -405,6 +419,38 @@ document.addEventListener('DOMContentLoaded', function () {
             closeCropModal();
 
         }, 'image/jpeg', 0.90);
+    });
+});
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const input = document.getElementById(
+        '{{ form.profile_picture.id_for_label }}'
+    );
+
+    const errorMessage = document.getElementById(
+        'profile-picture-error'
+    );
+
+    const maxSize = 2 * 1024 * 1024; // 2 MB
+
+    input.addEventListener('change', function () {
+        const file = this.files[0];
+
+        errorMessage.style.display = 'none';
+        errorMessage.textContent = '';
+
+        if (!file) return;
+
+        if (file.size > maxSize) {
+            errorMessage.textContent =
+                'Ukuran foto profil maksimal 2 MB.';
+
+            errorMessage.style.display = 'block';
+
+            // Kosongkan file agar tidak ikut terkirim
+            this.value = '';
+        }
     });
 });
 </script>
