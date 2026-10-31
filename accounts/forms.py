@@ -59,7 +59,13 @@ class AdminUserEditForm(forms.ModelForm):
         }
 
 class RegisterForm(UserCreationForm):
-    email = forms.EmailField(required=True)
+    email = forms.EmailField(
+        required=True,
+        error_messages={
+            'invalid': 'Format email tidak valid.',
+            'required': 'Email wajib diisi.',
+        }
+    )
 
     class Meta(UserCreationForm.Meta):
         model = Users
