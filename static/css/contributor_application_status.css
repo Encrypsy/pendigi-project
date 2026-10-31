@@ -1,0 +1,172 @@
+
+/* ==============================
+   Contributor Application Status
+================================= */
+
+.application-status-page {
+    width: 100%;
+    max-width: 760px;
+    margin: 50px auto;
+    padding: 0 20px;
+}
+
+.application-status-card {
+    background: #ffffff;
+    border: 1px solid #e8eaf0;
+    border-radius: 18px;
+    padding: 36px;
+    box-shadow: 0 8px 30px rgba(30, 41, 59, 0.06);
+}
+
+.application-status-header {
+    margin-bottom: 28px;
+}
+
+.application-status-header h1 {
+    font-size: 26px;
+    font-weight: 700;
+    color: #202938;
+    margin: 0 0 8px;
+}
+
+.application-status-header p {
+    color: #7b8494;
+    font-size: 14px;
+    margin: 0;
+}
+
+/* Status indicator */
+
+.status-indicator {
+    padding: 22px;
+    border-radius: 14px;
+    margin-bottom: 24px;
+}
+
+.status-indicator h2 {
+    font-size: 20px;
+    margin: 0 0 8px;
+}
+
+.status-indicator p {
+    font-size: 14px;
+    line-height: 1.7;
+    margin: 0;
+}
+
+.status-pending {
+    background: #fff7e6;
+    color: #946200;
+    border: 1px solid #ffe4a3;
+}
+
+.status-approved {
+    background: #eaf8ef;
+    color: #237a45;
+    border: 1px solid #c5ebd1;
+}
+
+.status-rejected {
+    background: #fff0f0;
+    color: #b42318;
+    border: 1px solid #ffd0cc;
+}
+
+/* Publisher ID */
+
+.publisher-id-card {
+    background: #f5f7ff;
+    border: 1px solid #dce3ff;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 24px;
+}
+
+.publisher-id-card span {
+    display: block;
+    color: #69738a;
+    font-size: 13px;
+    margin-bottom: 8px;
+}
+
+.publisher-id-card strong {
+    color: #3949ab;
+    font-size: 22px;
+    letter-spacing: 1px;
+}
+
+/* Admin notes */
+
+.admin-notes {
+    background: #f8f9fb;
+    border-left: 4px solid #e05b55;
+    border-radius: 8px;
+    padding: 18px;
+    margin-bottom: 24px;
+}
+
+.admin-notes h3 {
+    font-size: 15px;
+    color: #303846;
+    margin: 0 0 8px;
+}
+
+.admin-notes p {
+    color: #667085;
+    font-size: 14px;
+    line-height: 1.7;
+    margin: 0;
+}
+
+/* Application information */
+
+.application-meta {
+    border-top: 1px solid #edf0f4;
+    padding-top: 20px;
+    color: #8992a1;
+    font-size: 13px;
+}
+
+/* Buttons */
+
+.application-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 22px;
+    margin-top: 20px;
+    border-radius: 10px;
+    background: #5267d9;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.2s ease;
+}
+
+.application-action:hover {
+    background: #4054c5;
+    color: #ffffff;
+}
+
+/* Responsive */
+
+@media (max-width: 600px) {
+    .application-status-page {
+        margin: 28px auto;
+        padding: 0 14px;
+    }
+
+    .application-status-card {
+        padding: 22px;
+        border-radius: 14px;
+    }
+
+    .application-status-header h1 {
+        font-size: 22px;
+    }
+
+    .status-indicator {
+        padding: 18px;
+    }
+}

@@ -105,17 +105,16 @@ def register_view(request):
         form = RegisterForm()
     return render(request, 'accounts/register.html', {'form': form})
 
+
 @login_required
 def apply_contributor(request):
-    # Kunci baris user agar dua pengajuan bersamaan
-    # tidak lolos pemeriksaan status.
     if request.method == 'POST':
         with transaction.atomic():
             user = Users.objects.select_for_update().get(
                 pk=request.user.pk
             )
 
-            # Pengguna yang sudah menjadi kontributor tidak bisa mendaftar lagi.
+            # Pengguna yang sudah disetujui tidak bisa mendaftar lagi.
             if user.status_kontributor == StatusKontributor.APPROVED:
                 messages.info(
                     request,
@@ -123,8 +122,7 @@ def apply_contributor(request):
                 )
                 return redirect('articles:article_list')
 
-            # Cegah pengajuan pending ganda, termasuk jika status user
-            # tidak sengaja tidak sinkron dengan data pengajuan.
+            # Cegah pengajuan pending ganda.
             has_pending_application = (
                 ContributorApplication.objects.filter(
                     user=user,
@@ -132,15 +130,14 @@ def apply_contributor(request):
                 ).exists()
             )
 
-            if (
-                user.status_kontributor == StatusKontributor.PENDING
-                or has_pending_application
-            ):
+            if has_pending_application:
                 messages.info(
                     request,
                     'Pengajuan kamu masih menunggu verifikasi admin.',
                 )
-                return redirect('articles:article_list')
+                return redirect(
+                    'accounts:contributor_application_status'
+                )
 
             form = ContributorApplicationForm(request.POST)
 
@@ -168,31 +165,36 @@ def apply_contributor(request):
                     'Pengajuan berhasil dikirim! '
                     'Silakan tunggu verifikasi admin.',
                 )
-                return redirect('articles:article_list')
+
+                return redirect(
+                    'accounts:contributor_application_status'
+                )
 
     else:
-        # Pemeriksaan status juga dilakukan saat halaman dibuka.
-        if request.user.status_kontributor == StatusKontributor.APPROVED:
+        user = request.user
+
+        if user.status_kontributor == StatusKontributor.APPROVED:
             messages.info(
                 request,
                 'Anda sudah menjadi kontributor.',
             )
             return redirect('articles:article_list')
 
-        has_pending_application = ContributorApplication.objects.filter(
-            user=request.user,
-            status=StatusKontributor.PENDING,
-        ).exists()
+        has_pending_application = (
+            ContributorApplication.objects.filter(
+                user=user,
+                status=StatusKontributor.PENDING,
+            ).exists()
+        )
 
-        if (
-            request.user.status_kontributor == StatusKontributor.PENDING
-            or has_pending_application
-        ):
+        if has_pending_application:
             messages.info(
                 request,
                 'Pengajuan kamu masih menunggu verifikasi admin.',
             )
-            return redirect('articles:article_list')
+            return redirect(
+                'accounts:contributor_application_status'
+            )
 
         form = ContributorApplicationForm()
 
@@ -201,8 +203,6 @@ def apply_contributor(request):
         'accounts/apply_contributor.html',
         {'form': form},
     )
-
-
 
 @login_required
 def profile_view(request, username=None):
@@ -1159,4 +1159,32 @@ def notifications_list(request):
             'breadcrumb': 'Notifikasi',
         }
     )
+
+@login_required
+def contributor_application_status(request):
+    application = (
+        ContributorApplication.objects
+        .filter(user=request.user)
+        .order_by('-submitted_at')
+        .first()
+    )
+
+    if application is None:
+        messages.info(
+            request,
+            'Kamu belum memiliki pengajuan kontributor.',
+        )
+        return redirect('accounts:apply_contributor')
+
+    context = {
+        'application': application,
+        'publisher_id': request.user.publisher_id,
+    }
+
+    return render(
+        request,
+        'accounts/contributor_application_status.html',
+        context,
+    )
+
 

@@ -1,0 +1,82 @@
+
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block extra_css %}
+<link
+    rel="stylesheet"
+    href="{% static 'accounts/css/contributor_application_status.css' %}"
+>
+{% endblock %}
+
+{% block content %}
+<div class="application-status-page">
+    <div class="application-status-card">
+
+        <div class="application-status-header">
+            <h1>Status Pengajuan Kontributor</h1>
+            <p>Pantau perkembangan pengajuan kontributor kamu.</p>
+        </div>
+
+        {% if application.status == 'pending' %}
+            <div class="status-indicator status-pending">
+                <h2>Pengajuan Sedang Ditinjau</h2>
+                <p>
+                    Pengajuan kamu sudah diterima dan sedang menunggu
+                    verifikasi dari admin.
+                </p>
+            </div>
+
+        {% elif application.status == 'approved' %}
+            <div class="status-indicator status-approved">
+                <h2>Pengajuan Disetujui!</h2>
+                <p>
+                    Selamat! Kamu sekarang sudah menjadi kontributor
+                    Pena Digital.
+                </p>
+            </div>
+
+            {% if publisher_id %}
+                <div class="publisher-id-card">
+                    <span>ID Publisher</span>
+                    <strong>{{ publisher_id }}</strong>
+                </div>
+            {% endif %}
+
+        {% elif application.status == 'rejected' %}
+            <div class="status-indicator status-rejected">
+                <h2>Pengajuan Belum Disetujui</h2>
+                <p>
+                    Mohon maaf, pengajuan kontributor kamu belum
+                    dapat disetujui.
+                </p>
+            </div>
+
+            <div class="admin-notes">
+                <h3>Catatan dari Admin</h3>
+
+                {% if application.admin_notes %}
+                    <p>{{ application.admin_notes }}</p>
+                {% else %}
+                    <p>Admin belum memberikan catatan penolakan.</p>
+                {% endif %}
+            </div>
+
+            <a
+                href="{% url 'accounts:apply_contributor' %}"
+                class="application-action"
+            >
+                Ajukan Kembali
+            </a>
+        {% endif %}
+
+        <div class="application-meta">
+            Tanggal pengajuan:
+            {{ application.submitted_at|date:"d F Y, H:i" }}
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
