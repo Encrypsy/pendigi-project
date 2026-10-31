@@ -118,10 +118,10 @@
                         </label>
 
                         <small class="form-text text-muted">
-                            Format: JPG, JPEG, atau PNG. Ukuran maksimal 2 MB.
+                            Format: JPG, JPEG, atau PNG
                         </small>
 
-                        <small
+                        {% comment %} <small
                             id="profile-picture-error"
                             class="register-field-error"
                             {% if not form.profile_picture.errors %}style="display: none;"{% endif %}
@@ -129,7 +129,7 @@
                             {% for error in form.profile_picture.errors %}
                                 {{ error }}
                             {% endfor %}
-                        </small>
+                        </small> {% endcomment %}
 
                     </div>
                 </div>
