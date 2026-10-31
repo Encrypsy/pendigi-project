@@ -327,16 +327,32 @@
                                 Dashboard
                             </a>
 
-                        {% elif user.status_kontributor == 'approved' or user.status_kontributor == 'pending' or user.status_kontributor == 'rejected' %}
+                        {% elif user.status_kontributor == 'approved' %}
+
+                            {% if request.session.login_mode == 'publisher' %}
+
+                                <a href="{% url 'author_dashboard' %}">
+                                    Dashboard Penulis
+                                </a>
+
+                            {% else %}
+
+                                <a href="{% url 'contributor_application_status' %}">
+                                    Lihat Status
+                                </a>
+
+                            {% endif %}
+
+                        {% elif user.status_kontributor == 'pending' or user.status_kontributor == 'rejected' %}
 
                             <a href="{% url 'contributor_application_status' %}">
                                 Lihat Status
                             </a>
 
-                        {% elif user.status_kontributor == 'none' %}
+                        {% else %}
 
                             <a href="{% url 'apply_contributor' %}">
-                                Daftar Menjadi Penulis
+                                Daftar menjadi penulis
                             </a>
 
                         {% endif %}

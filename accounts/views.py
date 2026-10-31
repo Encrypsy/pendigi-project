@@ -91,10 +91,22 @@ def toggle_follow(request, username):
 class CustomLoginView(LoginView):
     template_name = 'accounts/login.html'
 
+    def form_valid(self, form):
+        self.request.session.pop('login_mode', None)
+
+        return super().form_valid(form)
+    
 class PublisherLoginView(LoginView):
     template_name = 'accounts/publisher_login.html'
     authentication_form = PublisherLoginForm
-    redirect_authenticated_user = True
+    redirect_authenticated_user = False
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+
+        self.request.session['login_mode'] = 'publisher'
+
+        return response
 
     def get_success_url(self):
         return reverse_lazy('author_dashboard')
@@ -422,6 +434,9 @@ def author_dashboard(request):
 
     if request.user.status_kontributor != 'approved':
         return redirect('articles:article_list')
+
+    if request.session.get('login_mode') != 'publisher':
+        return redirect('contributor_application_status')
 
     # ==========================================
     # SEMUA KONTEN MILIK PENULIS
