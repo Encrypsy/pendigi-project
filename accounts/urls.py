@@ -27,7 +27,7 @@ urlpatterns = [
     path('dashboard/penulis/notifikasi/', author_notifications, name='author_notifications'),
     path('kelola/user/', admin_user_list, name='admin_user_list'),
     path(
-        'admin/users/<int:pk>/revoke-contributor/',
+        'kelola/user/<int:pk>/revoke-kontributor/',
         admin_revoke_contributor,
         name='admin_revoke_contributor',
     ),

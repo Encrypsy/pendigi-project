@@ -303,6 +303,7 @@
                                     onclick="openRevokeModal(
                                         '{{ item.pk }}',
                                         '{{ item.username|escapejs }}'
+                                        '{% url 'admin_revoke_contributor' item.pk %}'
                                     )"
                                 >
                                     Cabut akses
@@ -361,15 +362,14 @@
     </div>
 </div>
 <script>
-    function openRevokeModal(userId, username) {
+    function openRevokeModal(userId, username, revokeUrl) {
         const modal = document.getElementById('revokeModal');
         const form = document.getElementById('revokeForm');
 
         document.getElementById('revokeUsername').textContent = username;
         document.getElementById('revokeReason').value = '';
 
-        form.action = `/admin/users/${userId}/revoke-contributor/`;
-
+        form.action = revokeUrl;
         modal.classList.add('active');
     }
 
