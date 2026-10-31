@@ -154,6 +154,11 @@ class Activity(models.Model):
         
         CONTRIBUTOR_APPROVED = "contributor_approved", "Kontributor disetujui"
         CONTRIBUTOR_REJECTED = "contributor_rejected", "Pengajuan kontributor ditolak"
+        
+        CONTRIBUTOR_REVOKED = (
+            "contributor_revoked",
+            "Hak akses penulis dicabut",
+        )
 
 
     # User yang menerima notifikasi

@@ -101,6 +101,108 @@
             .user-filter { flex-direction: column; }
             .user-filter input, .user-filter select { width: 100%; }
         }
+
+        .user-revoke-button {
+            border: none;
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 7px 10px;
+            border-radius: 7px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: rgba(0, 0, 0, 0.55);
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            width: 100%;
+            max-width: 450px;
+            background: #fff;
+            border-radius: 14px;
+            padding: 24px;
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            font-size: 20px;
+        }
+
+        .modal-close {
+            border: none;
+            background: none;
+            font-size: 26px;
+            cursor: pointer;
+            color: #777;
+        }
+
+        .modal-content p {
+            line-height: 1.6;
+            color: #555;
+            margin-bottom: 20px;
+        }
+
+        .modal-content label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .modal-content textarea {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            resize: vertical;
+            font: inherit;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .cancel-button,
+        .confirm-revoke-button {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .cancel-button {
+            background: #eee;
+            color: #444;
+        }
+
+        .confirm-revoke-button {
+            background: #dc3545;
+            color: white;
+        }
     </style>
 {% endblock %}
 
@@ -194,6 +296,18 @@
                             >
                                 Detail
                             </a>
+                            {% if item.role == 'kontributor' and not item.is_superuser %}
+                                <button
+                                    type="button"
+                                    class="user-revoke-button"
+                                    onclick="openRevokeModal(
+                                        '{{ item.pk }}',
+                                        '{{ item.username|escapejs }}'
+                                    )"
+                                >
+                                    Cabut akses
+                                </button>
+                            {% endif %}
                         </div>
                     </td>
                 </tr>
@@ -206,6 +320,67 @@
                 {% endfor %}
             </tbody>
         </table>
+        <div id="revokeModal" class="modal-overlay">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Cabut Akses Penulis</h3>
+                    <button type="button" class="modal-close" onclick="closeRevokeModal()">
+                        &times;
+                    </button>
+                </div>
+
+                <p>
+                    Kamu akan mencabut hak akses penulis dari
+                    <strong id="revokeUsername"></strong>.
+                    Pengguna tersebut akan kembali menjadi pembaca.
+                </p>
+
+                <form id="revokeForm" method="POST">
+                    {% csrf_token %}
+
+                    <label for="revokeReason">Alasan pencabutan (opsional)</label>
+                    <textarea
+                        id="revokeReason"
+                        name="reason"
+                        rows="4"
+                        placeholder="Tuliskan alasan pencabutan akses..."
+                    ></textarea>
+
+                    <div class="modal-actions">
+                        <button type="button" class="cancel-button" onclick="closeRevokeModal()">
+                            Batal
+                        </button>
+
+                        <button type="submit" class="confirm-revoke-button">
+                            Ya, Cabut Akses
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 </div>
+<script>
+    function openRevokeModal(userId, username) {
+        const modal = document.getElementById('revokeModal');
+        const form = document.getElementById('revokeForm');
+
+        document.getElementById('revokeUsername').textContent = username;
+        document.getElementById('revokeReason').value = '';
+
+        form.action = `/admin/users/${userId}/revoke-contributor/`;
+
+        modal.classList.add('active');
+    }
+
+    function closeRevokeModal() {
+        document.getElementById('revokeModal').classList.remove('active');
+    }
+
+    document.getElementById('revokeModal').addEventListener('click', function(event) {
+        if (event.target === this) {
+            closeRevokeModal();
+        }
+    });
+</script>
 {% endblock %}

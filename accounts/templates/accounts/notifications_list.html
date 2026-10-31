@@ -27,6 +27,11 @@
         border-radius: 50%;
         object-fit: cover;
     }
+    
+    .notification-revoked-icon {
+        background: #fff0e6;
+        color: #d97706;
+    }
 </style>
 <section class="notifications-page">
 
@@ -38,25 +43,40 @@
     </header>
    
     <div class="notifications-list">
-        {% for activity in page_obj %}
+        
+    {% for activity in page_obj %}
 
-        {% if activity.action_type == 'contributor_approved' or activity.action_type == 'contributor_rejected' %}
+        {% if activity.action_type == 'contributor_approved' or activity.action_type == 'contributor_rejected' or activity.action_type == 'contributor_revoked' %}
 
             <a
-                href="{% url 'contributor_application_status' %}"
+                {% if activity.action_type == 'contributor_revoked' %}
+                    href="#"
+                {% else %}
+                    href="{% url 'contributor_application_status' %}"
+                {% endif %}
                 class="notification-card {% if not activity.is_read %}is-unread{% endif %}"
                 style="text-decoration: none; color: inherit;"
             >
                 <div class="notification-card-avatar">
 
                     {% if activity.action_type == 'contributor_approved' %}
+
                         <span class="notification-system-icon notification-approved-icon">
                             ✓
                         </span>
-                    {% else %}
+
+                    {% elif activity.action_type == 'contributor_rejected' %}
+
                         <span class="notification-system-icon notification-rejected-icon">
                             !
                         </span>
+
+                    {% else %}
+
+                        <span class="notification-system-icon notification-revoked-icon">
+                            <i class="fas fa-bell"></i>
+                        </span>
+
                     {% endif %}
 
                 </div>
@@ -65,12 +85,20 @@
                     <p class="notification-message">
 
                         {% if activity.action_type == 'contributor_approved' %}
+
                             <strong>Pengajuan kontributor disetujui</strong>
                             Pengajuan kamu telah disetujui. Selamat bergabung sebagai kontributor Pena Digital!
 
-                        {% else %}
+                        {% elif activity.action_type == 'contributor_rejected' %}
+
                             <strong>Pengajuan kontributor ditolak</strong>
                             Pengajuan kamu ditolak. Silakan periksa catatan admin untuk mengetahui alasannya.
+
+                        {% else %}
+
+                            <strong>Hak akses penulis dicabut</strong>
+                            {{ activity.message }}
+
                         {% endif %}
 
                     </p>
@@ -185,12 +213,15 @@
 
         {% endif %}
 
-        {% empty %}
-            <div class="notifications-empty">
-                <h2>Belum ada notifikasi</h2>
-                <p>Notifikasi baru akan muncul di sini.</p>
-            </div>
-        {% endfor %}
+    {% empty %}
+
+        <div class="notifications-empty">
+            <h2>Belum ada notifikasi</h2>
+            <p>Notifikasi baru akan muncul di sini.</p>
+        </div>
+
+    {% endfor %}
+
     </div>
 
     {% if page_obj.has_other_pages %}

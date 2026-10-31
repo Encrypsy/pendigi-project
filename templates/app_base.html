@@ -150,7 +150,7 @@
                                 {% endif %}
 
                             </div>
-
+                       
                             <div class="notification-content">
                                 <p>
 
@@ -163,6 +163,11 @@
 
                                         <strong>Pengajuan kontributor ditolak</strong>
                                         Pengajuan kamu ditolak. Silakan periksa catatan admin untuk mengetahui alasannya.
+
+                                    {% elif activity.action_type == 'contributor_revoked' %}
+
+                                        <strong>Hak akses penulis dicabut</strong>
+                                        {{ activity.message }}
 
                                     {% elif activity.action_type == 'approved' %}
 

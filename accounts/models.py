@@ -152,3 +152,35 @@ class ActionType(models.TextChoices):
     LIKE = "like", "Konten disukai"
     COMMENT_REPLY = "comment_reply", "Balasan komentar"
     NEW_CHAPTER = "new_chapter", "Bab baru"
+    
+    CONTRIBUTOR_REVOKED = (
+        "contributor_revoked",
+        "Hak akses penulis dicabut",
+    )
+        
+class ContributorRevocation(models.Model):
+    user = models.ForeignKey(
+        Users,
+        on_delete=models.CASCADE,
+        related_name='contributor_revocations',
+    )
+    revoked_by = models.ForeignKey(
+        Users,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='revocations_made',
+    )
+    reason = models.TextField(
+        blank=True,
+        default='',
+        verbose_name='Alasan pencabutan',
+    )
+    revoked_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-revoked_at']
+        verbose_name = 'Riwayat Pencabutan Hak Akses'
+        verbose_name_plural = 'Riwayat Pencabutan Hak Akses'
+
+    def __str__(self):
+        return f'{self.user.username} - {self.revoked_at}'

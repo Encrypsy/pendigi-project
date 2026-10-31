@@ -8,7 +8,7 @@ from django.urls import reverse_lazy
 
 from accounts.services import approve_contributor_application, reject_contributor_application
 from .forms import AdminUserEditForm, PublisherLoginForm, ReaderLoginForm, RegisterForm, ContributorApplicationForm, ProfileUpdateForm
-from .models import StatusKontributor, ContributorApplication, Users
+from .models import ActionType, ContributorRevocation, Role, StatusKontributor, ContributorApplication, Users
 from .decorators import admin_required
 from django.db.models import Count, Avg, Q
 from django.utils import timezone
@@ -1068,6 +1068,60 @@ def admin_user_list(request):
         'total_users': Users.objects.count(),
     })
 
+@admin_required
+@require_POST
+def admin_revoke_contributor(request, pk):
+    user_obj = get_object_or_404(Users, pk=pk)
+
+    if user_obj.is_superuser or user_obj.role == Role.ADMIN:
+        messages.error(
+            request,
+            'Hak akses admin tidak dapat dicabut melalui fitur ini.'
+        )
+        return redirect('admin_user_detail', pk=user_obj.pk)
+
+    if user_obj.role != Role.KONTRIBUTOR:
+        messages.error(
+            request,
+            'Pengguna tersebut bukan penulis.'
+        )
+        return redirect('admin_user_detail', pk=user_obj.pk)
+
+    reason = request.POST.get('reason', '').strip()
+
+    ContributorRevocation.objects.create(
+        user=user_obj,
+        revoked_by=request.user,
+        reason=reason,
+    )
+
+    user_obj.role = Role.PEMBACA
+    user_obj.status_kontributor = StatusKontributor.NONE
+    user_obj.publisher_id = None
+    user_obj.save(
+        update_fields=[
+            'role',
+            'status_kontributor',
+            'publisher_id',
+        ]
+    )
+    
+    Activity.objects.create(
+        actor=request.user,
+        recipient=user_obj,
+        action_type=ActionType.CONTRIBUTOR_REVOKED,
+        message=(
+            "Hak akses penulis akun kamu telah dicabut oleh administrator. "
+            + (f"Alasan: {reason}" if reason else "")
+        ),
+    )
+
+    messages.success(
+        request,
+        f'Hak akses penulis {user_obj.username} berhasil dicabut.'
+    )
+
+    return redirect('admin_user_list')
 
 @admin_required
 def admin_user_detail(request, pk):
