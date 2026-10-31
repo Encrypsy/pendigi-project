@@ -611,3 +611,9 @@
     box-shadow: none;
     transform: translateY(-1px);
 }
+
+.publisher-login-page *,
+.publisher-login-page *::before,
+.publisher-login-page *::after {
+    box-shadow: none !important;
+}
