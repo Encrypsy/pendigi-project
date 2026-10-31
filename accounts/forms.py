@@ -303,14 +303,10 @@ class ReaderLoginForm(AuthenticationForm):
                 email__iexact=username
             ).exists()
 
-            if email_exists:
+            if not email_exists:
                 raise ValidationError(
-                    'Email terdaftar, tetapi silakan periksa kembali kredensial login.'
+                    'Username dan password salah.'
                 )
-
-            raise ValidationError(
-                'Username tidak ditemukan.'
-            )
 
         user = Users.objects.filter(username=username).first()
 
