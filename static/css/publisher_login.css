@@ -1,0 +1,536 @@
+/* =========================================
+   PUBLISHER LOGIN
+   PENA DIGITAL — WARM EDITORIAL THEME
+========================================= */
+
+.publisher-login-page {
+    --brown-dark: #432B1F;
+    --brown: #6B4226;
+    --brown-medium: #80583C;
+    --brown-light: #A78361;
+    --cream: #FBF8F2;
+    --beige: #F1E7DA;
+    --beige-dark: #E5D5C2;
+    --text: #382A21;
+    --muted: #968577;
+
+    min-height: 80vh;
+    padding: 65px 24px 30px;
+    box-sizing: border-box;
+    background:
+        radial-gradient(circle at 10% 15%, #EDE0D0 0, transparent 25%),
+        radial-gradient(circle at 90% 85%, #EDE0D0 0, transparent 25%),
+        var(--cream);
+    color: var(--text);
+    font-family: inherit;
+    position: relative;
+    overflow: hidden;
+}
+
+.publisher-login-wrapper {
+    width: 100%;
+    max-width: 1050px;
+    min-height: 590px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 0.95fr 1.05fr;
+    background: #FFFFFF;
+    border: 1px solid var(--beige-dark);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(67, 43, 31, 0.09);
+    position: relative;
+}
+
+/* =========================================
+   LEFT INTRO PANEL
+========================================= */
+
+.publisher-login-intro {
+    background:
+        radial-gradient(circle at 90% 15%, rgba(255,255,255,.09), transparent 25%),
+        linear-gradient(145deg, #513522, #765037 65%, #875F43);
+    color: #FFF9F1;
+    padding: 38px 42px 30px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+}
+
+.publisher-login-intro::before {
+    content: "";
+    position: absolute;
+    width: 320px;
+    height: 320px;
+    border: 1px solid rgba(255,255,255,.10);
+    border-radius: 50%;
+    right: -180px;
+    bottom: -90px;
+}
+
+.publisher-login-intro::after {
+    content: "";
+    position: absolute;
+    width: 220px;
+    height: 220px;
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 50%;
+    right: -130px;
+    bottom: -40px;
+}
+
+.intro-top,
+.intro-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    position: relative;
+    z-index: 2;
+}
+
+.intro-brand {
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 2px;
+}
+
+.intro-label,
+.intro-footer {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: #D8C2AB;
+}
+
+.intro-content {
+    position: relative;
+    z-index: 2;
+    margin: 65px 0;
+}
+
+.intro-eyebrow,
+.form-step {
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 2px;
+}
+
+.intro-eyebrow {
+    color: #D8B998;
+}
+
+.intro-content h1 {
+    margin: 22px 0;
+    color: #FFF9F1;
+    font-family: Georgia, serif;
+    font-size: clamp(38px, 4vw, 53px);
+    line-height: 1.13;
+    font-weight: 500;
+    letter-spacing: -1.5px;
+}
+
+.intro-content h1 em {
+    color: #E7C9A7;
+    font-weight: 400;
+}
+
+.intro-content > p {
+    max-width: 300px;
+    color: #E6D6C6;
+    font-size: 13px;
+    line-height: 1.9;
+}
+
+.intro-quote {
+    margin-top: 45px;
+    padding: 16px 18px;
+    border-left: 2px solid #D5B18C;
+    background: rgba(255,255,255,.07);
+}
+
+.quote-mark {
+    font-family: Georgia, serif;
+    font-size: 30px;
+    color: #E7C9A7;
+    line-height: 1;
+}
+
+.intro-quote p {
+    margin: 4px 0 0;
+    color: #F2E6D9;
+    font-family: Georgia, serif;
+    font-size: 13px;
+    font-style: italic;
+}
+
+.intro-footer {
+    border-top: 1px solid rgba(255,255,255,.18);
+    padding-top: 20px;
+}
+
+/* DECORATIONS */
+
+.login-decoration {
+    position: absolute;
+    color: rgba(255,255,255,.10);
+    pointer-events: none;
+    z-index: 1;
+}
+
+.decoration-one {
+    top: 25%;
+    right: 12%;
+    font-size: 85px;
+}
+
+.decoration-two {
+    bottom: 15%;
+    left: 8%;
+    font-size: 35px;
+}
+
+.decoration-three {
+    top: 8%;
+    right: 40%;
+    font-size: 25px;
+}
+
+/* =========================================
+   RIGHT FORM PANEL
+========================================= */
+
+.publisher-login-form-panel {
+    padding: 65px 65px 35px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background: #FFFEFC;
+}
+
+.form-heading {
+    margin-bottom: 38px;
+}
+
+.form-step {
+    color: var(--brown-light);
+}
+
+.form-heading h2 {
+    margin: 17px 0 9px;
+    color: var(--brown-dark);
+    font-family: Georgia, serif;
+    font-size: clamp(32px, 3vw, 42px);
+    font-weight: 500;
+    letter-spacing: -1px;
+}
+
+.form-heading h2 em {
+    color: var(--brown-medium);
+    font-weight: 400;
+}
+
+.form-heading p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.8;
+}
+
+/* =========================================
+   FORM FIELDS
+========================================= */
+
+.publisher-login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 23px;
+}
+
+.form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.form-field label {
+    color: var(--brown);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+}
+
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-icon {
+    position: absolute;
+    left: 16px;
+    color: var(--brown-light);
+    font-size: 16px;
+    pointer-events: none;
+}
+
+.input-wrapper input {
+    width: 100%;
+    height: 51px;
+    padding: 0 15px 0 45px;
+    box-sizing: border-box;
+    border: 1px solid #E5D9CB;
+    border-radius: 9px;
+    background: #FBF8F3;
+    color: var(--brown-dark);
+    font-family: inherit;
+    font-size: 13px;
+    outline: none;
+    transition: .2s ease;
+}
+
+.input-wrapper input::placeholder {
+    color: #B6A797;
+    font-size: 12px;
+}
+
+.input-wrapper input:focus {
+    border-color: var(--brown-medium);
+    background: #FFFFFF;
+    box-shadow: 0 0 0 3px rgba(107,66,38,.08);
+}
+
+.field-error {
+    color: var(--brown);
+    font-size: 11px;
+}
+
+/* =========================================
+   ERROR MESSAGE
+========================================= */
+
+.form-errors {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px;
+    border: 1px solid #D8BDA5;
+    border-radius: 9px;
+    background: #F5EADF;
+    color: var(--brown-dark);
+    font-size: 12px;
+    line-height: 1.7;
+}
+
+.form-errors p {
+    margin: 0;
+}
+
+.error-icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--brown);
+    color: #FFFFFF;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+/* =========================================
+   SUBMIT BUTTON
+========================================= */
+
+.publisher-submit-btn {
+    width: 100%;
+    min-height: 52px;
+    margin-top: 8px;
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border: none;
+    border-radius: 9px;
+    background: var(--brown);
+    color: #FFFFFF;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: .25s ease;
+}
+
+.publisher-submit-btn:hover {
+    background: var(--brown-dark);
+    box-shadow: 0 7px 18px rgba(67,43,31,.18);
+    transform: translateY(-2px);
+}
+
+.button-arrow {
+    font-size: 20px;
+    transition: transform .2s ease;
+}
+
+.publisher-submit-btn:hover .button-arrow {
+    transform: translateX(4px);
+}
+
+/* =========================================
+   ALTERNATIVE LOGIN
+========================================= */
+
+.login-alternative {
+    margin-top: 27px;
+    padding-top: 22px;
+    border-top: 1px solid #EEE5DB;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+}
+
+.login-alternative > span {
+    color: #A39587;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+}
+
+.login-alternative a {
+    width: fit-content;
+    color: var(--brown);
+    font-size: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: .2s ease;
+}
+
+.login-alternative a:hover {
+    color: var(--brown-dark);
+}
+
+.login-alternative a span {
+    margin-left: 5px;
+}
+
+.form-bottom-note {
+    margin-top: 45px;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    color: #B0A092;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+}
+
+.form-bottom-note span {
+    color: var(--brown-light);
+    font-size: 15px;
+}
+
+/* =========================================
+   PAGE CAPTION
+========================================= */
+
+.publisher-page-caption {
+    max-width: 1050px;
+    margin: 19px auto 0;
+    display: flex;
+    justify-content: space-between;
+    color: #A39587;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1.3px;
+}
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 850px) {
+    .publisher-login-page {
+        padding: 35px 18px;
+    }
+
+    .publisher-login-wrapper {
+        max-width: 560px;
+        grid-template-columns: 1fr;
+    }
+
+    .publisher-login-intro {
+        min-height: 330px;
+        padding: 28px;
+    }
+
+    .intro-content {
+        margin: 40px 0;
+    }
+
+    .intro-content h1 {
+        font-size: 42px;
+    }
+
+    .intro-quote {
+        margin-top: 25px;
+    }
+
+    .publisher-login-form-panel {
+        padding: 42px 35px;
+    }
+
+    .form-bottom-note {
+        margin-top: 30px;
+    }
+}
+
+@media (max-width: 480px) {
+    .publisher-login-page {
+        padding: 20px 12px;
+    }
+
+    .publisher-login-wrapper {
+        border-radius: 14px;
+    }
+
+    .publisher-login-intro {
+        min-height: 290px;
+        padding: 24px 22px;
+    }
+
+    .intro-content {
+        margin: 35px 0;
+    }
+
+    .intro-content h1 {
+        font-size: 38px;
+    }
+
+    .intro-content > p {
+        font-size: 12px;
+    }
+
+    .intro-label {
+        font-size: 8px;
+    }
+
+    .publisher-login-form-panel {
+        padding: 35px 23px;
+    }
+
+    .form-heading {
+        margin-bottom: 30px;
+    }
+
+    .form-heading h2 {
+        font-size: 34px;
+    }
+
+    .publisher-page-caption {
+        padding: 0 5px;
+        font-size: 8px;
+    }
+}

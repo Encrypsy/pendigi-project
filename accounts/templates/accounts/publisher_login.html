@@ -1,0 +1,132 @@
+{% extends 'app_base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/publisher_login.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="publisher-login-page">
+
+    <div class="publisher-login-wrapper">
+
+        <!-- DECORATIVE BACKGROUND -->
+        <div class="login-decoration decoration-one">✳</div>
+        <div class="login-decoration decoration-two">✦</div>
+        <div class="login-decoration decoration-three">✳</div>
+
+        <!-- LEFT PANEL -->
+        <div class="publisher-login-intro">
+            <div class="intro-top">
+                <span class="intro-brand">PENA DIGITAL</span>
+                <span class="intro-label">CONTRIBUTOR SPACE</span>
+            </div>
+
+            <div class="intro-content">
+                <span class="intro-eyebrow">WELCOME BACK, WRITER</span>
+
+                <h1>
+                    Your words<br>
+                    deserve to be<br>
+                    <em>read.</em>
+                </h1>
+
+                <p>
+                    Setiap cerita memiliki tempat untuk ditemukan.
+                    Masuk dan lanjutkan perjalananmu bersama Pena Digital.
+                </p>
+
+                <div class="intro-quote">
+                    <span class="quote-mark">“</span>
+                    <p>Write what should not be forgotten.</p>
+                </div>
+            </div>
+
+            <div class="intro-footer">
+                <span>EST. PENA DIGITAL</span>
+                <span>01 — WRITER PORTAL</span>
+            </div>
+        </div>
+
+        <!-- RIGHT PANEL -->
+        <div class="publisher-login-form-panel">
+
+            <div class="form-heading">
+                <span class="form-step">WRITER ACCESS / 01</span>
+                <h2>Welcome <em>back.</em></h2>
+                <p>Masuk ke akun kontributormu untuk melanjutkan.</p>
+            </div>
+
+            <form method="post" class="publisher-login-form">
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                    <div class="form-errors">
+                        <span class="error-icon">!</span>
+                        <div>
+                            {% for error in form.non_field_errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+
+                <div class="form-field">
+                    <label for="{{ form.username.id_for_label }}">
+                        PUBLISHER ID
+                    </label>
+
+                    <div class="input-wrapper">
+                        <span class="input-icon">✳</span>
+                        {{ form.username }}
+                    </div>
+
+                    {% for error in form.username.errors %}
+                        <small class="field-error">{{ error }}</small>
+                    {% endfor %}
+                </div>
+
+                <div class="form-field">
+                    <label for="{{ form.password.id_for_label }}">
+                        PASSWORD
+                    </label>
+
+                    <div class="input-wrapper">
+                        <span class="input-icon">✧</span>
+                        {{ form.password }}
+                    </div>
+
+                    {% for error in form.password.errors %}
+                        <small class="field-error">{{ error }}</small>
+                    {% endfor %}
+                </div>
+
+                <button type="submit" class="publisher-submit-btn">
+                    <span>Masuk sebagai Penulis</span>
+                    <span class="button-arrow">→</span>
+                </button>
+            </form>
+
+            <div class="login-alternative">
+                <span>BUKAN AKUN PENULIS?</span>
+                <a href="{% url 'login' %}">
+                    Login sebagai pembaca
+                    <span>↗</span>
+                </a>
+            </div>
+
+            <div class="form-bottom-note">
+                <span>✳</span>
+                YOUR STORY STARTS HERE.
+            </div>
+
+        </div>
+    </div>
+
+    <div class="publisher-page-caption">
+        <span>PENA DIGITAL © 2026</span>
+        <span>A HOME FOR EVERY STORY</span>
+    </div>
+
+</div>
+{% endblock %}
