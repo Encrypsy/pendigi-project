@@ -118,16 +118,38 @@ class ContributorApplicationForm(forms.ModelForm):
                 'placeholder': 'https://contoh.com/karya (opsional)',
             }),
         }
-
+   
     def clean_nik(self):
-        nik = self.cleaned_data.get('nik', '').strip()
+        nik = self.cleaned_data.get('nik', '')
 
+        # NIK wajib diisi.
         if not nik:
-            raise forms.ValidationError('NIK wajib diisi.')
+            raise forms.ValidationError(
+                'NIK wajib diisi.'
+            )
 
-        if not re.fullmatch(r'\d{16}', nik):
+        # NIK tidak boleh mengandung spasi.
+        if any(char.isspace() for char in nik):
+            raise forms.ValidationError(
+                'NIK tidak boleh mengandung spasi.'
+            )
+
+        # NIK hanya boleh berisi angka 0-9.
+        if not nik.isascii() or not nik.isdigit():
+            raise forms.ValidationError(
+                'NIK harus berupa angka.'
+            )
+
+        # NIK harus tepat 16 digit.
+        if len(nik) != 16:
             raise forms.ValidationError(
                 'NIK harus terdiri dari tepat 16 digit angka.'
+            )
+
+        # Tolak NIK yang seluruh digitnya sama.
+        if len(set(nik)) == 1:
+            raise forms.ValidationError(
+                'NIK tidak boleh menggunakan angka yang sama secara berulang.'
             )
 
         return nik
