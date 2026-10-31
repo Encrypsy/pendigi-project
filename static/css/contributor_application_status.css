@@ -1,172 +1,474 @@
 
-/* ==============================
-   Contributor Application Status
-================================= */
+/* =========================================
+   PENA DIGITAL — CONTRIBUTOR STATUS PAGE
+========================================= */
+
+:root {
+    --status-ink: #252b3a;
+    --status-muted: #858b9b;
+    --status-primary: #5968c9;
+    --status-primary-dark: #414fae;
+    --status-cream: #faf7f2;
+    --status-border: #eee9e2;
+}
+
+/* PAGE BACKGROUND */
 
 .application-status-page {
+    position: relative;
+    isolation: isolate;
     width: 100%;
-    max-width: 760px;
-    margin: 50px auto;
-    padding: 0 20px;
+    min-height: 85vh;
+    box-sizing: border-box;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 75px 24px;
+    overflow: hidden;
+    background:
+        radial-gradient(
+            circle at 12% 15%,
+            rgba(255, 213, 184, 0.35),
+            transparent 25%
+        ),
+        radial-gradient(
+            circle at 90% 75%,
+            rgba(190, 198, 255, 0.28),
+            transparent 28%
+        ),
+        var(--status-cream);
 }
+
+/* Decorative background */
+
+.application-status-page::before,
+.application-status-page::after {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.application-status-page::before {
+    width: 260px;
+    height: 260px;
+    top: -100px;
+    right: -70px;
+    border: 1px solid rgba(89, 104, 201, 0.13);
+    box-shadow:
+        0 0 0 25px rgba(89, 104, 201, 0.025),
+        0 0 0 50px rgba(89, 104, 201, 0.025);
+}
+
+.application-status-page::after {
+    width: 180px;
+    height: 180px;
+    bottom: -80px;
+    left: -60px;
+    background: rgba(255, 190, 155, 0.15);
+    filter: blur(4px);
+}
+
+/* MAIN CARD */
 
 .application-status-card {
+    position: relative;
+    width: 100%;
+    max-width: 760px;
+    box-sizing: border-box;
+    padding: 42px;
+    overflow: hidden;
     background: #ffffff;
-    border: 1px solid #e8eaf0;
-    border-radius: 18px;
-    padding: 36px;
-    box-shadow: 0 8px 30px rgba(30, 41, 59, 0.06);
+    border: 1px solid rgba(232, 229, 224, 0.9);
+    border-radius: 24px;
+    box-shadow:
+        0 20px 60px rgba(44, 48, 72, 0.07),
+        0 4px 12px rgba(44, 48, 72, 0.025);
+    animation: statusFadeIn 0.55s ease both;
 }
 
+/* Top decorative line */
+
+.application-status-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 6px;
+    background: linear-gradient(
+        90deg,
+        #f2a88c,
+        #8e9be9,
+        #a9d8c3
+    );
+}
+
+.application-status-card::after {
+    content: "PENA DIGITAL";
+    position: absolute;
+    top: 30px;
+    right: 38px;
+    color: #c4c5d0;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 2px;
+}
+
+/* HEADER */
+
 .application-status-header {
-    margin-bottom: 28px;
+    position: relative;
+    margin-bottom: 32px;
+    padding-bottom: 25px;
+    border-bottom: 1px solid #f0edf0;
+}
+
+.application-status-header::before {
+    content: "CONTRIBUTOR CENTER";
+    display: inline-flex;
+    align-items: center;
+    margin-bottom: 15px;
+    padding: 7px 12px;
+    border-radius: 30px;
+    background: #f0f1ff;
+    color: var(--status-primary);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.3px;
 }
 
 .application-status-header h1 {
-    font-size: 26px;
-    font-weight: 700;
-    color: #202938;
-    margin: 0 0 8px;
+    max-width: 480px;
+    margin: 0 0 10px;
+    color: var(--status-ink);
+    font-size: clamp(25px, 4vw, 32px);
+    font-weight: 800;
+    line-height: 1.25;
+    letter-spacing: -1px;
 }
 
 .application-status-header p {
-    color: #7b8494;
-    font-size: 14px;
     margin: 0;
+    color: var(--status-muted);
+    font-size: 14px;
+    line-height: 1.8;
 }
 
-/* Status indicator */
+/* STATUS INDICATOR */
 
 .status-indicator {
-    padding: 22px;
-    border-radius: 14px;
-    margin-bottom: 24px;
+    position: relative;
+    margin-bottom: 25px;
+    padding: 27px 28px 27px 76px;
+    border: 1px solid transparent;
+    border-radius: 17px;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.status-indicator:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 22px rgba(30, 41, 59, 0.06);
+}
+
+.status-indicator::before {
+    position: absolute;
+    top: 28px;
+    left: 25px;
+    width: 34px;
+    height: 34px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    font-size: 18px;
+    font-weight: 800;
 }
 
 .status-indicator h2 {
-    font-size: 20px;
-    margin: 0 0 8px;
+    margin: 0 0 9px;
+    font-size: 19px;
+    font-weight: 800;
+    letter-spacing: -0.3px;
 }
 
 .status-indicator p {
-    font-size: 14px;
-    line-height: 1.7;
     margin: 0;
+    font-size: 13px;
+    line-height: 1.8;
 }
+
+/* PENDING */
 
 .status-pending {
-    background: #fff7e6;
     color: #946200;
-    border: 1px solid #ffe4a3;
+    background: linear-gradient(120deg, #fff9e9, #fffdf7);
+    border-color: #f5e6bd;
 }
+
+.status-pending::before {
+    content: "◷";
+    color: #a87512;
+    background: #ffedbd;
+}
+
+/* APPROVED */
 
 .status-approved {
-    background: #eaf8ef;
-    color: #237a45;
-    border: 1px solid #c5ebd1;
+    color: #26734b;
+    background: linear-gradient(120deg, #eaf8ef, #f8fdf9);
+    border-color: #cdebd8;
 }
+
+.status-approved::before {
+    content: "✓";
+    color: #26734b;
+    background: #ccefd8;
+}
+
+/* REJECTED */
 
 .status-rejected {
-    background: #fff0f0;
-    color: #b42318;
-    border: 1px solid #ffd0cc;
+    color: #b33d43;
+    background: linear-gradient(120deg, #fff0f0, #fffafa);
+    border-color: #f5d1d1;
 }
 
-/* Publisher ID */
+.status-rejected::before {
+    content: "!";
+    color: #b33d43;
+    background: #ffdada;
+}
+
+/* PUBLISHER ID CARD */
 
 .publisher-id-card {
-    background: #f5f7ff;
-    border: 1px solid #dce3ff;
-    border-radius: 12px;
-    padding: 20px;
-    margin-bottom: 24px;
+    position: relative;
+    margin: 25px 0;
+    padding: 25px 28px;
+    overflow: hidden;
+    border: 1px solid #dce0ff;
+    border-radius: 17px;
+    background:
+        radial-gradient(
+            circle at 95% 10%,
+            rgba(255, 255, 255, 0.3),
+            transparent 35%
+        ),
+        linear-gradient(125deg, #525fbd, #818de0);
+    box-shadow: 0 10px 25px rgba(82, 95, 189, 0.18);
+}
+
+.publisher-id-card::after {
+    content: "P";
+    position: absolute;
+    right: 25px;
+    bottom: -55px;
+    color: rgba(255, 255, 255, 0.09);
+    font-size: 180px;
+    font-weight: 900;
+    line-height: 1;
+    pointer-events: none;
 }
 
 .publisher-id-card span {
+    position: relative;
+    z-index: 1;
     display: block;
-    color: #69738a;
-    font-size: 13px;
-    margin-bottom: 8px;
+    margin-bottom: 12px;
+    color: rgba(255, 255, 255, 0.78);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
 }
 
 .publisher-id-card strong {
-    color: #3949ab;
-    font-size: 22px;
-    letter-spacing: 1px;
+    position: relative;
+    z-index: 1;
+    display: inline-block;
+    color: #ffffff;
+    font-size: 25px;
+    font-weight: 800;
+    letter-spacing: 2px;
 }
 
-/* Admin notes */
+/* ADMIN NOTES */
 
 .admin-notes {
-    background: #f8f9fb;
-    border-left: 4px solid #e05b55;
-    border-radius: 8px;
-    padding: 18px;
-    margin-bottom: 24px;
+    position: relative;
+    margin: 24px 0;
+    padding: 23px 25px;
+    background: #fff9f6;
+    border: 1px solid #f4e3dc;
+    border-left: 4px solid #e58b75;
+    border-radius: 13px;
 }
 
 .admin-notes h3 {
+    margin: 0 0 11px;
+    color: #493b3a;
     font-size: 15px;
-    color: #303846;
-    margin: 0 0 8px;
+    font-weight: 800;
 }
 
 .admin-notes p {
-    color: #667085;
-    font-size: 14px;
-    line-height: 1.7;
     margin: 0;
-}
-
-/* Application information */
-
-.application-meta {
-    border-top: 1px solid #edf0f4;
-    padding-top: 20px;
-    color: #8992a1;
+    color: #796b69;
     font-size: 13px;
+    line-height: 1.9;
+    white-space: pre-line;
 }
 
-/* Buttons */
+/* ACTION BUTTON */
 
 .application-action {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 12px 22px;
-    margin-top: 20px;
-    border-radius: 10px;
-    background: #5267d9;
+    gap: 9px;
+    margin: 0 0 25px;
+    padding: 13px 23px;
+    border: 1px solid transparent;
+    border-radius: 11px;
+    background: var(--status-primary);
     color: #ffffff;
-    font-size: 14px;
-    font-weight: 600;
+    font-size: 13px;
+    font-weight: 700;
     text-decoration: none;
-    transition: background 0.2s ease;
+    box-shadow: 0 5px 14px rgba(89, 104, 201, 0.2);
+    transition:
+        transform 0.2s ease,
+        background 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.application-action::after {
+    content: "→";
+    font-size: 17px;
+    transition: transform 0.2s ease;
 }
 
 .application-action:hover {
-    background: #4054c5;
     color: #ffffff;
+    background: var(--status-primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 18px rgba(89, 104, 201, 0.25);
 }
 
-/* Responsive */
+.application-action:hover::after {
+    transform: translateX(4px);
+}
+
+/* APPLICATION META */
+
+.application-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 27px;
+    padding-top: 20px;
+    border-top: 1px solid #efedf0;
+    color: #9296a3;
+    font-size: 12px;
+}
+
+.application-meta::before {
+    content: "◷";
+    color: var(--status-primary);
+    font-size: 16px;
+}
+
+/* ANIMATION */
+
+@keyframes statusFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* RESPONSIVE */
 
 @media (max-width: 600px) {
     .application-status-page {
-        margin: 28px auto;
-        padding: 0 14px;
+        min-height: 80vh;
+        padding: 35px 15px;
     }
 
     .application-status-card {
-        padding: 22px;
-        border-radius: 14px;
+        padding: 30px 21px;
+        border-radius: 18px;
+    }
+
+    .application-status-card::after {
+        top: 27px;
+        right: 20px;
+        font-size: 8px;
+    }
+
+    .application-status-header {
+        padding-bottom: 21px;
     }
 
     .application-status-header h1 {
-        font-size: 22px;
+        max-width: 280px;
+        font-size: 25px;
+    }
+
+    .application-status-header p {
+        font-size: 13px;
     }
 
     .status-indicator {
-        padding: 18px;
+        padding: 22px 18px 22px 60px;
+    }
+
+    .status-indicator::before {
+        top: 23px;
+        left: 17px;
+        width: 30px;
+        height: 30px;
+    }
+
+    .status-indicator h2 {
+        font-size: 16px;
+    }
+
+    .status-indicator p {
+        font-size: 12px;
+    }
+
+    .publisher-id-card {
+        padding: 22px;
+    }
+
+    .publisher-id-card strong {
+        font-size: 21px;
+    }
+
+    .admin-notes {
+        padding: 19px;
+    }
+
+    .application-meta {
+        font-size: 11px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .application-status-card {
+        animation: none;
+    }
+
+    .status-indicator,
+    .application-action,
+    .application-action::after {
+        transition: none;
     }
 }
