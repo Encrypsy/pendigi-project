@@ -2,26 +2,22 @@
 {% load static %}
 
 {% block content %}
-<style>
+<style>  
     .notification-system-icon {
         display: inline-flex;
         align-items: center;
         justify-content: center;
         width: 46px;
         height: 46px;
-        border-radius: 50%;
         flex-shrink: 0;
+        border-radius: 50%;
         font-size: 23px;
         font-weight: 700;
     }
 
-    .notification-approved-icon {
-        background: #E3EBDD;
-        color: #2F5D50;
-    }
-
+    .notification-approved-icon,
     .notification-rejected-icon {
-        background: #F1E5D5;
+        background: #E9DDCE;
         color: #6B4226;
     }
 
@@ -40,98 +36,160 @@
             <p>Semua aktivitas dan pemberitahuan untukmu.</p>
         </div>
     </header>
-
+   
     <div class="notifications-list">
         {% for activity in page_obj %}
-        <article class="notification-card {% if not activity.is_read %}is-unread{% endif %}">
 
-            <div class="notification-card-avatar">
-                {% if activity.action_type == 'approved' %}
-                    <span class="notification-system-icon notification-approved-icon">✓</span>
+        {% if activity.action_type == 'contributor_approved' or activity.action_type == 'contributor_rejected' %}
 
-                {% elif activity.action_type == 'rejected' %}
-                    <span class="notification-system-icon notification-rejected-icon">!</span>
+            <a
+                href="{% url 'contributor_application_status' %}"
+                class="notification-card {% if not activity.is_read %}is-unread{% endif %}"
+                style="text-decoration: none; color: inherit;"
+            >
+                <div class="notification-card-avatar">
 
-                {% elif activity.actor %}
-                    {% if activity.actor.profile_picture %}
-                        <img
-                            src="{{ activity.actor.profile_picture.url }}"
-                            alt="{{ activity.actor.username }}"
-                        >
+                    {% if activity.action_type == 'contributor_approved' %}
+                        <span class="notification-system-icon notification-approved-icon">
+                            ✓
+                        </span>
                     {% else %}
-                        <span>{{ activity.actor.username|first|upper }}</span>
+                        <span class="notification-system-icon notification-rejected-icon">
+                            !
+                        </span>
                     {% endif %}
 
-                {% else %}
-                    <span class="notification-system-icon">●</span>
-                {% endif %}
-            </div>
+                </div>
 
-            <div class="notification-card-content">          
-                <p class="notification-message">
+                <div class="notification-card-content">
+                    <p class="notification-message">
+
+                        {% if activity.action_type == 'contributor_approved' %}
+                            <strong>Pengajuan kontributor disetujui</strong>
+                            Pengajuan kamu telah disetujui. Selamat bergabung sebagai kontributor Pena Digital!
+
+                        {% else %}
+                            <strong>Pengajuan kontributor ditolak</strong>
+                            Pengajuan kamu ditolak. Silakan periksa catatan admin untuk mengetahui alasannya.
+                        {% endif %}
+
+                    </p>
+
+                    <time datetime="{{ activity.created_at|date:'c' }}">
+                        {{ activity.created_at|timesince }} lalu
+                    </time>
+                </div>
+
+                {% if not activity.is_read %}
+                    <span
+                        class="notification-unread-indicator"
+                        title="Belum dibaca"
+                        aria-label="Belum dibaca">
+                    </span>
+                {% endif %}
+            </a>
+
+        {% else %}
+
+            <article class="notification-card {% if not activity.is_read %}is-unread{% endif %}">
+
+                <div class="notification-card-avatar">
 
                     {% if activity.action_type == 'approved' %}
-                        <strong>Konten disetujui</strong>
-                        {% if activity.article %}
-                            Artikel "{{ activity.article.title }}" telah disetujui oleh admin.
-                        {% elif activity.chapter %}
-                            Bab "{{ activity.chapter.title }}" dari karya "{{ activity.chapter.story.title }}" telah disetujui oleh admin.
-                        {% else %}
-                            Konten kamu telah disetujui oleh admin.
-                        {% endif %}
+                        <span class="notification-system-icon notification-approved-icon">✓</span>
 
                     {% elif activity.action_type == 'rejected' %}
-                        <strong>Konten ditolak</strong>
-                        {% if activity.article %}
-                            Artikel "{{ activity.article.title }}" ditolak oleh admin.
-                        {% elif activity.chapter %}
-                            Bab "{{ activity.chapter.title }}" dari karya "{{ activity.chapter.story.title }}" ditolak oleh admin.
-                        {% else %}
-                            Konten kamu ditolak oleh admin.
-                        {% endif %}
+                        <span class="notification-system-icon notification-rejected-icon">!</span>
 
-                    {% elif activity.action_type == 'comment_reply' %}
-                        {% if activity.actor %}
-                            <strong>{{ activity.actor.username }}</strong>
-                        {% endif %}
-                        membalas komentar Anda
-                        {% if activity.article %}
-                            pada artikel "{{ activity.article.title }}"
-                        {% endif %}.
-                        {% if activity.message and 'membalas komentar Anda:' in activity.message %}
-                            {{ activity.message|cut:'membalas komentar Anda:' }}
+                    {% elif activity.actor %}
+                        {% if activity.actor.profile_picture %}
+                            <img
+                                src="{{ activity.actor.profile_picture.url }}"
+                                alt="{{ activity.actor.username }}"
+                            >
+                        {% else %}
+                            <span>{{ activity.actor.username|first|upper }}</span>
                         {% endif %}
 
                     {% else %}
-                        {% if activity.actor %}
-                            <strong>{{ activity.actor.username }}</strong>
-                        {% else %}
-                            <strong>Sistem</strong>
-                        {% endif %}
-                        {{ activity.message|default:activity.get_action_type_display }}
+                        <span class="notification-system-icon">●</span>
                     {% endif %}
 
-                </p>
+                </div>
 
-                <time datetime="{{ activity.created_at|date:'c' }}">
-                    {{ activity.created_at|timesince }} lalu
-                </time>
-            </div>
+                <div class="notification-card-content">
+                    <p class="notification-message">
 
-            {% if not activity.is_read %}
-                <span
-                    class="notification-unread-indicator"
-                    title="Belum dibaca"
-                    aria-label="Belum dibaca">
-                </span>
-            {% endif %}
+                        {% if activity.action_type == 'approved' %}
+                            <strong>Konten disetujui</strong>
 
-        </article>
+                            {% if activity.article %}
+                                Artikel "{{ activity.article.title }}" telah disetujui oleh admin.
+                            {% elif activity.chapter %}
+                                Bab "{{ activity.chapter.title }}" dari karya "{{ activity.chapter.story.title }}" telah disetujui oleh admin.
+                            {% else %}
+                                Konten kamu telah disetujui oleh admin.
+                            {% endif %}
+
+                        {% elif activity.action_type == 'rejected' %}
+                            <strong>Konten ditolak</strong>
+
+                            {% if activity.article %}
+                                Artikel "{{ activity.article.title }}" ditolak oleh admin.
+                            {% elif activity.chapter %}
+                                Bab "{{ activity.chapter.title }}" dari karya "{{ activity.chapter.story.title }}" ditolak oleh admin.
+                            {% else %}
+                                Konten kamu ditolak oleh admin.
+                            {% endif %}
+
+                        {% elif activity.action_type == 'comment_reply' %}
+                            {% if activity.actor %}
+                                <strong>{{ activity.actor.username }}</strong>
+                            {% endif %}
+                            membalas komentar Anda
+
+                            {% if activity.article %}
+                                pada artikel "{{ activity.article.title }}"
+                            {% endif %}.
+
+                            {% if activity.message and 'membalas komentar Anda:' in activity.message %}
+                                {{ activity.message|cut:'membalas komentar Anda:' }}
+                            {% endif %}
+
+                        {% else %}
+                            {% if activity.actor %}
+                                <strong>{{ activity.actor.username }}</strong>
+                            {% else %}
+                                <strong>Sistem</strong>
+                            {% endif %}
+
+                            {{ activity.message|default:activity.get_action_type_display }}
+                        {% endif %}
+
+                    </p>
+
+                    <time datetime="{{ activity.created_at|date:'c' }}">
+                        {{ activity.created_at|timesince }} lalu
+                    </time>
+                </div>
+
+                {% if not activity.is_read %}
+                    <span
+                        class="notification-unread-indicator"
+                        title="Belum dibaca"
+                        aria-label="Belum dibaca">
+                    </span>
+                {% endif %}
+
+            </article>
+
+        {% endif %}
+
         {% empty %}
-        <div class="notifications-empty">
-            <h2>Belum ada notifikasi</h2>
-            <p>Notifikasi baru akan muncul di sini.</p>
-        </div>
+            <div class="notifications-empty">
+                <h2>Belum ada notifikasi</h2>
+                <p>Notifikasi baru akan muncul di sini.</p>
+            </div>
         {% endfor %}
     </div>
 
