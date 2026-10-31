@@ -99,41 +99,36 @@
                 {% endif %}
 
                 </button>
-
+                
                 <div class="navbar-dropdown-menu notification-menu">
                     <div class="navbar-dropdown-title">
                         Notifikasi
                     </div>
-                    
-                    
-                    {% for activity in navbar_notifications %}
 
+                    {% for activity in navbar_notifications %}
                         <a
-                            href="{% if activity.action_type == 'contributor_approved' or activity.action_type == 'contributor_rejected' %}{% url 'contributor_application_status' %}{% elif activity.article_id %}{% url 'articles:article_detail' pk=activity.article_id %}{% elif activity.chapter_id %}{% url 'fiction:read_chapter' pk=activity.chapter.story_id chapter_number=activity.chapter.chapter_number %}{% else %}{% url 'notifications_list' %}{% endif %}"
+                            href="{% if activity.action_type == 'contributor_approved' or activity.action_type == 'contributor_rejected' %}{% url 'contributor_application_status' %}{% elif activity.action_type == 'contributor_revoked' %}{% url 'notifications_list' %}{% elif activity.article_id %}{% url 'articles:article_detail' pk=activity.article_id %}{% elif activity.chapter_id %}{% url 'fiction:read_chapter' pk=activity.chapter.story_id chapter_number=activity.chapter.chapter_number %}{% else %}{% url 'notifications_list' %}{% endif %}"
                             class="notification-item {% if not activity.is_read %}is-unread{% endif %}"
                         >
 
                             <div class="notification-avatar">
 
                                 {% if activity.action_type == 'contributor_approved' %}
-                                    <span class="notification-system-icon notification-approved-icon">
-                                        ✓
-                                    </span>
+                                    <span class="notification-system-icon notification-approved-icon">✓</span>
 
                                 {% elif activity.action_type == 'contributor_rejected' %}
-                                    <span class="notification-system-icon notification-rejected-icon">
-                                        !
+                                    <span class="notification-system-icon notification-rejected-icon">!</span>
+
+                                {% elif activity.action_type == 'contributor_revoked' %}
+                                    <span class="notification-system-icon notification-revoked-icon">
+                                        <i class="fas fa-bell"></i>
                                     </span>
 
                                 {% elif activity.action_type == 'approved' %}
-                                    <span class="notification-system-icon notification-approved-icon">
-                                        ✓
-                                    </span>
+                                    <span class="notification-system-icon notification-approved-icon">✓</span>
 
                                 {% elif activity.action_type == 'rejected' %}
-                                    <span class="notification-system-icon notification-rejected-icon">
-                                        !
-                                    </span>
+                                    <span class="notification-system-icon notification-rejected-icon">!</span>
 
                                 {% elif activity.actor %}
                                     {% if activity.actor.profile_picture %}
@@ -150,27 +145,22 @@
                                 {% endif %}
 
                             </div>
-                       
+
                             <div class="notification-content">
                                 <p>
-
                                     {% if activity.action_type == 'contributor_approved' %}
-
                                         <strong>Pengajuan kontributor disetujui</strong>
                                         Pengajuan kamu telah disetujui. Selamat bergabung sebagai kontributor Pena Digital!
 
                                     {% elif activity.action_type == 'contributor_rejected' %}
-
                                         <strong>Pengajuan kontributor ditolak</strong>
                                         Pengajuan kamu ditolak. Silakan periksa catatan admin untuk mengetahui alasannya.
 
                                     {% elif activity.action_type == 'contributor_revoked' %}
-
                                         <strong>Hak akses penulis dicabut</strong>
                                         {{ activity.message }}
 
                                     {% elif activity.action_type == 'approved' %}
-
                                         <strong>Konten disetujui</strong>
 
                                         {% if activity.article %}
@@ -182,7 +172,6 @@
                                         {% endif %}
 
                                     {% elif activity.action_type == 'rejected' %}
-
                                         <strong>Konten ditolak</strong>
 
                                         {% if activity.article %}
@@ -194,7 +183,6 @@
                                         {% endif %}
 
                                     {% elif activity.action_type == 'comment_reply' %}
-
                                         {% if activity.actor %}
                                             <strong>{{ activity.actor.username }}</strong>
                                         {% endif %}
@@ -205,12 +193,7 @@
                                             pada artikel "{{ activity.article.title }}"
                                         {% endif %}.
 
-                                        {% if activity.message and 'membalas komentar Anda:' in activity.message %}
-                                            {{ activity.message|cut:'membalas komentar Anda:' }}
-                                        {% endif %}
-
                                     {% else %}
-
                                         {% if activity.actor %}
                                             <strong>{{ activity.actor.username }}</strong>
                                         {% else %}
@@ -218,9 +201,7 @@
                                         {% endif %}
 
                                         {{ activity.message|default:activity.get_action_type_display }}
-
                                     {% endif %}
-
                                 </p>
 
                                 <small>{{ activity.created_at|timesince }} lalu</small>
@@ -229,17 +210,12 @@
                         </a>
 
                     {% empty %}
-
                         <div class="notification-empty">
                             Belum ada notifikasi.
                         </div>
-
                     {% endfor %}
 
-                    <a
-                        href="{% url 'notifications_list' %}"
-                        class="notification-see-all"
-                    >
+                    <a href="{% url 'notifications_list' %}" class="notification-see-all">
                         Lihat semua notifikasi
                     </a>
                 </div>
