@@ -87,33 +87,41 @@
                     </div>
 
                     <div class="register-avatar-upload">
+                    <label class="register-dropzone" id="dropzone">
 
-                        <label class="register-dropzone" id="dropzone">
+                        <img
+                            class="preview"
+                            id="preview"
+                            src=""
+                            alt="Preview foto profil"
+                        >
 
-                            <img
-                                class="preview"
-                                id="preview"
-                                src=""
-                                alt="Preview foto profil"
+                        <div id="dz-placeholder" class="register-dz-placeholder">
+                            <svg
+                                viewBox="0 0 24 24"
+                                width="30"
+                                height="30"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="1.5"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
                             >
-
-                            <div id="dz-placeholder" class="register-dz-placeholder">
-                                <span class="camera-symbol">✧</span>
-                                <strong>Upload foto profil</strong>
-                                <small>Klik untuk memilih gambar</small>
-                            </div>
-
-                            {{ form.profile_picture }}
-
-                        </label>
-
-                        <div class="avatar-upload-info">
-                            <strong>Foto profil kamu</strong>
-                            <span>Format JPG, PNG, atau WEBP.</span>
-                            <span>Sesuaikan foto sebelum menyimpan.</span>
+                                <path d="M14 4H10L8.5 7H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3.5L14 4Z"/>
+                                <circle cx="12" cy="13" r="3.5"/>
+                            </svg>
                         </div>
 
+                        {{ form.profile_picture }}
+
+                    </label>
+
+                    <div class="avatar-upload-info">
+                        <strong>Foto profil</strong>
+                        <span>Klik ikon kamera untuk memilih foto.</span>
+                        <span>JPG, PNG, atau WEBP.</span>
                     </div>
+                </div>
 
                     {% if form.profile_picture.errors %}
                         <small class="register-field-error">
@@ -246,30 +254,156 @@
 
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
+
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.querySelector(
+        '#dropzone input[type="file"]'
+    );
 
-    if (!dropzone) return;
-
-    const fileInput = dropzone.querySelector('input[type=file]');
     const preview = document.getElementById('preview');
     const placeholder = document.getElementById('dz-placeholder');
 
-    if (!fileInput || !preview || !placeholder) return;
+    const cropModal = document.getElementById('cropModal');
+    const cropImage = document.getElementById('cropImage');
 
-    fileInput.addEventListener('change', () => {
-        if (fileInput.files && fileInput.files[0]) {
-            const reader = new FileReader();
+    const closeButton = document.getElementById('closeCropModal');
+    const cancelButton = document.getElementById('cancelCrop');
+    const applyButton = document.getElementById('applyCrop');
 
-            reader.onload = e => {
-                preview.src = e.target.result;
-                preview.style.display = 'block';
-                placeholder.style.display = 'none';
+    let cropper = null;
+    let originalFileName = 'profile-picture';
+
+    if (!fileInput) return;
+
+    function destroyCropper() {
+        if (cropper) {
+            cropper.destroy();
+            cropper = null;
+        }
+    }
+
+    function closeCropModal() {
+        cropModal.classList.remove('active');
+        destroyCropper();
+    }
+
+    fileInput.addEventListener('change', function () {
+        const file = this.files[0];
+
+        if (!file) return;
+
+        if (!file.type.startsWith('image/')) {
+            alert('File harus berupa gambar.');
+            fileInput.value = '';
+            return;
+        }
+
+        if (!window.Cropper) {
+            alert('Cropper gagal dimuat. Periksa koneksi internet.');
+            fileInput.value = '';
+            return;
+        }
+
+        originalFileName = file.name.replace(/\.[^/.]+$/, '');
+
+        const reader = new FileReader();
+
+        reader.onload = function (event) {
+            destroyCropper();
+
+            // Pasang event load SEBELUM mengubah src
+            cropImage.onload = function () {
+                cropper = new Cropper(cropImage, {
+                    aspectRatio: 1,
+                    viewMode: 1,
+                    dragMode: 'move',
+                    autoCropArea: 1,
+                    responsive: true,
+                    restore: false,
+                    guides: true,
+                    center: true,
+                    highlight: false,
+                    cropBoxMovable: false,
+                    cropBoxResizable: false,
+                    toggleDragModeOnDblclick: false,
+                });
             };
 
-            reader.readAsDataURL(fileInput.files[0]);
-        }
+            cropModal.classList.add('active');
+            cropImage.src = event.target.result;
+        };
+
+        reader.readAsDataURL(file);
+    });
+
+    document.getElementById('zoomIn').addEventListener('click', function () {
+        if (cropper) cropper.zoom(0.1);
+    });
+
+    document.getElementById('zoomOut').addEventListener('click', function () {
+        if (cropper) cropper.zoom(-0.1);
+    });
+
+    document.getElementById('rotateLeft').addEventListener('click', function () {
+        if (cropper) cropper.rotate(-90);
+    });
+
+    document.getElementById('rotateRight').addEventListener('click', function () {
+        if (cropper) cropper.rotate(90);
+    });
+
+    closeButton.addEventListener('click', function () {
+        closeCropModal();
+        fileInput.value = '';
+    });
+
+    cancelButton.addEventListener('click', function () {
+        closeCropModal();
+        fileInput.value = '';
+    });
+
+    applyButton.addEventListener('click', function () {
+        if (!cropper) return;
+
+        const canvas = cropper.getCroppedCanvas({
+            width: 600,
+            height: 600,
+            imageSmoothingEnabled: true,
+            imageSmoothingQuality: 'high',
+        });
+
+        canvas.toBlob(function (blob) {
+            if (!blob) {
+                alert('Gagal memproses foto.');
+                return;
+            }
+
+            const croppedFile = new File(
+                [blob],
+                originalFileName + '.jpg',
+                { type: 'image/jpeg' }
+            );
+
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(croppedFile);
+
+            fileInput.files = dataTransfer.files;
+
+            const previewURL = URL.createObjectURL(blob);
+
+            preview.onload = function () {
+                URL.revokeObjectURL(previewURL);
+            };
+
+            preview.src = previewURL;
+            preview.style.display = 'block';
+            placeholder.style.display = 'none';
+
+            closeCropModal();
+
+        }, 'image/jpeg', 0.90);
     });
 });
 </script>
