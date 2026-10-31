@@ -136,7 +136,7 @@ def apply_contributor(request):
                     'Pengajuan kamu masih menunggu verifikasi admin.',
                 )
                 return redirect(
-                    'accounts:contributor_application_status'
+                    'contributor_application_status'
                 )
 
             form = ContributorApplicationForm(request.POST)
@@ -167,7 +167,7 @@ def apply_contributor(request):
                 )
 
                 return redirect(
-                    'accounts:contributor_application_status'
+                    'contributor_application_status'
                 )
 
     else:
@@ -193,7 +193,7 @@ def apply_contributor(request):
                 'Pengajuan kamu masih menunggu verifikasi admin.',
             )
             return redirect(
-                'accounts:contributor_application_status'
+                'contributor_application_status'
             )
 
         form = ContributorApplicationForm()
@@ -1174,7 +1174,7 @@ def contributor_application_status(request):
             request,
             'Kamu belum memiliki pengajuan kontributor.',
         )
-        return redirect('accounts:apply_contributor')
+        return redirect('apply_contributor')
 
     context = {
         'application': application,
