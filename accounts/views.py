@@ -674,16 +674,27 @@ def admin_reject_contributor(request, pk):
     application = get_object_or_404(
         ContributorApplication,
         pk=pk,
+        status=StatusKontributor.PENDING,
     )
+
+    admin_notes = request.POST.get('admin_notes', '').strip()
+
+    if not admin_notes:
+        messages.error(
+            request,
+            'Alasan penolakan wajib diisi.',
+        )
+        return redirect('admin_pending_contributors')
 
     reject_contributor_application(
         application_id=application.pk,
         actor=request.user,
+        admin_notes=admin_notes,
     )
 
     messages.success(
         request,
-        f'Pengajuan {application.user.username} ditolak.',
+        f'Pengajuan {application.user.username} berhasil ditolak.',
     )
 
     return redirect('admin_pending_contributors')

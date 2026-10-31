@@ -258,8 +258,7 @@
                         {% endif %}
 
                     </button>
-
-
+                    
                     <!-- PROFILE DROPDOWN -->
 
                     <div class="navbar-dropdown-menu profile-menu">
@@ -268,16 +267,13 @@
                             {{ user.username }}
                         </div>
 
-
                         <a href="{% url 'profile' %}">
                             Lihat Profil
                         </a>
 
-
                         <a href="{% url 'interactions:my_bookmarks' %}">
                             Bookmark
                         </a>
-
 
                         {% if user.role == 'admin' or user.is_superuser %}
 
@@ -285,28 +281,19 @@
                                 Dashboard
                             </a>
 
-                        {% elif user.status_kontributor == 'approved' %}
+                        {% elif user.status_kontributor == 'approved' or user.status_kontributor == 'pending' or user.status_kontributor == 'rejected' %}
 
-                            <a href="{% url 'author_dashboard' %}">
-        Dashboard
-    </a>
+                            <a href="{% url 'contributor_application_status' %}">
+                                Lihat Status
+                            </a>
 
-                        {% elif user.status_kontributor == 'pending' %}
-
-                            {% if user.status_kontributor == 'pending' %}
-                                <a href="{% url 'contributor_application_status' %}">
-                                    Lihat Status
-                                </a>
-                            {% endif %}
-
-                        {% else %}
+                        {% elif user.status_kontributor == 'none' %}
 
                             <a href="{% url 'apply_contributor' %}">
-                                Daftar menjadi penulis
+                                Daftar Menjadi Penulis
                             </a>
 
                         {% endif %}
-
 
                         <!-- LOGOUT -->
 

@@ -56,7 +56,11 @@ def approve_contributor_application(application_id, actor=None):
     return application
 
 @transaction.atomic
-def reject_contributor_application(application_id, actor=None):
+def reject_contributor_application(
+    application_id,
+    actor=None,
+    admin_notes=None,
+):
     application = (
         ContributorApplication.objects
         .select_for_update()
@@ -75,19 +79,27 @@ def reject_contributor_application(application_id, actor=None):
     if application.status == StatusKontributor.REJECTED:
         return application
 
+    admin_notes = (admin_notes or '').strip()
+
+    if not admin_notes:
+        raise ValueError('Alasan penolakan wajib diisi.')
+
     application.status = StatusKontributor.REJECTED
-    application.save(update_fields=["status"])
+    application.admin_notes = admin_notes
+    application.save(
+        update_fields=['status', 'admin_notes']
+    )
 
     user.status_kontributor = StatusKontributor.REJECTED
-    user.save(update_fields=["status_kontributor"])
+    user.save(update_fields=['status_kontributor'])
 
     Activity.objects.create(
         recipient=user,
         actor=actor,
         action_type=Activity.ActionType.CONTRIBUTOR_REJECTED,
         message=(
-            "Pengajuan kontributor kamu ditolak. "
-            "Silakan periksa catatan admin jika tersedia."
+            'Pengajuan kontributor kamu ditolak. '
+            'Silakan periksa catatan admin untuk mengetahui alasannya.'
         ),
     )
 

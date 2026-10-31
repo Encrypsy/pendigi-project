@@ -361,14 +361,29 @@
                     <form
                         action="{% url 'admin_reject_contributor' application.pk %}"
                         method="post"
+                        class="contributor-reject-form"
                     >
                         {% csrf_token %}
+
+                        <label for="admin-notes-{{ application.pk }}">
+                            Alasan Penolakan
+                        </label>
+
+                        <textarea
+                            id="admin-notes-{{ application.pk }}"
+                            name="admin_notes"
+                            rows="3"
+                            placeholder="Tuliskan alasan pengajuan ditolak..."
+                            required
+                            maxlength="2000"
+                        ></textarea>
+
                         <button
                             type="submit"
                             class="contributor-btn-reject"
                             onclick="return confirm('Yakin ingin menolak pengajuan ini?')"
                         >
-                            Tolak
+                            Tolak Pengajuan
                         </button>
                     </form>
 
