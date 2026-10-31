@@ -45,14 +45,6 @@ class Users(AbstractUser):
     def __str__(self):
         return self.username
     
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                Lower('email'),
-                name='unique_user_email_ci'
-            ),
-        ]
-    
 class ContributorApplication(models.Model):
 
     user = models.ForeignKey(
