@@ -287,7 +287,7 @@ class ReaderLoginForm(AuthenticationForm):
         password = self.cleaned_data.get('password')
 
         if not username:
-            self.add_error('username', 'Username atau email wajib diisi.')
+            self.add_error('username', 'Username wajib diisi.')
             return self.cleaned_data
 
         if not password:
@@ -309,7 +309,7 @@ class ReaderLoginForm(AuthenticationForm):
                 )
 
             raise ValidationError(
-                'Username atau email tidak ditemukan.'
+                'Username tidak ditemukan.'
             )
 
         user = Users.objects.filter(username=username).first()
