@@ -329,4 +329,35 @@ a {
 }
 
 
+.rating-input {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+    gap: 4px;
+}
+
+.rating-input input {
+    display: none;
+}
+
+.rating-input label {
+    color: #ccc;
+    cursor: pointer;
+    font-size: 29px;
+    transition: color 0.2s;
+}
+
+/* Bintang terpilih dan bintang sebelumnya */
+.rating-input input:checked ~ label {
+    color: #e5a13b;
+}
+
+/* Efek hover */
+.rating-input label:hover,
+.rating-input label:hover ~ label {
+    color: #e5a13b;
+}
+
+
+
 

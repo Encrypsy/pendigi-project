@@ -119,6 +119,36 @@
     .rating-input label:hover ~ label {
         color: #e5a13b;
     }
+
+    .rating-input {
+        display: flex;
+        flex-direction: row-reverse;
+        justify-content: flex-end;
+        gap: 4px;
+    }
+
+    .rating-input input {
+        display: none;
+    }
+
+    .rating-input label {
+        color: #ccc;
+        cursor: pointer;
+        font-size: 29px;
+        transition: color 0.2s;
+    }
+
+    /* Bintang terpilih dan bintang sebelumnya */
+    .rating-input input:checked ~ label {
+        color: #e5a13b;
+    }
+
+    /* Efek hover */
+    .rating-input label:hover,
+    .rating-input label:hover ~ label {
+        color: #e5a13b;
+    }
+
 </style>
 {% endblock %}
 
@@ -176,19 +206,19 @@
                             Berikan rating:
                         {% endif %}
                     </p>
-                    
+                                       
                     <div class="rating-input">
-                        {% for value in "12345" %}
+                        {% for value in "54321" %}
                             <input
                                 type="radio"
                                 name="rating"
-                                id="rating-{{ forloop.counter }}"
-                                value="{{ forloop.counter }}"
-                                {% if user_rating and user_rating.rating_value == forloop.counter %}checked{% endif %}
+                                id="rating-{{ forloop.revcounter }}"
+                                value="{{ forloop.revcounter }}"
+                                {% if user_rating and user_rating.rating_value == forloop.revcounter %}checked{% endif %}
                             >
                             <label
-                                for="rating-{{ forloop.counter }}"
-                                title="{{ forloop.counter }} bintang"
+                                for="rating-{{ forloop.revcounter }}"
+                                title="{{ forloop.revcounter }} bintang"
                             >★</label>
                         {% endfor %}
                     </div>
