@@ -231,6 +231,29 @@
                                     </svg>
                                     {{ story.author.username }}
                                 </p>
+
+                                <div class="fiction-story-rating">
+                                    {% if story.total_ratings > 0 %}
+                                        <span class="fiction-card-rating-stars">
+                                            {% for i in "12345" %}
+                                                {% if forloop.counter <= story.average_rating %}
+                                                    ★
+                                                {% else %}
+                                                    ☆
+                                                {% endif %}
+                                            {% endfor %}
+                                        </span>
+
+                                        <strong>{{ story.average_rating|floatformat:1 }}</strong>
+                                        <span class="fiction-rating-count">
+                                            ({{ story.total_ratings }} rating)
+                                        </span>
+                                    {% else %}
+                                        <span class="fiction-no-rating">
+                                            ☆ Belum ada rating
+                                        </span>
+                                    {% endif %}
+                                </div>
                             </div>
                         </a>
 

@@ -1925,3 +1925,33 @@
     stroke: #6B4226;
 }
 
+
+.fiction-story-rating {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 5px;
+    font-size: 11px;
+}
+
+.fiction-card-rating-stars {
+    color: #e5a13b;
+    font-size: 13px;
+    letter-spacing: 1px;
+}
+
+.fiction-story-rating strong {
+    color: #444;
+    font-size: 11px;
+}
+
+.fiction-rating-count {
+    color: #888;
+}
+
+.fiction-no-rating {
+    color: #999;
+    font-size: 11px;
+}
+
