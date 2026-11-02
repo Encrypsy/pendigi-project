@@ -37,4 +37,9 @@ urlpatterns = [
         views.delete_approved_chapter,
         name='delete_approved_chapter',
     ),
+    path(
+        'cerita/<int:pk>/rating/',
+        views.rate_story,
+        name='rate_story'
+    ),
 ]

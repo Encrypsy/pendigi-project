@@ -204,3 +204,61 @@ a {
     color: #a66b37;
     text-decoration: underline;
 }
+
+
+.story-rating-section {
+    margin: 16px 0 24px;
+}
+
+.story-rating-summary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: #777;
+}
+
+.rating-stars-display {
+    color: #e5a13b;
+    font-size: 20px;
+    letter-spacing: 2px;
+}
+
+.rating-input {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+    gap: 5px;
+    margin: 8px 0 14px;
+}
+
+.rating-input input {
+    display: none;
+}
+
+.rating-input label {
+    color: #ccc;
+    cursor: pointer;
+    font-size: 30px;
+    transition: color 0.2s;
+}
+
+.rating-input label:hover,
+.rating-input label:hover ~ label,
+.rating-input input:checked ~ label {
+    color: #e5a13b;
+}
+
+.rating-submit-button {
+    border: none;
+    border-radius: 8px;
+    padding: 9px 16px;
+    background: #356b5b;
+    color: white;
+    cursor: pointer;
+}
+
+.rating-login-message {
+    color: #777;
+    font-size: 13px;
+}

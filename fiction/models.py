@@ -1,6 +1,7 @@
 from django.db import models
 from accounts.models import Users, StatusKontributor
 from interactions.models import StatusComment
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 class GenreFiksi(models.TextChoices):
     ROMANCE = 'romance', 'Romance'
@@ -74,6 +75,35 @@ class Stories(models.Model):
 
         scored.sort(key=lambda x: (x[0], x[1], x[2]), reverse=True)
         return [item[3] for item in scored[:limit]]
+    
+    
+class StoryRatings(models.Model):
+    user = models.ForeignKey(
+        Users,
+        on_delete=models.CASCADE,
+        related_name='story_ratings'
+    )
+    story = models.ForeignKey(
+        Stories,
+        on_delete=models.CASCADE,
+        related_name='ratings'
+    )
+    rating_value = models.PositiveSmallIntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(5)]
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'story'],
+                name='unique_user_story_rating'
+            )
+        ]
+
+    def __str__(self):
+        return f'{self.user.username} -> {self.story.title} : {self.rating_value}'
 
 
 class FavoriteStories(models.Model):

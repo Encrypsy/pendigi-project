@@ -7,13 +7,13 @@ from accounts.models import StatusKontributor, Follow
 from articles.models import Banner, BannerType
 from interactions.models import Bookmarks, StatusComment, Activity
 from interactions.notifications import notify_admins
-from .models import StatusChapter, Stories, Chapters, StatusStory, FavoriteStories, ChapterComments, ChapterCommentLikes, ReadingProgress
+from .models import StatusChapter, Stories, Chapters, StatusStory, FavoriteStories, ChapterComments, ChapterCommentLikes, ReadingProgress, StoryRatings
 from .forms import StoryForm, ChapterForm, ChapterCommentForm
 from django.http import JsonResponse
 from accounts.decorators import admin_required
 from django.views.decorators.http import require_POST
 from django.utils import timezone
-from django.db.models import F, Count, Q
+from django.db.models import F, Avg, Count, Q
 from django.http import JsonResponse
 
 def tag_suggestions(request):
@@ -497,26 +497,79 @@ def story_list(request):
     )
 
 def story_detail(request, pk):
-    story = get_object_or_404(Stories, pk=pk, status=StatusStory.APPROVED)
+    story = get_object_or_404(
+        Stories,
+        pk=pk,
+        status=StatusStory.APPROVED
+    )
 
-    Stories.objects.filter(pk=pk).update(views_count=F('views_count') + 1)
+    Stories.objects.filter(pk=pk).update(
+        views_count=F('views_count') + 1
+    )
     story.refresh_from_db(fields=['views_count'])
 
     chapters = story.chapters.filter(
         status=StatusChapter.APPROVED
     ).order_by('chapter_number')
+
     similar_stories = story.get_similar_stories()
 
     is_favorited = False
+    user_rating = None
+
     if request.user.is_authenticated:
-        is_favorited = FavoriteStories.objects.filter(user=request.user, story=story).exists()
+        is_favorited = FavoriteStories.objects.filter(
+            user=request.user,
+            story=story
+        ).exists()
+
+        user_rating = StoryRatings.objects.filter(
+            user=request.user,
+            story=story
+        ).first()
+
+    rating_summary = story.ratings.aggregate(
+        average=Avg('rating_value'),
+        total=Count('id')
+    )
 
     return render(request, 'fiction/story_detail.html', {
         'story': story,
         'chapters': chapters,
         'is_favorited': is_favorited,
         'similar_stories': similar_stories,
+        'average_rating': rating_summary['average'] or 0,
+        'total_ratings': rating_summary['total'],
+        'user_rating': user_rating,
     })
+    
+@login_required
+@require_POST
+def rate_story(request, pk):
+    story = get_object_or_404(
+        Stories,
+        pk=pk,
+        status=StatusStory.APPROVED
+    )
+
+    try:
+        rating_value = int(request.POST.get('rating', 0))
+    except (TypeError, ValueError):
+        rating_value = 0
+
+    if rating_value < 1 or rating_value > 5:
+        messages.error(request, 'Rating harus antara 1 sampai 5.')
+        return redirect('fiction:story_detail', pk=story.pk)
+
+    StoryRatings.objects.update_or_create(
+        user=request.user,
+        story=story,
+        defaults={'rating_value': rating_value}
+    )
+
+    messages.success(request, 'Rating cerita berhasil disimpan.')
+    return redirect('fiction:story_detail', pk=story.pk)
+
 
 def read_chapter(request, pk, chapter_number):
     story = get_object_or_404(

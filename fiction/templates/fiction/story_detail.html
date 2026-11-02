@@ -1,9 +1,96 @@
+
 {% extends 'fiction/fiction_base.html' %}
 {% load static %}
+
 {% block title %}{{ story.title }}{% endblock %}
+
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/table.css' %}">
 <link rel="stylesheet" href="{% static 'css/story-detail.css' %}">
+
+<style>
+    /* Rating cerita */
+    .story-rating-section {
+        margin: 12px 0 18px;
+    }
+
+    .story-rating-summary {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+        font-size: 14px;
+        color: #777;
+    }
+
+    .rating-stars-display {
+        color: #e5a13b;
+        font-size: 20px;
+        letter-spacing: 2px;
+    }
+
+    .story-rating-summary strong {
+        color: #333;
+        font-size: 15px;
+    }
+
+    .story-rating-form {
+        margin-top: 12px;
+    }
+
+    .story-rating-form p {
+        margin-bottom: 6px;
+        font-size: 13px;
+        color: #666;
+    }
+
+    .rating-input {
+        display: flex;
+        flex-direction: row-reverse;
+        justify-content: flex-end;
+        width: fit-content;
+        gap: 3px;
+        margin: 5px 0 12px;
+    }
+
+    .rating-input input {
+        display: none;
+    }
+
+    .rating-input label {
+        color: #ccc;
+        cursor: pointer;
+        font-size: 29px;
+        transition: color 0.2s;
+    }
+
+    .rating-input label:hover,
+    .rating-input label:hover ~ label,
+    .rating-input input:checked ~ label {
+        color: #e5a13b;
+    }
+
+    .rating-submit-button {
+        border: none;
+        border-radius: 8px;
+        padding: 9px 16px;
+        background: #356b5b;
+        color: white;
+        font-size: 13px;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+    .rating-submit-button:hover {
+        background: #285345;
+    }
+
+    .rating-login-message {
+        margin-top: 10px;
+        color: #777;
+        font-size: 13px;
+    }
+</style>
 {% endblock %}
 
 {% block fiction_content %}
@@ -18,7 +105,7 @@
 
     <div class="story-hero-info">
         <h1>{{ story.title }}</h1>
-        
+
         <a
             href="{% url 'public_profile' story.author.username %}"
             class="story-hero-author story-hero-author-link"
@@ -26,6 +113,71 @@
             {{ story.author.username }}
         </a>
 
+        <!-- Rating cerita -->
+        <div class="story-rating-section">
+
+            <div class="story-rating-summary">
+                <span class="rating-stars-display">
+                    {% for i in "12345" %}
+                        {% if forloop.counter <= average_rating %}
+                            ★
+                        {% else %}
+                            ☆
+                        {% endif %}
+                    {% endfor %}
+                </span>
+
+                <strong>{{ average_rating|floatformat:1 }}</strong>
+                <span>({{ total_ratings }} rating)</span>
+            </div>
+
+            {% if user.is_authenticated %}
+            <form
+                method="POST"
+                action="{% url 'fiction:rate_story' story.pk %}"
+                class="story-rating-form"
+            >
+                {% csrf_token %}
+
+                <p>
+                    {% if user_rating %}
+                        Rating kamu: {{ user_rating.rating_value }}/5
+                        · Ubah rating:
+                    {% else %}
+                        Berikan rating untuk cerita ini:
+                    {% endif %}
+                </p>
+
+                <div class="rating-input">
+                    {% for value in "12345" %}
+                    <input
+                        type="radio"
+                        name="rating"
+                        id="rating-{{ forloop.counter }}"
+                        value="{{ forloop.counter }}"
+                        {% if user_rating and user_rating.rating_value == forloop.counter %}checked{% endif %}
+                        required
+                    >
+                    <label for="rating-{{ forloop.counter }}">★</label>
+                    {% endfor %}
+                </div>
+
+                <button type="submit" class="rating-submit-button">
+                    {% if user_rating %}
+                        Perbarui Rating
+                    {% else %}
+                        Kirim Rating
+                    {% endif %}
+                </button>
+            </form>
+
+            {% else %}
+            <p class="rating-login-message">
+                Login untuk memberikan rating.
+            </p>
+            {% endif %}
+
+        </div>
 
         <div class="story-hero-stats">
             <span>👁 {{ story.views_count }}</span>
@@ -35,16 +187,25 @@
 
         <div class="story-hero-actions">
             {% if chapters.first %}
-            <a href="{% url 'fiction:read_chapter' story.pk chapters.first.chapter_number %}"
-                class="btn-primary story-read-btn">Mulai Membaca</a>
+            <a
+                href="{% url 'fiction:read_chapter' story.pk chapters.first.chapter_number %}"
+                class="btn-primary story-read-btn"
+            >
+                Mulai Membaca
+            </a>
             {% else %}
-            <span class="btn-primary story-read-btn story-read-disabled">Belum Ada Bab</span>
+            <span class="btn-primary story-read-btn story-read-disabled">
+                Belum Ada Bab
+            </span>
             {% endif %}
 
             {% if user.is_authenticated %}
             <form action="{% url 'fiction:toggle_favorite_story' story.pk %}" method="post">
                 {% csrf_token %}
-                <button type="submit" class="favorite-icon-btn {% if is_favorited %}is-active{% endif %}">
+                <button
+                    type="submit"
+                    class="favorite-icon-btn {% if is_favorited %}is-active{% endif %}"
+                >
                     {% if is_favorited %}★{% else %}+{% endif %}
                 </button>
             </form>
@@ -60,10 +221,15 @@
 
 <div class="story-tab-content active" id="tab-ringkasan">
     <div class="story-info-line">
-        {% if story.target_pembaca == 'dewasa' %}<span>📖 Dewasa</span> &middot;{% endif %}
-        <span>{% if story.is_completed %}Lengkap{% else %}Sedang Berlangsung{% endif %}</span> &middot;
+        {% if story.target_pembaca == 'dewasa' %}
+            <span>📖 Dewasa</span> &middot;
+        {% endif %}
+        <span>
+            {% if story.is_completed %}Lengkap{% else %}Sedang Berlangsung{% endif %}
+        </span> &middot;
         <span>{{ story.published_at|date:"D, d M Y" }}</span>
     </div>
+
     <div class="story-info-line story-info-genre">
         ⓘ {{ story.get_genre_display }}
     </div>
@@ -71,19 +237,26 @@
     {% if story.tag_list %}
     <div class="story-tags">
         {% for tag in story.tag_list %}
-        <a href="{% url 'fiction:tag_stories' tag %}" class="tag-chip-link">{{ tag }}</a>
+        <a href="{% url 'fiction:tag_stories' tag %}" class="tag-chip-link">
+            {{ tag }}
+        </a>
         {% endfor %}
     </div>
     {% endif %}
 
     <div class="story-description" id="storyDescription">
-        <p id="descText" class="desc-collapsed">{{ story.description|linebreaksbr }}</p>
-        <button type="button" id="descToggleBtn" class="desc-toggle-btn">Baca selengkapnya</button>
+        <p id="descText" class="desc-collapsed">
+            {{ story.description|linebreaksbr }}
+        </p>
+        <button type="button" id="descToggleBtn" class="desc-toggle-btn">
+            Baca selengkapnya
+        </button>
     </div>
 
     {% if similar_stories %}
     <div class="similar-stories-section">
         <h3 class="similar-title">Anda Mungkin Juga Menyukai</h3>
+
         <div class="similar-grid">
             {% for similar in similar_stories %}
             <a href="{% url 'fiction:story_detail' similar.pk %}" class="similar-card">
@@ -94,11 +267,14 @@
                     <div class="similar-cover-placeholder">📖</div>
                     {% endif %}
                 </div>
+
                 <div class="similar-info">
                     <strong>{{ similar.title }}</strong>
                     <p>{{ similar.description|truncatewords:12 }}</p>
-                    <span class="similar-meta">☰ {{ similar.total_chapters }} bab &middot; 
-                        {% if similar.is_completed%}Lengkap{% else %}Berlangsung{% endif %}</span>
+                    <span class="similar-meta">
+                        ☰ {{ similar.total_chapters }} bab &middot;
+                        {% if similar.is_completed %}Lengkap{% else %}Berlangsung{% endif %}
+                    </span>
                 </div>
             </a>
             {% endfor %}
@@ -116,11 +292,15 @@
                 <th>Tanggal</th>
             </tr>
         </thead>
+
         <tbody>
             {% for chapter in chapters %}
             <tr>
                 <td>{{ chapter.chapter_number }}</td>
-                <td><a href="{% url 'fiction:read_chapter' story.pk chapter.chapter_number %}">{{ chapter.title }}</a>
+                <td>
+                    <a href="{% url 'fiction:read_chapter' story.pk chapter.chapter_number %}">
+                        {{ chapter.title }}
+                    </a>
                 </td>
                 <td>{{ chapter.created_at|date:"D, d M Y" }}</td>
             </tr>
@@ -138,6 +318,7 @@
         btn.addEventListener('click', () => {
             document.querySelectorAll('.story-tab-btn').forEach(b => b.classList.remove('active'));
             document.querySelectorAll('.story-tab-content').forEach(c => c.classList.remove('active'));
+
             btn.classList.add('active');
             document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
         });
@@ -145,13 +326,20 @@
 
     const descText = document.getElementById('descText');
     const descToggleBtn = document.getElementById('descToggleBtn');
-    if (descText.scrollHeight <= descText.clientHeight + 4) {
-        descToggleBtn.style.display = 'none';
-    } else {
-        descToggleBtn.addEventListener('click', () => {
-            descText.classList.toggle('desc-collapsed');
-            descToggleBtn.textContent = descText.classList.contains('desc-collapsed') ? 'Baca selengkapnya' : 'Tutup';
-        });
+
+    if (descText && descToggleBtn) {
+        if (descText.scrollHeight <= descText.clientHeight + 4) {
+            descToggleBtn.style.display = 'none';
+        } else {
+            descToggleBtn.addEventListener('click', () => {
+                descText.classList.toggle('desc-collapsed');
+
+                descToggleBtn.textContent =
+                    descText.classList.contains('desc-collapsed')
+                        ? 'Baca selengkapnya'
+                        : 'Tutup';
+            });
+        }
     }
 </script>
 {% endblock %}
