@@ -205,14 +205,14 @@ a {
     text-decoration: underline;
 }
 
-
 .story-rating-section {
-    margin: 16px 0 24px;
+    margin: 12px 0 18px;
 }
 
 .story-rating-summary {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
     gap: 8px;
     font-size: 14px;
     color: #777;
@@ -224,12 +224,25 @@ a {
     letter-spacing: 2px;
 }
 
+.story-rating-summary strong {
+    color: #333;
+}
+
+.story-rating-form {
+    margin-top: 10px;
+}
+
+.story-rating-form p {
+    margin-bottom: 5px;
+    font-size: 13px;
+    color: #666;
+}
+
 .rating-input {
     display: flex;
-    flex-direction: row-reverse;
-    justify-content: flex-end;
-    gap: 5px;
-    margin: 8px 0 14px;
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 4px;
 }
 
 .rating-input input {
@@ -239,26 +252,25 @@ a {
 .rating-input label {
     color: #ccc;
     cursor: pointer;
-    font-size: 30px;
+    font-size: 29px;
     transition: color 0.2s;
 }
 
+/* Hover: bintang terpilih dan semua bintang sebelumnya */
 .rating-input label:hover,
-.rating-input label:hover ~ label,
-.rating-input input:checked ~ label {
+.rating-input label:hover ~ label {
     color: #e5a13b;
 }
 
-.rating-submit-button {
-    border: none;
-    border-radius: 8px;
-    padding: 9px 16px;
-    background: #356b5b;
-    color: white;
-    cursor: pointer;
+/* Rating yang sudah dipilih */
+.rating-input input:checked + label,
+.rating-input input:checked + label ~ label {
+    color: #e5a13b;
 }
 
 .rating-login-message {
+    margin-top: 10px;
     color: #777;
     font-size: 13px;
 }
+

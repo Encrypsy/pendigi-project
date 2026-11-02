@@ -113,7 +113,7 @@
             {{ story.author.username }}
         </a>
 
-        <!-- Rating cerita -->
+        <!-- Rating cerita -->    
         <div class="story-rating-section">
 
             <div class="story-rating-summary">
@@ -132,49 +132,42 @@
             </div>
 
             {% if user.is_authenticated %}
-            <form
-                method="POST"
-                action="{% url 'fiction:rate_story' story.pk %}"
-                class="story-rating-form"
-            >
-                {% csrf_token %}
+                <form
+                    method="POST"
+                    action="{% url 'fiction:rate_story' story.pk %}"
+                    class="story-rating-form"
+                    id="storyRatingForm"
+                >
+                    {% csrf_token %}
 
-                <p>
-                    {% if user_rating %}
-                        Rating kamu: {{ user_rating.rating_value }}/5
-                        · Ubah rating:
-                    {% else %}
-                        Berikan rating untuk cerita ini:
-                    {% endif %}
-                </p>
+                    <p>
+                        {% if user_rating %}
+                            Rating kamu: {{ user_rating.rating_value }}/5
+                        {% else %}
+                            Berikan rating:
+                        {% endif %}
+                    </p>
 
-                <div class="rating-input">
-                    {% for value in "12345" %}
-                    <input
-                        type="radio"
-                        name="rating"
-                        id="rating-{{ forloop.counter }}"
-                        value="{{ forloop.counter }}"
-                        {% if user_rating and user_rating.rating_value == forloop.counter %}checked{% endif %}
-                        required
-                    >
-                    <label for="rating-{{ forloop.counter }}">★</label>
-                    {% endfor %}
-                </div>
-
-                <button type="submit" class="rating-submit-button">
-                    {% if user_rating %}
-                        Perbarui Rating
-                    {% else %}
-                        Kirim Rating
-                    {% endif %}
-                </button>
-            </form>
-
+                    <div class="rating-input">
+                        {% for value in "12345" %}
+                            <input
+                                type="radio"
+                                name="rating"
+                                id="rating-{{ forloop.counter }}"
+                                value="{{ forloop.counter }}"
+                                {% if user_rating and user_rating.rating_value == forloop.counter %}checked{% endif %}
+                            >
+                            <label
+                                for="rating-{{ forloop.counter }}"
+                                title="{{ forloop.counter }} bintang"
+                            >★</label>
+                        {% endfor %}
+                    </div>
+                </form>
             {% else %}
-            <p class="rating-login-message">
-                Login untuk memberikan rating.
-            </p>
+                <p class="rating-login-message">
+                    Login untuk memberikan rating.
+                </p>
             {% endif %}
 
         </div>
@@ -340,6 +333,16 @@
                         : 'Tutup';
             });
         }
+    }
+
+    const storyRatingForm = document.getElementById('storyRatingForm');
+
+    if (storyRatingForm) {
+        storyRatingForm.querySelectorAll('input[name="rating"]').forEach(input => {
+            input.addEventListener('change', () => {
+                storyRatingForm.submit();
+            });
+        });
     }
 </script>
 {% endblock %}
