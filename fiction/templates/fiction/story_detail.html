@@ -322,14 +322,40 @@
                     <div class="similar-cover-placeholder">📖</div>
                     {% endif %}
                 </div>
-
+     
                 <div class="similar-info">
                     <strong>{{ similar.title }}</strong>
+
                     <p>{{ similar.description|truncatewords:12 }}</p>
+
                     <span class="similar-meta">
                         ☰ {{ similar.total_chapters }} bab &middot;
                         {% if similar.is_completed %}Lengkap{% else %}Berlangsung{% endif %}
                     </span>
+
+                    <div class="similar-rating">
+                        {% if similar.total_ratings > 0 %}
+                            <span class="similar-rating-stars">
+                                {% for i in "12345" %}
+                                    {% if forloop.counter <= similar.average_rating %}
+                                        ★
+                                    {% else %}
+                                        ☆
+                                    {% endif %}
+                                {% endfor %}
+                            </span>
+
+                            <strong>{{ similar.average_rating|floatformat:1 }}</strong>
+
+                            <span class="similar-rating-count">
+                                ({{ similar.total_ratings }} rating)
+                            </span>
+                        {% else %}
+                            <span class="similar-no-rating">
+                                ☆ Belum ada rating
+                            </span>
+                        {% endif %}
+                    </div>
                 </div>
             </a>
             {% endfor %}

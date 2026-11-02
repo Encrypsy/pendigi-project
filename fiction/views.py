@@ -521,7 +521,28 @@ def story_detail(request, pk):
         status=StatusChapter.APPROVED
     ).order_by('chapter_number')
 
+    # Rekomendasi cerita
     similar_stories = story.get_similar_stories()
+
+    # Ambil rating untuk setiap cerita rekomendasi
+    similar_ids = [item.pk for item in similar_stories]
+
+    similar_rating_data = {
+        item['pk']: item
+        for item in Stories.objects.filter(pk__in=similar_ids)
+        .annotate(
+            average_rating=Avg('ratings__rating_value'),
+            total_ratings=Count('ratings', distinct=True),
+        )
+        .values('pk', 'average_rating', 'total_ratings')
+    }
+
+    # Tempelkan data rating ke setiap objek rekomendasi
+    for similar in similar_stories:
+        rating_data = similar_rating_data.get(similar.pk, {})
+
+        similar.average_rating = rating_data.get('average_rating') or 0
+        similar.total_ratings = rating_data.get('total_ratings') or 0
 
     is_favorited = False
     user_rating = None
@@ -537,6 +558,7 @@ def story_detail(request, pk):
             story=story
         ).first()
 
+    # Rating cerita utama
     rating_summary = story.ratings.aggregate(
         average=Avg('rating_value'),
         total=Count('id')

@@ -371,4 +371,34 @@ a {
 }
 
 
+.similar-rating {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 5px;
+    font-size: 11px;
+}
+
+.similar-rating-stars {
+    color: #e5a13b;
+    letter-spacing: 1px;
+    font-size: 12px;
+}
+
+.similar-rating strong {
+    color: #444;
+    font-size: 11px;
+}
+
+.similar-rating-count {
+    color: #888;
+}
+
+.similar-no-rating {
+    color: #999;
+}
+
+
+
 
