@@ -173,10 +173,11 @@
         </a>
 
         <!-- Rating cerita -->    
-        <div class="story-rating-section">
+        
+        <div class="story-rating-section" id="storyRatingSection">
 
             <div class="story-rating-summary">
-                <span class="rating-stars-display">
+                <span class="rating-stars-display" id="averageRatingStars">
                     {% for i in "12345" %}
                         {% if forloop.counter <= average_rating %}
                             ★
@@ -186,8 +187,8 @@
                     {% endfor %}
                 </span>
 
-                <strong>{{ average_rating|floatformat:1 }}</strong>
-                <span>({{ total_ratings }} rating)</span>
+                <strong id="averageRatingValue">{{ average_rating|floatformat:1 }}</strong>
+                <span>(<span id="totalRatings">{{ total_ratings }}</span> rating)</span>
             </div>
 
             {% if user.is_authenticated %}
@@ -199,14 +200,14 @@
                 >
                     {% csrf_token %}
 
-                    <p>
+                    <p id="ratingMessage">
                         {% if user_rating %}
                             Rating kamu: {{ user_rating.rating_value }}/5
                         {% else %}
                             Berikan rating:
                         {% endif %}
                     </p>
-                                       
+
                     <div class="rating-input">
                         {% for value in "54321" %}
                             <input
@@ -223,12 +224,14 @@
                         {% endfor %}
                     </div>
                 </form>
+
+                <span id="ratingFeedback" class="rating-feedback" aria-live="polite"></span>
+
             {% else %}
                 <p class="rating-login-message">
                     Login untuk memberikan rating.
                 </p>
             {% endif %}
-
         </div>
 
         <div class="story-hero-stats">
@@ -400,6 +403,65 @@
         storyRatingForm.querySelectorAll('input[name="rating"]').forEach(input => {
             input.addEventListener('change', () => {
                 storyRatingForm.submit();
+            });
+        });
+    }
+
+    const storyRatingForm = document.getElementById('storyRatingForm');
+
+    if (storyRatingForm) {
+        const ratingFeedback = document.getElementById('ratingFeedback');
+        const ratingMessage = document.getElementById('ratingMessage');
+
+        storyRatingForm.querySelectorAll('input[name="rating"]').forEach(input => {
+            input.addEventListener('change', async () => {
+                const formData = new FormData(storyRatingForm);
+                const selectedRating = Number(formData.get('rating'));
+
+                ratingFeedback.textContent = 'Menyimpan rating...';
+
+                storyRatingForm.querySelectorAll('input').forEach(radio => {
+                    radio.disabled = true;
+                });
+
+                try {
+                    const response = await fetch(storyRatingForm.action, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    });
+
+                    const data = await response.json();
+
+                    if (!response.ok || !data.success) {
+                        throw new Error(data.message || 'Gagal menyimpan rating.');
+                    }
+
+                    document.getElementById('averageRatingValue').textContent =
+                        data.average_rating.toFixed(1);
+
+                    document.getElementById('totalRatings').textContent =
+                        data.total_ratings;
+
+                    document.getElementById('averageRatingStars').textContent =
+                        '★'.repeat(Math.round(data.average_rating)) +
+                        '☆'.repeat(5 - Math.round(data.average_rating));
+
+                    ratingMessage.textContent =
+                        `Rating kamu: ${data.user_rating}/5`;
+
+                    ratingFeedback.textContent = 'Rating berhasil disimpan.';
+
+                } catch (error) {
+                    ratingFeedback.textContent = error.message;
+
+                } finally {
+                    storyRatingForm.querySelectorAll('input').forEach(radio => {
+                        radio.disabled = false;
+                    });
+                }
             });
         });
     }

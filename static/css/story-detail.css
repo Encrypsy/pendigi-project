@@ -358,6 +358,17 @@ a {
     color: #e5a13b;
 }
 
+.rating-feedback {
+    display: block;
+    margin-top: 5px;
+    font-size: 12px;
+    color: #356b5b;
+}
+
+.rating-input input:disabled + label {
+    cursor: wait;
+    opacity: 0.6;
+}
 
 
 

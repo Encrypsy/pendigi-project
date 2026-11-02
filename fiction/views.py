@@ -543,6 +543,7 @@ def story_detail(request, pk):
         'user_rating': user_rating,
     })
     
+
 @login_required
 @require_POST
 def rate_story(request, pk):
@@ -555,11 +556,16 @@ def rate_story(request, pk):
     try:
         rating_value = int(request.POST.get('rating', 0))
     except (TypeError, ValueError):
-        rating_value = 0
+        return JsonResponse({
+            'success': False,
+            'message': 'Rating tidak valid.'
+        }, status=400)
 
     if rating_value < 1 or rating_value > 5:
-        messages.error(request, 'Rating harus antara 1 sampai 5.')
-        return redirect('fiction:story_detail', pk=story.pk)
+        return JsonResponse({
+            'success': False,
+            'message': 'Rating harus antara 1 sampai 5.'
+        }, status=400)
 
     StoryRatings.objects.update_or_create(
         user=request.user,
@@ -567,8 +573,19 @@ def rate_story(request, pk):
         defaults={'rating_value': rating_value}
     )
 
-    messages.success(request, 'Rating cerita berhasil disimpan.')
-    return redirect('fiction:story_detail', pk=story.pk)
+    rating_summary = story.ratings.aggregate(
+        average=Avg('rating_value'),
+        total=Count('id')
+    )
+
+    return JsonResponse({
+        'success': True,
+        'message': 'Rating berhasil disimpan.',
+        'user_rating': rating_value,
+        'average_rating': round(rating_summary['average'] or 0, 1),
+        'total_ratings': rating_summary['total'],
+    })
+
 
 
 def read_chapter(request, pk, chapter_number):
