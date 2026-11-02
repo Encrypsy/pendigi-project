@@ -400,16 +400,6 @@
     const storyRatingForm = document.getElementById('storyRatingForm');
 
     if (storyRatingForm) {
-        storyRatingForm.querySelectorAll('input[name="rating"]').forEach(input => {
-            input.addEventListener('change', () => {
-                storyRatingForm.submit();
-            });
-        });
-    }
-
-    const storyRatingForm = document.getElementById('storyRatingForm');
-
-    if (storyRatingForm) {
         const ratingFeedback = document.getElementById('ratingFeedback');
         const ratingMessage = document.getElementById('ratingMessage');
 
