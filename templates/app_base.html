@@ -191,6 +191,14 @@
                                             Konten kamu ditolak oleh admin.
                                         {% endif %}
 
+                                    {% elif activity.action_type == 'follow' %}
+                                        {% if activity.actor %}
+                                            <strong>{{ activity.actor.username }}</strong>
+                                            {{ activity.message|cut:activity.actor.username }}
+                                        {% else %}
+                                            {{ activity.message }}
+                                        {% endif %}
+
                                     {% elif activity.action_type == 'comment_reply' %}
                                         {% if activity.actor %}
                                             <strong>{{ activity.actor.username }}</strong>
