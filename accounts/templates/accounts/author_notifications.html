@@ -97,7 +97,7 @@
                         {% if action == 'approved' or action == 'rejected' %}
                             Admin
                         {% elif activity.actor %}
-                            {% comment %} {{ activity.actor.username }} {% endcomment %}
+                            {{ activity.actor.username }}
                         {% else %}
                             Sistem
                         {% endif %}
