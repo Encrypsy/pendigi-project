@@ -130,6 +130,9 @@
                                 {% elif activity.action_type == 'rejected' %}
                                     <span class="notification-system-icon notification-rejected-icon">!</span>
 
+                                {% elif activity.action_type == 'comment_approved' %}
+                                    <span class="notification-system-icon notification-approved-icon">✓</span>
+
                                 {% elif activity.actor %}
                                     {% if activity.actor.profile_picture %}
                                         <img
@@ -190,6 +193,10 @@
                                         {% else %}
                                             Konten kamu ditolak oleh admin.
                                         {% endif %}
+
+                                    {% elif activity.action_type == 'comment_approved' %}
+                                        <strong>Komentar disetujui</strong>
+                                        {{ activity.message }}
 
                                     {% elif activity.action_type == 'follow' %}
                                         {% if activity.actor %}

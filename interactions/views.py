@@ -10,7 +10,7 @@ from django.core.paginator import Paginator
 from django.utils.http import url_has_allowed_host_and_scheme
 
 from articles.models import Articles, StatusArticle
-from fiction.models import Stories
+from fiction.models import ChapterComments, Stories
 from .models import (
     Activity,
     CommentDislikes,
@@ -367,6 +367,7 @@ def toggle_comment_dislike(request, comment_id):
     return redirect("articles:article_detail", pk=comment.article.pk)
 
 
+
 @admin_required
 def admin_comment_approval(request, status="pending"):
     allowed_statuses = {
@@ -378,23 +379,66 @@ def admin_comment_approval(request, status="pending"):
     if status not in allowed_statuses:
         return redirect("interactions:admin_comment_approval")
 
-    comments = Comments.objects.filter(
-        status=allowed_statuses[status]
+    selected_status = allowed_statuses[status]
+    query = request.GET.get("q", "").strip()
+
+    # Ambil komentar artikel
+    article_comments = Comments.objects.filter(
+        status=selected_status
     ).select_related(
         "user",
         "article",
     )
 
-    query = request.GET.get("q", "").strip()
+    # Ambil komentar chapter fiksi
+    fiction_comments = ChapterComments.objects.filter(
+        status=selected_status
+    ).select_related(
+        "user",
+        "chapter",
+        "chapter__story",
+    )
 
     if query:
-        comments = comments.filter(
+        article_comments = article_comments.filter(
             Q(content__icontains=query)
             | Q(user__username__icontains=query)
             | Q(article__title__icontains=query)
         )
 
-    comments = comments.order_by("-created_at")
+        fiction_comments = fiction_comments.filter(
+            Q(content__icontains=query)
+            | Q(user__username__icontains=query)
+            | Q(chapter__story__title__icontains=query)
+        )
+
+    # Satukan hasil kedua model untuk kebutuhan dashboard.
+    combined_comments = []
+
+    for comment in article_comments:
+        combined_comments.append({
+            "comment": comment,
+            "comment_type": "article",
+            "target_type": "Artikel",
+            "target_title": comment.article.title,
+        })
+
+    for comment in fiction_comments:
+        combined_comments.append({
+            "comment": comment,
+            "comment_type": "fiction",
+            "target_type": "Fiksi",
+            "target_title": (
+                f'{comment.chapter.story.title} '
+                f'(Bab {comment.chapter.chapter_number})'
+            ),
+        })
+
+    # Urutkan berdasarkan tanggal terbaru.
+    combined_comments.sort(
+        key=lambda item: item["comment"].created_at,
+        reverse=True,
+    )
 
     try:
         per_page = int(request.GET.get("per_page", 10))
@@ -403,19 +447,35 @@ def admin_comment_approval(request, status="pending"):
     except (ValueError, TypeError):
         per_page = 10
 
-    paginator = Paginator(comments, per_page)
+    paginator = Paginator(combined_comments, per_page)
     page_obj = paginator.get_page(request.GET.get("page", 1))
 
+    # Hitung seluruh komentar dari kedua model.
     status_counts = {
-        "pending": Comments.objects.filter(
-            status=StatusComment.PENDING
-        ).count(),
-        "approved": Comments.objects.filter(
-            status=StatusComment.APPROVED
-        ).count(),
-        "rejected": Comments.objects.filter(
-            status=StatusComment.REJECTED
-        ).count(),
+        "pending": (
+            Comments.objects.filter(
+                status=StatusComment.PENDING
+            ).count()
+            + ChapterComments.objects.filter(
+                status=StatusComment.PENDING
+            ).count()
+        ),
+        "approved": (
+            Comments.objects.filter(
+                status=StatusComment.APPROVED
+            ).count()
+            + ChapterComments.objects.filter(
+                status=StatusComment.APPROVED
+            ).count()
+        ),
+        "rejected": (
+            Comments.objects.filter(
+                status=StatusComment.REJECTED
+            ).count()
+            + ChapterComments.objects.filter(
+                status=StatusComment.REJECTED
+            ).count()
+        ),
     }
 
     return render(
@@ -432,39 +492,51 @@ def admin_comment_approval(request, status="pending"):
         },
     )
 
-
 @admin_required
 @require_POST
-def admin_approve_comment(request, pk):
-    comment = get_object_or_404(Comments, pk=pk)
+def admin_approve_comment(request, comment_type, pk):
+    if comment_type == "article":
+        comment = get_object_or_404(Comments, pk=pk)
 
-    comment.status = StatusComment.APPROVED
-    comment.save()
+        target_name = comment.article.title
+        target_label = "artikel"
 
-    # Untuk komentar utama, beri tahu penulis artikel.
-    # Untuk balasan, beri tahu pemilik komentar yang dibalas.
-    if comment.parent_id:
-        recipient = comment.parent.user
-        action_type = Activity.ActionType.COMMENT_REPLY
-        message = (
-            f'Balasan Anda pada artikel "{comment.article.title}" '
-            "telah disetujui."
+    elif comment_type == "fiction":
+        comment = get_object_or_404(
+            ChapterComments.objects.select_related(
+                "chapter",
+                "chapter__story",
+            ),
+            pk=pk,
         )
+
+        target_name = (
+            f'{comment.chapter.story.title} '
+            f'(Bab {comment.chapter.chapter_number})'
+        )
+        target_label = "cerita"
+
     else:
-        recipient = comment.article.contributor
-        action_type = Activity.ActionType.COMMENT
-        message = (
-            f'Komentar baru pada artikel "{comment.article.title}".'
-        )
+        return redirect("interactions:admin_comment_approval")
 
-    if recipient and recipient.pk != comment.user_id:
-        Activity.objects.create(
-            recipient=recipient,
-            actor=comment.user,
-            article=comment.article,
-            action_type=action_type,
-            message=message[:255],
-        )
+    # Hindari membuat notifikasi berulang jika sudah approved.
+    if comment.status != StatusComment.APPROVED:
+        comment.status = StatusComment.APPROVED
+        comment.save(update_fields=["status"])
+
+        # Notifikasi dikirim kepada pemilik komentar.
+        if comment.user_id != request.user.pk:
+            Activity.objects.create(
+                recipient=comment.user,
+                actor=request.user,
+                action_type=Activity.ActionType.COMMENT_APPROVED,
+                article=comment.article if comment_type == "article" else None,
+                chapter=comment.chapter if comment_type == "fiction" else None,
+                message=(
+                    f'Komentar kamu pada {target_label} '
+                    f'"{target_name}" telah disetujui oleh admin.'
+                )[:255],
+            )
 
     messages.success(request, "Komentar berhasil disetujui.")
 
@@ -476,17 +548,46 @@ def admin_approve_comment(request, pk):
 
 @admin_required
 @require_POST
-def admin_reject_comment(request, pk):
-    comment = get_object_or_404(Comments, pk=pk)
+def admin_reject_comment(request, comment_type, pk):
+    if comment_type == "article":
+        comment = get_object_or_404(Comments, pk=pk)
+
+    elif comment_type == "fiction":
+        comment = get_object_or_404(ChapterComments, pk=pk)
+
+    else:
+        return redirect("interactions:admin_comment_approval")
 
     comment.status = StatusComment.REJECTED
-    comment.save()
+    comment.save(update_fields=["status"])
 
     messages.success(request, "Komentar berhasil ditolak.")
 
     return redirect(
         "interactions:admin_comment_approval_status",
         status="pending",
+    )
+
+
+@admin_required
+@require_POST
+def admin_delete_comment(request, comment_type, pk):
+    if comment_type == "article":
+        comment = get_object_or_404(Comments, pk=pk)
+
+    elif comment_type == "fiction":
+        comment = get_object_or_404(ChapterComments, pk=pk)
+
+    else:
+        return redirect("interactions:admin_comment_approval")
+
+    comment.delete()
+
+    messages.success(request, "Komentar berhasil dihapus.")
+
+    return redirect(
+        "interactions:admin_comment_approval_status",
+        status="approved",
     )
 
 @login_required

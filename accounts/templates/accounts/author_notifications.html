@@ -31,12 +31,15 @@
 
             <!-- AVATAR / IKON NOTIFIKASI -->
 
-            {% if action == 'approved' or action == 'rejected' or action == 'story_rating' %}
+            {% if action == 'approved' or action == 'rejected' or action == 'story_rating' or action == 'comment_approved' %}
 
                 <div class="notification-icon">
 
                     {% if action == 'approved' %}
                         <span aria-label="Disetujui">✓</span>
+                    
+                    {% elif action == 'comment_approved' %}
+                        <span aria-label="Komentar disetujui">✓</span>
 
                     {% elif action == 'rejected' %}
                         <span aria-label="Ditolak">!</span>
@@ -94,7 +97,7 @@
                 {% else %}
 
                     <div class="activity-username">
-                        {% if action == 'approved' or action == 'rejected' %}
+                        {% if action == 'approved' or action == 'rejected' or action == 'comment_approved' %}
                             Admin
                         {% elif activity.actor %}
                             {{ activity.actor.username }}

@@ -161,6 +161,7 @@ class Activity(models.Model):
         )
         
         STORY_RATING = "story_rating", "Cerita mendapat rating"
+        COMMENT_APPROVED = "comment_approved", "Komentar disetujui"
 
 
     # User yang menerima notifikasi

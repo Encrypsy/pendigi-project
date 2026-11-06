@@ -28,7 +28,7 @@ urlpatterns = [
         name='my_bookmarks'
     ),
 
-    # =========================
+        # =========================
     # COMMENT APPROVAL
     # =========================
 
@@ -45,21 +45,21 @@ urlpatterns = [
     ),
 
     path(
-        'kelola/<int:pk>/approve/',
+        'kelola/<str:comment_type>/<int:pk>/approve/',
         views.admin_approve_comment,
         name='admin_approve_comment'
     ),
 
     path(
-        'kelola/<int:pk>/reject/',
+        'kelola/<str:comment_type>/<int:pk>/reject/',
         views.admin_reject_comment,
         name='admin_reject_comment'
     ),
 
     path(
-        'komentar/<int:comment_id>/hapus/',
-        views.delete_comment,
-        name='delete_comment'
+        'kelola/<str:comment_type>/<int:pk>/hapus/',
+        views.admin_delete_comment,
+        name='admin_delete_comment'
     ),
 
     path(

@@ -1,46 +1,30 @@
+
 {% extends 'admin_base.html' %}
 {% load static %}
 
 {% block title %}Approval Komentar{% endblock %}
 
 {% block extra_css %}
-
 <link rel="stylesheet" href="{% static 'css/admin.css' %}">
 <link rel="stylesheet" href="{% static 'css/table.css' %}">
 <link rel="stylesheet" href="{% static 'css/admin-table.css' %}">
-
 {% endblock %}
-
 
 {% block admin_content %}
 
-
 <div class="page-header-row">
-
     <h1 class="admin-page-title">
-
         {% if comment_status == 'pending' %}
             Komentar Menunggu Approval
-
         {% elif comment_status == 'approved' %}
             Komentar Disetujui
-
         {% elif comment_status == 'rejected' %}
             Komentar Ditolak
-
         {% endif %}
-
     </h1>
-
 </div>
 
-
-<!-- ================= SEARCH ================= -->
-
 {% include 'partials/table_toolbar.html' with search_placeholder="Cari komentar..." %}
-
-
-<!-- ================= STATUS TABS ================= -->
 
 <div class="article-status-tabs">
 
@@ -48,151 +32,98 @@
         href="{% url 'interactions:admin_comment_approval_status' 'pending' %}"
         class="article-status-tab {% if comment_status == 'pending' %}active{% endif %}"
     >
-
         Pending
-
-        <span class="tab-count">
-            {{ status_counts.pending }}
-        </span>
-
+        <span class="tab-count">{{ status_counts.pending }}</span>
     </a>
-
 
     <a
         href="{% url 'interactions:admin_comment_approval_status' 'approved' %}"
         class="article-status-tab {% if comment_status == 'approved' %}active{% endif %}"
     >
-
         Approved
-
-        <span class="tab-count">
-            {{ status_counts.approved }}
-        </span>
-
+        <span class="tab-count">{{ status_counts.approved }}</span>
     </a>
-
 
     <a
         href="{% url 'interactions:admin_comment_approval_status' 'rejected' %}"
         class="article-status-tab {% if comment_status == 'rejected' %}active{% endif %}"
     >
-
         Rejected
-
-        <span class="tab-count">
-            {{ status_counts.rejected }}
-        </span>
-
+        <span class="tab-count">{{ status_counts.rejected }}</span>
     </a>
 
 </div>
 
-
-<!-- ================= TABLE ================= -->
-
 <table class="data-table">
 
     <thead>
-
         <tr>
-
             <th>ID</th>
-
+            <th>Jenis</th>
             <th>User</th>
-
-            <th>Artikel</th>
-
+            <th>Artikel / Cerita</th>
             <th>Isi Komentar</th>
-
             <th>Status</th>
-
             <th>Tanggal</th>
-
             <th>Aksi</th>
-
         </tr>
-
     </thead>
-
 
     <tbody>
 
-        {% for comment in comments %}
+        {% for item in comments %}
+
+        {% with comment=item.comment %}
 
         <tr>
 
-            <td>
-                {{ comment.pk }}
-            </td>
-
-            <!-- USER -->
+            <td>{{ comment.pk }}</td>
 
             <td>
-                {{ comment.user.username }}
+                {% if item.comment_type == 'article' %}
+                    <span class="status-badge">Artikel</span>
+                {% else %}
+                    <span class="status-badge">Fiksi</span>
+                {% endif %}
             </td>
 
-
-            <!-- ARTIKEL -->
+            <td>{{ comment.user.username }}</td>
 
             <td>
-
-                <a
-                    href="{% url 'articles:article_detail' comment.article.pk %}"
-                    target="_blank"
-                >
-                    {{ comment.article.title }}
-                </a>
-
+                {{ item.target_title }}
             </td>
-
-
-            <!-- KOMENTAR -->
 
             <td class="comment-preview">
                 {{ comment.content }}
             </td>
 
-
-            <!-- STATUS -->
-
             <td>
-
                 {% if comment.status == 'pending' %}
-
                     <span class="status-badge status-pending">
                         Pending
                     </span>
-
                 {% elif comment.status == 'approved' %}
-
                     <span class="status-badge status-approved">
                         Approved
                     </span>
-
                 {% elif comment.status == 'rejected' %}
-
                     <span class="status-badge status-rejected">
                         Rejected
                     </span>
-
                 {% endif %}
-
             </td>
-
-
-            <!-- TANGGAL -->
 
             <td>
                 {{ comment.created_at|date:"d M Y H:i" }}
             </td>
-              
-            <!-- AKSI -->
+
             <td>
                 <div class="table-actions">
 
                     {% if comment_status == 'pending' %}
+
                         <form
-                            action="{% url 'interactions:admin_approve_comment' comment.pk %}"
+                            action="{% url 'interactions:admin_approve_comment' item.comment_type comment.pk %}"
                             method="post"
                         >
                             {% csrf_token %}
@@ -202,7 +133,7 @@
                         </form>
 
                         <form
-                            action="{% url 'interactions:admin_reject_comment' comment.pk %}"
+                            action="{% url 'interactions:admin_reject_comment' item.comment_type comment.pk %}"
                             method="post"
                         >
                             {% csrf_token %}
@@ -212,59 +143,47 @@
                         </form>
 
                     {% elif comment_status == 'approved' %}
+
                         <form
-                            action="{% url 'interactions:delete_comment' comment.pk %}"
+                            action="{% url 'interactions:admin_delete_comment' item.comment_type comment.pk %}"
                             method="post"
-                            onsubmit="return confirm('Yakin ingin menghapus komentar dari {{ comment.user.username|escapejs }}? Jika komentar ini memiliki balasan, balasannya juga akan terhapus.');"
+                            onsubmit="return confirm('Yakin ingin menghapus komentar ini? Balasan yang terkait juga dapat terhapus.');"
                         >
                             {% csrf_token %}
-
-                            <input
-                                type="hidden"
-                                name="next"
-                                value="{{ request.get_full_path }}"
-                            >
-
                             <button type="submit" class="btn-delete-comment">
                                 Hapus
                             </button>
                         </form>
 
                     {% elif comment_status == 'rejected' %}
+
                         <span class="status-badge status-rejected">
                             Rejected
                         </span>
+
                     {% endif %}
 
                 </div>
             </td>
+
         </tr>
-        
+
+        {% endwith %}
+
         {% empty %}
 
         <tr>
-
-            <td
-                colspan="6"
-                class="empty-state"
-            >
+            <td colspan="8" class="empty-state">
 
                 {% if comment_status == 'pending' %}
-
                     Tidak ada komentar yang menunggu approval.
-
                 {% elif comment_status == 'approved' %}
-
                     Belum ada komentar yang disetujui.
-
                 {% elif comment_status == 'rejected' %}
-
                     Belum ada komentar yang ditolak.
-
                 {% endif %}
 
             </td>
-
         </tr>
 
         {% endfor %}
@@ -273,10 +192,6 @@
 
 </table>
 
-
-<!-- ================= PAGINATION ================= -->
-
 {% include 'partials/table_pagination.html' %}
-
 
 {% endblock %}
