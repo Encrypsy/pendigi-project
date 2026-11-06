@@ -609,13 +609,13 @@ def rate_story(request, pk):
     if story.author_id != request.user.pk:
         if created:
             message = (
-                f'{request.user.username} memberikan rating '
-                f'{rating_value}/5 untuk cerita "{story.title}".'
+                f'memberikan rating {rating_value}/5 '
+                f'untuk cerita "{story.title}".'
             )
         else:
             message = (
-                f'{request.user.username} memperbarui rating menjadi '
-                f'{rating_value}/5 untuk cerita "{story.title}".'
+                f'memperbarui rating menjadi {rating_value}/5 '
+                f'untuk cerita "{story.title}".'
             )
 
         Activity.objects.create(
