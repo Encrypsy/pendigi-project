@@ -2050,3 +2050,13 @@
     background: #f5f0e8;
     color: #8a7765;
 }
+
+
+.notification-rating-icon {
+    color: #e5a13b;
+    background: #fff2d6;
+    font-size: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

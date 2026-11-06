@@ -58,6 +58,7 @@ def submit_comment(request, pk):
 
     # Edit komentar milik pengguna yang sedang login.
     edit_id = request.POST.get("edit_id")
+
     if edit_id:
         comment = get_object_or_404(
             Comments,
@@ -67,11 +68,12 @@ def submit_comment(request, pk):
         )
 
         form = CommentForm(request.POST, instance=comment)
+
         if not form.is_valid():
             return respond(
                 False,
                 "Komentar gagal diperbarui. Periksa kembali isinya.",
-                status=400,
+                http_status=400,
             )
 
         updated_comment = form.save(commit=False)
@@ -87,13 +89,14 @@ def submit_comment(request, pk):
             status=updated_comment.status,
         )
 
+    # Membuat komentar baru.
     form = CommentForm(request.POST)
 
     if not form.is_valid():
         return respond(
             False,
             "Komentar gagal dikirim. Pastikan isinya tidak kosong.",
-            status=400,
+            http_status=400,
         )
 
     comment = form.save(commit=False)
@@ -113,6 +116,7 @@ def submit_comment(request, pk):
         )
         comment.parent = parent_comment
 
+    # Komentar admin langsung disetujui.
     is_admin = (
         getattr(request.user, "role", None) == "admin"
         or request.user.is_superuser
@@ -123,18 +127,23 @@ def submit_comment(request, pk):
 
     comment.save()
 
+    # Catat aktivitas membaca.
     ReadingActivity.objects.create(
         user=request.user,
         article=article,
         action_type=ActionType.COMMENTED,
     )
 
-    # Notifikasi hanya dikirim untuk komentar yang sudah disetujui.
+    # Notifikasi hanya untuk komentar yang sudah disetujui.
     if comment.status == StatusComment.APPROVED:
+
         if parent_comment:
-            if parent_comment.user_id != request.user.id:
+            # Balasan komentar dikirim kepada pemilik komentar induk.
+            recipient = parent_comment.user
+
+            if recipient and recipient.pk != request.user.pk:
                 Activity.objects.create(
-                    recipient=parent_comment.user,
+                    recipient=recipient,
                     actor=request.user,
                     article=article,
                     action_type=Activity.ActionType.COMMENT_REPLY,
@@ -143,17 +152,22 @@ def submit_comment(request, pk):
                         f'"{article.title}".'
                     )[:255],
                 )
-        elif article.contributor_id != request.user.id:
-            Activity.objects.create(
-                recipient=article.contributor,
-                actor=request.user,
-                article=article,
-                action_type=Activity.ActionType.COMMENT,
-                message=(
-                    f'Memberikan komentar pada artikel '
-                    f'"{article.title}".'
-                )[:255],
-            )
+
+        else:
+            # Komentar utama dikirim kepada penulis artikel.
+            recipient = article.contributor
+
+            if recipient and recipient.pk != request.user.pk:
+                Activity.objects.create(
+                    recipient=recipient,
+                    actor=request.user,
+                    article=article,
+                    action_type=Activity.ActionType.COMMENT,
+                    message=(
+                        f'Memberikan komentar pada artikel '
+                        f'"{article.title}".'
+                    )[:255],
+                )
 
     if comment.status == StatusComment.APPROVED:
         message = (
@@ -162,17 +176,20 @@ def submit_comment(request, pk):
             else "Komentar berhasil dikirim."
         )
     else:
-        message = "Komentar terkirim dan menunggu persetujuan admin."
+        message = (
+            "Komentar terkirim dan menunggu persetujuan admin."
+        )
 
     return respond(
         True,
-        'Komentar terkirim dan menunggu approval admin.',
+        message,
         comment_id=comment.pk,
         parent_id=comment.parent_id,
         content=comment.content,
         username=request.user.username,
         status=comment.status,
     )
+
 
 @login_required
 @require_POST

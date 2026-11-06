@@ -1,3 +1,4 @@
+
 {% extends 'author_base.html' %}
 
 {% block title %}Notifikasi{% endblock %}
@@ -20,6 +21,7 @@
 
         {% for activity in page_obj %}
         {% with action=activity.action_type %}
+
         <div class="notification-row
             {% if action == 'approved' %}
                 notification-approved
@@ -27,20 +29,28 @@
                 notification-rejected
             {% endif %}">
 
-            {% if action == 'approved' or action == 'rejected' %}
+            <!-- AVATAR / IKON NOTIFIKASI -->
 
-                <!-- NOTIFIKASI ADMIN: GUNAKAN IKON -->
+            {% if action == 'approved' or action == 'rejected' or action == 'story_rating' %}
+
                 <div class="notification-icon">
+
                     {% if action == 'approved' %}
                         <span aria-label="Disetujui">✓</span>
-                    {% else %}
+
+                    {% elif action == 'rejected' %}
                         <span aria-label="Ditolak">!</span>
+
+                    {% elif action == 'story_rating' %}
+                        <span class="notification-rating-icon" aria-label="Rating cerita">
+                            ★
+                        </span>
                     {% endif %}
+
                 </div>
 
             {% else %}
 
-                <!-- USER BIASA: TETAP TAMPILKAN AVATAR -->
                 <div class="activity-avatar">
                     {% if activity.actor and activity.actor.profile_picture %}
                         <img
@@ -60,27 +70,53 @@
 
             {% endif %}
 
+
+            <!-- KONTEN NOTIFIKASI -->
+
             <div class="notification-content">
 
-                <div class="activity-username">
-                    {% if action == 'approved' or action == 'rejected' %}
-                        Admin
-                    {% elif activity.actor %}
-                        {{ activity.actor.username }}
-                    {% else %}
-                        Sistem
+                {% if action == 'story_rating' %}
+
+                    <div class="activity-username">
+                        {{ activity.actor.username|default:"Sistem" }}
+                    </div>
+
+                    <div class="activity-action">
+                        {{ activity.get_action_type_display }}
+                    </div>
+
+                    {% if activity.message %}
+                        <p class="activity-message">
+                            {{ activity.message|cut:activity.actor.username }}
+                        </p>
                     {% endif %}
-                </div>
 
-                <div class="activity-action">
-                    {{ activity.get_action_type_display }}
-                </div>
+                {% else %}
 
-                {% if activity.message %}
-                    <p class="activity-message">
-                        {{ activity.message }}
-                    </p>
+                    <div class="activity-username">
+                        {% if action == 'approved' or action == 'rejected' %}
+                            Admin
+                        {% elif activity.actor %}
+                            {{ activity.actor.username }}
+                        {% else %}
+                            Sistem
+                        {% endif %}
+                    </div>
+
+                    <div class="activity-action">
+                        {{ activity.get_action_type_display }}
+                    </div>
+
+                    {% if activity.message %}
+                        <p class="activity-message">
+                            {{ activity.message }}
+                        </p>
+                    {% endif %}
+
                 {% endif %}
+
+
+                <!-- LINK ARTIKEL -->
 
                 {% if activity.article %}
                     <a
@@ -91,11 +127,15 @@
                     </a>
                 {% endif %}
 
+
                 <div class="activity-time">
                     {{ activity.created_at|timesince }} yang lalu
                 </div>
 
             </div>
+
+
+            <!-- THUMBNAIL ARTIKEL -->
 
             {% if activity.article and activity.article.thumbnail %}
                 <a
@@ -110,14 +150,20 @@
             {% endif %}
 
         </div>
+
         {% endwith %}
 
         {% empty %}
+
             <div class="notifications-empty">
                 <h3>Belum ada notifikasi</h3>
                 <p>Notifikasi aktivitasmu akan muncul di sini.</p>
             </div>
+
         {% endfor %}
+
+
+        <!-- PAGINATION -->
 
         {% if page_obj.paginator.num_pages > 1 %}
         <nav class="notifications-pagination">
