@@ -1006,27 +1006,26 @@ def author_notifications(request):
     activities = (
         Activity.objects
         .filter(recipient=request.user)
-        .select_related(
-            'actor',
-            'article',
-            'chapter',
-            'chapter__story',
-        )
+        .select_related('actor', 'article', 'chapter', 'chapter__story')
         .order_by('-created_at')
     )
 
     paginator = Paginator(activities, 10)
     page_obj = paginator.get_page(request.GET.get('page'))
 
-    return render(
-        request,
-        'accounts/author_notifications.html',
-        {
-            'page_obj': page_obj,
-            'breadcrumb': 'Notifikasi',
-            'active_menu': 'notifications',
-        },
-    )
+    # Hilangkan username dari awal message jika masih tersimpan di sana
+    for activity in page_obj:
+        if activity.actor and activity.message:
+            username = activity.actor.username
+
+            if activity.message.startswith(username):
+                activity.message = (
+                    activity.message[len(username):].lstrip()
+                )
+
+    return render(request, 'accounts/author_notifications.html', {
+        'page_obj': page_obj,
+    })
     
 def admin_required(view_func):
     return user_passes_test(
