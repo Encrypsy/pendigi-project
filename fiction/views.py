@@ -15,6 +15,7 @@ from django.views.decorators.http import require_POST
 from django.utils import timezone
 from django.db.models import F, Avg, Count, Q
 from django.http import JsonResponse
+from django.utils.http import url_has_allowed_host_and_scheme
 
 def tag_suggestions(request):
     query = request.GET.get('q', '').strip().lower()
@@ -902,3 +903,53 @@ def delete_approved_chapter(request, story_id, chapter_id):
         f'Bab "{chapter_title}" berhasil dihapus.'
     )
     return redirect('fiction:chapter_list', story_id=story.pk)
+
+@login_required
+@require_POST
+def delete_chapter_comment(request, comment_id):
+    comment = get_object_or_404(
+        ChapterComments.objects.select_related(
+            'user',
+            'chapter',
+            'chapter__story',
+        ),
+        pk=comment_id,
+    )
+
+    is_admin = (
+        request.user.is_staff
+        or request.user.is_superuser
+        or getattr(request.user, 'role', '') == 'admin'
+    )
+
+    if comment.user_id != request.user.pk and not is_admin:
+        messages.error(
+            request,
+            'Kamu hanya dapat menghapus komentar milikmu sendiri.',
+        )
+        return redirect(
+            'fiction:read_chapter',
+            pk=comment.chapter.story_id,
+            chapter_number=comment.chapter.chapter_number,
+        )
+
+    story_id = comment.chapter.story_id
+    chapter_number = comment.chapter.chapter_number
+
+    next_url = request.POST.get('next', '')
+    comment.delete()
+
+    messages.success(request, 'Komentar berhasil dihapus.')
+
+    if next_url and url_has_allowed_host_and_scheme(
+        next_url,
+        allowed_hosts={request.get_host()},
+        require_https=request.is_secure(),
+    ):
+        return redirect(next_url)
+
+    return redirect(
+        'fiction:read_chapter',
+        pk=story_id,
+        chapter_number=chapter_number,
+    )

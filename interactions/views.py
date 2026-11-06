@@ -629,6 +629,7 @@ def delete_comment(request, comment_id):
 
     return redirect('articles:article_list')
 
+
 def _attach_comment_meta(
     comments,
     request,
@@ -639,15 +640,38 @@ def _attach_comment_meta(
 ):
     result = []
 
+    def attach_delete_url(comment):
+        """Menentukan URL hapus berdasarkan jenis model komentar."""
+        if not request.user.is_authenticated:
+            comment.delete_url = None
+            return
+
+        if comment.user_id != request.user.pk:
+            comment.delete_url = None
+            return
+
+        if hasattr(comment, 'article_id'):
+            comment.delete_url = reverse(
+                'interactions:delete_comment',
+                kwargs={'comment_id': comment.pk},
+            )
+        else:
+            comment.delete_url = reverse(
+                'fiction:delete_chapter_comment',
+                kwargs={'comment_id': comment.pk},
+            )
+
     for comment in comments:
         comment.is_owner = (
             request.user.is_authenticated
-            and comment.user_id == request.user.id
+            and comment.user_id == request.user.pk
         )
+
         comment.is_liked = (
             request.user.is_authenticated
             and comment.likes.filter(user=request.user).exists()
         )
+
         comment.is_disliked = (
             request.user.is_authenticated
             and comment.dislikes.filter(user=request.user).exists()
@@ -655,22 +679,19 @@ def _attach_comment_meta(
 
         comment.like_url = reverse(
             like_url_name,
-            kwargs={**url_kwargs, "comment_id": comment.pk},
-        )
-        comment.dislike_url = reverse(
-            dislike_url_name,
-            kwargs={**url_kwargs, "comment_id": comment.pk},
-        )
-        comment.edit_url = post_url
-        comment.delete_url = (
-            reverse(
-                "interactions:admin_delete_comment",
-                kwargs={"comment_id": comment.pk},
-            )
-            if comment.is_owner
-            else None
+            kwargs={**url_kwargs, 'comment_id': comment.pk},
         )
 
+        comment.dislike_url = reverse(
+            dislike_url_name,
+            kwargs={**url_kwargs, 'comment_id': comment.pk},
+        )
+
+        comment.edit_url = post_url
+
+        attach_delete_url(comment)
+
+        # Ambil balasan yang sudah disetujui.
         replies = [
             reply
             for reply in comment.get_all_replies()
@@ -680,39 +701,41 @@ def _attach_comment_meta(
         for reply in replies:
             reply.is_owner = (
                 request.user.is_authenticated
-                and reply.user_id == request.user.id
+                and reply.user_id == request.user.pk
             )
+
             reply.is_liked = (
                 request.user.is_authenticated
                 and reply.likes.filter(user=request.user).exists()
             )
+
             reply.is_disliked = (
                 request.user.is_authenticated
                 and reply.dislikes.filter(user=request.user).exists()
             )
+
             reply.parent_username = reply.parent.user.username
+
             reply.like_url = reverse(
                 like_url_name,
-                kwargs={**url_kwargs, "comment_id": reply.pk},
+                kwargs={**url_kwargs, 'comment_id': reply.pk},
             )
+
             reply.dislike_url = reverse(
                 dislike_url_name,
-                kwargs={**url_kwargs, "comment_id": reply.pk},
+                kwargs={**url_kwargs, 'comment_id': reply.pk},
             )
+
             reply.edit_url = post_url
-            reply.delete_url = (
-                reverse(
-                    "interactions:admin_delete_comment",
-                    kwargs={"comment_id": reply.pk},
-                )
-                if reply.is_owner
-                else None
-            )
+
+            attach_delete_url(reply)
 
         comment.reply_list = replies
         result.append(comment)
 
     return result
+
+
 
 
 def _sort_comments(queryset, sort):

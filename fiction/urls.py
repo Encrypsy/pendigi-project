@@ -42,4 +42,9 @@ urlpatterns = [
         views.rate_story,
         name='rate_story'
     ),
+    path(
+        'komentar/<int:comment_id>/hapus/',
+        views.delete_chapter_comment,
+        name='delete_chapter_comment',
+    ),
 ]
