@@ -77,9 +77,9 @@
 
                 {% if action == 'story_rating' %}
 
-                    <div class="activity-username">
+                    {% comment %} <div class="activity-username">
                         {{ activity.actor.username|default:"Sistem" }}
-                    </div>
+                    </div> {% endcomment %}
 
                     <div class="activity-action">
                         {{ activity.get_action_type_display }}
