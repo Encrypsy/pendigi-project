@@ -130,6 +130,11 @@
                                 {% elif activity.action_type == 'rejected' %}
                                     <span class="notification-system-icon notification-rejected-icon">!</span>
 
+                                {% elif activity.action_type == 'story_rating' %}
+                                    <span class="notification-system-icon notification-rating-icon">
+                                        ★
+                                    </span>
+
                                 {% elif activity.actor %}
                                     {% if activity.actor.profile_picture %}
                                         <img
@@ -151,6 +156,10 @@
                                     {% if activity.action_type == 'contributor_approved' %}
                                         <strong>Pengajuan kontributor disetujui</strong>
                                         Pengajuan kamu telah disetujui. Selamat bergabung sebagai kontributor Pena Digital!
+                                    
+                                    {% elif activity.action_type == 'story_rating' %}
+                                        <strong>Rating cerita kamu</strong>
+                                        {{ activity.message }}
 
                                     {% elif activity.action_type == 'contributor_rejected' %}
                                         <strong>Pengajuan kontributor ditolak</strong>

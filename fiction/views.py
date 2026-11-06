@@ -573,7 +573,6 @@ def story_detail(request, pk):
         'total_ratings': rating_summary['total'],
         'user_rating': user_rating,
     })
-    
 
 @login_required
 @require_POST
@@ -598,12 +597,35 @@ def rate_story(request, pk):
             'message': 'Rating harus antara 1 sampai 5.'
         }, status=400)
 
-    StoryRatings.objects.update_or_create(
+    # Simpan atau perbarui rating
+    rating, created = StoryRatings.objects.update_or_create(
         user=request.user,
         story=story,
         defaults={'rating_value': rating_value}
     )
 
+    # Buat notifikasi untuk penulis cerita
+    # Penulis tidak menerima notifikasi dari rating dirinya sendiri
+    if story.author_id != request.user.pk:
+        if created:
+            message = (
+                f'{request.user.username} memberikan rating '
+                f'{rating_value}/5 untuk cerita "{story.title}".'
+            )
+        else:
+            message = (
+                f'{request.user.username} memperbarui rating menjadi '
+                f'{rating_value}/5 untuk cerita "{story.title}".'
+            )
+
+        Activity.objects.create(
+            recipient=story.author,
+            actor=request.user,
+            action_type=Activity.ActionType.STORY_RATING,
+            message=message,
+        )
+
+    # Hitung ulang rata-rata rating
     rating_summary = story.ratings.aggregate(
         average=Avg('rating_value'),
         total=Count('id')
@@ -616,8 +638,6 @@ def rate_story(request, pk):
         'average_rating': round(rating_summary['average'] or 0, 1),
         'total_ratings': rating_summary['total'],
     })
-
-
 
 def read_chapter(request, pk, chapter_number):
     story = get_object_or_404(

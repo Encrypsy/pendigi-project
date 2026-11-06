@@ -1318,3 +1318,9 @@ span:nth-child(3) {
     font-size: 20px;
     line-height: 1;
 }
+
+.notification-rating-icon {
+    background: #fff2d6;
+    color: #e5a13b;
+    font-size: 20px;
+}

@@ -159,6 +159,8 @@ class Activity(models.Model):
             "contributor_revoked",
             "Hak akses penulis dicabut",
         )
+        
+        STORY_RATING = "story_rating", "Cerita mendapat rating"
 
 
     # User yang menerima notifikasi
