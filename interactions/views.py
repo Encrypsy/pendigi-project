@@ -664,7 +664,7 @@ def _attach_comment_meta(
         comment.edit_url = post_url
         comment.delete_url = (
             reverse(
-                "interactions:delete_comment",
+                "interactions:admin_delete_comment",
                 kwargs={"comment_id": comment.pk},
             )
             if comment.is_owner
@@ -702,7 +702,7 @@ def _attach_comment_meta(
             reply.edit_url = post_url
             reply.delete_url = (
                 reverse(
-                    "interactions:delete_comment",
+                    "interactions:admin_delete_comment",
                     kwargs={"comment_id": reply.pk},
                 )
                 if reply.is_owner
