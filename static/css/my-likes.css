@@ -3,6 +3,24 @@
    MY LIKES - WARM BROWN EDITORIAL
 ================================= */
 
+/* Mengikuti typography utama Pena Digital */
+
+.likes-page {
+    font-family: inherit;
+}
+
+.likes-page h1,
+.likes-page h2,
+.likes-page h3,
+.likes-page p,
+.likes-page span,
+.likes-page a,
+.likes-page button,
+.likes-page input,
+.likes-page select {
+    font-family: inherit;
+}
+
 .likes-page {
     max-width: 1180px;
     margin: 35px auto 70px;
@@ -47,7 +65,7 @@
 .likes-hero h1 {
     position: relative;
     z-index: 1;
-    font-family: Georgia, serif;
+    /* font-family: Georgia, serif; */
     font-size: clamp(34px, 5vw, 52px);
     font-weight: 500;
     margin: 12px 0;
@@ -215,7 +233,7 @@
 }
 
 .likes-section-heading h2 {
-    font-family: Georgia, serif;
+    /* font-family: Georgia, serif; */
     font-size: 27px;
     font-weight: 500;
     margin: 5px 0 0;
@@ -342,7 +360,7 @@
 
 .liked-card-body h3 {
     margin: 8px 0;
-    font-family: Georgia, serif;
+    /* font-family: Georgia, serif; */
     font-size: 19px;
     font-weight: 500;
     line-height: 1.35;
@@ -420,7 +438,7 @@
 
 .likes-empty-state h3 {
     color: #493729;
-    font-family: Georgia, serif;
+    /* font-family: Georgia, serif; */
     font-size: 22px;
     font-weight: 500;
     margin: 18px 0 8px;
