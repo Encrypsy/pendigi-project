@@ -965,7 +965,17 @@ def toggle_article_like(request, pk):
         article=article
     )
 
-    if not created:
+    if created:
+        # Kirim notifikasi kepada author
+        if article.contributor != request.user:
+            Activity.objects.create(
+                recipient=article.contributor,
+                actor=request.user,
+                article=article,
+                action_type=Activity.ActionType.LIKE,
+                message=f"menyukai artikel '{article.title}'"
+            )
+    else:
         like.delete()
 
     is_liked = created
@@ -1006,7 +1016,17 @@ def toggle_story_like(request, pk):
         story=story
     )
 
-    if not created:
+    if created:
+        # Kirim notifikasi kepada author
+        if story.author != request.user:
+            Activity.objects.create(
+                recipient=story.author,
+                actor=request.user,
+                story=story,
+                action_type=Activity.ActionType.LIKE,
+                message=f"menyukai cerita '{story.title}'"
+            )
+    else:
         like.delete()
 
     is_liked = created

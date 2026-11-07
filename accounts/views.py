@@ -1206,6 +1206,7 @@ def navbar_notifications(request):
         .select_related(
             'actor',
             'article',
+            'story',
             'chapter',
             'chapter__story',
         )

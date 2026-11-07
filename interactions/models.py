@@ -246,6 +246,14 @@ class Activity(models.Model):
         null=True,
         blank=True
     )
+    
+    story = models.ForeignKey(
+        'fiction.Stories',
+        on_delete=models.CASCADE,
+        related_name='activities',
+        null=True,
+        blank=True,
+    )
 
     action_type = models.CharField(
         max_length=20,
@@ -271,9 +279,16 @@ class Activity(models.Model):
     def __str__(self):
         actor = self.actor.username if self.actor else "System"
 
+        content = (
+            self.article.title if self.article
+            else self.story.title if self.story
+            else self.chapter.story.title if self.chapter
+            else "-"
+        )
+
         return (
             f"{actor} - "
             f"{self.get_action_type_display()} - "
-            f"{self.article.title if self.article else '-'}"
+            f"{content}"
         )
         
