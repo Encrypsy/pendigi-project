@@ -277,17 +277,6 @@
             </form>
             {% endif %}
 
-            {% if user.is_authenticated %}
-            <form action="{% url 'fiction:toggle_favorite_story' story.pk %}" method="post">
-                {% csrf_token %}
-                <button
-                    type="submit"
-                    class="favorite-icon-btn {% if is_favorited %}is-active{% endif %}"
-                >
-                    {% if is_favorited %}★{% else %}+{% endif %}
-                </button>
-            </form>
-            {% endif %}
         </div>
     </div>
 </div>
