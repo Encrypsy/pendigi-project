@@ -7,7 +7,7 @@
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/table.css' %}">
 <link rel="stylesheet" href="{% static 'css/story-detail.css' %}">
-
+<link rel="stylesheet" href="{% static 'css/content-likes.css' %}" />
 <style>
     /* Rating cerita */
     .story-rating-section {
@@ -255,6 +255,29 @@
             {% endif %}
 
             {% if user.is_authenticated %}
+            <form
+                method="POST"
+                action="{% url 'interactions:toggle_story_like' story.pk %}"
+                class="content-like-form"
+                data-like-form
+            >
+                {% csrf_token %}
+
+                <button
+                    type="submit"
+                    class="content-like-btn {% if is_liked %}is-liked{% endif %}"
+                    aria-label="{% if is_liked %}Batalkan like{% else %}Sukai cerita{% endif %}"
+                    aria-pressed="{{ is_liked|yesno:'true,false' }}"
+                >
+                    <span class="like-icon">
+                        {% if is_liked %}♥{% else %}♡{% endif %}
+                    </span>
+                    <span class="like-count">{{ total_likes }}</span>
+                </button>
+            </form>
+            {% endif %}
+
+            {% if user.is_authenticated %}
             <form action="{% url 'fiction:toggle_favorite_story' story.pk %}" method="post">
                 {% csrf_token %}
                 <button
@@ -482,4 +505,5 @@
         });
     }
 </script>
+<script src="{% static 'js/content-likes.js' %}"></script>
 {% endblock %}

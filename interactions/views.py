@@ -10,15 +10,17 @@ from django.core.paginator import Paginator
 from django.utils.http import url_has_allowed_host_and_scheme
 
 from articles.models import Articles, StatusArticle
-from fiction.models import ChapterComments, Stories
+from fiction.models import ChapterComments, StatusStory, Stories
 from .models import (
     Activity,
+    ArticleLikes,
     CommentDislikes,
     CommentLikes,
     Comments,
     Ratings,
     Bookmarks,
     StatusComment,
+    StoryLikes,
 )
 from .forms import CommentForm, RatingForm
 from reading_journal.models import ReadingActivity, ActionType
@@ -948,3 +950,229 @@ def toggle_story_bookmark(request, pk):
         return redirect(next_url)
 
     return redirect('articles:article_list')
+
+@login_required
+@require_POST
+def toggle_article_like(request, pk):
+    article = get_object_or_404(
+        Articles,
+        pk=pk,
+        status=StatusArticle.APPROVED
+    )
+
+    like, created = ArticleLikes.objects.get_or_create(
+        user=request.user,
+        article=article
+    )
+
+    if not created:
+        like.delete()
+
+    is_liked = created
+    total_likes = article.likes.count()
+
+    if _is_ajax(request):
+        return JsonResponse({
+            'success': True,
+            'liked': is_liked,
+            'total_likes': total_likes,
+            'message': (
+                'Artikel berhasil disukai.'
+                if is_liked
+                else 'Like artikel dibatalkan.'
+            )
+        })
+
+    messages.success(
+        request,
+        'Artikel berhasil disukai.'
+        if is_liked
+        else 'Like artikel dibatalkan.'
+    )
+
+    return redirect('articles:article_detail', pk=pk)
+
+@login_required
+@require_POST
+def toggle_story_like(request, pk):
+    story = get_object_or_404(
+        Stories,
+        pk=pk,
+        status=StatusStory.APPROVED
+    )
+
+    like, created = StoryLikes.objects.get_or_create(
+        user=request.user,
+        story=story
+    )
+
+    if not created:
+        like.delete()
+
+    is_liked = created
+    total_likes = story.likes.count()
+
+    if _is_ajax(request):
+        return JsonResponse({
+            'success': True,
+            'liked': is_liked,
+            'total_likes': total_likes,
+            'message': (
+                'Cerita berhasil disukai.'
+                if is_liked
+                else 'Like cerita dibatalkan.'
+            )
+        })
+
+    messages.success(
+        request,
+        'Cerita berhasil disukai.'
+        if is_liked
+        else 'Like cerita dibatalkan.'
+    )
+
+    return redirect('fiction:story_detail', pk=pk)
+
+@login_required
+def my_likes(request):
+    search_query = request.GET.get('q', '').strip()
+    content_type = request.GET.get('type', 'all')
+    sort = request.GET.get('sort', 'newest')
+
+    liked_contents = []
+
+    # ==========================
+    # ARTIKEL YANG DISUKAI
+    # ==========================
+
+    if content_type in ['all', 'article']:
+        article_likes = ArticleLikes.objects.filter(
+            user=request.user,
+            article__status=StatusArticle.APPROVED,
+        ).select_related(
+            'article',
+            'article__category',
+            'article__contributor',
+        )
+
+        if search_query:
+            article_likes = article_likes.filter(
+                article__title__icontains=search_query
+            )
+
+        for item in article_likes:
+            article = item.article
+
+            liked_contents.append({
+                'id': article.pk,
+                'type': 'article',
+                'type_label': 'Artikel',
+                'title': article.title,
+                'description': article.content,
+                'author': article.contributor.username,
+                'category': article.category.name,
+                'image': (
+                    article.thumbnail.url
+                    if article.thumbnail else None
+                ),
+                'liked_at': item.created_at,
+                'url': reverse(
+                    'articles:article_detail',
+                    kwargs={'pk': article.pk},
+                ),
+                'unlike_url': reverse(
+                    'interactions:toggle_article_like',
+                    kwargs={'pk': article.pk},
+                ),
+            })
+
+    # ==========================
+    # FIKSI YANG DISUKAI
+    # ==========================
+
+    if content_type in ['all', 'fiction']:
+        story_likes = StoryLikes.objects.filter(
+            user=request.user,
+            story__status=StatusStory.APPROVED,
+        ).select_related(
+            'story',
+            'story__author',
+        )
+
+        if search_query:
+            story_likes = story_likes.filter(
+                story__title__icontains=search_query
+            )
+
+        for item in story_likes:
+            story = item.story
+
+            liked_contents.append({
+                'id': story.pk,
+                'type': 'fiction',
+                'type_label': 'Fiksi',
+                'title': story.title,
+                'description': story.description,
+                'author': story.author.username,
+                'category': story.get_genre_display(),
+                'image': (
+                    story.cover.url
+                    if story.cover else None
+                ),
+                'liked_at': item.created_at,
+                'url': reverse(
+                    'fiction:story_detail',
+                    kwargs={'pk': story.pk},
+                ),
+                'unlike_url': reverse(
+                    'interactions:toggle_story_like',
+                    kwargs={'pk': story.pk},
+                ),
+            })
+
+    # ==========================
+    # PENGURUTAN
+    # ==========================
+
+    if sort == 'oldest':
+        liked_contents.sort(
+            key=lambda item: item['liked_at']
+        )
+
+    elif sort == 'title':
+        liked_contents.sort(
+            key=lambda item: item['title'].lower()
+        )
+
+    else:
+        liked_contents.sort(
+            key=lambda item: item['liked_at'],
+            reverse=True,
+        )
+
+    # Jumlah seluruh konten yang disukai
+    total_liked = (
+        ArticleLikes.objects.filter(user=request.user).count()
+        + StoryLikes.objects.filter(user=request.user).count()
+    )
+
+    # ==========================
+    # PAGINATION
+    # ==========================
+
+    paginator = Paginator(liked_contents, 9)
+    page_obj = paginator.get_page(request.GET.get('page'))
+
+    return render(
+        request,
+        'interactions/my_likes.html',
+        {
+            'page_obj': page_obj,
+            'liked_contents': page_obj.object_list,
+            'search_query': search_query,
+            'content_type': content_type,
+            'sort': sort,
+            'total_liked': total_liked,
+            'total_filtered': paginator.count,
+        },
+    )

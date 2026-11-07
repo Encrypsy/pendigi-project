@@ -102,6 +102,56 @@ class Bookmarks(models.Model):
     def __str__(self):
         target = self.article or self.story
         return f'{self.user.username} bookmarked {target}'
+    
+class ArticleLikes(models.Model):
+    user = models.ForeignKey(
+        Users,
+        on_delete=models.CASCADE,
+        related_name='article_likes'
+    )
+    article = models.ForeignKey(
+        Articles,
+        on_delete=models.CASCADE,
+        related_name='likes'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'article'],
+                name='unique_user_article_like'
+            )
+        ]
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'{self.user.username} liked {self.article.title}'
+    
+class StoryLikes(models.Model):
+    user = models.ForeignKey(
+        Users,
+        on_delete=models.CASCADE,
+        related_name='story_likes'
+    )
+    story = models.ForeignKey(
+        'fiction.Stories',
+        on_delete=models.CASCADE,
+        related_name='likes'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'story'],
+                name='unique_user_story_like'
+            )
+        ]
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'{self.user.username} liked {self.story.title}'
 
 class CommentLikes(models.Model):
     user = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='comment_likes')

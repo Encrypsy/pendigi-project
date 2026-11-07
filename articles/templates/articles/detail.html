@@ -2,6 +2,7 @@
 {% load static %} {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/articles.css' %}" />
 <link rel="stylesheet" href="{% static 'css/forms.css' %}" />
+<link rel="stylesheet" href="{% static 'css/content-likes.css' %}" />
 {% endblock %} {% block content %}
 <article class="article-detail">
     {% if article.thumbnail %}
@@ -25,6 +26,29 @@
             </span>
         {% endif %}
     </p>
+
+    <div class="content-like-wrapper">
+        <form
+            method="POST"
+            action="{% url 'interactions:toggle_article_like' article.pk %}"
+            class="content-like-form"
+            data-like-form
+        >
+            {% csrf_token %}
+
+            <button
+                type="submit"
+                class="content-like-btn {% if is_liked %}is-liked{% endif %}"
+                aria-label="{% if is_liked %}Batalkan like{% else %}Sukai artikel{% endif %}"
+                aria-pressed="{{ is_liked|yesno:'true,false' }}"
+            >
+                <span class="like-icon">
+                    {% if is_liked %}♥{% else %}♡{% endif %}
+                </span>
+                <span class="like-count">{{ total_likes }}</span>
+            </button>
+        </form>
+    </div>
 
     <div class="article-body">{{ article.content|linebreaks }}</div>
 
@@ -237,4 +261,5 @@ document.addEventListener("DOMContentLoaded", function () {
     updateStars(previousValue);
 });
 </script>
+<script src="{% static 'js/content-likes.js' %}"></script>
 {% endblock %}

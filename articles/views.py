@@ -15,7 +15,7 @@ from interactions.views import _attach_comment_meta, _sort_comments
 from .models import Articles, Banner, BannerType, Categories, StatusArticle
 from .forms import ArticleMetaForm, ArticleUploadForm, BannerForm
 from accounts.models import StatusKontributor
-from interactions.models import Activity, Comments, Ratings, Bookmarks, StatusComment, ArticleViewHistory
+from interactions.models import Activity, ArticleLikes, Comments, Ratings, Bookmarks, StatusComment, ArticleViewHistory
 from interactions.forms import CommentForm, RatingForm
 from reading_journal.models import ReadingActivity, ActionType
 from accounts.decorators import admin_required
@@ -301,6 +301,11 @@ def article_detail(request, pk):
 
     user_rating = None
     is_bookmarked = False
+    is_liked = False
+
+    total_likes = ArticleLikes.objects.filter(
+        article=article
+    ).count()
 
     if request.user.is_authenticated:
         is_bookmarked = Bookmarks.objects.filter(
@@ -316,6 +321,11 @@ def article_detail(request, pk):
             'rating_value',
             flat=True,
         ).first()
+        
+        is_liked = ArticleLikes.objects.filter(
+            user=request.user,
+            article=article,
+        ).exists()
 
         ReadingActivity.objects.get_or_create(
             user=request.user,
@@ -344,6 +354,8 @@ def article_detail(request, pk):
                 'articles:article_comments_partial',
                 kwargs={'pk': pk},
             ),
+            'is_liked': is_liked,
+            'total_likes': total_likes,
         },
     )
 

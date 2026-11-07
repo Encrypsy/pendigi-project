@@ -326,6 +326,10 @@
                             Bookmark
                         </a>
 
+                        <a href="{% url 'interactions:my_likes' %}">
+                            Konten Disukai
+                        </a>
+
                         {% if user.role == 'admin' or user.is_superuser %}
 
                             <a href="{% url 'dashboard' %}">

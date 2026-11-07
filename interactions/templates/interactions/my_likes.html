@@ -1,0 +1,288 @@
+
+{% extends 'app_base.html' %}
+{% load static %}
+
+{% block title %}Konten yang Disukai{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/my-likes.css' %}">
+<link rel="stylesheet" href="{% static 'css/content-likes.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="likes-page">
+
+    <!-- HEADER -->
+    <section class="likes-hero">
+        <div class="likes-hero-top">
+            <span class="likes-eyebrow">
+                YOUR PERSONAL COLLECTION
+            </span>
+            <span class="likes-hero-icon">♡</span>
+        </div>
+
+        <h1>Things you love<span>.</span></h1>
+
+        <p>
+            Semua bacaan yang pernah menarik perhatianmu,
+            tersimpan rapi di satu tempat.
+        </p>
+
+        <div class="likes-hero-stat">
+            <span class="likes-stat-icon">♥</span>
+            <strong>{{ total_liked }}</strong>
+            <span>konten disukai</span>
+        </div>
+
+        <div class="likes-decoration decoration-one"></div>
+        <div class="likes-decoration decoration-two"></div>
+    </section>
+
+
+    <!-- SEARCH & FILTER -->
+    <section class="likes-toolbar">
+
+        <form method="GET" class="likes-search-form" id="likesFilterForm">
+
+            <div class="likes-search">
+                <span>⌕</span>
+                <input
+                    type="search"
+                    name="q"
+                    value="{{ search_query }}"
+                    placeholder="Cari judul artikel atau cerita..."
+                >
+                {% if search_query %}
+                    <a href="?type={{ content_type }}&sort={{ sort }}"
+                       class="clear-search">×</a>
+                {% endif %}
+            </div>
+
+            <div class="likes-filter-row">
+
+                <div class="likes-filter-tabs">
+                    <button
+                        type="submit"
+                        name="type"
+                        value="all"
+                        class="{% if content_type == 'all' %}active{% endif %}"
+                    >
+                        Semua
+                    </button>
+
+                    <button
+                        type="submit"
+                        name="type"
+                        value="article"
+                        class="{% if content_type == 'article' %}active{% endif %}"
+                    >
+                        Artikel
+                    </button>
+
+                    <button
+                        type="submit"
+                        name="type"
+                        value="fiction"
+                        class="{% if content_type == 'fiction' %}active{% endif %}"
+                    >
+                        Fiksi
+                    </button>
+                </div>
+
+                <select name="sort" class="likes-sort"
+                        onchange="this.form.submit()">
+                    <option value="newest"
+                        {% if sort == 'newest' %}selected{% endif %}>
+                        Terbaru disukai
+                    </option>
+
+                    <option value="oldest"
+                        {% if sort == 'oldest' %}selected{% endif %}>
+                        Terlama disukai
+                    </option>
+
+                    <option value="title"
+                        {% if sort == 'title' %}selected{% endif %}>
+                        Judul A–Z
+                    </option>
+                </select>
+
+            </div>
+
+        </form>
+    </section>
+
+
+    <!-- COLLECTION -->
+    <section class="likes-collection">
+
+        <div class="likes-section-heading">
+            <div>
+                <span class="likes-section-eyebrow">
+                    YOUR LIBRARY
+                </span>
+                <h2>Saved collection</h2>
+            </div>
+
+            <span class="likes-result-count">
+                {{ total_filtered }} konten
+            </span>
+        </div>
+
+
+        {% if liked_contents %}
+
+        <div class="liked-content-grid" id="likedContentGrid">
+
+            {% for item in liked_contents %}
+
+            <article class="liked-content-card">
+
+                <div class="liked-card-image">
+
+                    {% if item.image %}
+                        <img src="{{ item.image }}" alt="{{ item.title }}">
+                    {% else %}
+                        <div class="liked-image-placeholder">
+                            <span>✦</span>
+                            <small>PENA DIGITAL</small>
+                        </div>
+                    {% endif %}
+
+                    <span class="liked-type-badge
+                        {% if item.type == 'article' %}
+                            article-badge
+                        {% else %}
+                            fiction-badge
+                        {% endif %}">
+                        {{ item.type_label }}
+                    </span>
+
+                    <form
+                        method="POST"
+                        action="{{ item.unlike_url }}"
+                        class="content-like-form liked-card-unlike"
+                        data-like-form
+                        data-remove-card="true"
+                    >
+                        {% csrf_token %}
+
+                        <button
+                            type="submit"
+                            class="content-like-btn is-liked"
+                            aria-label="Batalkan like"
+                            aria-pressed="true"
+                        >
+                            <span class="like-icon">♥</span>
+                        </button>
+                    </form>
+
+                </div>
+
+                <div class="liked-card-body">
+
+                    <span class="liked-card-category">
+                        {{ item.category }}
+                    </span>
+
+                    <h3>
+                        <a href="{{ item.url }}">
+                            {{ item.title }}
+                        </a>
+                    </h3>
+
+                    <p class="liked-card-description">
+                        {{ item.description|striptags|truncatechars:105 }}
+                    </p>
+
+                    <div class="liked-card-footer">
+                        <div class="liked-card-author">
+                            <span class="author-avatar">
+                                {{ item.author|first|upper }}
+                            </span>
+
+                            <span>{{ item.author }}</span>
+                        </div>
+
+                        <span class="liked-card-date">
+                            {{ item.liked_at|date:"d M Y" }}
+                        </span>
+                    </div>
+
+                </div>
+
+            </article>
+
+            {% endfor %}
+
+        </div>
+
+        {% else %}
+
+        <div class="likes-empty-state">
+            <div class="empty-heart">♡</div>
+
+            {% if search_query %}
+                <h3>Tidak ada hasil ditemukan</h3>
+                <p>
+                    Coba gunakan kata kunci lain untuk menemukan
+                    konten yang kamu cari.
+                </p>
+                <a href="{% url 'interactions:my_likes' %}"
+                   class="empty-action">
+                    Lihat semua koleksi
+                </a>
+
+            {% else %}
+                <h3>Belum ada yang disimpan di sini.</h3>
+                <p>
+                    Konten yang kamu sukai akan muncul di halaman ini.
+                    Mulailah menjelajahi bacaan menarik!
+                </p>
+                <a href="{% url 'articles:article_list' %}"
+                   class="empty-action">
+                    Jelajahi artikel
+                </a>
+            {% endif %}
+        </div>
+
+        {% endif %}
+
+
+        <!-- PAGINATION -->
+        {% if page_obj.has_other_pages %}
+
+        <nav class="likes-pagination">
+
+            {% if page_obj.has_previous %}
+                <a href="?q={{ search_query|urlencode }}&type={{ content_type }}&sort={{ sort }}&page={{ page_obj.previous_page_number }}">
+                    ← Sebelumnya
+                </a>
+            {% else %}
+                <span class="disabled">← Sebelumnya</span>
+            {% endif %}
+
+            <span class="pagination-current">
+                {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
+            </span>
+
+            {% if page_obj.has_next %}
+                <a href="?q={{ search_query|urlencode }}&type={{ content_type }}&sort={{ sort }}&page={{ page_obj.next_page_number }}">
+                    Berikutnya →
+                </a>
+            {% else %}
+                <span class="disabled">Berikutnya →</span>
+            {% endif %}
+
+        </nav>
+
+        {% endif %}
+
+    </section>
+
+</div>
+
+<script src="{% static 'js/content-likes.js' %}"></script>
+
+{% endblock %}

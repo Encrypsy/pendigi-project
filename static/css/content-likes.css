@@ -1,0 +1,40 @@
+.content-like-wrapper {
+    margin: 14px 0;
+}
+
+.content-like-form {
+    display: inline-flex;
+    margin: 0;
+}
+
+.content-like-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    border: 1px solid #e05260;
+    background: transparent;
+    color: #e05260;
+    border-radius: 20px;
+    padding: 7px 13px;
+    font-size: 15px;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.content-like-btn:hover {
+    background: #fff0f1;
+}
+
+.content-like-btn .like-icon {
+    font-size: 21px;
+    line-height: 1;
+}
+
+.content-like-btn.is-liked {
+    color: #e05260;
+}
+
+.content-like-btn:disabled {
+    opacity: 0.6;
+    cursor: wait;
+}

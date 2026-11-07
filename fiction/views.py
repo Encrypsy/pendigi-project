@@ -5,7 +5,7 @@ from django.contrib import messages
 from django.urls import reverse
 from accounts.models import StatusKontributor, Follow
 from articles.models import Banner, BannerType
-from interactions.models import Bookmarks, StatusComment, Activity
+from interactions.models import Bookmarks, StatusComment, Activity, StoryLikes
 from interactions.notifications import notify_admins
 from .models import StatusChapter, Stories, Chapters, StatusStory, FavoriteStories, ChapterComments, ChapterCommentLikes, ReadingProgress, StoryRatings
 from .forms import StoryForm, ChapterForm, ChapterCommentForm
@@ -547,6 +547,11 @@ def story_detail(request, pk):
 
     is_favorited = False
     user_rating = None
+    is_liked = False
+    
+    total_likes = StoryLikes.objects.filter(
+        story=story
+    ).count()
 
     if request.user.is_authenticated:
         is_favorited = FavoriteStories.objects.filter(
@@ -558,6 +563,11 @@ def story_detail(request, pk):
             user=request.user,
             story=story
         ).first()
+        
+        is_liked = StoryLikes.objects.filter(
+            user=request.user,
+            story=story,
+        ).exists()
 
     # Rating cerita utama
     rating_summary = story.ratings.aggregate(
@@ -573,6 +583,8 @@ def story_detail(request, pk):
         'average_rating': rating_summary['average'] or 0,
         'total_ratings': rating_summary['total'],
         'user_rating': user_rating,
+        'is_liked': is_liked,
+        'total_likes': total_likes,
     })
 
 @login_required

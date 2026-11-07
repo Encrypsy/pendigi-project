@@ -83,4 +83,20 @@ urlpatterns = [
         views.toggle_story_bookmark,
         name='toggle_story_bookmark',
     ),
+    path(
+        'artikel/<int:pk>/like/',
+        views.toggle_article_like,
+        name='toggle_article_like'
+    ),
+
+    path(
+        'fiksi/<int:pk>/like/',
+        views.toggle_story_like,
+        name='toggle_story_like'
+    ),
+    path(
+        'konten-disukai/',
+        views.my_likes,
+        name='my_likes',
+    ),
 ]
