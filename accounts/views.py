@@ -34,6 +34,29 @@ from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
 
+from django.db.models import Count, Avg, Sum, Q
+
+from articles.models import (
+    Articles,
+    StatusArticle,
+)
+
+from fiction.models import (
+    Stories,
+    Chapters,
+    FictionStatusStory,
+    StoryRatings,
+    ChapterComments,
+)
+
+from interactions.models import (
+    ArticleLikes,
+    StoryLikes,
+    Comments,
+    Ratings,
+    StatusComment,
+)
+
 
 @login_required
 @require_POST
@@ -1783,3 +1806,194 @@ def admin_reports_export(request):
     workbook.save(response)
 
     return response
+
+@login_required
+def author_reports_view(request):
+
+    # ==========================================
+    # VALIDASI AKSES PENULIS
+    # ==========================================
+
+    if request.user.status_kontributor != 'approved':
+        return redirect('articles:article_list')
+
+    if request.session.get('login_mode') != 'publisher':
+        return redirect('contributor_application_status')
+
+    author = request.user
+
+    # ==========================================
+    # QUERYSET KONTEN MILIK PENULIS
+    # ==========================================
+
+    my_articles = Articles.objects.filter(
+        contributor=author
+    )
+
+    my_stories = Stories.objects.filter(
+        author=author
+    )
+
+    my_chapters = Chapters.objects.filter(
+        story__author=author
+    )
+
+    # ==========================================
+    # STATISTIK ARTIKEL
+    # ==========================================
+
+    article_views = (
+        my_articles.aggregate(total=Sum('views_count'))['total'] or 0
+    )
+
+    article_likes = ArticleLikes.objects.filter(
+        article__contributor=author
+    ).count()
+
+    article_comments = Comments.objects.filter(
+        article__contributor=author,
+        status=StatusComment.APPROVED
+    ).count()
+
+    article_ratings = Ratings.objects.filter(
+        article__contributor=author
+    )
+
+    article_rating_average = (
+        article_ratings.aggregate(
+            average=Avg('rating_value')
+        )['average'] or 0
+    )
+
+    article_stats = {
+        'total': my_articles.count(),
+        'approved': my_articles.filter(
+            status=StatusArticle.APPROVED
+        ).count(),
+        'pending': my_articles.filter(
+            status=StatusArticle.PENDING
+        ).count(),
+        'rejected': my_articles.filter(
+            status=StatusArticle.REJECTED
+        ).count(),
+        'views': article_views,
+        'likes': article_likes,
+        'comments': article_comments,
+        'ratings': article_ratings.count(),
+        'average_rating': round(article_rating_average, 2),
+    }
+
+    # ==========================================
+    # STATISTIK CERITA FIKSI
+    # ==========================================
+
+    story_views = (
+        my_stories.aggregate(total=Sum('views_count'))['total'] or 0
+    )
+
+    story_likes = StoryLikes.objects.filter(
+        story__author=author
+    ).count()
+
+    chapter_comments = ChapterComments.objects.filter(
+        chapter__story__author=author,
+        status=StatusComment.APPROVED
+    ).count()
+
+    story_ratings = StoryRatings.objects.filter(
+        story__author=author
+    )
+
+    story_rating_average = (
+        story_ratings.aggregate(
+            average=Avg('rating_value')
+        )['average'] or 0
+    )
+
+    story_stats = {
+        'total': my_stories.count(),
+        'approved': my_stories.filter(
+            status=FictionStatusStory.APPROVED
+        ).count(),
+        'pending': my_stories.filter(
+            status=FictionStatusStory.PENDING
+        ).count(),
+        'rejected': my_stories.filter(
+            status=FictionStatusStory.REJECTED
+        ).count(),
+        'views': story_views,
+        'likes': story_likes,
+        'comments': chapter_comments,
+        'ratings': story_ratings.count(),
+        'average_rating': round(story_rating_average, 2),
+        'chapters': my_chapters.count(),
+    }
+
+    # ==========================================
+    # RINGKASAN KESELURUHAN
+    # ==========================================
+
+    total_stats = {
+        'total_contents': (
+            article_stats['total'] + story_stats['total']
+        ),
+        'total_views': article_views + story_views,
+        'total_likes': article_likes + story_likes,
+        'total_comments': article_comments + chapter_comments,
+        'total_ratings': (
+            article_ratings.count() + story_ratings.count()
+        ),
+    }
+
+    # ==========================================
+    # ARTIKEL TERPOPULER
+    # ==========================================
+
+    popular_articles = (
+        my_articles
+        .filter(status=StatusArticle.APPROVED)
+        .annotate(
+            likes_count=Count('likes', distinct=True),
+            comments_count=Count(
+                'comments',
+                filter=Q(
+                    comments__status=StatusComment.APPROVED
+                ),
+                distinct=True,
+            ),
+        )
+        .order_by('-views_count')[:5]
+    )
+
+    # ==========================================
+    # CERITA FIKSI TERPOPULER
+    # ==========================================
+
+    popular_stories = (
+        my_stories
+        .filter(status=FictionStatusStory.APPROVED)
+        .annotate(
+            likes_count=Count('likes', distinct=True),
+        )
+        .order_by('-views_count')[:5]
+    )
+
+    # ==========================================
+    # RENDER
+    # ==========================================
+
+    return render(
+        request,
+        'author_reports.html',
+        {
+            'breadcrumb': 'Laporan',
+            'active_menu': 'reports',
+
+            'total_stats': total_stats,
+            'article_stats': article_stats,
+            'story_stats': story_stats,
+
+            'popular_articles': popular_articles,
+            'popular_stories': popular_stories,
+        }
+    )
