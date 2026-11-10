@@ -16,7 +16,7 @@ from datetime import timedelta
 from articles.models import Articles, StatusArticle, Categories
 from interactions.models import Activity, ArticleLikes, ArticleViewHistory, Bookmarks, Comments, StatusComment, Ratings, StoryLikes
 from articles.models import Articles, StatusArticle, Categories
-from fiction.models import ChapterComments, Chapters, StatusChapter, Stories, StatusStory as FictionStatusStory, StoryRatings
+from fiction.models import ChapterComments, Chapters, StatusChapter, Stories, StatusStory, StoryRatings
 from reading_journal.models import ReadingActivity
 from datetime import timedelta
 from django.views.decorators.http import require_POST
@@ -44,9 +44,9 @@ from articles.models import (
 from fiction.models import (
     Stories,
     Chapters,
-    FictionStatusStory,
     StoryRatings,
     ChapterComments,
+    StatusStory
 )
 
 from interactions.models import (
@@ -410,7 +410,7 @@ def dashboard_view(request):
         'pending_articles': Articles.objects.filter(status=StatusArticle.PENDING).count(),
         'pending_comments': Comments.objects.filter(status=StatusComment.PENDING).count(),
         'pending_contributors': ContributorApplication.objects.filter(status=StatusKontributor.PENDING).count(),
-        'pending_stories': Stories.objects.filter(status=FictionStatusStory.PENDING).count(),
+        'pending_stories': Stories.objects.filter(status=StatusStory.PENDING).count(),
         'total_categories': Categories.objects.count(),
     }
 
@@ -1356,13 +1356,13 @@ def admin_reports_view(request):
         # Cerita
         'total_stories': total_stories,
         'approved_stories': Stories.objects.filter(
-            status=FictionStatusStory.APPROVED
+            status=StatusStory.APPROVED
         ).count(),
         'pending_stories': Stories.objects.filter(
-            status=FictionStatusStory.PENDING
+            status=StatusStory.PENDING
         ).count(),
         'rejected_stories': Stories.objects.filter(
-            status=FictionStatusStory.REJECTED
+            status=StatusStory.REJECTED
         ).count(),
         'total_story_views': (
             Stories.objects.aggregate(total=Sum('views_count'))['total'] or 0
@@ -1413,7 +1413,7 @@ def admin_reports_view(request):
 
     popular_stories = (
         Stories.objects
-        .filter(status=FictionStatusStory.APPROVED)
+        .filter(status=StatusStory.APPROVED)
         .annotate(likes_count=Count('likes'))
         .order_by('-views_count')[:5]
     )
@@ -1586,9 +1586,9 @@ def admin_reports_export(request):
         ],
 
         ['Total Cerita Fiksi', Stories.objects.count()],
-        ['Fiksi Disetujui', Stories.objects.filter(status=FictionStatusStory.APPROVED).count()],
-        ['Fiksi Pending', Stories.objects.filter(status=FictionStatusStory.PENDING).count()],
-        ['Fiksi Ditolak', Stories.objects.filter(status=FictionStatusStory.REJECTED).count()],
+        ['Fiksi Disetujui', Stories.objects.filter(status=StatusStory.APPROVED).count()],
+        ['Fiksi Pending', Stories.objects.filter(status=StatusStory.PENDING).count()],
+        ['Fiksi Ditolak', Stories.objects.filter(status=StatusStory.REJECTED).count()],
         [
             'Total Views Fiksi',
             Stories.objects.aggregate(total=Sum('views_count'))['total'] or 0,
@@ -1913,13 +1913,13 @@ def author_reports_view(request):
     story_stats = {
         'total': my_stories.count(),
         'approved': my_stories.filter(
-            status=FictionStatusStory.APPROVED
+            status=StatusStory.APPROVED
         ).count(),
         'pending': my_stories.filter(
-            status=FictionStatusStory.PENDING
+            status=StatusStory.PENDING
         ).count(),
         'rejected': my_stories.filter(
-            status=FictionStatusStory.REJECTED
+            status=StatusStory.REJECTED
         ).count(),
         'views': story_views,
         'likes': story_likes,
@@ -1971,7 +1971,7 @@ def author_reports_view(request):
 
     popular_stories = (
         my_stories
-        .filter(status=FictionStatusStory.APPROVED)
+        .filter(status=StatusStory.APPROVED)
         .annotate(
             likes_count=Count('likes', distinct=True),
         )
