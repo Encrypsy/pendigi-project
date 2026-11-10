@@ -420,3 +420,24 @@
         padding: 6px 9px;
     }
 }
+
+.reports-export-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    padding: 11px 18px;
+    background: #6B4226;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 9px;
+    font-size: 14px;
+    font-weight: 600;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.reports-export-btn:hover {
+    background: #54321e;
+    color: #fff;
+    transform: translateY(-2px);
+}
