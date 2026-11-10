@@ -40,15 +40,16 @@
             <a href="{% url 'interactions:admin_comment_approval' %}">Komentar Pending</a>
             <a href="{% url 'fiction:admin_pending_stories' %}">Fiksi Pending</a>
             <a href="{% url 'admin_pending_contributors' %}">Kontributor Pending</a>
-            <a
+          </div>
+        </div>
+
+        <a
               href="{% url 'admin_reports' %}"
               class="admin-nav-link {% if active_menu == 'reports' %}is-active{% endif %}"
             >
               <span class="admin-nav-icon">▤</span>
               Laporan
             </a>
-          </div>
-        </div>
 
         <a href="{% url 'articles:article_list' %}" class="admin-nav-link"><span class="admin-nav-icon">↩</span> Kembali ke Situs</a>
       </nav>
