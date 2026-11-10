@@ -1997,3 +1997,329 @@ def author_reports_view(request):
             'popular_stories': popular_stories,
         }
     )
+    
+
+@login_required
+def author_reports_export(request):
+    if request.user.status_kontributor != 'approved':
+        return redirect('articles:article_list')
+
+    if request.session.get('login_mode') != 'publisher':
+        return redirect('contributor_application_status')
+
+    author = request.user
+
+    # ==========================================
+    # AMBIL DATA KONTEN PENULIS
+    # ==========================================
+
+    my_articles = Articles.objects.filter(
+        contributor=author
+    ).select_related('category').order_by('-created_at')
+
+    my_stories = Stories.objects.filter(
+        author=author
+    ).order_by('-created_at')
+
+    my_chapters = Chapters.objects.filter(
+        story__author=author
+    )
+
+    # ==========================================
+    # RINGKASAN ARTIKEL
+    # ==========================================
+
+    article_views = my_articles.aggregate(
+        total=Sum('views_count')
+    )['total'] or 0
+
+    article_likes = ArticleLikes.objects.filter(
+        article__contributor=author
+    ).count()
+
+    article_comments = Comments.objects.filter(
+        article__contributor=author,
+        status=StatusComment.APPROVED
+    ).count()
+
+    article_ratings = Ratings.objects.filter(
+        article__contributor=author
+    )
+
+    article_rating_count = article_ratings.count()
+    article_rating_average = article_ratings.aggregate(
+        average=Avg('rating_value')
+    )['average'] or 0
+
+    # ==========================================
+    # RINGKASAN CERITA FIKSI
+    # ==========================================
+
+    story_views = my_stories.aggregate(
+        total=Sum('views_count')
+    )['total'] or 0
+
+    story_likes = StoryLikes.objects.filter(
+        story__author=author
+    ).count()
+
+    chapter_comments = ChapterComments.objects.filter(
+        chapter__story__author=author,
+        status=StatusComment.APPROVED
+    ).count()
+
+    story_ratings = StoryRatings.objects.filter(
+        story__author=author
+    )
+
+    story_rating_count = story_ratings.count()
+    story_rating_average = story_ratings.aggregate(
+        average=Avg('rating_value')
+    )['average'] or 0
+
+    # ==========================================
+    # BUAT WORKBOOK
+    # ==========================================
+
+    workbook = Workbook()
+
+    header_fill = PatternFill(
+        start_color='6B4226',
+        end_color='6B4226',
+        fill_type='solid'
+    )
+
+    header_font = Font(
+        color='FFFFFF',
+        bold=True
+    )
+
+    title_font = Font(
+        bold=True,
+        size=14,
+        color='6B4226'
+    )
+
+    thin_border = Border(
+        bottom=Side(style='thin', color='E5D8CC')
+    )
+
+    def style_sheet(sheet, header_row=1):
+        sheet.freeze_panes = f'A{header_row + 1}'
+        sheet.auto_filter.ref = sheet.dimensions
+
+        for cell in sheet[header_row]:
+            cell.fill = header_fill
+            cell.font = header_font
+            cell.alignment = Alignment(
+                horizontal='center',
+                vertical='center'
+            )
+
+        for row in sheet.iter_rows(min_row=header_row + 1):
+            for cell in row:
+                cell.border = thin_border
+                cell.alignment = Alignment(
+                    vertical='center'
+                )
+
+        for column_cells in sheet.columns:
+            max_length = max(
+                len(str(cell.value or ''))
+                for cell in column_cells
+            )
+
+            column_letter = get_column_letter(
+                column_cells[0].column
+            )
+
+            sheet.column_dimensions[column_letter].width = min(
+                max(max_length + 3, 14),
+                40
+            )
+
+        sheet.row_dimensions[header_row].height = 25
+
+    # ==========================================
+    # SHEET 1: RINGKASAN
+    # ==========================================
+
+    summary = workbook.active
+    summary.title = 'Ringkasan'
+
+    summary.append(['LAPORAN PERFORMA PENULIS'])
+    summary.merge_cells('A1:B1')
+    summary['A1'].font = title_font
+
+    summary.append([
+        'Nama Penulis',
+        author.get_full_name() or author.username
+    ])
+
+    summary.append([
+        'Tanggal Export',
+        timezone.localdate().strftime('%d-%m-%Y')
+    ])
+
+    summary.append([])
+
+    summary.append(['METRIK', 'TOTAL'])
+
+    summary_data = [
+        ['Total Artikel', my_articles.count()],
+        ['Total Cerita Fiksi', my_stories.count()],
+        ['Total Bab', my_chapters.count()],
+        ['Total Views', article_views + story_views],
+        ['Total Likes', article_likes + story_likes],
+        ['Total Komentar', article_comments + chapter_comments],
+        ['Total Rating', article_rating_count + story_rating_count],
+    ]
+
+    for row in summary_data:
+        summary.append(row)
+
+    summary['A5'].fill = header_fill
+    summary['B5'].fill = header_fill
+    summary['A5'].font = header_font
+    summary['B5'].font = header_font
+
+    # Rincian performa artikel
+    summary.append([])
+    summary.append(['PERFORMA ARTIKEL'])
+    summary['A14'].font = title_font
+
+    article_summary = [
+        ['Artikel Disetujui', my_articles.filter(status=StatusArticle.APPROVED).count()],
+        ['Artikel Menunggu', my_articles.filter(status=StatusArticle.PENDING).count()],
+        ['Artikel Ditolak', my_articles.filter(status=StatusArticle.REJECTED).count()],
+        ['Rata-rata Rating Artikel', round(article_rating_average, 2)],
+    ]
+
+    for row in article_summary:
+        summary.append(row)
+
+    # Rincian performa cerita fiksi
+    summary.append([])
+    summary.append(['PERFORMA CERITA FIKSI'])
+    summary.cell(summary.max_row, 1).font = title_font
+
+    story_summary = [
+        ['Cerita Disetujui', my_stories.filter(status=StatusStory.APPROVED).count()],
+        ['Cerita Menunggu', my_stories.filter(status=StatusStory.PENDING).count()],
+        ['Cerita Ditolak', my_stories.filter(status=StatusStory.REJECTED).count()],
+        ['Rata-rata Rating Cerita', round(story_rating_average, 2)],
+    ]
+
+    for row in story_summary:
+        summary.append(row)
+
+    summary.column_dimensions['A'].width = 32
+    summary.column_dimensions['B'].width = 28
+
+    # ==========================================
+    # SHEET 2: ARTIKEL
+    # ==========================================
+
+    article_sheet = workbook.create_sheet('Artikel')
+
+    article_sheet.append([
+        'No',
+        'Judul Artikel',
+        'Kategori',
+        'Status',
+        'Tanggal Dibuat',
+        'Views',
+        'Likes',
+        'Komentar',
+        'Jumlah Rating',
+        'Rata-rata Rating',
+    ])
+
+    for index, article in enumerate(my_articles, start=1):
+        ratings = Ratings.objects.filter(article=article)
+
+        article_sheet.append([
+            index,
+            article.title,
+            article.category.name if article.category else '-',
+            article.get_status_display(),
+            article.created_at.strftime('%d-%m-%Y') if article.created_at else '-',
+            article.views_count,
+            ArticleLikes.objects.filter(article=article).count(),
+            Comments.objects.filter(
+                article=article,
+                status=StatusComment.APPROVED
+            ).count(),
+            ratings.count(),
+            round(ratings.aggregate(
+                average=Avg('rating_value')
+            )['average'] or 0, 2),
+        ])
+
+    style_sheet(article_sheet)
+
+    # ==========================================
+    # SHEET 3: CERITA FIKSI
+    # ==========================================
+
+    story_sheet = workbook.create_sheet('Cerita Fiksi')
+
+    story_sheet.append([
+        'No',
+        'Judul Cerita',
+        'Genre',
+        'Status',
+        'Tanggal Dibuat',
+        'Jumlah Bab',
+        'Views',
+        'Likes',
+        'Komentar Bab',
+        'Jumlah Rating',
+        'Rata-rata Rating',
+        'Status Cerita',
+    ])
+
+    for index, story in enumerate(my_stories, start=1):
+        ratings = StoryRatings.objects.filter(story=story)
+
+        story_sheet.append([
+            index,
+            story.title,
+            story.genre,
+            story.get_status_display(),
+            story.created_at.strftime('%d-%m-%Y') if story.created_at else '-',
+            story.chapters.count(),
+            story.views_count,
+            StoryLikes.objects.filter(story=story).count(),
+            ChapterComments.objects.filter(
+                chapter__story=story,
+                status=StatusComment.APPROVED
+            ).count(),
+            ratings.count(),
+            round(ratings.aggregate(
+                average=Avg('rating_value')
+            )['average'] or 0, 2),
+            'Selesai' if story.is_completed else 'Berjalan',
+        ])
+
+    style_sheet(story_sheet)
+
+    # ==========================================
+    # DOWNLOAD EXCEL
+    # ==========================================
+
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+
+    filename = (
+        f'Laporan_Penulis_{timezone.localdate().strftime("%Y-%m-%d")}.xlsx'
+    )
+
+    response['Content-Disposition'] = (
+        f'attachment; filename="{filename}"'
+    )
+
+    workbook.save(response)
+
+    return response
