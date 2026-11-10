@@ -10,13 +10,13 @@ from accounts.services import approve_contributor_application, reject_contributo
 from .forms import AdminUserEditForm, PublisherLoginForm, ReaderLoginForm, RegisterForm, ContributorApplicationForm, ProfileUpdateForm
 from .models import ActionType, ContributorRevocation, Role, StatusKontributor, ContributorApplication, Users
 from .decorators import admin_required
-from django.db.models import Count, Avg, Q
+from django.db.models import Count, Avg, Q, Sum
 from django.utils import timezone
 from datetime import timedelta
 from articles.models import Articles, StatusArticle, Categories
-from interactions.models import Activity, ArticleViewHistory, Comments, StatusComment, Ratings
+from interactions.models import Activity, ArticleLikes, ArticleViewHistory, Bookmarks, Comments, StatusComment, Ratings, StoryLikes
 from articles.models import Articles, StatusArticle, Categories
-from fiction.models import Chapters, StatusChapter, Stories, StatusStory as FictionStatusStory
+from fiction.models import ChapterComments, Chapters, StatusChapter, Stories, StatusStory as FictionStatusStory, StoryRatings
 from reading_journal.models import ReadingActivity
 from datetime import timedelta
 from django.views.decorators.http import require_POST
@@ -1272,6 +1272,185 @@ def contributor_application_status(request):
         request,
         'accounts/contributor_application_status.html',
         context,
+    )
+    
+@admin_required
+def admin_reports_view(request):
+    # ==========================================
+    # 1. STATISTIK UTAMA
+    # ==========================================
+
+    total_users = Users.objects.count()
+
+    total_articles = Articles.objects.count()
+    total_stories = Stories.objects.count()
+
+    total_article_likes = ArticleLikes.objects.count()
+    total_story_likes = StoryLikes.objects.count()
+
+    total_article_comments = Comments.objects.count()
+    total_chapter_comments = ChapterComments.objects.count()
+
+    total_article_ratings = Ratings.objects.count()
+    total_story_ratings = StoryRatings.objects.count()
+
+    total_bookmarks = Bookmarks.objects.count()
+
+    stats = {
+        # Pengguna
+        'total_users': total_users,
+        'total_readers': Users.objects.filter(
+            role=Role.PEMBACA
+        ).count(),
+        'total_contributors': Users.objects.filter(
+            role=Role.KONTRIBUTOR
+        ).count(),
+        'total_admins': Users.objects.filter(
+            role=Role.ADMIN
+        ).count(),
+
+        # Artikel
+        'total_articles': total_articles,
+        'approved_articles': Articles.objects.filter(
+            status=StatusArticle.APPROVED
+        ).count(),
+        'pending_articles': Articles.objects.filter(
+            status=StatusArticle.PENDING
+        ).count(),
+        'rejected_articles': Articles.objects.filter(
+            status=StatusArticle.REJECTED
+        ).count(),
+        'total_article_views': (
+            Articles.objects.aggregate(total=Sum('views_count'))['total'] or 0
+        ),
+
+        # Cerita
+        'total_stories': total_stories,
+        'approved_stories': Stories.objects.filter(
+            status=FictionStatusStory.APPROVED
+        ).count(),
+        'pending_stories': Stories.objects.filter(
+            status=FictionStatusStory.PENDING
+        ).count(),
+        'rejected_stories': Stories.objects.filter(
+            status=FictionStatusStory.REJECTED
+        ).count(),
+        'total_story_views': (
+            Stories.objects.aggregate(total=Sum('views_count'))['total'] or 0
+        ),
+        'total_chapters': Chapters.objects.count(),
+
+        # Interaksi
+        'total_likes': total_article_likes + total_story_likes,
+        'total_comments': (
+            total_article_comments + total_chapter_comments
+        ),
+        'total_ratings': (
+            total_article_ratings + total_story_ratings
+        ),
+        'total_bookmarks': total_bookmarks,
+    }
+
+    # ==========================================
+    # 2. DISTRIBUSI STATUS KONTEN
+    # ==========================================
+
+    content_status = {
+        'approved': (
+            stats['approved_articles'] + stats['approved_stories']
+        ),
+        'pending': (
+            stats['pending_articles'] + stats['pending_stories']
+        ),
+        'rejected': (
+            stats['rejected_articles'] + stats['rejected_stories']
+        ),
+    }
+
+    # ==========================================
+    # 3. ARTIKEL TERPOPULER
+    # ==========================================
+
+    popular_articles = (
+        Articles.objects
+        .filter(status=StatusArticle.APPROVED)
+        .annotate(likes_count=Count('likes'))
+        .order_by('-views_count')[:5]
+    )
+
+    # ==========================================
+    # 4. CERITA TERPOPULER
+    # ==========================================
+
+    popular_stories = (
+        Stories.objects
+        .filter(status=FictionStatusStory.APPROVED)
+        .annotate(likes_count=Count('likes'))
+        .order_by('-views_count')[:5]
+    )
+
+    # ==========================================
+    # 5. KONTRIBUTOR TERAKTIF
+    # ==========================================
+
+    top_contributors = (
+        Users.objects
+        .filter(
+            role=Role.KONTRIBUTOR,
+            status_kontributor=StatusKontributor.APPROVED,
+        )
+        .annotate(
+            article_count=Count('articles', distinct=True),
+            story_count=Count('stories', distinct=True),
+        )
+        .order_by('-article_count', '-story_count')[:5]
+    )
+
+    # ==========================================
+    # 6. ARTIKEL PER KATEGORI
+    # ==========================================
+
+    articles_per_category = (
+        Categories.objects
+        .annotate(article_count=Count('articles'))
+        .order_by('-article_count')
+    )
+
+    # ==========================================
+    # 7. RATA-RATA RATING
+    # ==========================================
+
+    article_average_rating = (
+        Ratings.objects.aggregate(
+            average=Avg('rating_value')
+        )['average'] or 0
+    )
+
+    story_average_rating = (
+        StoryRatings.objects.aggregate(
+            average=Avg('rating_value')
+        )['average'] or 0
+    )
+
+    stats['article_average_rating'] = round(
+        article_average_rating, 2
+    )
+
+    stats['story_average_rating'] = round(
+        story_average_rating, 2
+    )
+
+    return render(
+        request,
+        'accounts/admin_reports.html',
+        {
+            'stats': stats,
+            'content_status': content_status,
+            'popular_articles': popular_articles,
+            'popular_stories': popular_stories,
+            'top_contributors': top_contributors,
+            'articles_per_category': articles_per_category,
+        }
     )
 
 
