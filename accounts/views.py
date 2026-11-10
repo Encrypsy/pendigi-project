@@ -27,6 +27,12 @@ from django.core.paginator import Paginator
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth import get_user_model
 from interactions.notifications import notify_admins
+from django.http import HttpResponse
+from django.utils import timezone
+
+from openpyxl import Workbook
+from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+from openpyxl.utils import get_column_letter
 
 
 @login_required
@@ -1453,4 +1459,327 @@ def admin_reports_view(request):
         }
     )
 
+@admin_required
+def admin_reports_export(request):
+    workbook = Workbook()
 
+    # ==================================================
+    # HELPER: FORMAT TANGGAL
+    # ==================================================
+    def excel_datetime(value):
+        if not value:
+            return None
+
+        if timezone.is_aware(value):
+            value = timezone.localtime(value)
+
+        return value.replace(tzinfo=None)
+
+    # ==================================================
+    # HELPER: MEMBUAT SHEET DAN FORMAT HEADER
+    # ==================================================
+    def create_sheet(title, headers, rows):
+        ws = workbook.create_sheet(title=title)
+
+        ws.append(headers)
+
+        for row in rows:
+            ws.append(row)
+
+        header_fill = PatternFill(
+            fill_type='solid',
+            fgColor='2F5D50',
+        )
+
+        header_font = Font(
+            bold=True,
+            color='FFFFFF',
+            size=11,
+        )
+
+        thin_border = Border(
+            bottom=Side(
+                style='thin',
+                color='EAE2D8',
+            )
+        )
+
+        for cell in ws[1]:
+            cell.fill = header_fill
+            cell.font = header_font
+            cell.alignment = Alignment(
+                horizontal='center',
+                vertical='center',
+            )
+
+        ws.row_dimensions[1].height = 25
+        ws.freeze_panes = 'A2'
+        ws.auto_filter.ref = ws.dimensions
+
+        # Lebar kolom otomatis
+        for column_cells in ws.columns:
+            max_length = 0
+            column_letter = get_column_letter(
+                column_cells[0].column
+            )
+
+            for cell in column_cells:
+                cell.alignment = Alignment(
+                    vertical='center',
+                    wrap_text=True,
+                )
+
+                cell.border = thin_border
+
+                if cell.value is not None:
+                    max_length = max(
+                        max_length,
+                        len(str(cell.value))
+                    )
+
+            ws.column_dimensions[column_letter].width = min(
+                max_length + 4,
+                45,
+            )
+
+        return ws
+
+    # ==================================================
+    # SHEET 1: RINGKASAN
+    # ==================================================
+    summary_rows = [
+        ['Total Pengguna', Users.objects.count()],
+        ['Total Pembaca', Users.objects.filter(role=Role.PEMBACA).count()],
+        ['Total Kontributor', Users.objects.filter(role=Role.KONTRIBUTOR).count()],
+        ['Total Admin', Users.objects.filter(role=Role.ADMIN).count()],
+
+        ['Total Artikel', Articles.objects.count()],
+        ['Artikel Disetujui', Articles.objects.filter(status=StatusArticle.APPROVED).count()],
+        ['Artikel Pending', Articles.objects.filter(status=StatusArticle.PENDING).count()],
+        ['Artikel Ditolak', Articles.objects.filter(status=StatusArticle.REJECTED).count()],
+        [
+            'Total Views Artikel',
+            Articles.objects.aggregate(total=Sum('views_count'))['total'] or 0,
+        ],
+
+        ['Total Cerita Fiksi', Stories.objects.count()],
+        ['Fiksi Disetujui', Stories.objects.filter(status=FictionStatusStory.APPROVED).count()],
+        ['Fiksi Pending', Stories.objects.filter(status=FictionStatusStory.PENDING).count()],
+        ['Fiksi Ditolak', Stories.objects.filter(status=FictionStatusStory.REJECTED).count()],
+        [
+            'Total Views Fiksi',
+            Stories.objects.aggregate(total=Sum('views_count'))['total'] or 0,
+        ],
+
+        ['Total Bab Fiksi', Chapters.objects.count()],
+        ['Total Likes', ArticleLikes.objects.count() + StoryLikes.objects.count()],
+        ['Total Komentar', Comments.objects.count() + ChapterComments.objects.count()],
+        ['Total Rating', Ratings.objects.count() + StoryRatings.objects.count()],
+        ['Total Bookmark', Bookmarks.objects.count()],
+    ]
+
+    create_sheet(
+        'Ringkasan',
+        ['Indikator', 'Jumlah'],
+        summary_rows,
+    )
+
+    # ==================================================
+    # SHEET 2: PENGGUNA
+    # ==================================================
+    user_rows = []
+
+    for user_item in Users.objects.all().order_by('date_joined'):
+        user_rows.append([
+            user_item.username,
+            user_item.email,
+            user_item.get_role_display(),
+            user_item.get_status_kontributor_display(),
+            excel_datetime(user_item.date_joined),
+        ])
+
+    ws = create_sheet(
+        'Pengguna',
+        [
+            'Username',
+            'Email',
+            'Role',
+            'Status Kontributor',
+            'Tanggal Bergabung',
+        ],
+        user_rows,
+    )
+
+    for row in ws.iter_rows(min_row=2, min_col=5, max_col=5):
+        row[0].number_format = 'dd mmmm yyyy hh:mm'
+
+    # ==================================================
+    # SHEET 3: ARTIKEL
+    # ==================================================
+    article_rows = []
+
+    articles_data = (
+        Articles.objects
+        .select_related('contributor', 'category')
+        .order_by('-created_at')
+    )
+
+    for article in articles_data:
+        article_rows.append([
+            article.title,
+            article.contributor.username,
+            article.category.name if article.category else '-',
+            article.get_status_display(),
+            article.views_count,
+            excel_datetime(article.created_at),
+            excel_datetime(article.published_at),
+        ])
+
+    ws = create_sheet(
+        'Artikel',
+        [
+            'Judul Artikel',
+            'Kontributor',
+            'Kategori',
+            'Status',
+            'Views',
+            'Tanggal Dibuat',
+            'Tanggal Publikasi',
+        ],
+        article_rows,
+    )
+
+    for row in ws.iter_rows(min_row=2, min_col=6, max_col=7):
+        for cell in row:
+            cell.number_format = 'dd mmmm yyyy hh:mm'
+
+    # ==================================================
+    # SHEET 4: CERITA FIKSI
+    # ==================================================
+    story_rows = []
+
+    stories_data = (
+        Stories.objects
+        .select_related('author')
+        .annotate(total_chapters=Count('chapters', distinct=True))
+        .order_by('-created_at')
+    )
+
+    for story in stories_data:
+        story_rows.append([
+            story.title,
+            story.author.username,
+            story.genre,
+            story.get_status_display(),
+            story.views_count,
+            story.total_chapters,
+            excel_datetime(story.created_at),
+            excel_datetime(story.published_at),
+        ])
+
+    ws = create_sheet(
+        'Cerita Fiksi',
+        [
+            'Judul Cerita',
+            'Penulis',
+            'Genre',
+            'Status',
+            'Views',
+            'Jumlah Bab',
+            'Tanggal Dibuat',
+            'Tanggal Publikasi',
+        ],
+        story_rows,
+    )
+
+    for row in ws.iter_rows(min_row=2, min_col=7, max_col=8):
+        for cell in row:
+            cell.number_format = 'dd mmmm yyyy hh:mm'
+
+    # ==================================================
+    # SHEET 5: KONTRIBUTOR
+    # ==================================================
+    contributors_data = (
+        Users.objects
+        .filter(role=Role.KONTRIBUTOR)
+        .annotate(
+            article_count=Count('articles', distinct=True),
+            story_count=Count('stories', distinct=True),
+        )
+        .order_by('-article_count', '-story_count')
+    )
+
+    contributor_rows = []
+
+    for contributor in contributors_data:
+        contributor_rows.append([
+            contributor.username,
+            contributor.email,
+            contributor.get_status_kontributor_display(),
+            contributor.article_count,
+            contributor.story_count,
+            contributor.article_count + contributor.story_count,
+        ])
+
+    create_sheet(
+        'Kontributor',
+        [
+            'Username',
+            'Email',
+            'Status',
+            'Jumlah Artikel',
+            'Jumlah Cerita',
+            'Total Konten',
+        ],
+        contributor_rows,
+    )
+
+    # ==================================================
+    # SHEET 6: INTERAKSI
+    # ==================================================
+    interaction_rows = [
+        ['Likes Artikel', ArticleLikes.objects.count()],
+        ['Likes Cerita Fiksi', StoryLikes.objects.count()],
+        ['Komentar Artikel', Comments.objects.count()],
+        ['Komentar Bab Fiksi', ChapterComments.objects.count()],
+        ['Rating Artikel', Ratings.objects.count()],
+        ['Rating Cerita Fiksi', StoryRatings.objects.count()],
+        ['Bookmark', Bookmarks.objects.count()],
+        [
+            'Rata-rata Rating Artikel',
+            Ratings.objects.aggregate(avg=Avg('rating_value'))['avg'] or 0,
+        ],
+        [
+            'Rata-rata Rating Cerita Fiksi',
+            StoryRatings.objects.aggregate(avg=Avg('rating_value'))['avg'] or 0,
+        ],
+    ]
+
+    create_sheet(
+        'Interaksi',
+        ['Jenis Interaksi', 'Jumlah / Nilai'],
+        interaction_rows,
+    )
+
+    # ==================================================
+    # DOWNLOAD EXCEL
+    # ==================================================
+    filename = (
+        f"Laporan_Pena_Digital_"
+        f"{timezone.localdate().strftime('%Y-%m-%d')}.xlsx"
+    )
+
+    response = HttpResponse(
+        content_type=(
+            'application/vnd.openxmlformats-officedocument.'
+            'spreadsheetml.sheet'
+        )
+    )
+
+    response['Content-Disposition'] = (
+        f'attachment; filename="{filename}"'
+    )
+
+    workbook.save(response)
+
+    return response
