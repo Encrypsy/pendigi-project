@@ -1,0 +1,234 @@
+{% extends 'accounts/admin_base.html' %}
+{% load static %}
+
+{% block extra_css %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'css/admin-reports.css' %}">
+{% endblock %}
+
+{% block admin_content %}
+
+<div class="reports-page">
+
+    <div class="reports-header">
+        <div>
+            <span class="reports-eyebrow">PENA DIGITAL / ANALYTICS</span>
+            <h1>Laporan</h1>
+            <p>
+                Pantau perkembangan platform, aktivitas pengguna,
+                dan performa konten Pena Digital.
+            </p>
+        </div>
+    </div>
+
+    <!-- STATISTIK UTAMA -->
+    <section class="reports-section">
+        <div class="reports-section-heading">
+            <div>
+                <h2>Ringkasan Platform</h2>
+                <p>Gambaran keseluruhan aktivitas Pena Digital.</p>
+            </div>
+        </div>
+
+        <div class="reports-stats-grid">
+
+            <div class="report-stat-card">
+                <div class="report-stat-icon users-icon">♙</div>
+                <span>Total Pengguna</span>
+                <h3>{{ stats.total_users }}</h3>
+                <small>
+                    {{ stats.total_readers }} pembaca ·
+                    {{ stats.total_contributors }} kontributor
+                </small>
+            </div>
+
+            <div class="report-stat-card">
+                <div class="report-stat-icon articles-icon">▤</div>
+                <span>Total Artikel</span>
+                <h3>{{ stats.total_articles }}</h3>
+                <small>{{ stats.total_article_views }} total views</small>
+            </div>
+
+            <div class="report-stat-card">
+                <div class="report-stat-icon fiction-icon">✎</div>
+                <span>Total Cerita Fiksi</span>
+                <h3>{{ stats.total_stories }}</h3>
+                <small>{{ stats.total_chapters }} total bab</small>
+            </div>
+
+            <div class="report-stat-card">
+                <div class="report-stat-icon interaction-icon">♡</div>
+                <span>Total Interaksi</span>
+                <h3>{{ stats.total_likes|add:stats.total_comments|add:stats.total_ratings }}</h3>
+                <small>
+                    {{ stats.total_likes }} likes ·
+                    {{ stats.total_comments }} komentar
+                </small>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- STATUS KONTEN -->
+    <section class="reports-section">
+        <div class="reports-section-heading">
+            <div>
+                <h2>Status Konten</h2>
+                <p>Distribusi status artikel dan cerita fiksi.</p>
+            </div>
+        </div>
+
+        <div class="report-status-grid">
+            <div class="report-status-card approved">
+                <span>Disetujui</span>
+                <h3>{{ content_status.approved }}</h3>
+            </div>
+
+            <div class="report-status-card pending">
+                <span>Menunggu Approval</span>
+                <h3>{{ content_status.pending }}</h3>
+            </div>
+
+            <div class="report-status-card rejected">
+                <span>Ditolak</span>
+                <h3>{{ content_status.rejected }}</h3>
+            </div>
+        </div>
+    </section>
+
+    <!-- RATING -->
+    <section class="reports-section">
+        <div class="reports-section-heading">
+            <div>
+                <h2>Performa Rating</h2>
+                <p>Rata-rata penilaian dari pembaca.</p>
+            </div>
+        </div>
+
+        <div class="report-rating-grid">
+            <div class="report-rating-card">
+                <span>Rating Artikel</span>
+                <h3>{{ stats.article_average_rating|floatformat:2 }} <small>/ 5</small></h3>
+            </div>
+
+            <div class="report-rating-card">
+                <span>Rating Cerita Fiksi</span>
+                <h3>{{ stats.story_average_rating|floatformat:2 }} <small>/ 5</small></h3>
+            </div>
+        </div>
+    </section>
+
+    <!-- KONTEN POPULER -->
+    <section class="reports-section">
+        <div class="reports-section-heading">
+            <div>
+                <h2>Konten Populer</h2>
+                <p>Konten dengan jumlah kunjungan tertinggi.</p>
+            </div>
+        </div>
+
+        <div class="report-popular-grid">
+
+            <div class="report-panel">
+                <h3>Artikel Terpopuler</h3>
+
+                {% for article in popular_articles %}
+                <div class="report-popular-item">
+                    <div>
+                        <strong>{{ article.title }}</strong>
+                        <span>{{ article.contributor.username }}</span>
+                    </div>
+                    <div class="report-popular-views">
+                        <strong>{{ article.views_count }}</strong>
+                        <small>views</small>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="report-empty">Belum ada artikel.</p>
+                {% endfor %}
+            </div>
+
+            <div class="report-panel">
+                <h3>Cerita Fiksi Terpopuler</h3>
+
+                {% for story in popular_stories %}
+                <div class="report-popular-item">
+                    <div>
+                        <strong>{{ story.title }}</strong>
+                        <span>{{ story.author.username }}</span>
+                    </div>
+                    <div class="report-popular-views">
+                        <strong>{{ story.views_count }}</strong>
+                        <small>views</small>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="report-empty">Belum ada cerita fiksi.</p>
+                {% endfor %}
+            </div>
+
+        </div>
+    </section>
+
+    <!-- KONTRIBUTOR -->
+    <section class="reports-section">
+        <div class="reports-section-heading">
+            <div>
+                <h2>Kontributor Teratas</h2>
+                <p>Kontributor berdasarkan jumlah publikasi.</p>
+            </div>
+        </div>
+
+        <div class="report-panel">
+            {% for contributor in top_contributors %}
+            <div class="report-contributor-item">
+                <div class="report-contributor-avatar">
+                    {% if contributor.profile_picture %}
+                        <img src="{{ contributor.profile_picture.url }}" alt="{{ contributor.username }}">
+                    {% else %}
+                        {{ contributor.username|first|upper }}
+                    {% endif %}
+                </div>
+
+                <div class="report-contributor-info">
+                    <strong>{{ contributor.username }}</strong>
+                    <span>
+                        {{ contributor.article_count }} artikel ·
+                        {{ contributor.story_count }} cerita
+                    </span>
+                </div>
+
+                <strong class="report-contributor-total">
+                    {{ contributor.article_count|add:contributor.story_count }} konten
+                </strong>
+            </div>
+            {% empty %}
+            <p class="report-empty">Belum ada kontributor.</p>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- KATEGORI -->
+    <section class="reports-section">
+        <div class="reports-section-heading">
+            <div>
+                <h2>Artikel Berdasarkan Kategori</h2>
+                <p>Jumlah artikel yang terdaftar pada setiap kategori.</p>
+            </div>
+        </div>
+
+        <div class="report-panel report-category-list">
+            {% for category in articles_per_category %}
+            <div class="report-category-item">
+                <span>{{ category.name }}</span>
+                <strong>{{ category.article_count }} artikel</strong>
+            </div>
+            {% empty %}
+            <p class="report-empty">Belum ada kategori.</p>
+            {% endfor %}
+        </div>
+    </section>
+
+</div>
+
+{% endblock %}
