@@ -147,27 +147,15 @@
                 </div>
             </div>
 
-            <!-- KOMENTAR -->
+            <!-- LAPORAN -->
 
             <a
-                href="#"
-                class="author-nav-link"
+                href="{% url 'author_reports' %}"
+                class="author-nav-link {% if active_menu == 'reports' %}is-active{% endif %}"
             >
-                <span class="author-nav-icon">💬</span>
-                <span>Komentar</span>
+                <span class="author-nav-icon">▤</span>
+                <span>Laporan</span>
             </a>
-
-
-            <!-- STATISTIK -->
-
-            <a
-                href="#"
-                class="author-nav-link"
-            >
-                <span class="author-nav-icon">📊</span>
-                <span>Statistik</span>
-            </a>
-
 
             <!-- SETTINGS -->
 
