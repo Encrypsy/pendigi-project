@@ -12,7 +12,8 @@ dependencies = [
     "sqlparse==0.6.0",
     "tzdata==2026.3",
     "cloudinary==1.46.2",
-    "django-cloudinary-storage==0.3.0"
+    "django-cloudinary-storage==0.3.0",
+    "openpyxl",
 ]
 
 [tool.vercel.scripts]
