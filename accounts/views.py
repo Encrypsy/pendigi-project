@@ -1984,7 +1984,7 @@ def author_reports_view(request):
 
     return render(
         request,
-        'author_reports.html',
+        'accounts/author_reports.html',
         {
             'breadcrumb': 'Laporan',
             'active_menu': 'reports',
