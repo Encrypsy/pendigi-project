@@ -247,7 +247,7 @@
 
                 <!-- ================= AUTHOR CREATE BUTTON ================= -->
 
-                {% if user.status_kontributor == 'approved' and user.role != 'admin' %}
+                {% if user.is_authenticated and user.status_kontributor == 'approved' and user.role == 'kontributor' and request.session.login_mode == 'publisher' %}
 
                     <div class="navbar-dropdown create-dropdown">
 
