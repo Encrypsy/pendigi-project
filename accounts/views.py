@@ -33,7 +33,6 @@ from django.utils import timezone
 from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
-from openpyxl.worksheet.table import Table, TableStyleInfo
 
 from django.db.models import Count, Avg, Sum, Q
 
@@ -1554,22 +1553,74 @@ def admin_reports_export(request):
     for name, description in worksheet_info:
         ws.append([name, description])
 
-    # Buat tabel Excel
-    table_worksheets = Table(
-        displayName='TabelDaftarWorksheet',
-        ref='A9:B15'
+    # ================= FORMAT TABEL =================
+
+    # Filter tanpa Excel Table Style
+    ws.auto_filter.ref = 'A9:B15'
+
+    # Filter tabel petunjuk tidak bisa menggunakan
+    # auto_filter kedua pada worksheet yang sama.
+    # Jadi tabel petunjuk dibuat tanpa filter.
+
+    # Warna hanya pada nama kolom
+    header_fill = PatternFill(
+        fill_type='solid',
+        fgColor='2F5D50'
     )
 
-    style_worksheets = TableStyleInfo(
-        name='TableStyleMedium4',
-        showFirstColumn=False,
-        showLastColumn=False,
-        showRowStripes=True,
-        showColumnStripes=False
+    header_font = Font(
+        bold=True,
+        color='FFFFFF'
     )
 
-    table_worksheets.tableStyleInfo = style_worksheets
-    ws.add_table(table_worksheets)
+    for cell in ws[9]:
+        if cell.column <= 2:
+            cell.fill = header_fill
+            cell.font = header_font
+            cell.alignment = Alignment(
+                vertical='center'
+            )
+
+    for cell in ws[20]:
+        if cell.column <= 2:
+            cell.fill = header_fill
+            cell.font = header_font
+            cell.alignment = Alignment(
+                vertical='center'
+            )
+
+    # Hilangkan border pada seluruh area Panduan
+    no_border = Border(
+        left=Side(style=None),
+        right=Side(style=None),
+        top=Side(style=None),
+        bottom=Side(style=None)
+    )
+
+    for row in ws.iter_rows():
+        for cell in row:
+            cell.border = no_border
+
+    # Hilangkan warna latar bagian judul tabel
+    for cell in ['A7', 'A18']:
+        ws[cell].fill = PatternFill(fill_type=None)
+        ws[cell].font = Font(
+            bold=True,
+            color='2F5D50',
+            size=11
+        )
+
+    # Lebar kolom
+    ws.column_dimensions['A'].width = 25
+    ws.column_dimensions['B'].width = 75
+    ws.column_dimensions['C'].width = 18
+    ws.column_dimensions['D'].width = 18
+
+    # Tidak menggunakan freeze panes
+    ws.freeze_panes = None
+
+    # Hilangkan gridlines
+    ws.sheet_view.showGridLines = False
 
     # ================= TABEL PETUNJUK PENGGUNAAN =================
 
@@ -1591,22 +1642,7 @@ def admin_reports_export(request):
     for number, instruction in enumerate(instructions, start=1):
         ws.append([number, instruction])
 
-    table_instructions = Table(
-        displayName='TabelPetunjukPenggunaan',
-        ref='A20:B24'
-    )
-
-    style_instructions = TableStyleInfo(
-        name='TableStyleMedium4',
-        showFirstColumn=False,
-        showLastColumn=False,
-        showRowStripes=True,
-        showColumnStripes=False
-    )
-
-    table_instructions.tableStyleInfo = style_instructions
-    ws.add_table(table_instructions)
-
+    
     # ================= CATATAN =================
 
     ws.merge_cells('A27:D28')
