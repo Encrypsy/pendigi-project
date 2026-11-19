@@ -1486,6 +1486,139 @@ def admin_reports_view(request):
 def admin_reports_export(request):
     workbook = Workbook()
 
+# ================= PANDUAN LAPORAN =================
+
+    ws = workbook.active
+    ws.title = 'Panduan'
+
+    # Judul utama
+    ws.merge_cells('A1:D1')
+    ws['A1'] = 'PANDUAN LAPORAN PENA DIGITAL'
+
+    # Subjudul
+    ws.merge_cells('A2:D2')
+    ws['A2'] = 'DOKUMENTASI FILE EKSPOR EXCEL'
+
+    # Deskripsi
+    ws.merge_cells('A4:D5')
+    ws['A4'] = (
+        'Laporan ini berisi rekapitulasi data dan aktivitas '
+        'pada platform Pena Digital. Setiap kategori data '
+        'dipisahkan ke dalam worksheet tersendiri agar lebih '
+        'mudah dibaca dan dianalisis.'
+    )
+    ws['A4'].alignment = Alignment(
+        vertical='center',
+        wrap_text=True
+    )
+
+    # Daftar worksheet
+    ws['A7'] = 'DAFTAR WORKSHEET'
+    ws.append([])
+    ws.append(['Nama Worksheet', 'Deskripsi'])
+
+    worksheet_info = [
+        ('Ringkasan', 'Rekapitulasi statistik utama platform.'),
+        ('Pengguna', 'Data pengguna yang terdaftar di Pena Digital.'),
+        ('Artikel', 'Data artikel yang diterbitkan melalui platform.'),
+        ('Cerita Fiksi', 'Data cerita fiksi dan karya terkait.'),
+        ('Kontributor', 'Informasi kontributor dan aktivitas publikasinya.'),
+        ('Interaksi', 'Rekapitulasi aktivitas interaksi pengguna.'),
+    ]
+
+    for name, description in worksheet_info:
+        ws.append([name, description])
+
+    # Petunjuk penggunaan
+    ws['A18'] = 'PETUNJUK PENGGUNAAN'
+
+    instructions = [
+        'Gunakan tab worksheet di bagian bawah untuk berpindah kategori data.',
+        'Gunakan fitur filter pada baris judul untuk menyaring data.',
+        'Gunakan worksheet Ringkasan untuk melihat gambaran umum platform.',
+        'Worksheet lainnya menyediakan data yang lebih terperinci.',
+    ]
+
+    for row, instruction in enumerate(instructions, start=19):
+        ws.merge_cells(start_row=row, start_column=1, end_row=row, end_column=4)
+        ws.cell(row=row, column=1, value=f'{row - 18}. {instruction}')
+        ws.cell(row=row, column=1).alignment = Alignment(
+            vertical='center',
+            wrap_text=True
+        )
+
+    # Catatan
+    ws.merge_cells('A25:D26')
+    ws['A25'] = (
+        'CATATAN: Laporan merupakan snapshot data pada saat '
+        'file diekspor. Perubahan pada platform setelah ekspor '
+        'tidak otomatis memperbarui file ini.'
+    )
+    ws['A25'].alignment = Alignment(
+        vertical='center',
+        wrap_text=True
+    )
+
+    # ================= FORMAT PANDUAN =================
+
+    # Judul utama
+    ws['A1'].font = Font(
+        name='Calibri',
+        size=18,
+        bold=True,
+        color='FFFFFF'
+    )
+    ws['A1'].fill = PatternFill(
+        'solid',
+        fgColor='2F5D50'
+    )
+    ws['A1'].alignment = Alignment(
+        horizontal='center',
+        vertical='center'
+    )
+    ws.row_dimensions[1].height = 38
+
+    # Subjudul
+    ws['A2'].font = Font(
+        size=10,
+        italic=True,
+        color='2F5D50'
+    )
+    ws['A2'].alignment = Alignment(horizontal='center')
+
+    # Bagian heading
+    for cell in ['A7', 'A9', 'A18']:
+        ws[cell].font = Font(
+            bold=True,
+            color='FFFFFF'
+        )
+        ws[cell].fill = PatternFill(
+            'solid',
+            fgColor='2F5D50'
+        )
+
+    # Header tabel
+    for cell in ws[9]:
+        if cell.column <= 2:
+            cell.font = Font(bold=True, color='FFFFFF')
+            cell.fill = PatternFill('solid', fgColor='6B4226')
+            cell.alignment = Alignment(
+                horizontal='center',
+                vertical='center'
+            )
+
+    # Lebar kolom
+    ws.column_dimensions['A'].width = 25
+    ws.column_dimensions['B'].width = 75
+    ws.column_dimensions['C'].width = 20
+    ws.column_dimensions['D'].width = 20
+
+    # Tinggi baris
+    for row in range(10, 16):
+        ws.row_dimensions[row].height = 25
+
+    ws.sheet_view.showGridLines = False
+
     # ==================================================
     # HELPER: FORMAT TANGGAL
     # ==================================================
