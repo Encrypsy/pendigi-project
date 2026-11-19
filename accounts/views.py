@@ -31,8 +31,9 @@ from django.http import HttpResponse
 from django.utils import timezone
 
 from openpyxl import Workbook
-from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
+from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+from openpyxl.worksheet.table import Table, TableStyleInfo
 
 from django.db.models import Count, Avg, Sum, Q
 
