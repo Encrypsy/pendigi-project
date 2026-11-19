@@ -1928,43 +1928,41 @@ def admin_reports_export(request):
         for cell in row:
             cell.number_format = 'dd mmmm yyyy hh:mm'
 
-    # ==================================================
-    # SHEET 5: KONTRIBUTOR
-    # ==================================================
-    contributors_data = (
-        Users.objects
-        .filter(role=Role.KONTRIBUTOR)
-        .annotate(
-            article_count=Count('articles', distinct=True),
-            story_count=Count('stories', distinct=True),
-        )
-        .order_by('-article_count', '-story_count')
-    )
+    # ================= SHEET KONTRIBUTOR =================
 
-    contributor_rows = []
+    ws_contributors = workbook.create_sheet('Kontributor')
 
-    for contributor in contributors_data:
-        contributor_rows.append([
+    # Header
+    ws_contributors.append([
+        'Username',
+        'ID Penulis',
+    ])
+
+    # Ambil seluruh kontributor yang disetujui
+    all_contributors = Users.objects.filter(
+        role=Role.KONTRIBUTOR,
+        status_kontributor=StatusKontributor.APPROVED,
+    ).order_by('username')
+
+    # Isi data
+    for contributor in all_contributors:
+        ws_contributors.append([
             contributor.username,
-            contributor.email,
-            contributor.get_status_kontributor_display(),
-            contributor.article_count,
-            contributor.story_count,
-            contributor.article_count + contributor.story_count,
+            contributor.publisher_id or 'Belum tersedia',
         ])
 
-    create_sheet(
-        'Kontributor',
-        [
-            'Username',
-            'Email',
-            'Status',
-            'Jumlah Artikel',
-            'Jumlah Cerita',
-            'Total Konten',
-        ],
-        contributor_rows,
-    )
+    # Lebar kolom
+    ws_contributors.column_dimensions['A'].width = 25
+    ws_contributors.column_dimensions['B'].width = 25
+
+    # Format header
+    for cell in ws_contributors[1]:
+        cell.font = Font(bold=True, color='FFFFFF')
+        cell.fill = PatternFill(
+            fill_type='solid',
+            fgColor='2F5D50'
+        )
+        cell.alignment = Alignment(vertical='center')
 
     # ==================================================
     # SHEET 6: INTERAKSI
