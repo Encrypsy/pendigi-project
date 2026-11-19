@@ -136,6 +136,9 @@ class PublisherLoginView(LoginView):
 
         self.request.session['login_mode'] = 'publisher'
 
+        self.request.user.last_publisher_login = timezone.now()
+        self.request.user.save(update_fields=['last_publisher_login'])
+
         return response
 
     def get_success_url(self):
@@ -1324,6 +1327,23 @@ def admin_reports_view(request):
     total_story_ratings = StoryRatings.objects.count()
 
     total_bookmarks = Bookmarks.objects.count()
+    
+    # Seluruh penulis yang sudah disetujui
+    all_contributors = (
+        Users.objects
+        .filter(
+            role=Role.KONTRIBUTOR,
+            status_kontributor=StatusKontributor.APPROVED,
+        )
+        .order_by('username')
+    )
+
+    # Pagination: 5 penulis per halaman
+    contributors_paginator = Paginator(all_contributors, 5)
+
+    contributors_page = contributors_paginator.get_page(
+        request.GET.get('penulis_page')
+    )
 
     stats = {
         # Pengguna
@@ -1479,6 +1499,7 @@ def admin_reports_view(request):
             'popular_stories': popular_stories,
             'top_contributors': top_contributors,
             'articles_per_category': articles_per_category,
+            'contributors_page': contributors_page,
         }
     )
 

@@ -182,38 +182,61 @@
     <section class="reports-section">
         <div class="reports-section-heading">
             <div>
-                <h2>Kontributor Teratas</h2>
-                <p>Kontributor berdasarkan jumlah publikasi.</p>
+                <h2>Daftar Penulis</h2>
+                {% comment %} <p>Kontributor berdasarkan jumlah publikasi.</p> {% endcomment %}
             </div>
         </div>
 
         <div class="report-panel">
-            {% for contributor in top_contributors %}
-            <div class="report-contributor-item">
-                <div class="report-contributor-avatar">
-                    {% if contributor.profile_picture %}
-                        <img src="{{ contributor.profile_picture.url }}" alt="{{ contributor.username }}">
-                    {% else %}
-                        {{ contributor.username|first|upper }}
-                    {% endif %}
-                </div>
+            {% for contributor in contributors_page %}
+                <div class="contributor-item">
 
-                <div class="report-contributor-info">
-                    <strong>{{ contributor.username }}</strong>
-                    <span>
-                        {{ contributor.article_count }} artikel ·
-                        {{ contributor.story_count }} cerita
-                    </span>
-                </div>
+                    <div class="contributor-info">
+                        <strong>{{ contributor.username }}</strong>
 
-                <strong class="report-contributor-total">
-                    {{ contributor.article_count|add:contributor.story_count }} konten
-                </strong>
-            </div>
+                        <span>
+                            ID Penulis:
+                            {{ contributor.publisher_id|default:"Belum tersedia" }}
+                        </span>
+
+                        <span>
+                            Login terakhir:
+                            {% if contributor.last_publisher_login %}
+                                {{ contributor.last_publisher_login|date:"d F Y, H:i" }}
+                            {% else %}
+                                Belum tercatat
+                            {% endif %}
+                        </span>
+                    </div>
+
+                </div>
             {% empty %}
-            <p class="report-empty">Belum ada kontributor.</p>
+                <p>Belum ada penulis terdaftar.</p>
             {% endfor %}
         </div>
+
+        {% if contributors_page.has_other_pages %}
+            <div class="pagination">
+
+                {% if contributors_page.has_previous %}
+                    <a href="?penulis_page={{ contributors_page.previous_page_number }}">
+                        Sebelumnya
+                    </a>
+                {% endif %}
+
+                <span>
+                    Halaman {{ contributors_page.number }}
+                    dari {{ contributors_page.paginator.num_pages }}
+                </span>
+
+                {% if contributors_page.has_next %}
+                    <a href="?penulis_page={{ contributors_page.next_page_number }}">
+                        Selanjutnya
+                    </a>
+                {% endif %}
+
+            </div>
+        {% endif %}
     </section>
 
     <!-- KATEGORI -->

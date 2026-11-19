@@ -41,6 +41,11 @@ class Users(AbstractUser):
         blank=True,
         verbose_name='ID Publisher',
     )
+    last_publisher_login = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name='Login terakhir sebagai penulis'
+    )
 
     def __str__(self):
         return self.username
