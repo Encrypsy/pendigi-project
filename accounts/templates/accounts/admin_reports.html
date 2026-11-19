@@ -191,21 +191,25 @@
             {% for contributor in contributors_page %}
                 <div class="contributor-item">
 
+                    <div class="contributor-avatar">
+                        {% if contributor.profile_picture %}
+                            <img
+                                src="{{ contributor.profile_picture.url }}"
+                                alt="{{ contributor.username }}"
+                            >
+                        {% else %}
+                            <span>
+                                {{ contributor.username|first|upper }}
+                            </span>
+                        {% endif %}
+                    </div>
+
                     <div class="contributor-info">
                         <strong>{{ contributor.username }}</strong>
 
                         <span>
                             ID Penulis:
                             {{ contributor.publisher_id|default:"Belum tersedia" }}
-                        </span>
-
-                        <span>
-                            Login terakhir:
-                            {% if contributor.last_publisher_login %}
-                                {{ contributor.last_publisher_login|date:"d F Y, H:i" }}
-                            {% else %}
-                                Belum tercatat
-                            {% endif %}
                         </span>
                     </div>
 
