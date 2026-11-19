@@ -1485,35 +1485,59 @@ def admin_reports_view(request):
 @admin_required
 def admin_reports_export(request):
     workbook = Workbook()
-
-# ================= PANDUAN LAPORAN =================
+    
+    # ================= PANDUAN LAPORAN =================
 
     ws = workbook.active
     ws.title = 'Panduan'
 
+    # Warna
+    GREEN = '2F5D50'
+    BROWN = '6B4226'
+    WHITE = 'FFFFFF'
+
     # Judul utama
     ws.merge_cells('A1:D1')
     ws['A1'] = 'PANDUAN LAPORAN PENA DIGITAL'
+    ws['A1'].font = Font(
+        name='Calibri', size=18, bold=True, color=WHITE
+    )
+    ws['A1'].fill = PatternFill('solid', fgColor=GREEN)
+    ws['A1'].alignment = Alignment(
+        horizontal='center', vertical='center'
+    )
+    ws.row_dimensions[1].height = 38
 
     # Subjudul
     ws.merge_cells('A2:D2')
     ws['A2'] = 'DOKUMENTASI FILE EKSPOR EXCEL'
+    ws['A2'].font = Font(
+        size=10, italic=True, color=GREEN
+    )
+    ws['A2'].alignment = Alignment(horizontal='center')
 
     # Deskripsi
     ws.merge_cells('A4:D5')
     ws['A4'] = (
-        'Laporan ini berisi rekapitulasi data dan aktivitas '
-        'pada platform Pena Digital. Setiap kategori data '
-        'dipisahkan ke dalam worksheet tersendiri agar lebih '
-        'mudah dibaca dan dianalisis.'
+        'Laporan ini merupakan dokumentasi rekapitulasi '
+        'data dan aktivitas pada platform Pena Digital. '
+        'Setiap kategori data dipisahkan ke dalam worksheet '
+        'tersendiri agar lebih mudah dibaca, dikelola, '
+        'dan dianalisis.'
     )
     ws['A4'].alignment = Alignment(
         vertical='center',
         wrap_text=True
     )
 
-    # Daftar worksheet
+    # ================= TABEL DAFTAR WORKSHEET =================
+
+    ws.merge_cells('A7:D7')
     ws['A7'] = 'DAFTAR WORKSHEET'
+    ws['A7'].font = Font(bold=True, color=WHITE)
+    ws['A7'].fill = PatternFill('solid', fgColor=GREEN)
+
+    # Header tabel
     ws.append([])
     ws.append(['Nama Worksheet', 'Deskripsi'])
 
@@ -1529,95 +1553,89 @@ def admin_reports_export(request):
     for name, description in worksheet_info:
         ws.append([name, description])
 
-    # Petunjuk penggunaan
+    # Buat tabel Excel
+    table_worksheets = Table(
+        displayName='TabelDaftarWorksheet',
+        ref='A9:B15'
+    )
+
+    style_worksheets = TableStyleInfo(
+        name='TableStyleMedium4',
+        showFirstColumn=False,
+        showLastColumn=False,
+        showRowStripes=True,
+        showColumnStripes=False
+    )
+
+    table_worksheets.tableStyleInfo = style_worksheets
+    ws.add_table(table_worksheets)
+
+    # ================= TABEL PETUNJUK PENGGUNAAN =================
+
+    ws.merge_cells('A18:D18')
     ws['A18'] = 'PETUNJUK PENGGUNAAN'
+    ws['A18'].font = Font(bold=True, color=WHITE)
+    ws['A18'].fill = PatternFill('solid', fgColor=GREEN)
+
+    ws.append([])
+    ws.append(['No.', 'Petunjuk'])
 
     instructions = [
         'Gunakan tab worksheet di bagian bawah untuk berpindah kategori data.',
-        'Gunakan fitur filter pada baris judul untuk menyaring data.',
+        'Gunakan fitur filter pada tabel untuk menyaring informasi.',
         'Gunakan worksheet Ringkasan untuk melihat gambaran umum platform.',
-        'Worksheet lainnya menyediakan data yang lebih terperinci.',
+        'Gunakan worksheet lainnya untuk melihat data secara lebih terperinci.',
     ]
 
-    for row, instruction in enumerate(instructions, start=19):
-        ws.merge_cells(start_row=row, start_column=1, end_row=row, end_column=4)
-        ws.cell(row=row, column=1, value=f'{row - 18}. {instruction}')
-        ws.cell(row=row, column=1).alignment = Alignment(
-            vertical='center',
-            wrap_text=True
-        )
+    for number, instruction in enumerate(instructions, start=1):
+        ws.append([number, instruction])
 
-    # Catatan
-    ws.merge_cells('A25:D26')
-    ws['A25'] = (
-        'CATATAN: Laporan merupakan snapshot data pada saat '
-        'file diekspor. Perubahan pada platform setelah ekspor '
-        'tidak otomatis memperbarui file ini.'
+    table_instructions = Table(
+        displayName='TabelPetunjukPenggunaan',
+        ref='A20:B24'
     )
-    ws['A25'].alignment = Alignment(
+
+    style_instructions = TableStyleInfo(
+        name='TableStyleMedium4',
+        showFirstColumn=False,
+        showLastColumn=False,
+        showRowStripes=True,
+        showColumnStripes=False
+    )
+
+    table_instructions.tableStyleInfo = style_instructions
+    ws.add_table(table_instructions)
+
+    # ================= CATATAN =================
+
+    ws.merge_cells('A27:D28')
+    ws['A27'] = (
+        'CATATAN: Laporan merupakan snapshot data pada saat '
+        'file diekspor. Perubahan pada platform setelah proses '
+        'ekspor tidak otomatis memperbarui file ini.'
+    )
+    ws['A27'].font = Font(
+        italic=True, size=10, color=BROWN
+    )
+    ws['A27'].alignment = Alignment(
         vertical='center',
         wrap_text=True
     )
 
-    # ================= FORMAT PANDUAN =================
+    # ================= FORMAT WORKSHEET =================
 
-    # Judul utama
-    ws['A1'].font = Font(
-        name='Calibri',
-        size=18,
-        bold=True,
-        color='FFFFFF'
-    )
-    ws['A1'].fill = PatternFill(
-        'solid',
-        fgColor='2F5D50'
-    )
-    ws['A1'].alignment = Alignment(
-        horizontal='center',
-        vertical='center'
-    )
-    ws.row_dimensions[1].height = 38
-
-    # Subjudul
-    ws['A2'].font = Font(
-        size=10,
-        italic=True,
-        color='2F5D50'
-    )
-    ws['A2'].alignment = Alignment(horizontal='center')
-
-    # Bagian heading
-    for cell in ['A7', 'A9', 'A18']:
-        ws[cell].font = Font(
-            bold=True,
-            color='FFFFFF'
-        )
-        ws[cell].fill = PatternFill(
-            'solid',
-            fgColor='2F5D50'
-        )
-
-    # Header tabel
-    for cell in ws[9]:
-        if cell.column <= 2:
-            cell.font = Font(bold=True, color='FFFFFF')
-            cell.fill = PatternFill('solid', fgColor='6B4226')
-            cell.alignment = Alignment(
-                horizontal='center',
-                vertical='center'
-            )
-
-    # Lebar kolom
     ws.column_dimensions['A'].width = 25
     ws.column_dimensions['B'].width = 75
-    ws.column_dimensions['C'].width = 20
-    ws.column_dimensions['D'].width = 20
+    ws.column_dimensions['C'].width = 18
+    ws.column_dimensions['D'].width = 18
 
-    # Tinggi baris
-    for row in range(10, 16):
-        ws.row_dimensions[row].height = 25
+    ws.row_dimensions[4].height = 30
+    ws.row_dimensions[5].height = 25
+    ws.row_dimensions[27].height = 25
+    ws.row_dimensions[28].height = 25
 
     ws.sheet_view.showGridLines = False
+    ws.freeze_panes = 'A9'
 
     # ==================================================
     # HELPER: FORMAT TANGGAL
