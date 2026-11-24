@@ -1334,6 +1334,7 @@ def admin_reports_view(request):
         .filter(
             role=Role.KONTRIBUTOR,
             status_kontributor=StatusKontributor.APPROVED,
+            last_publisher_login__isnull=False,
         )
         .order_by('username')
     )
