@@ -1142,140 +1142,141 @@
 
     {% else %}
 
-    {# Beranda: pertahankan struktur beranda sebelumnya #}
-    {% if banner_items %}
-      <div class="hero-banner" id="heroBanner">
-        <div class="hero-slides" id="heroSlides">
-          {% for banner in banner_items %}
-            <a href="{{ banner.link_url|default:'#' }}"
-               class="hero-slide {% if forloop.first %}active{% endif %}">
-              <img src="{{ banner.image.url }}" alt="{{ banner.title }}">
-              {% if banner.title %}
-                <div class="hero-slide-overlay">
-                  <h2>{{ banner.title }}</h2>
-                </div>
-              {% endif %}
-            </a>
-          {% endfor %}
-        </div>
-        <button class="hero-arrow hero-arrow-prev" id="heroPrev" type="button">❮</button>
-        <button class="hero-arrow hero-arrow-next" id="heroNext" type="button">❯</button>
-        <div class="hero-dots" id="heroDots">
-          {% for banner in banner_items %}
-            <button class="hero-dot {% if forloop.first %}active{% endif %}"
-                    data-index="{{ forloop.counter0 }}" type="button"></button>
-          {% endfor %}
-        </div>
-      </div>
-    {% endif %}
-
-    <div class="homepage-columns">
-      <div class="latest-col">
-        <h2 class="section-title">Artikel Terbaru</h2>
-        <div class="article-grid">       
-          {% for article in latest_articles %}
-              <article class="article-card">
-                  <a href="{% url 'articles:article_detail' article.pk %}"
-                    class="article-card-link">
-                      {% if article.thumbnail %}
-                          <img src="{{ article.thumbnail.url }}"
-                              class="article-thumb"
-                              alt="{{ article.title }}">
-                      {% else %}
-                          <div class="article-thumb article-thumb-placeholder">📰</div>
-                      {% endif %}
-
-                      <div class="article-card-body">
-                          <span class="category-tag">{{ article.category.name }}</span>
-                          <h3>{{ article.title }}</h3>
-                          <p class="author">
-                              oleh {{ article.contributor.username }}
-                          </p>
-                      </div>
-                  </a>
-
-                  <form
-                      action="{% url 'interactions:toggle_bookmark' article.pk %}"
-                      method="post"
-                      class="article-bookmark-form"
-                  >
-                      {% csrf_token %}
-                      <input type="hidden" name="next" value="{{ request.get_full_path }}">
-
-                      <button type="submit"
-                              class="article-bookmark-btn {% if article.pk in bookmarked_article_ids %}is-bookmarked{% endif %}"
-                              aria-label="Simpan {{ article.title }} ke bookmark"
-                              title="Simpan ke bookmark">
-                          <svg viewBox="0 0 24 24" aria-hidden="true">
-                              <path d="M6 3.75h12a1 1 0 0 1 1 1V21l-7-4.5L5 21V4.75a1 1 0 0 1 1-1Z"/>
-                          </svg>
-                      </button>
-                  </form>
-              </article>
-          {% empty %}
-              <p>Belum ada artikel yang tayang.</p>
-          {% endfor %}
-        </div>
-      </div>
-
-      <div class="trending-col">
-        <h2 class="section-title">Artikel Trending</h2>
-        <div class="trending-list">
-          {% for article in trending_articles %}
-            <a href="{% url 'articles:article_detail' article.pk %}" class="trending-item">
-              <span class="trending-rank rank-{{ forloop.counter }}">{{ forloop.counter }}</span>
-              {% if article.thumbnail %}
-                <img src="{{ article.thumbnail.url }}" class="trending-thumb" alt="{{ article.title }}">
-              {% else %}
-                <div class="trending-thumb trending-thumb-placeholder">📰</div>
-              {% endif %}
-              <div class="trending-info">
-                <strong>{{ article.title }}</strong>
-                <span class="trending-meta">
-                  👁 {{ article.views_count }} · {{ article.category.name }}
-                </span>
-              </div>
-            </a>
-          {% empty %}
-            <p class="hint-text">Belum ada data trending.</p>
-          {% endfor %}
-        </div>
-      </div>
-    </div>
-
-    {% if featured_stories %}
-      <section class="fiction-works-section">
-        <h2 class="section-title">Karya Fiksi</h2>
-        <div class="fiction-carousel-wrap">
-          <div class="fiction-carousel">
-            {% for story in featured_stories %}
-              <a href="{% url 'fiction:story_detail' story.pk %}" class="fiction-cover-item">
-                <img src="{{ story.cover.url }}" class="fiction-cover-img" alt="{{ story.title }}">
-                <div class="fiction-cover-info">
-                  <strong class="fiction-cover-title">{{ story.title }}</strong>
-                  <div class="fiction-cover-author">
-                    {% if story.author.profile_picture %}
-                      <img src="{{ story.author.profile_picture.url }}" class="fiction-author-avatar" alt="">
-                    {% else %}
-                      <div class="fiction-author-avatar fiction-author-placeholder">
-                        {{ story.author.username|first|upper }}
-                      </div>
-                    {% endif %}
-                    <span>{{ story.author.username }}</span>
+      {# Beranda: pertahankan struktur beranda sebelumnya #}
+      {% if banner_items %}
+        <div class="hero-banner" id="heroBanner">
+          <div class="hero-slides" id="heroSlides">
+            {% for banner in banner_items %}
+              <a href="{{ banner.link_url|default:'#' }}"
+                class="hero-slide {% if forloop.first %}active{% endif %}">
+                <img src="{{ banner.image.url }}" alt="{{ banner.title }}">
+                {% if banner.title %}
+                  <div class="hero-slide-overlay">
+                    <h2>{{ banner.title }}</h2>
                   </div>
-                  <div class="fiction-cover-meta">
-                    <span>👁 {{ story.views_count }}</span>
-                    <span>☰ {{ story.total_chapters }} bab</span>
-                  </div>
-                  <span class="fiction-status-badge {% if story.is_completed %}status-completed{% else %}status-ongoing{% endif %}">
-                    {% if story.is_completed %}Tamat{% else %}Berlangsung{% endif %}
-                  </span>
-                </div>
+                {% endif %}
               </a>
             {% endfor %}
           </div>
+          <button class="hero-arrow hero-arrow-prev" id="heroPrev" type="button">❮</button>
+          <button class="hero-arrow hero-arrow-next" id="heroNext" type="button">❯</button>
+          <div class="hero-dots" id="heroDots">
+            {% for banner in banner_items %}
+              <button class="hero-dot {% if forloop.first %}active{% endif %}"
+                      data-index="{{ forloop.counter0 }}" type="button"></button>
+            {% endfor %}
+          </div>
         </div>
-      </section>
+      {% endif %}
+
+      <div class="homepage-columns">
+        <div class="latest-col">
+          <h2 class="section-title">Artikel Terbaru</h2>
+          <div class="article-grid">       
+            {% for article in latest_articles %}
+                <article class="article-card">
+                    <a href="{% url 'articles:article_detail' article.pk %}"
+                      class="article-card-link">
+                        {% if article.thumbnail %}
+                            <img src="{{ article.thumbnail.url }}"
+                                class="article-thumb"
+                                alt="{{ article.title }}">
+                        {% else %}
+                            <div class="article-thumb article-thumb-placeholder">📰</div>
+                        {% endif %}
+
+                        <div class="article-card-body">
+                            <span class="category-tag">{{ article.category.name }}</span>
+                            <h3>{{ article.title }}</h3>
+                            <p class="author">
+                                oleh {{ article.contributor.username }}
+                            </p>
+                        </div>
+                    </a>
+
+                    <form
+                        action="{% url 'interactions:toggle_bookmark' article.pk %}"
+                        method="post"
+                        class="article-bookmark-form"
+                    >
+                        {% csrf_token %}
+                        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+
+                        <button type="submit"
+                                class="article-bookmark-btn {% if article.pk in bookmarked_article_ids %}is-bookmarked{% endif %}"
+                                aria-label="Simpan {{ article.title }} ke bookmark"
+                                title="Simpan ke bookmark">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M6 3.75h12a1 1 0 0 1 1 1V21l-7-4.5L5 21V4.75a1 1 0 0 1 1-1Z"/>
+                            </svg>
+                        </button>
+                    </form>
+                </article>
+            {% empty %}
+                <p>Belum ada artikel yang tayang.</p>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="trending-col">
+          <h2 class="section-title">Artikel Trending</h2>
+          <div class="trending-list">
+            {% for article in trending_articles %}
+              <a href="{% url 'articles:article_detail' article.pk %}" class="trending-item">
+                <span class="trending-rank rank-{{ forloop.counter }}">{{ forloop.counter }}</span>
+                {% if article.thumbnail %}
+                  <img src="{{ article.thumbnail.url }}" class="trending-thumb" alt="{{ article.title }}">
+                {% else %}
+                  <div class="trending-thumb trending-thumb-placeholder">📰</div>
+                {% endif %}
+                <div class="trending-info">
+                  <strong>{{ article.title }}</strong>
+                  <span class="trending-meta">
+                    👁 {{ article.views_count }} · {{ article.category.name }}
+                  </span>
+                </div>
+              </a>
+            {% empty %}
+              <p class="hint-text">Belum ada data trending.</p>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+      {% if featured_stories %}
+        <section class="fiction-works-section">
+          <h2 class="section-title">Karya Fiksi</h2>
+          <div class="fiction-carousel-wrap">
+            <div class="fiction-carousel">
+              {% for story in featured_stories %}
+                <a href="{% url 'fiction:story_detail' story.pk %}" class="fiction-cover-item">
+                  <img src="{{ story.cover.url }}" class="fiction-cover-img" alt="{{ story.title }}">
+                  <div class="fiction-cover-info">
+                    <strong class="fiction-cover-title">{{ story.title }}</strong>
+                    <div class="fiction-cover-author">
+                      {% if story.author.profile_picture %}
+                        <img src="{{ story.author.profile_picture.url }}" class="fiction-author-avatar" alt="">
+                      {% else %}
+                        <div class="fiction-author-avatar fiction-author-placeholder">
+                          {{ story.author.username|first|upper }}
+                        </div>
+                      {% endif %}
+                      <span>{{ story.author.username }}</span>
+                    </div>
+                    <div class="fiction-cover-meta">
+                      <span>👁 {{ story.views_count }}</span>
+                      <span>☰ {{ story.total_chapters }} bab</span>
+                    </div>
+                    <span class="fiction-status-badge {% if story.is_completed %}status-completed{% else %}status-ongoing{% endif %}">
+                      {% if story.is_completed %}Tamat{% else %}Berlangsung{% endif %}
+                    </span>
+                  </div>
+                </a>
+              {% endfor %}
+            </div>
+          </div>
+        </section>
+      {% endif %}
     {% endif %}
   {% endif %}
 
