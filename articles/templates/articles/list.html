@@ -1036,8 +1036,114 @@
     </div>
 
   {% else %}
+
+    {% if search_query %}
+        <!-- HALAMAN HASIL PENCARIAN -->
+        <section class="category-page-layout">
+            <main class="category-main">
+
+                <section class="category-latest-section">
+                    <h2 class="category-section-title">
+                        Hasil pencarian: "{{ search_query }}"
+                    </h2>
+
+                    <div class="category-latest-list">
+                        {% for article in page_obj %}
+                            <!-- Kartu artikel -->
+                            <div class="category-latest-card">
+
+                                <a href="{% url 'articles:article_detail' article.pk %}"
+                                   class="category-latest-link">
+
+                                    <div class="category-latest-image-wrap">
+                                        {% if article.thumbnail %}
+                                            <img src="{{ article.thumbnail.url }}"
+                                                 alt="{{ article.title }}">
+                                        {% else %}
+                                            <div class="category-latest-placeholder">
+                                                📰
+                                            </div>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="category-latest-info">
+                                        <div class="category-latest-meta">
+                                            {{ article.category.name }} ·
+                                            {{ article.created_at|timesince }} lalu
+                                        </div>
+
+                                        <h3>{{ article.title }}</h3>
+
+                                        <div class="category-latest-excerpt">
+                                            {{ article.content|striptags|truncatewords:28 }}
+                                        </div>
+
+                                        <div class="category-latest-meta">
+                                            {% if article.contributor %}
+                                                Oleh {{ article.contributor.username }}
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </a>
+
+                            </div>
+                        {% empty %}
+                            <div class="category-empty">
+                                Tidak ada artikel yang cocok dengan
+                                pencarian "{{ search_query }}".
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    {% if page_obj.has_other_pages %}
+                        <nav class="category-pagination"
+                             aria-label="Pagination">
+
+                            {% if page_obj.has_previous %}
+                                <a href="?q={{ search_query|urlencode }}&page=1">
+                                    «
+                                </a>
+                                <a href="?q={{ search_query|urlencode }}&page={{ page_obj.previous_page_number }}">
+                                    ‹
+                                </a>
+                            {% else %}
+                                <span class="disabled">«</span>
+                                <span class="disabled">‹</span>
+                            {% endif %}
+
+                            {% for number in page_obj.paginator.page_range %}
+                                {% if number == page_obj.number %}
+                                    <span class="current">{{ number }}</span>
+                                {% elif number >= page_obj.number|add:'-2' and number <= page_obj.number|add:'2' %}
+                                    <a href="?q={{ search_query|urlencode }}&page={{ number }}">
+                                        {{ number }}
+                                    </a>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if page_obj.has_next %}
+                                <a href="?q={{ search_query|urlencode }}&page={{ page_obj.next_page_number }}">
+                                    ›
+                                </a>
+                                <a href="?q={{ search_query|urlencode }}&page={{ page_obj.paginator.num_pages }}">
+                                    »
+                                </a>
+                            {% else %}
+                                <span class="disabled">›</span>
+                                <span class="disabled">»</span>
+                            {% endif %}
+
+                        </nav>
+                    {% endif %}
+                </section>
+
+            </main>
+        </section>
+
+    {% else %}
+
     {# Beranda: pertahankan struktur beranda sebelumnya #}
-    {% if banner_items and not search_query %}
+    {% if banner_items %}
       <div class="hero-banner" id="heroBanner">
         <div class="hero-slides" id="heroSlides">
           {% for banner in banner_items %}
